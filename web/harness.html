@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PokerGym - harness</title>
+<link rel="stylesheet" href="gbc.css">
+<style>body{background:#14121c}#log{position:fixed;left:0;right:0;bottom:0;max-height:45vh;overflow:auto;background:#000;color:#9bbc0f;font:11px Silkscreen,monospace;padding:8px;z-index:99;border-top:3px solid #9bbc0f}</style>
+</head>
+<body>
+<div class="shell">
+  <iframe id="frame" src="index.html" style="width:460px;height:100vh;border:0" title="app"></iframe>
+</div>
+<pre id="log"></pre>
+<script type="module">
+const log = (m) => { document.getElementById('log').textContent += m + '\n'; document.getElementById('log').scrollTop = 9e9; };
+const errors = [];
+window.addEventListener('error', (e) => { errors.push(e.message); log('HOST ERROR: ' + e.message); });
+
+const f = document.getElementById('frame');
+// Once only: the reload test at the end swaps f.src and would otherwise start a
+// second copy of this whole run against a half-torn-down page.
+f.addEventListener('load', () => run(), { once: true });
+
+async function run() {
+  const w = f.contentWindow, d = f.contentDocument;
+  w.addEventListener('error', (e) => { errors.push(e.message); log('APP ERROR: ' + e.message); });
+  w.addEventListener('unhandledrejection', (e) => { errors.push(String(e.reason)); log('APP REJECT: ' + e.reason); });
+
+  const $ = (id) => d.getElementById(id);
+  const click = (id) => { const n = $(id); if (!n) { log('MISSING #' + id); return false; } n.click(); return true; };
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  const visible = (id) => !$(id).hidden;
+  const cards = () => [...d.querySelectorAll('#zones .card')];
+
+  // Advance until the lesson screen is gone (it is typed out a page at a time).
+  const dealerSigs = [];
+  function sampleDealer(game) {
+    const ctx = $('lessonDealer').getContext('2d');
+    const data = ctx.getImageData(0, 0, 48, 48).data;
+    let painted = 0, hash = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i + 3] > 0) painted++;
+      hash = (hash * 31 + data[i] + data[i + 1] * 3 + data[i + 2] * 7 + data[i + 3]) >>> 0;
+    }
+    log(game + ' dealer painted px: ' + painted + ' | signature: ' + hash);
+    if (painted < 300) errors.push(game + ' dealer portrait did not render (' + painted + ' px)');
+    dealerSigs.push({ game, painted, hash });
+  }
+
+  async function drainLesson(tag) {
+    sampleDealer(tag);
+    let guard = 0;
+    while (visible('scr-lesson') && guard++ < 80) {
+      $('lessonBox').click();
+      await wait(60);
+    }
+    log(tag + ' lesson pages advanced: ' + guard + ' | battle visible: ' + visible('scr-battle'));
+  }
+
+  // Ask the coach, take the coached play, then commit it however the game needs.
+  // Returns true once the hand has settled and the CONTINUE button is up.
+  async function finishHand(game) {
+    let guard = 0;
+    while (visible('scr-battle') && $('battleEndRow').hidden && guard++ < 40) {
+      click('btnAsk');
+      await wait(15);
+      click('btnApply');
+      await wait(15);
+      if (game === 'videopoker') click('btnDraw');
+      else if (game === 'holdem') click('btnConfirm');
+      await wait(15);
+    }
+    return !$('battleEndRow').hidden;
+  }
+
+  async function reportHand(i) {
+    const full = $('masterLine')._dataset?.full ?? $('masterLine').textContent;
+    log('  hand ' + i + ': ' + full);
+    log('    grade=' + $('handGrade').textContent + ' xp=' + $('xpLine').textContent
+      + ' chips=' + $('chipCount').textContent);
+  }
+
+  async function backToMap() {
+    let guard = 0;
+    while (!visible('scr-map') && guard++ < 12) {
+      if (!visible('scr-battle')) return false;
+      click('btnNext');
+      await wait(60);
+    }
+    return visible('scr-map');
+  }
+
+  async function beatGym(game, index) {
+    const btns = $('gymList').querySelectorAll('button');
+    log('\n=== gym ' + (index + 1) + ': ' + game + ' ===');
+    log('button enabled: ' + !btns[index].disabled);
+    btns[index].click();
+    await wait(80);
+    await drainLesson(game);
+
+    log('hand title: ' + $('handTitle').textContent + ' | paytable title: ' + $('paytableTitle').textContent);
+    log('rows  actions=' + !$('rowActions').hidden + ' bet=' + !$('rowBet').hidden
+      + ' pick=' + !$('rowPick').hidden + ' deal/draw=' + !$('btnDeal').hidden + '/' + !$('btnDraw').hidden);
+    log('zones: ' + $('zones').children.length + ' | cards: ' + cards().length
+      + ' | held flags: ' + cards().map((c) => c.dataset.held ?? c.dataset.picked ?? c.dataset.down ?? '-').join(','));
+    log('pays: ' + $('pays').textContent);
+    log('status: ' + $('handGrade').textContent + ' / ' + $('potentialText').textContent);
+    log('coach hidden before ask: ' + $('coachPanel').hidden);
+
+    // Manual clicks on the cards themselves: they must toggle and re-render.
+    if (game === 'videopoker') {
+      const before = cards().map((c) => c.dataset.held).join(',');
+      cards()[0].click();
+      await wait(20);
+      log('manual hold toggle: ' + (cards().map((c) => c.dataset.held).join(',') !== before)
+        + ' | holds now: ' + cards().map((c) => c.dataset.held).join(','));
+    } else if (game === 'holdem') {
+      cards()[0].click();
+      await wait(20);
+      log('manual pick: ' + cards()[0].dataset.picked
+        + ' | confirm enabled with one card: ' + !$('btnConfirm').disabled
+        + ' | pays: ' + $('pays').textContent);
+      cards()[0].click();
+      await wait(20);
+      log('pick cleared: ' + cards()[0].dataset.picked
+        + ' | clear enabled with no cards: ' + !$('btnClear').disabled);
+    }
+
+    let settles = 0;
+    const done = () => settles >= 10 || visible('scr-map');
+
+    // Hand 1: the full coach path - ask, read the reasoning, apply, commit.
+    click('btnAsk');
+    await wait(20);
+    log('advice: ' + $('advice').textContent);
+    click('btnWhy');
+    await wait(20);
+    log('why: ' + $('why').textContent);
+    click('btnApply');
+    await wait(20);
+    if (game === 'videopoker') click('btnDraw');
+    else if (game === 'holdem') click('btnConfirm');
+    await wait(30);
+    log('hand 1 settled: ' + !$('battleEndRow').hidden
+      + ' | coach hidden after settle: ' + $('coachPanel').hidden);
+    await reportHand(++settles);
+    click('btnNext');
+    await wait(50);
+
+    // Hand 2 in baccarat: the worst bet on the board, taken on purpose. A wrong
+    // decision must show the bad verdict, cost chips, and pay no XP, and the
+    // gym still has to be winnable at nine good plays out of ten.
+    if (game === 'baccarat' && !done()) {
+      click('btnTie');
+      await wait(30);
+      const full = $('masterLine')._dataset?.full ?? '';
+      log('hand 2: wrong bet on purpose -> ' + full);
+      log('  wrong verdict: ' + full.includes('NO. THE BETTER MOVE')
+        + ' | no XP line: ' + full.includes('NO XP. WRONG DECISION.'));
+      settles++;
+      click('btnNext');
+      await wait(50);
+    }
+
+    while (!done()) {
+      const settled = await finishHand(game);
+      if (!settled) { log('  HAND ' + (settles + 1) + ' DID NOT SETTLE'); break; }
+      await reportHand(++settles);
+      click('btnNext');
+      await wait(50);
+    }
+
+    const home = await backToMap();
+    if (!home) errors.push('gym ' + game + ' never returned to the map');
+    log('hands played: ' + settles + ' | back on map: ' + home
+      + ' | badges locked: ' + d.querySelectorAll('#badgeList .badge.locked').length
+      + ' of ' + d.querySelectorAll('#badgeList .badge').length);
+    log('chips: ' + $('chipCount').textContent + ' | xp: ' + $('xpLine').textContent);
+    return home;
+  }
+
+  log('--- title screen ---');
+  log('title visible: ' + visible('scr-title'));
+  log('continue disabled (no save): ' + $('btnContinue').disabled);
+
+  log('\n--- new game -> class select ---');
+  click('btnNew');
+  await wait(30);
+  log('class select visible: ' + visible('scr-class'));
+  log('class cards: ' + d.querySelectorAll('.class-card').length);
+
+  const first = d.querySelector('.class-card');
+  first.click();
+  await wait(30);
+  log('detail visible: ' + visible('classDetail'));
+  log('detail name: ' + $('classDetailName').textContent);
+  log('detail text: ' + $('classDetailText').textContent.slice(0, 70));
+  log('stat boxes: ' + $('classDetailStats').children.length);
+
+  log('\n--- become trainer -> map ---');
+  click('btnBecome');
+  await wait(30);
+  log('map visible: ' + visible('scr-map'));
+  log('trainer line: ' + $('trainerLine').textContent);
+  log('stats line: ' + $('trainerStats').textContent);
+  log('xp bar width: ' + $('xpBar').style.width);
+  log('chips: ' + $('chipCount').textContent);
+  log('badges shown: ' + $('badgeList').children.length);
+  const gymBtns = $('gymList').querySelectorAll('button');
+  log('gym buttons: ' + gymBtns.length + ' | first enabled: ' + !gymBtns[0].disabled
+    + ' | second enabled: ' + !gymBtns[1].disabled + ' (should be false)');
+
+  log('\n--- enter gym 1 -> lesson ---');
+  gymBtns[0].click();
+  await wait(60);
+  log('lesson visible (should be true for a new player): ' + visible('scr-lesson'));
+  log('lesson title: ' + $('lessonTitle').textContent);
+  log('page counter: ' + $('lessonPage').textContent);
+  log('page dots: ' + $('lessonBar').children.length);
+  log('speaker: ' + $('lessonWho').textContent);
+  log('btn label: ' + $('btnLessonNext').textContent);
+  await wait(400);
+  log('typewriter partial text: "' + $('lessonText').textContent.slice(0, 40) + '"');
+
+  log('\n--- page through the whole lesson ---');
+  await drainLesson('gym1');
+  log('lesson saved to profile: ' + JSON.parse(w.localStorage.getItem('pokergym:save:v1')).lessonsDone);
+
+  log('\n--- battle ---');
+  log('battle visible: ' + visible('scr-battle'));
+  log('scene sprites: foe=' + !!d.querySelector('.scene .foe') + ' me=' + !!d.querySelector('.scene .me'));
+  log('foe name: ' + $('foeName').textContent);
+  log('hand title: ' + $('handTitle').textContent + ' | paytable title: ' + $('paytableTitle').textContent);
+  log('hand grade: ' + $('handGrade').textContent);
+  log('potential bar width: ' + $('potentialBar').style.width);
+  log('potential text: ' + $('potentialText').textContent);
+  log('master: ' + $('masterName').textContent);
+  log('cards dealt: ' + cards().length);
+  log('held flags: ' + cards().map(c => c.dataset.held).join(','));
+  log('pays line: ' + $('pays').textContent);
+  log('end row hidden at start: ' + $('battleEndRow').hidden
+    + ' | draw button enabled: ' + !$('btnDraw').disabled);
+
+  log('\n--- manual card click toggles a hold ---');
+  const holdsBefore = cards().map(c => c.dataset.held).join(',');
+  cards()[0].click();
+  await wait(20);
+  log('holds ' + holdsBefore + ' -> ' + cards().map(c => c.dataset.held).join(','));
+  cards()[0].click();
+  await wait(20);
+  log('restored: ' + (cards().map(c => c.dataset.held).join(',') === holdsBefore));
+
+  log('\n--- coach ---');
+  const t0 = performance.now();
+  click('btnAsk');
+  log('coach shown in ' + (performance.now() - t0).toFixed(0) + 'ms');
+  log('advice: ' + $('advice').textContent);
+  click('btnWhy');
+  log('why: ' + $('why').textContent);
+  click('btnApply');
+  log('after apply, held: ' + cards().map(c => c.dataset.held).join(','));
+
+  log('\n--- draw a hand with coach applied (always optimal) ---');
+  click('btnDraw');
+  await wait(30);
+  log('result: ' + $('masterLine').textContent);
+  log('xp bar after: ' + $('xpBar').style.width);
+  log('chips after: ' + $('chipCount').textContent);
+  log('draw disabled after settle: ' + $('btnDraw').disabled + ' | ask disabled: ' + $('btnAsk').disabled);
+
+  log('\n--- play out 10 hands, always taking the coach play ---');
+  for (let i = 0; i < 10; i++) {
+    const settled = await finishHand('videopoker');
+    if (!settled) { log('  HAND ' + (i + 1) + ' DID NOT SETTLE'); break; }
+    await reportHand(i + 1);
+    click('btnNext');
+    await wait(30);
+    if (visible('scr-map')) break;
+  }
+  log('after 10 optimal hands: ' + $('masterLine').textContent);
+
+  log('\n--- back to map, check badge ---');
+  if (!visible('scr-map')) click('btnNext');
+  await wait(40);
+  log('map visible: ' + visible('scr-map'));
+  log('badges locked count: ' + d.querySelectorAll('#badgeList .badge.locked').length + ' of ' + d.querySelectorAll('#badgeList .badge').length);
+  log('gym2 enabled: ' + !$('gymList').querySelectorAll('button')[1].disabled);
+  log('chips: ' + $('chipCount').textContent);
+
+  log('\n--- persistence ---');
+  log('localStorage save written: ' + (w.localStorage.getItem('pokergym:save:v1') !== null));
+  const saved = JSON.parse(w.localStorage.getItem('pokergym:save:v1'));
+  log('saved class: ' + saved.classId + ' | xp: ' + saved.xp + ' | badges: ' + JSON.stringify(saved.badges));
+
+  // --- the other three gyms: same discipline, different game engine ---
+  await beatGym('blackjack', 1);
+  await beatGym('baccarat', 2);
+  await beatGym('holdem', 3);
+
+  const end = JSON.parse(w.localStorage.getItem('pokergym:save:v1'));
+  log('\n--- all gyms beaten ---');
+  log('badges: ' + JSON.stringify(end.badges));
+  log('xp: ' + end.xp + ' | hands played: ' + end.handsPlayed + ' | optimal: ' + end.handsOptimal);
+  log('lessons done: ' + JSON.stringify(end.lessonsDone));
+  log('gym buttons enabled: '
+    + [...$('gymList').querySelectorAll('button')].map((b) => !b.disabled).join(','));
+
+  if (end.badges.length !== 4) errors.push('expected all four badges, got ' + JSON.stringify(end.badges));
+  if (end.lessonsDone.length !== 4) errors.push('expected all four lessons, got ' + JSON.stringify(end.lessonsDone));
+  if (end.handsPlayed !== 40) errors.push('expected 40 settled hands, got ' + end.handsPlayed);
+  if (end.xp <= 0) errors.push('expected XP to be earned, got ' + end.xp);
+  if (end.chips <= 500) errors.push('expected chips to grow under optimal play, got ' + end.chips);
+
+  const sigs = dealerSigs.map(s => s.hash);
+  const unique = new Set(sigs).size;
+  log('dealer signatures: ' + dealerSigs.map(s => s.game + '=' + s.hash).join('  '));
+  log('distinct dealers: ' + unique + ' of ' + sigs.length);
+  if (sigs.length < 4) errors.push('expected four sampled dealers, got ' + sigs.length);
+  if (unique !== sigs.length) errors.push('dealer portraits are not distinct per gym (' + unique + '/' + sigs.length + ')');
+
+  log('\n--- reload continues ---');
+  f.src = 'index.html';
+  await new Promise(r => f.addEventListener('load', r, { once: true }));
+  await wait(60);
+  const d2 = f.contentDocument;
+  log('continue enabled: ' + !d2.getElementById('btnContinue').disabled);
+  d2.getElementById('btnContinue').click();
+  await wait(40);
+  log('resumed trainer: ' + d2.getElementById('trainerLine').textContent);
+  log('resumed badges locked: ' + d2.querySelectorAll('#badgeList .badge.locked').length);
+
+  log('\n--- fonts + palette ---');
+  const live = f.contentDocument;
+  await live.fonts.ready;
+  const faces = await Promise.all([
+    live.fonts.load('12px "PressStart"'),
+    live.fonts.load('12px "Silkscreen"'),
+  ]);
+  log('PressStart faces loaded: ' + faces[0].length);
+  log('Silkscreen faces loaded: ' + faces[1].length);
+  const h1 = live.querySelector('h1');
+  if (h1) log('title font-family: ' + getComputedStyle(h1).fontFamily.split(',')[0]);
+  const btn = live.getElementById('btnContinue');
+  if (btn) {
+    const cs = getComputedStyle(btn);
+    log('button font: ' + cs.fontFamily.split(',')[0] + ' | bg ' + cs.backgroundColor);
+  }
+  const win = live.querySelector('.window');
+  if (win) log('window border colour: ' + getComputedStyle(win).borderTopColor);
+  log('body bg: ' + getComputedStyle(live.body).backgroundColor);
+
+  log('\n=== errors: ' + errors.length + ' ===');
+  errors.forEach(e => log('  ' + e));
+  document.title = 'DONE errors=' + errors.length;
+}
+</script>
+</body>
+</html>

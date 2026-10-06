@@ -1,0 +1,414 @@
+@font-face {
+  font-family: 'PressStart';
+  src: url('fonts/PressStart2P-Regular.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Silkscreen';
+  src: url('fonts/Silkscreen-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Silkscreen';
+  src: url('fonts/Silkscreen-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* Default chrome: neutral indigo, used before a trainer is chosen. Each class
+   then re-skins the whole UI with the same four ramps its sprite is drawn in,
+   so the world always matches the character. app.js sets data-class on <html>. */
+:root {
+  --gbc-0: #14121c;
+  --gbc-1: #4a4468;
+  --gbc-2: #8f7fd0;
+  --gbc-3: #c9bfe8;
+
+  --p00: #4a1c5c;
+  --p01: #7b3b8f;
+  --p02: #a95fa8;
+  --p03: #d7a3d8;
+
+  --t00: #0f2f5f;
+  --t01: #2f5f8f;
+  --t02: #4f8fbf;
+  --t03: #7fbfe8;
+
+  --r00: #5c1c1c;
+  --r01: #8f3b3b;
+  --r02: #bf5f5f;
+  --r03: #ef9a9a;
+
+  --ink: var(--gbc-0);
+  --panel: #ece9f4;
+  --panel-2: #d8d3e6;
+  --unit: 4px;
+}
+
+html[data-class='scholar'] {
+  --gbc-0: #4a1c5c; --gbc-1: #7b3b8f; --gbc-2: #a95fa8; --gbc-3: #d7a3d8;
+  --panel: #f3e7f7; --panel-2: #e0c9e8;
+}
+html[data-class='dealer'] {
+  --gbc-0: #5c1c1c; --gbc-1: #8f3b3b; --gbc-2: #bf5f5f; --gbc-3: #ef9a9a;
+  --panel: #fbe8e8; --panel-2: #f0cfcf;
+}
+html[data-class='countess'] {
+  --gbc-0: #0f2f5f; --gbc-1: #2f5f8f; --gbc-2: #4f8fbf; --gbc-3: #7fbfe8;
+  --panel: #e4effa; --panel-2: #cadff2;
+}
+html[data-class='grinder'] {
+  --gbc-0: #0f380f; --gbc-1: #306230; --gbc-2: #8bac0f; --gbc-3: #9bbc0f;
+  --panel: #e0f8d0; --panel-2: #c8e6b0;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+/* Author display rules (.row, .hand, .paytable) outrank the UA sheet, so the
+   hidden attribute has to be re-asserted here or hidden rows stay on screen. */
+[hidden] { display: none !important; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--gbc-0);
+  color: var(--ink);
+  font-family: 'Silkscreen', ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Hard pixel edges everywhere, no smoothing */
+body, img, canvas, .px { image-rendering: pixelated; image-rendering: crisp-edges; }
+
+h1, h2, h3, .title, .stat-label, .badge-name {
+  font-family: 'PressStart', 'Silkscreen', monospace;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.shell {
+  max-width: 460px;
+  margin: 0 auto;
+  background: var(--panel);
+  min-height: 100vh;
+  padding: calc(env(safe-area-inset-top) + 8px) calc(env(safe-area-inset-right) + 8px)
+           calc(env(safe-area-inset-bottom) + 8px) calc(env(safe-area-inset-left) + 8px);
+  border-left: 4px solid var(--gbc-1);
+  border-right: 4px solid var(--gbc-1);
+}
+
+/* persistent sound switch, sits above whichever screen is showing */
+.topbar { display: flex; justify-content: flex-end; margin-bottom: 6px; }
+.sound-toggle { min-height: 34px; padding: 6px 10px; font-size: 9px; width: auto; }
+
+/* Chunky double-border window, like a GBC dialogue box */
+.window {
+  background: var(--panel);
+  border: 4px solid var(--gbc-1);
+  box-shadow:
+    inset 0 0 0 4px var(--panel),
+    inset 0 0 0 8px var(--gbc-0);
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.window > h2 {
+  font-size: 9px;
+  margin: 0 0 10px;
+  color: var(--gbc-3);
+  background: var(--gbc-0);
+  display: inline-block;
+  padding: 3px 6px;
+  box-shadow: 3px 3px 0 var(--gbc-1);
+}
+
+button {
+  font-family: 'Silkscreen', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--gbc-3);
+  border: 0;
+  box-shadow:
+    inset -4px -4px 0 var(--gbc-2),
+    inset 4px 4px 0 var(--gbc-1),
+    0 0 0 4px var(--gbc-0);
+  padding: 10px 8px;
+  min-height: 44px;
+  cursor: pointer;
+  text-align: center;
+}
+button:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: inset -4px -4px 0 var(--gbc-2), inset 4px 4px 0 var(--gbc-1), 0 0 0 2px var(--gbc-0);
+}
+button:disabled { opacity: .45; cursor: default; }
+/* Anything "chosen" inverts: dark face, light type. Keeps every accent at
+   >=4.5:1 in all four class palettes instead of the ~3:1 a mid-tone gives. */
+button.primary { background: var(--gbc-0); color: var(--gbc-3); }
+button:focus-visible { outline: 4px solid var(--t02); outline-offset: 2px; }
+
+.row { display: flex; gap: 8px; margin-top: 8px; }
+.row > button { flex: 1; }
+
+/* Cards: GBC green tile with a hard 3D edge */
+.hand { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+.card {
+  width: 52px; height: 74px;
+  font-family: 'PressStart', monospace;
+  font-size: 15px;
+  background: var(--panel-2);
+  border: 0;
+  box-shadow: inset 0 0 0 3px var(--gbc-1), 0 0 0 3px var(--gbc-0);
+  color: var(--ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  padding: 0;
+  transition: transform 60ms ease-in-out, box-shadow 60ms ease-in-out, filter 60ms ease-in-out;
+}
+.card .pip { font-size: 17px; line-height: 1; }
+.card[data-held='true'] {
+  background: var(--gbc-0);
+  color: var(--gbc-3);
+  box-shadow: inset 0 0 0 3px var(--gbc-1), 0 0 0 3px var(--gbc-0);
+}
+.card[data-held='true']::after {
+  content: 'HELD';
+  font-size: 6px;
+  font-family: 'Silkscreen', monospace;
+  letter-spacing: .5px;
+}
+/* hold'em: cards picked for your best five out of seven */
+.card[data-picked='true'] {
+  background: var(--gbc-0);
+  color: var(--gbc-3);
+  box-shadow: inset 0 0 0 3px var(--gbc-1), 0 0 0 3px var(--gbc-0);
+}
+.card[data-picked='true']::after {
+  content: 'PICK';
+  font-size: 6px;
+  font-family: 'Silkscreen', monospace;
+  letter-spacing: .5px;
+}
+/* blackjack: the dealer's hole card until it is turned over */
+.card[data-down='true'] {
+  background: var(--gbc-1);
+  color: var(--panel);
+  box-shadow: inset 0 0 0 3px var(--gbc-0), 0 0 0 3px var(--gbc-0);
+}
+.card:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+}
+.card:active:not(:disabled),
+.card[aria-pressed='true'],
+.card:focus-visible:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: inset 0 0 0 3px var(--gbc-0), inset 0 0 0 3px var(--gbc-1);
+  outline: none;
+}
+
+/* labelled rows of cards: dealer, player hands, baccarat sides, hold'em board */
+.zone { margin-bottom: 10px; }
+.zone:last-child { margin-bottom: 0; }
+.zone-head { margin: 0 0 6px; text-align: center; }
+.zone-head b { color: var(--gbc-0); font-weight: 700; }
+
+.meter {
+  height: 12px;
+  background: var(--panel-2);
+  box-shadow: inset 0 0 0 3px var(--gbc-1), inset 0 0 0 3px var(--gbc-0);
+  padding: 2px;
+}
+.meter > div { height: 100%; background: var(--gbc-2); image-rendering: pixelated; }
+
+.paytable { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; font-size: 10px; }
+.paytable .amt { text-align: right; }
+.paytable .won { background: var(--gbc-0); color: var(--gbc-3); font-weight: 700; }
+
+.hint { color: var(--gbc-1); font-size: 10px; }
+.stat-label { font-size: 7px; }
+.badge-list { display: flex; gap: 8px; flex-wrap: wrap; }
+.badge {
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  background: var(--panel-2);
+  box-shadow: inset 0 0 0 3px var(--gbc-1), 0 0 0 3px var(--gbc-0);
+  font-size: 18px;
+}
+.badge.locked { opacity: .3; }
+
+.sprite { width: 96px; height: 96px; image-rendering: pixelated; }
+
+.dlg { display: flex; gap: 12px; align-items: flex-start; }
+.dlg .who {
+  flex: 0 0 auto;
+  font-family: 'PressStart', monospace;
+  font-size: 8px;
+  background: var(--gbc-0);
+  color: var(--gbc-3);
+  padding: 4px 6px;
+}
+.dlg p { margin: 0; font-size: 11px; }
+
+.class-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.class-card {
+  display: block; width: 100%; text-align: left;
+  background: var(--panel-2);
+  box-shadow: inset 0 0 0 3px var(--gbc-1), 0 0 0 3px var(--gbc-0);
+  padding: 8px;
+  cursor: pointer;
+}
+.class-card:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+}
+.class-card:active:not(:disabled),
+.class-card[aria-pressed='true'] {
+  transform: translate(2px, 2px);
+}
+.class-card:disabled { opacity: .45; cursor: default; }
+.class-card .nm { font-family: 'PressStart', monospace; font-size: 9px; display: block; margin-bottom: 6px; }
+.class-card .bl { font-size: 9px; font-weight: 400; text-transform: none; display: block; line-height: 1.5; }
+/* Micro-interactions: keep it snappy and readable on a Game Boy screen. */
+
+@keyframes pulse-next {
+  0% {
+    box-shadow: inset 0 0 0 3px var(--gbc-1), 0 0 0 3px var(--gbc-0);
+  }
+  50% {
+    box-shadow: inset 0 0 0 3px var(--gbc-2), 0 0 0 4px var(--gbc-0);
+  }
+  100% {
+    box-shadow: inset 0 0 0 3px var(--gbc-1), 0 0 0 3px var(--gbc-0);
+  }
+}
+
+@keyframes xpup {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 8px) scale(0.9);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-50%, -4px) scale(1.05);
+  }
+  85% {
+    opacity: 1;
+    transform: translate(-50%, -18px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -26px) scale(0.98);
+  }
+}
+
+.next-unlocked {
+  animation: pulse-next 1400ms ease-in-out infinite;
+}
+
+.xp-float {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  font-family: 'PressStart', monospace;
+  font-size: 10px;
+  color: var(--gbc-3);
+  text-shadow: 2px 2px 0 var(--gbc-0), -2px -2px 0 var(--gbc-0), 2px -2px 0 var(--gbc-0), -2px 2px 0 var(--gbc-0);
+  pointer-events: none;
+  z-index: 10;
+  animation: xpup 900ms ease-out forwards;
+  white-space: nowrap;
+}
+.scene {
+  position: relative;
+  height: 148px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 7px, rgba(15,56,15,.07) 7px 8px),
+    var(--panel);
+  box-shadow: inset 0 0 0 3px var(--gbc-1), 0 0 0 3px var(--gbc-0);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.foe, .me { position: absolute; image-rendering: pixelated; }
+.foe { top: 6px; right: 10px; width: 96px; height: 96px; }
+.me { bottom: 4px; left: 10px; width: 96px; height: 96px; }
+.ground {
+  position: absolute; border-radius: 50%;
+  background: var(--gbc-2); box-shadow: 0 0 0 3px var(--gbc-1);
+}
+.ground.foe-g { top: 86px; right: 2px; width: 104px; height: 26px; }
+.ground.me-g  { bottom: -6px; left: 2px; width: 104px; height: 22px; }
+
+/* the classic white dialogue box with a name plate and blinking prompt */
+.dialogue {
+  position: relative;
+  background: #f8f8f8;
+  border: 3px solid var(--gbc-0);
+  padding: 10px 10px 16px;
+  margin-bottom: 10px;
+  color: #182018;
+  min-height: 74px;
+  overflow: hidden;
+}
+.dialogue[role='button'] { cursor: pointer; }
+.dialogue[role='button']:active .prompt { opacity: 1; transform: translateY(2px); }
+/* the attendant behind the counter: 48x48 dealer floated into the text box */
+.dealer {
+  float: left;
+  width: 96px;
+  height: 96px;
+  margin: 12px 8px 0 0;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  background: #e8e8e8;
+  border: 2px solid var(--gbc-0);
+}
+.nameplate {
+  position: absolute; top: -3px; left: 6px;
+  background: var(--gbc-0); color: var(--gbc-3);
+  font-family: 'PressStart', monospace; font-size: 7px;
+  padding: 3px 6px; letter-spacing: .5px;
+}
+.dialogue p { margin: 6px 0 0; font-size: 11px; line-height: 1.7; overflow: hidden; }
+.prompt {
+  position: absolute; right: 6px; bottom: 3px;
+  color: #182018; font-size: 10px;
+  animation: bob .7s steps(2, jump-none) infinite;
+}
+@keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+@media (prefers-reduced-motion: reduce) { .prompt { animation: none; } }
+
+/* status box: NAME + gauge, exactly like an HP readout */
+.statusbox {
+  background: #f8f8f8; color: #182018;
+  border: 3px solid var(--gbc-0);
+  padding: 7px 9px; margin-bottom: 10px;
+}
+.statusbox .row1 {
+  display: flex; justify-content: space-between;
+  font-family: 'PressStart', monospace; font-size: 8px; margin-bottom: 5px;
+}
+.gauge {
+  height: 7px; background: #c8c8c8; border: 2px solid #182018; padding: 1px;
+}
+.gauge > i { display: block; height: 100%; background: #38b038; }
+.gauge.mid > i { background: #e0a020; }
+.gauge.high > i { background: #20a0e0; }
+.gauge.low > i  { background: #e04040; }
+
+/* menu box with a marching cursor */
+.menu { background: #f8f8f8; border: 3px solid var(--gbc-0); padding: 6px 6px 6px 0; color: #182018; }
+.menu ul { list-style: none; margin: 0; padding: 0; }
+.menu li { padding: 5px 8px 5px 20px; position: relative; font-size: 11px; cursor: pointer; }
+.menu li::before { content: '\25B6'; position: absolute; left: 5px; }
+.menu li[aria-selected='true'] { background: var(--gbc-0); color: var(--gbc-3); }
+.menu li.locked { opacity: .45; cursor: default; }
+.menu li.locked::before { content: '\25CF'; }
+
+.tutbar { display: flex; gap: 4px; margin-bottom: 8px; }
+.tutbar i { flex: 1; height: 6px; background: var(--panel-2); box-shadow: inset 0 0 0 2px var(--gbc-1); }
+.tutbar i.on { background: var(--gbc-2); box-shadow: inset 0 0 0 2px var(--gbc-0); }

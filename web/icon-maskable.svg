@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="spade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7aa2f7"/>
+      <stop offset="1" stop-color="#6ee7b7"/>
+    </linearGradient>
+    <path id="sp" d="M256 96
+      C 292 144, 372 180, 372 240
+      C 372 280, 348 296, 316 296
+      C 296 296, 280 287, 270 271
+      L 298 364 L 214 364 L 242 271
+      C 232 287, 216 296, 196 296
+      C 164 296, 140 280, 140 240
+      C 140 180, 220 144, 256 96 Z"/>
+  </defs>
+  <rect width="512" height="512" fill="#14121c"/>
+  <use href="#sp" fill="url(#spade)"/>
+</svg>

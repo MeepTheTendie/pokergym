@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14121c">
+<meta name="description" content="PokerGym - an RPG that teaches casino card strategy.">
+<title>POKERGYM</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="gbc.css">
+</head>
+<body>
+<div class="shell">
+
+<div class="topbar">
+  <button id="btnSound" class="sound-toggle" type="button" aria-pressed="true">SND ON</button>
+</div>
+
+<!-- ============ TITLE ============ -->
+<section id="scr-title" class="screen">
+  <div class="window" style="text-align:center; padding:20px 12px;">
+    <h1 style="font-size:20px; margin:0 0 4px; color:var(--gbc-1);">POKER</h1>
+    <h1 style="font-size:20px; margin:0 0 14px; color:var(--r01);">GYM</h1>
+    <p class="hint" style="font-size:10px; margin:0 0 16px;">TRAIN. LEVEL UP.<br>BEAT THE MASTERS.</p>
+    <div class="row" style="flex-direction:column; gap:10px;">
+      <button id="btnNew" class="primary">NEW GAME</button>
+      <button id="btnContinue">CONTINUE</button>
+    </div>
+  </div>
+  <p class="hint" style="text-align:center; font-size:9px;">GAME BOY COLOR EDITION</p>
+</section>
+
+<!-- ============ CLASS SELECT ============ -->
+<section id="scr-class" class="screen" hidden>
+  <div class="window">
+    <h2>CHOOSE YOUR TRAINER</h2>
+    <p class="hint" style="font-size:10px; margin:0 0 10px;">YOUR CLASS DECIDES YOUR FIRST GYM AND YOUR STRONGER STAT.</p>
+    <div class="class-grid" id="classGrid"></div>
+  </div>
+  <div class="window" id="classDetail" hidden>
+    <h2 id="classDetailName">TRAINER</h2>
+    <p class="hint" id="classDetailText" style="font-size:10px; margin:0 0 8px;"></p>
+    <div class="badge-list" id="classDetailStats"></div>
+    <div class="row">
+      <button id="btnBack">BACK</button>
+      <button id="btnBecome" class="primary">BECOME THIS</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GYM MAP ============ -->
+<section id="scr-map" class="screen" hidden>
+  <div class="window">
+    <h2>YOUR TRAINER</h2>
+    <div class="dlg">
+      <canvas class="sprite" id="sprite" width="48" height="48" aria-hidden="true"></canvas>
+      <div>
+        <p id="trainerLine" style="margin:0; font-weight:700;"></p>
+        <p class="hint" id="trainerStats" style="margin:2px 0 0; font-size:10px;"></p>
+      </div>
+    </div>
+    <div class="meter" style="margin-top:10px;"><div id="xpBar"></div></div>
+    <p class="hint" id="xpLine" style="margin:4px 0 0; font-size:10px;"></p>
+    <p class="hint" style="margin:6px 0 0; font-size:10px;">CHIPS <span id="chipCount">0</span></p>
+  </div>
+
+  <div class="window">
+    <h2>BADGES</h2>
+    <div class="badge-list" id="badgeList"></div>
+  </div>
+
+  <div class="window">
+    <h2>GYMS</h2>
+    <div id="gymList"></div>
+  </div>
+</section>
+
+<!-- ============ TUTORIAL ============ -->
+<section id="scr-lesson" class="screen" hidden>
+  <div class="window">
+    <h2 id="lessonTitle">HOW TO PLAY</h2>
+    <div class="tutbar" id="lessonBar"></div>
+    <div class="statusbox">
+      <div class="row1"><span>PAGE</span><span id="lessonPage">1/14</span></div>
+      <div class="gauge"><i id="lessonGauge" style="width:7%"></i></div>
+    </div>
+    <div class="dialogue" id="lessonBox" role="button" tabindex="0">
+      <span class="nameplate" id="lessonWho">MASTER</span>
+      <canvas class="dealer" id="lessonDealer" width="48" height="48" aria-hidden="true"></canvas>
+      <p id="lessonText">&nbsp;</p>
+      <span class="prompt" id="lessonPrompt">▼</span>
+    </div>
+    <div class="row">
+      <button id="btnSkip">SKIP</button>
+      <button id="btnLessonNext" class="primary">NEXT</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BATTLE ============ -->
+<section id="scr-battle" class="screen" hidden>
+  <div class="scene">
+    <div class="ground foe-g"></div>
+    <div class="ground me-g"></div>
+    <canvas class="sprite foe" id="masterSprite" width="48" height="48" aria-hidden="true"></canvas>
+    <canvas class="sprite me" id="battleSprite" width="48" height="48" aria-hidden="true"></canvas>
+  </div>
+
+  <div class="statusbox">
+    <div class="row1"><span id="foeName">MASTER ROYALE</span><span id="handGrade">JUNK</span></div>
+    <div class="gauge"><i id="potentialBar" style="width:0%"></i></div>
+    <p class="hint" id="potentialText" style="margin:5px 0 0; font-size:9px; color:#3a4a3a;">HAND POTENTIAL</p>
+  </div>
+
+  <div class="dialogue" id="masterBox" role="button" tabindex="0">
+    <span class="nameplate" id="masterName">MASTER ROYALE</span>
+    <p id="masterLine">&nbsp;</p>
+    <span class="prompt" id="masterPrompt">▼</span>
+  </div>
+
+  <div class="window">
+    <h2 id="handTitle">YOUR HAND</h2>
+    <div id="zones"></div>
+    <p class="hint" id="pays" style="margin:8px 0 0; text-align:center;"></p>
+  </div>
+
+  <div class="window" id="coachPanel" hidden>
+    <h2>COACH</h2>
+    <div class="dialogue" style="background:var(--panel-2); margin-bottom:0;">
+      <p id="advice" style="margin:0;"></p>
+    </div>
+    <div class="row">
+      <button id="btnWhy">WHY?</button>
+      <button id="btnApply" class="primary">APPLY PLAY</button>
+    </div>
+    <p class="hint" id="why" hidden style="margin:8px 0 0; font-size:10px;"></p>
+  </div>
+
+  <div class="window">
+    <h2 id="paytableTitle">PAYS</h2>
+    <div class="paytable" id="paytable"></div>
+  </div>
+
+  <div class="row">
+    <button id="btnAsk">ASK COACH</button>
+    <button id="btnDeal" class="primary">DEAL</button>
+    <button id="btnDraw">DRAW</button>
+  </div>
+
+  <div class="row" id="rowActions" hidden>
+    <button id="btnHit">HIT</button>
+    <button id="btnStand" class="primary">STAND</button>
+    <button id="btnDouble">DOUBLE</button>
+    <button id="btnSplit">SPLIT</button>
+  </div>
+
+  <div class="row" id="rowBet" hidden>
+    <button id="btnBanker" class="primary">BANKER</button>
+    <button id="btnPlayer">PLAYER</button>
+    <button id="btnTie">TIE</button>
+  </div>
+
+  <div class="row" id="rowPick" hidden>
+    <button id="btnClear">CLEAR</button>
+    <button id="btnConfirm" class="primary">CONFIRM 5</button>
+  </div>
+
+  <div class="row" id="battleEndRow" hidden>
+    <button id="btnNext" class="primary">CONTINUE</button>
+  </div>
+</section>
+
+</div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
