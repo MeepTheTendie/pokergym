@@ -3,13 +3,13 @@ import assert from 'node:assert/strict';
 import { SONGS, SFX_NAMES, compileSong, validateSongs } from '../web/audio.js';
 
 const CHANNELS = ['lead', 'harm', 'bass', 'drum'];
-const TRACKS = ['title', 'map', 'battle1', 'battle2', 'battle3', 'battle4'];
+const TRACKS = ['gamecorner', 'title', 'map', 'battle1', 'battle2', 'battle3', 'battle4'];
 
 test('every track compiles without errors', () => {
   assert.deepEqual(validateSongs(), []);
 });
 
-test('the six expected tracks exist', () => {
+test('the expected tracks exist', () => {
   assert.deepEqual(Object.keys(SONGS).sort(), [...TRACKS].sort());
 });
 

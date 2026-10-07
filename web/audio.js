@@ -51,7 +51,8 @@ function pulseWave(duty) {
   const real = new Float32Array(n);
   const imag = new Float32Array(n);
   for (let k = 1; k < n; k++) {
-    imag[k] = (2 * (1 - Math.cos(2 * Math.PI * k * duty))) / (Math.PI * k);
+    real[k] = 2 * Math.sin(2 * Math.PI * k * duty) / (Math.PI * k);
+    imag[k] = 2 * (1 - Math.cos(2 * Math.PI * k * duty)) / (Math.PI * k);
   }
   const w = ctx.createPeriodicWave(real, imag, { disableNormalization: false });
   waves.set(duty, w);
@@ -260,16 +261,17 @@ function getCompiled(name) {
 
 /* ------------------------------- scheduling ------------------------------ */
 
-function fire(ev, t, sps, gain) {
-  const dur = ev.len * sps;
+function fire(ev, t, sps, gain, voices = {}) {
+  const settings = voices[ev.channel] ?? {};
+  const dur = ev.len * sps * (settings.gate ?? 1);
   if (ev.channel === 'drum') return drum(ev.note, t, gain);
   if (ev.channel === 'bass') {
-    return voice(t, ev.note, dur, { type: 'triangle', vol: 0.17 * gain, hold: 0.5 });
+    return voice(t, ev.note, dur, { type: 'triangle', vol: 0.17 * gain, hold: 0.5, ...settings });
   }
   if (ev.channel === 'harm') {
-    return voice(t, ev.note, dur, { type: 'pulse', duty: 0.5, vol: 0.055 * gain, hold: 0.85 });
+    return voice(t, ev.note, dur, { type: 'pulse', duty: 0.5, vol: 0.055 * gain, hold: 0.85, ...settings });
   }
-  return voice(t, ev.note, dur, { type: 'pulse', duty: 0.25, vol: 0.13 * gain, hold: 0.7 });
+  return voice(t, ev.note, dur, { type: 'pulse', duty: 0.25, vol: 0.13 * gain, hold: 0.7, ...settings });
 }
 
 function tick() {
@@ -281,7 +283,7 @@ function tick() {
   let guard = 0;
   while (nextTime < ctx.currentTime + LOOKAHEAD && guard++ < 64) {
     const events = song.data.at.get(song.step);
-    if (events) for (const ev of events) fire(ev, nextTime, sps, song.data.gain);
+    if (events) for (const ev of events) fire(ev, nextTime, sps, song.data.gain, SONGS[song.name].voices);
     nextTime += sps;
     song.step = (song.step + 1) % song.data.total;
     scheduledSteps++;
@@ -351,6 +353,50 @@ export const SFX_NAMES = Object.keys(SFX_PLAYS);
  * validateSongs() will tell you when one has drifted.                     */
 
 const SONGS = {
+  /* Original arcade theme: animated call/response, chromatic pickups and
+     bouncing single-note accompaniment instead of sustained synth chords.
+     Three pitched voices + restrained noise, in the handheld sound idiom. */
+  gamecorner: {
+    bpm: 144, bars: 8, gain: 0.85,
+    voices: {
+      lead: { duty: 0.5, gate: 0.82, attack: 0.002, hold: 0.35, vol: 0.10 },
+      harm: { duty: 0.25, gate: 0.65, attack: 0.002, hold: 0.3, vol: 0.075 },
+      bass: { gate: 0.55, attack: 0.002, hold: 0.6, vol: 0.14 },
+    },
+    channels: {
+      lead: [
+        'E5:2 -:1 E5:1 G5:2 A5:1 G5:1 E5:2 C5:2 D5:2 E5:2',
+        'G5:3 E5:1 D5:2 C5:2 B4:2 C5:1 #C5:1 D5:2 G5:2',
+        'A5:2 -:1 A5:1 C6:2 B5:1 A5:1 G5:2 E5:2 F5:2 G5:2',
+        'F5:3 E5:1 D5:2 B4:2 G4:2 A4:1 Bb4:1 B4:2 D5:2',
+        'E5:2 G5:2 C6:3 B5:1 A5:2 G5:2 E5:2 G5:2',
+        'A5:3 G5:1 F5:2 E5:2 D5:2 E5:1 F5:1 #F5:2 A5:2',
+        'G5:2 D5:2 B5:2 A5:2 G5:3 F5:1 E5:2 D5:2',
+        'C5:3 E5:1 G5:2 C6:2 B5:1 Bb5:1 A5:2 G5:2 D5:2',
+      ].join(' '),
+      harm: [
+        'C4:2 G4:2 E4:2 G4:2 C4:2 G4:2 E4:2 G4:2',
+        'B3:2 G4:2 D4:2 G4:2 B3:2 D4:2 F4:2 G4:2',
+        'C4:2 A4:2 E4:2 A4:2 C4:2 A4:2 E4:2 G4:2',
+        'B3:2 G4:2 F4:2 G4:2 B3:2 G4:2 D4:2 F4:2',
+        'E4:2 G4:2 C5:2 G4:2 E4:2 G4:2 C5:2 G4:2',
+        'D4:2 A4:2 F4:2 A4:2 D4:2 A4:2 #F4:2 A4:2',
+        'D4:2 G4:2 B4:2 G4:2 D4:2 G4:2 F4:2 G4:2',
+        'E4:2 G4:2 C5:2 G4:2 D4:2 G4:2 B4:2 G4:2',
+      ].join(' '),
+      bass: [
+        'C3:2 G2:2 E3:2 G2:2 C3:2 G2:2 A2:2 Bb2:2',
+        'B2:2 G2:2 D3:2 G2:2 B2:2 G2:2 A2:2 B2:2',
+        'A2:2 E3:2 C3:2 E3:2 A2:2 E3:2 G2:2 A2:2',
+        'G2:2 D3:2 B2:2 D3:2 G2:2 D3:2 A2:2 B2:2',
+        'C3:2 G2:2 E3:2 G2:2 C3:2 G2:2 E3:2 #C3:2',
+        'D3:2 A2:2 F3:2 A2:2 D3:2 A2:2 #F3:2 A2:2',
+        'G2:2 D3:2 B2:2 D3:2 G2:2 D3:2 A2:2 B2:2',
+        'C3:2 G2:2 E3:2 G2:2 B2:2 D3:2 G2:2 B2:2',
+      ].join(' '),
+      drum: Array(8).fill('h:2 -:2 s:2 -:2 h:2 -:2 s:2 h:2').join(' '),
+    },
+  },
   /* Title: A minor, heroic. Am - F - C - G. */
   title: {
     bpm: 112, bars: 4, gain: 0.9,
@@ -467,12 +513,20 @@ function applyMute() {
 
 /** Create/resume the context. Safe to call on every input event. */
 export function unlock() {
-  if (unlocked && ctx) return;
   unlocked = true;
+  // Mobile browsers grant activation on touchend/click, not necessarily on
+  // pointerdown. Retry resume on every gesture, including after interruptions.
+  if (ctx?.state === 'closed') {
+    ctx = null;
+    waves.clear();
+    stopSequencer();
+  }
   if (!ensure()) return;
-  if (ctx.state === 'suspended') {
-    ctx.resume().then(() => { if (desired && !timer) startSequencer(); }).catch(() => {});
-  } else if (desired && !timer) {
+  if (ctx.state !== 'running') {
+    ctx.resume().then(() => {
+      if (ctx.state === 'running' && desired && !muted && !timer) startSequencer();
+    }).catch(() => {});
+  } else if (desired && !muted && !timer) {
     startSequencer();
   }
 }
@@ -504,7 +558,7 @@ export function setMuted(v) {
   }
   applyMute();
   if (muted) stopSequencer();
-  else if (desired && ctx && ctx.state === 'running') startSequencer();
+  else unlock();
 }
 
 export function toggleMute() {
@@ -531,7 +585,7 @@ if (typeof document !== 'undefined') {
   document.addEventListener('visibilitychange', () => {
     if (!ctx) return;
     if (document.hidden) ctx.suspend().catch(() => {});
-    else ctx.resume().catch(() => {});
+    else if (unlocked && !muted) unlock();
   });
 }
 

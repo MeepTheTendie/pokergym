@@ -412,3 +412,129 @@ button:focus-visible { outline: 4px solid var(--t02); outline-offset: 2px; }
 .tutbar { display: flex; gap: 4px; margin-bottom: 8px; }
 .tutbar i { flex: 1; height: 6px; background: var(--panel-2); box-shadow: inset 0 0 0 2px var(--gbc-1); }
 .tutbar i.on { background: var(--gbc-2); box-shadow: inset 0 0 0 2px var(--gbc-0); }
+
+/* Pocket league: neutral dialogue chrome, original tiled overworld, and
+   restrained red/blue accents. Trainer colors stay on the characters. */
+:root, html[data-class] {
+  --gbc-0: #263c35; --gbc-1: #526451; --gbc-2: #a1b18a;
+  --gbc-3: #edf0d5; --panel: #f6f5e8; --panel-2: #e3e7cc;
+  --ink: #263c35;
+}
+html, body { background: #202e2b; font-size: 13px; }
+.shell {
+  max-width: 480px; border: 0; background: #d8dfc6;
+  padding: calc(env(safe-area-inset-top) + 12px) max(12px, env(safe-area-inset-right))
+    calc(env(safe-area-inset-bottom) + 18px) max(12px, env(safe-area-inset-left));
+  min-height: 100dvh;
+}
+.topbar { align-items: center; gap: 12px; margin-bottom: 12px; min-height: 44px; }
+.brand { margin-right: auto; font-family: 'PressStart', monospace; font-size: 9px; }
+.brand small { display: block; font-family: 'Silkscreen', monospace; font-size: 8px; margin-top: 5px; color: #526451; }
+button { background: #f6f5e8; border: 2px solid var(--ink); box-shadow: 0 3px 0 #a1b18a; min-height: 48px; padding: 10px; }
+button.primary { background: #263c35; color: #f6f5e8; }
+button:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
+button:disabled { opacity: .48; }
+button:focus-visible { outline: 3px solid #386a9c; outline-offset: 3px; }
+.topbar button { min-height: 44px; font-size: 9px; padding: 6px 8px; }
+.window, .dialogue {
+  border: 2px solid var(--ink); box-shadow: inset 0 0 0 2px var(--panel), inset 0 0 0 3px var(--ink);
+  padding: 12px; margin-bottom: 10px; background: var(--panel);
+}
+.window > h2 { background: var(--panel); color: var(--ink); box-shadow: none; padding: 0; font-size: 8px; }
+.title-art { position: relative; border: 3px solid var(--ink); background: #a8bf86; overflow: hidden; }
+.title-art canvas { display: block; width: 100%; }
+.title-art > span { position: absolute; top: 14%; left: 0; right: 0; text-align: center; font-size: 9px; color: #263c35; background: #edf0d5e8; padding: 8px 0; }
+.title-art canvas.title-trainer { position: absolute; width: 96px; height: 96px; left: 50%; bottom: 26%; transform: translateX(-50%); }
+.title-art > .title-league { top: auto; bottom: 7%; left: 50%; right: auto; transform: translateX(-50%); white-space: nowrap; background: #263c35; color: #edf0d5; padding: 8px 12px; font-size: 9px; }
+.title-art > .title-gym { font-family: 'PressStart', monospace; font-size: 9px; line-height: 1; top: 31%; left: 26%; right: auto; padding: 4px; background: #263c35; color: #f6f5e8; transform: translateX(-50%); }
+.title-art > .gym-ne, .title-art > .gym-se { left: 73%; }
+.title-art > .gym-sw, .title-art > .gym-se { top: 81%; }
+.title-menu { margin-top: 12px; }
+.title-menu h1 { display: inline-block; font-size: 24px !important; color: #263c35 !important; margin: 4px 3px 16px !important; text-shadow: 2px 2px #b6c5a2; }
+.title-menu h1:nth-of-type(2) { color: #9a4d43 !important; }
+.trainer-card { position: relative; padding-left: 80px; min-height: 128px; }
+.trainer-card .sprite { position: absolute; left: 8px; top: 24px; width: 64px; height: 64px; }
+.trainer-card .dlg { gap: 0; }
+.trainer-card h2 { margin-bottom: 6px; }
+.trainer-card .dlg p { font-size: 10px; }
+.trainer-card #trainerStats { font-size: 9px !important; }
+.trainer-card > .hint { display: inline-block; margin-right: 10px !important; }
+.meter { height: 8px; box-shadow: none; border: 1px solid var(--ink); padding: 1px; }
+.meter > div { background: #608670; }
+.badge-case { display: flex; align-items: center; gap: 16px; padding: 10px 12px; }
+.badge-case h2 { margin: 0; }
+.badge { width: 32px; height: 32px; border: 1px solid var(--ink); box-shadow: none; background: #e3e7cc; }
+.badge.locked { opacity: .4; }
+.world-panel { border: 2px solid var(--ink); background: var(--panel); }
+.world-heading { padding: 10px 12px; }
+.world-heading h2 { font-size: 9px; margin: 0 0 3px; }
+.world-heading span { font-size: 9px; color: #526451; }
+.overworld { position: relative; }
+.overworld > canvas { display: block; width: 100%; }
+.overworld > #mapTrainer { position: absolute; width: 76px; height: 76px; left: 50%; top: 41%; transform: translateX(-50%); pointer-events: none; }
+#gymList { position: absolute; inset: 0; }
+#gymList button { position: absolute; width: 34%; min-height: 48px; padding: 4px 2px; font-size: 9px; line-height: 1.4; background: #f6f5e8; box-shadow: 2px 2px 0 #263c35; }
+#gymList button:nth-child(1) { top: 35%; left: 9%; }
+#gymList button:nth-child(2) { top: 35%; right: 9%; }
+#gymList button:nth-child(3) { top: 76%; left: 9%; }
+#gymList button:nth-child(4) { top: 76%; right: 9%; }
+#gymList button.primary { color: #263c35; border-color: #263c35; }
+#gymList button:disabled { opacity: 1; background: #d3d8c6; color: #64705e; border-color: #78836d; box-shadow: 2px 2px 0 #78836d; }
+#gymList small { display: block; font-size: 8px; color: #526451; }
+.map-caption { margin: 0; padding: 10px; text-align: center; font-size: 10px; }
+.class-card { border: 2px solid var(--ink); box-shadow: 0 3px 0 #a1b18a; text-align: center; padding: 10px; }
+.class-portrait { display: block; width: 80px; height: 80px; margin: 0 auto 8px; }
+.class-card[aria-pressed='true'] { background: #d7e1bd; outline: 2px solid #526451; outline-offset: -5px; }
+.class-card .nm { font-size: 8px; }
+.scene { height: 125px; box-shadow: none; border: 2px solid var(--ink); background: #f6f5e8; margin-bottom: 0; }
+.battle-label { position: absolute; top: 10px; left: 10px; font-size: 8px; color: #526451; max-width: 120px; }
+.foe { width: 88px; height: 88px; top: 8px; right: 22px; }
+.me { width: 80px; height: 80px; left: 20px; bottom: 0; }
+.ground { background: #dbe3c4; box-shadow: none; border-bottom: 2px solid #8b9d79; }
+.ground.foe-g { top: 83px; right: 14px; }
+.ground.me-g { left: 10px; }
+.statusbox { border: 0; border-bottom: 2px solid var(--ink); background: var(--panel); padding: 10px; }
+.statusbox .row1 { font-size: 8px; gap: 8px; }
+.dialogue { min-height: 64px; padding: 15px 12px 12px; }
+.nameplate { background: var(--panel); color: var(--ink); top: 4px; padding: 0 4px; font-size: 7px; }
+.dialogue p { font-size: 12px; line-height: 1.6; }
+.hand-panel { padding: 10px 12px; }
+.hand { gap: 7px; }
+.card { width: 48px; height: 68px; background: #fffef5; border: 2px solid var(--ink); box-shadow: 0 2px 0 #a1b18a; font-size: 14px; }
+.card[data-held='true'], .card[data-picked='true'] { background: #263c35; color: #f6f5e8; box-shadow: 0 -3px 0 #ad6655; }
+.card[aria-pressed='true'] { transform: translateY(-3px); }
+.zone-head { font-size: 10px; }
+.payout-panel { padding: 10px 12px; }
+.payout-panel summary { cursor: pointer; min-height: 28px; font-size: 10px; }
+.payout-panel .paytable { margin-top: 8px; }
+#scr-battle { padding-bottom: 4px; }
+#scr-battle > .row { position: sticky; bottom: calc(env(safe-area-inset-bottom) + 8px); z-index: 3; padding: 6px; background: #d8dfc6; border: 1px solid #a1b18a; }
+#scr-battle > .row:has(~ .row:not([hidden])) { position: static; }
+.row { gap: 8px; }
+.row button { font-size: 10px; }
+@media (max-width: 360px) {
+  .shell { padding-left: 8px; padding-right: 8px; }
+  .brand { font-size: 8px; }
+  .brand small { font-size: 7px; }
+  .card { width: 43px; height: 64px; }
+  .hand { gap: 5px; }
+  .row button { font-size: 9px; padding: 8px 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* Character art gets enough space to read the pose on a phone. */
+.scene { height: 154px; }
+.foe { width: 120px; height: 120px; right: 12px; top: 8px; }
+.me { width: 104px; height: 104px; left: 12px; bottom: 0; }
+.ground.foe-g { top: 116px; right: 20px; width: 104px; height: 18px; }
+.ground.me-g { left: 8px; bottom: -3px; width: 112px; height: 18px; }
+.class-portrait { width: 112px; height: 112px; }
+.trainer-card { padding-left: 92px; }
+.trainer-card .sprite { width: 80px; height: 80px; left: 6px; top: 15px; }
+.dealer { background: transparent; border: 0; width: 112px; height: 112px; margin-top: 6px; }
+
+#playerFeedback label { display:block; margin:14px 0; line-height:1.7; }
+#playerFeedback select, #playerFeedback textarea { display:block; width:100%; max-width:100%; min-height:44px; margin-top:6px; padding:8px; font:16px/1.5 system-ui,sans-serif; color:#14121c; background:#fff; border:2px solid #4a4468; }
+#feedbackEmail { display:inline-block; padding:12px 0; }

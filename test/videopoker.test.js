@@ -136,3 +136,17 @@ test('card labels render for a dealt hand', () => {
   const round = newRound(seededRng(15));
   assert.equal(round.hand.length, cardLabel(round.hand[0]).length > 0 ? 5 : 0);
 });
+// Published teaching examples must agree with the exhaustive simulator analysis.
+test('public three-hand guide recommends the optimal exact holds', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const { SUIT_GLYPH } = await import('../src/cards.js');
+  const guide = await readFile(new URL('../public/guides/jacks-or-better/index.html', import.meta.url), 'utf8');
+  const hands = [...guide.matchAll(/class="hand"[^>]*>([^<]+)</g)].map(match =>
+    match[1].split(' ').map(label => ({
+      r: ({ J: 11, Q: 12, K: 13, A: 14 })[label.slice(0, -1)] ?? Number(label.slice(0, -1)),
+      s: SUIT_GLYPH.indexOf(label.slice(-1)),
+    })));
+  assert.equal(hands.length, 3);
+  const expected = [[true,true,false,false,false], [true,true,false,false,false], [true,true,true,true,false]];
+  hands.forEach((hand, i) => assert.deepEqual(bestHold(hand).holds, expected[i]));
+});
