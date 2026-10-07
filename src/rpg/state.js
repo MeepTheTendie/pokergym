@@ -41,8 +41,15 @@ export function createProfile(classId) {
   };
 }
 
-export function applyResult(state, { optimal, difficulty = 1, payout = 0 }) {
+export function applyResult(state, { optimal, difficulty = 1, payout = 0, game = null }) {
   const next = { ...state, stats: { ...state.stats } };
+  if (GYMS.some(g => g.game === game)) {
+    const previous = state.practice?.[game] ?? { played: 0, optimal: 0 };
+    next.practice = { ...state.practice, [game]: {
+      played: previous.played + 1,
+      optimal: previous.optimal + (optimal ? 1 : 0),
+    } };
+  }
   next.handsPlayed++;
   if (!optimal) {
     next.chips = Math.max(0, next.chips - Math.min(next.chips, 25));
@@ -61,6 +68,16 @@ export function applyResult(state, { optimal, difficulty = 1, payout = 0 }) {
   return { profile: next, gained, leveled: after > before, level: after };
 }
 
+export function practiceSummary(profile) {
+  return GYMS.map(gym => {
+    const counts = profile?.practice?.[gym.game];
+    const played = counts?.played ?? 0;
+    const optimal = counts?.optimal ?? 0;
+    return { game: gym.game, name: gym.name, played, optimal,
+      accuracy: played ? Math.round(optimal / played * 100) : null };
+  });
+}
+
 export function awardBadge(state, gymId) {
   const gym = GYM_BY_ID[gymId];
   if (!gym) throw new Error(`unknown gym: ${gymId}`);
@@ -73,6 +90,10 @@ export function awardBadge(state, gymId) {
 
 export function canBattle(state, gymId) {
   return Boolean(state) && !state.badges.includes(gymId) && isUnlocked(gymId, state.badges);
+}
+
+export function canPractice(state, gymId) {
+  return Boolean(state) && Boolean(GYM_BY_ID[gymId]) && state.badges.includes(gymId);
 }
 
 export function handDifficulty(result) {
@@ -94,4 +115,60 @@ export function deserialize(raw) {
   } catch {
     return null;
   }
+}
+
+// Keep review local and bounded; old saves acquire a notebook on their first mistake.
+export function recordMistake(profile, { game, situation, chosen, correction, quiz }) {
+  if (!GYMS.some(g => g.game === game)) return profile;
+  if (![situation, chosen, correction].every(value => typeof value === 'string' && value.trim())) return profile;
+  const entry = { game, situation: situation.slice(0, 600), chosen: chosen.slice(0, 600), correction: correction.slice(0, 1200) };
+  if (game === "blackjack" && validMistakeQuiz(quiz)) entry.quiz = { choices: [...quiz.choices], optimal: [...quiz.optimal] };
+  return { ...profile, mistakes: [entry, ...(profile.mistakes ?? [])].slice(0, 20) };
+}
+
+// Self-reported recall is separate from scored gameplay accuracy and rewards.
+export function markMistakeReviewed(profile, index) {
+  if (!Number.isInteger(index) || !profile.mistakes?.[index]) return profile;
+  return { ...profile, mistakes: profile.mistakes.map((entry, i) =>
+    i === index ? { ...entry, reviews: (entry.reviews ?? 0) + 1 } : entry) };
+}
+
+// Short sessions reuse real gameplay scoring. History is local, not customer analytics.
+export const SESSION_HANDS = 5;
+export function canTrain(profile, gymId) {
+  return Boolean(profile) && Boolean(GYM_BY_ID[gymId]);
+}
+export function beginSession(profile, gymId, now = new Date().toISOString()) {
+  if (!canTrain(profile, gymId)) return profile;
+  if (profile.activeSession) return profile;
+  return { ...profile, activeSession: { gymId, played: 0, optimal: 0, startedAt: now } };
+}
+export function scoreSession(profile, optimal, now = new Date().toISOString()) {
+  if (!profile.activeSession) return profile;
+  const session = { ...profile.activeSession,
+    played: profile.activeSession.played + 1,
+    optimal: profile.activeSession.optimal + (optimal ? 1 : 0) };
+  if (session.played < SESSION_HANDS) return { ...profile, activeSession: session };
+  return { ...profile, activeSession: null,
+    sessions: [{ ...session, completedAt: now }, ...(profile.sessions ?? [])].slice(0, 30) };
+}
+
+// Answer keys are captured from the original coach decision, never inferred from text.
+export function validMistakeQuiz(quiz) {
+  const actions = ['hit', 'stand', 'double', 'split'];
+  return Boolean(quiz && Array.isArray(quiz.choices) && quiz.choices.length >= 2 &&
+    quiz.choices.length <= 4 && new Set(quiz.choices).size === quiz.choices.length &&
+    quiz.choices.every(a => actions.includes(a)) && Array.isArray(quiz.optimal) &&
+    quiz.optimal.length > 0 && quiz.optimal.length <= quiz.choices.length &&
+    new Set(quiz.optimal).size === quiz.optimal.length && quiz.optimal.every(a => quiz.choices.includes(a)));
+}
+export function answerMistakeQuiz(profile, index, action) {
+  if (!Number.isInteger(index)) return profile;
+  const entry = profile.mistakes?.[index];
+  if (entry?.game !== 'blackjack' || !validMistakeQuiz(entry.quiz) || !entry.quiz.choices.includes(action)) return profile;
+  const previous = entry.retries ?? { attempted: 0, correct: 0 };
+  return { ...profile, mistakes: profile.mistakes.map((m, i) => i === index ? {
+    ...m, retries: { attempted: previous.attempted + 1,
+      correct: previous.correct + (entry.quiz.optimal.includes(action) ? 1 : 0) },
+  } : m) };
 }

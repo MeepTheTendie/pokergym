@@ -1,3 +1,5 @@
+import { readBackup, writeBackup } from '../src/rpg/backup.js';
+import { feedbackDraft } from './feedback.js';
 import { SUIT_GLYPH, SUIT_NAME, rankLabel, cardLabel } from '../src/cards.js';
 import { CATEGORY_LABEL, evaluate5 } from '../src/evaluate.js';
 import {
@@ -17,11 +19,12 @@ import { CLASSES, CLASS_BY_ID, STAT_LABEL } from '../src/rpg/classes.js';
 import { GYMS, GYM_BY_ID, gymForClass } from '../src/rpg/gyms.js';
 import { lessonFor, hasCompletedLesson, markLessonDone } from '../src/rpg/lessons.js';
 import {
-  createProfile, applyResult, awardBadge, canBattle, levelFromXp,
-  serialize, deserialize, handDifficulty,
+  createProfile, applyResult, awardBadge, canBattle, canPractice, canTrain, levelFromXp,
+  serialize, deserialize, handDifficulty, practiceSummary, recordMistake, markMistakeReviewed, validMistakeQuiz, answerMistakeQuiz, beginSession, scoreSession, SESSION_HANDS,
 } from '../src/rpg/state.js';
-import { drawArt } from './sprites.js';
-import audio from './audio.js';
+import { drawArt, drawTrainerBack } from './characters.js';
+import audio from './audio.js?v=20261006-audio3';
+import { drawWorld } from './world.js';
 
 const SAVE_KEY = 'pokergym:save:v1';
 const HANDS_TO_WIN = 10;
@@ -37,11 +40,21 @@ const HAND_TITLE = {
   baccarat: 'THE SHOE',
   holdem: 'THE TABLE',
 };
+const TRAINING_LABEL = {
+  videopoker: 'JACKS OR BETTER', blackjack: 'BLACKJACK',
+  baccarat: 'BACCARAT', holdem: 'HOLD’EM HAND EVALUATION',
+};
 
 const el = (id) => document.getElementById(id);
 const fmt = (n) => Number(n).toLocaleString('en-US');
 
-let profile = deserialize(localStorage.getItem(SAVE_KEY));
+function storageWarning() {
+  el('saveStatus').hidden = false;
+  el('saveStatus').textContent = 'PROGRESS IS NOT SAVING. Browser storage is blocked or full. You can still practise in this tab. Prepare a backup below before closing or reloading; open the standalone game if embedded storage is blocked.';
+}
+let profile = null;
+try { profile = deserialize(localStorage.getItem(SAVE_KEY)); }
+catch { storageWarning(); }
 let pendingClass = null;
 let round = null;
 let advice = null;
@@ -52,31 +65,73 @@ let picked = new Set(); // hold'em: indices into round.hand7
 let handsWon = 0;
 let handsAtGym = 0;
 let awaitingBadge = false;
+let shortSession = false;
 
 function save() {
-  if (profile) localStorage.setItem(SAVE_KEY, serialize(profile));
+  if (!profile) return;
+  try {
+    localStorage.setItem(SAVE_KEY, serialize(profile));
+    el('saveStatus').hidden = true;
+  } catch { storageWarning(); }
 }
+
+let pendingRestore = null;
+el('btnBackup').onclick = () => {
+  pendingRestore = null;
+  el('btnConfirmRestore').hidden = true;
+  try {
+    if (!profile) throw new Error('No save');
+    el('backupText').value = writeBackup(profile);
+    el('backupText').focus(); el('backupText').select();
+    el('backupStatus').textContent = 'BACKUP PREPARED. COPY THIS TEXT INTO A PRIVATE NOTE. NOTHING UPLOADED.';
+  } catch { el('backupStatus').textContent = 'NO VALID PROGRESS TO BACK UP.'; }
+};
+el('backupText').oninput = () => { pendingRestore = null; el('btnConfirmRestore').hidden = true; };
+el('btnRestore').onclick = () => {
+  pendingRestore = null;
+  el('btnConfirmRestore').hidden = true;
+  try {
+    pendingRestore = readBackup(el('backupText').value);
+    el('backupStatus').textContent = `VALID BACKUP: ${CLASS_BY_ID[pendingRestore.classId].name}, ${pendingRestore.handsPlayed} HANDS, ${pendingRestore.badges.length} BADGES. CONFIRM TO REPLACE LOCAL PROGRESS.`;
+    el('btnConfirmRestore').hidden = false;
+  } catch { el('backupStatus').textContent = 'INVALID OR UNSUPPORTED BACKUP. YOUR PROGRESS IS UNCHANGED.'; }
+};
+el('btnConfirmRestore').onclick = () => {
+  if (!pendingRestore) return;
+  try {
+    // Persist successfully before replacing the in-memory profile.
+    localStorage.setItem(SAVE_KEY, serialize(pendingRestore));
+    el('saveStatus').hidden = true;
+    profile = pendingRestore; pendingRestore = null; round = null; shortSession = false;
+    el('btnConfirmRestore').hidden = true;
+    el('btnContinue').disabled = false;
+    renderMap(); show('scr-map');
+    el('backupStatus').textContent = 'PROGRESS RESTORED ON THIS BROWSER. NOTHING UPLOADED.';
+  } catch { el('backupStatus').textContent = 'RESTORE FAILED. BROWSER STORAGE MAY BE FULL OR BLOCKED.'; }
+};
 
 /* Music follows the screen: title and class select get the fanfare, the map
  * and lessons share the quiet overworld loop, and each gym has its own battle
  * theme. Nothing actually starts until the first click, because browsers will
  * not let an AudioContext run before a user gesture. */
 const BATTLE_THEME = {
-  pokergym: 'battle1',
-  countyfair: 'battle2',
-  villaoak: 'battle3',
-  riverstone: 'battle4',
+  pokergym: 'gamecorner',
+  countyfair: 'gamecorner',
+  villaoak: 'gamecorner',
+  riverstone: 'gamecorner',
 };
 const AMBIENT = {
-  'scr-title': 'title',
-  'scr-class': 'title',
-  'scr-map': 'map',
-  'scr-lesson': 'map',
+  'scr-title': 'gamecorner',
+  'scr-class': 'gamecorner',
+  'scr-map': 'gamecorner',
+  'scr-lesson': 'gamecorner',
 };
 
 function show(id) {
   for (const s of document.querySelectorAll('.screen')) s.hidden = true;
   el(id).hidden = false;
+  el('btnMap').hidden = !['scr-battle', 'scr-lesson', 'scr-class'].includes(id) || !profile;
+  window.scrollTo(0, 0);
   audio.music(AMBIENT[id] ?? (id === 'scr-battle' ? (BATTLE_THEME[gymId] ?? null) : null));
 }
 
@@ -106,7 +161,8 @@ function renderSprite(profileOrClass) {
   // lesson portrait are drawn from the gym's dealer instead.
   for (const canvasId of ['sprite', 'battleSprite']) {
     const canvas = el(canvasId);
-    if (canvas) drawSprite(canvas, idx);
+    if (canvasId === 'battleSprite') drawTrainerBack(canvas, id);
+    else if (canvas) drawSprite(canvas, idx);
   }
 }
 
@@ -129,35 +185,15 @@ function applyPalette(classId) {
  * context opens on the first click or keypress and any track show() already
  * asked for begins then. The switch itself is persisted next to the save.
  */
-const btnSound = el('btnSound');
-
-function renderSound() {
-  const on = !audio.isMuted();
-  btnSound.textContent = on ? 'SND ON' : 'SND OFF';
-  btnSound.setAttribute('aria-pressed', String(on));
-}
-
-btnSound.onclick = () => {
-  audio.toggleMute();
-  renderSound();
-};
-
-for (const ev of ['pointerdown', 'keydown']) {
-  window.addEventListener(ev, () => audio.unlock(), { capture: true, passive: true });
-}
-
-/* Every button ticks, except the one that is about the ticking. */
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest?.('button');
-  if (!btn || btn.id === 'btnSound') return;
-  audio.sfx(btn.classList.contains('primary') ? 'confirm' : 'blip');
-});
-
-renderSound();
+// Sound controls initialize in sound-controls.js, before the atlas is ready.
+drawWorld(el('titleWorld'), true);
+drawWorld(el('mapWorld'));
+el('btnMap').onclick = () => { renderMap(); show('scr-map'); };
 
 /* ---------------- title ---------------- */
 function initTitle() {
   el('btnContinue').disabled = !profile;
+  drawArt(el('titleTrainer'), profile?.classId ?? 'grinder');
   applyPalette(profile?.classId ?? null);
   show('scr-title');
 }
@@ -180,6 +216,11 @@ function renderClassSelect() {
     card.type = 'button';
     card.setAttribute('aria-pressed', String(pendingClass === cls.id));
     card.innerHTML = `<span class="nm">${cls.name}</span><span class="bl">${gym.name}<br>${cls.blurb}</span>`;
+    const portrait = document.createElement('canvas');
+    portrait.width = portrait.height = 48;
+    portrait.className = 'class-portrait';
+    drawArt(portrait, cls.id);
+    card.prepend(portrait);
     card.onclick = () => { pendingClass = cls.id; applyPalette(cls.id); renderClassSelect(); showClassDetail(cls); };
     grid.appendChild(card);
   }
@@ -222,9 +263,45 @@ el('btnBecome').onclick = () => {
   show('scr-map');
 };
 
+el('btnShare').hidden = typeof navigator.share !== 'function';
+el('btnShare').onclick = async () => {
+  try {
+    await navigator.share({ title: 'Poker Gym — free training demo', text: el('sharePreview').value });
+    el('shareStatus').textContent = 'Share options closed. Delivery is handled by your chosen app.';
+  } catch (error) {
+    el('shareStatus').textContent = error.name === 'AbortError'
+      ? 'Sharing canceled. Nothing sent by Poker Gym.'
+      : 'Share options unavailable. Copy the invitation or select it above.';
+  }
+};
+el('btnCopyShare').onclick = async () => {
+  try {
+    await navigator.clipboard.writeText(el('sharePreview').value);
+    el('shareStatus').textContent = 'Invitation copied. Nothing sent; paste it where you choose.';
+  } catch {
+    el('sharePreview').focus();
+    el('sharePreview').select();
+    el('shareStatus').textContent = 'Copy unavailable. Invitation selected; use your device’s Copy command. Nothing sent.';
+  }
+};
+
+el('feedbackForm').onsubmit = event => {
+  event.preventDefault();
+  const draft = feedbackDraft({
+    clarity: el('feedbackClarity').value,
+    returnInterest: el('feedbackReturn').value,
+    priceInterest: el('feedbackPrice').value,
+    note: el('feedbackNote').value,
+  });
+  el('feedbackPreview').value = draft.body;
+  el('feedbackEmail').href = draft.href;
+  el('feedbackDraft').hidden = false;
+};
+
 /* ---------------- map ---------------- */
 function renderMap() {
   const cls = CLASS_BY_ID[profile.classId];
+  drawArt(el('mapTrainer'), profile.classId);
   const lvl = levelFromXp(profile.xp);
   renderSprite(profile);
 
@@ -234,6 +311,115 @@ function renderMap() {
   el('xpBar').style.width = `${Math.round((lvl.into / lvl.needed) * 100)}%`;
   el('xpLine').textContent = `XP ${fmt(lvl.into)} / ${fmt(lvl.needed)}`;
   el('chipCount').textContent = fmt(profile.chips);
+  const practice = el('practiceSummary');
+  if (practice) {
+    practice.replaceChildren();
+    for (const row of practiceSummary(profile)) {
+      const item = document.createElement('p');
+      item.className = 'hint';
+      item.textContent = `${row.name}: ${row.played ? `${row.accuracy}% CORRECT · ${row.played} HANDS` : 'NO TRACKED HANDS YET'}`;
+      practice.appendChild(item);
+    }
+  }
+
+  const sessions = el('shortSessions');
+  sessions.replaceChildren();
+  if (profile.activeSession) {
+    const resume = document.createElement('button');
+    resume.id = 'btnResumeSession';
+    resume.textContent = `RESUME FIVE HANDS · ${profile.activeSession.played}/${SESSION_HANDS} DONE`;
+    resume.onclick = () => startGym(GYM_BY_ID[profile.activeSession.gymId], true);
+    sessions.append(resume);
+  } else {
+    for (const gym of GYMS.filter(g => canTrain(profile, g.id))) {
+      const button = document.createElement('button');
+      button.dataset.sessionGym = gym.id;
+      button.textContent = `FIVE HANDS · ${TRAINING_LABEL[gym.game]}`;
+      button.onclick = () => { profile = beginSession(profile, gym.id); save(); startGym(gym, true); };
+      sessions.append(button);
+    }
+  }
+  for (const session of (profile.sessions ?? []).slice(0, 7)) {
+    const result = document.createElement('p');
+    result.className = 'hint';
+    result.textContent = `${session.completedAt.slice(0, 10)} · ${GYM_BY_ID[session.gymId].name} · ${session.optimal}/${SESSION_HANDS} CORRECT`;
+    sessions.append(result);
+  }
+
+  el('playerFeedback').hidden = !(profile.sessions?.length);
+  el('playerShare').hidden = !(profile.sessions?.length);
+
+  const notebook = el('mistakeReview');
+  if (notebook) {
+    notebook.replaceChildren();
+    for (const [index, mistake] of (profile.mistakes ?? []).entries()) {
+      const entry = document.createElement('details');
+      const title = document.createElement('summary');
+      title.textContent = `${GYMS.find(g => g.game === mistake.game)?.name ?? mistake.game}: ${mistake.situation}`;
+      entry.appendChild(title);
+      const play = document.createElement('p');
+      play.textContent = `YOUR PLAY: ${mistake.chosen}`;
+      const prompt = document.createElement('p');
+      prompt.textContent = 'WHAT WOULD YOU DO NEXT TIME? RECALL THE BETTER PLAY BEFORE REVEALING.';
+      const answer = document.createElement('p');
+      answer.textContent = `COACH: ${mistake.correction}`;
+      answer.hidden = true;
+      const reveal = document.createElement('button');
+      reveal.textContent = 'REVEAL COACH ANSWER';
+      const reviewed = document.createElement('button');
+      reviewed.textContent = 'I REVIEWED THIS';
+      reviewed.hidden = true;
+      const count = document.createElement('p');
+      count.textContent = `REVIEWED ${mistake.reviews ?? 0} TIMES · SELF CHECK, NO XP`;
+      reveal.onclick = () => { answer.hidden = false; reviewed.hidden = false; reveal.hidden = true; };
+      reviewed.onclick = () => {
+        profile = markMistakeReviewed(profile, index);
+        save();
+        count.textContent = `REVIEWED ${profile.mistakes[index].reviews} TIMES · SELF CHECK, NO XP`;
+        reviewed.disabled = true;
+        reviewed.textContent = 'REVIEW SAVED';
+      };
+      entry.append(play, prompt, reveal, answer, reviewed, count);
+      if (mistake.game === 'blackjack' && validMistakeQuiz(mistake.quiz)) {
+        prompt.textContent = 'RETRY THIS ORIGINAL DECISION BEFORE REVEALING. ONE SCORED ANSWER PER VISIT; NO XP OR CHIP REWARDS.';
+        const choices = document.createElement('div');
+        choices.className = 'mistake-choices';
+        const result = document.createElement('p');
+        result.setAttribute('aria-live', 'polite');
+        const retryCount = () => {
+          const retries = profile.mistakes[index].retries;
+          return `RETRIES: ${retries?.correct ?? 0}/${retries?.attempted ?? 0} CORRECT · SEPARATE FROM GAME ACCURACY`;
+        };
+        result.textContent = retryCount();
+        let answered = false;
+        for (const action of mistake.quiz.choices) {
+          const button = document.createElement('button');
+          button.textContent = ACTION_LABEL[action];
+          button.dataset.retryAction = action;
+          button.onclick = () => {
+            if (answered) return;
+            answered = true;
+            profile = answerMistakeQuiz(profile, index, action);
+            save();
+            result.textContent = `${mistake.quiz.optimal.includes(action) ? 'CORRECT' : 'TRY THE COACH PLAY NEXT VISIT'}. ${retryCount()}`;
+            for (const choice of choices.children) choice.disabled = true;
+            answer.hidden = false; reveal.hidden = true; reviewed.hidden = false;
+          };
+          choices.appendChild(button);
+        }
+        reveal.onclick = () => {
+          answered = true;
+          for (const choice of choices.children) choice.disabled = true;
+          result.textContent = `ANSWER REVEALED WITHOUT SCORING. ${retryCount()}`;
+          answer.hidden = false; reviewed.hidden = false; reveal.hidden = true;
+        };
+        entry.insertBefore(choices, reveal);
+        entry.appendChild(result);
+      }
+      notebook.appendChild(entry);
+    }
+    if (!profile.mistakes?.length) notebook.textContent = 'NO SAVED MISTAKES YET. MISSED DECISIONS WILL APPEAR HERE.';
+  }
 
   const badges = el('badgeList');
   badges.innerHTML = '';
@@ -250,22 +436,25 @@ function renderMap() {
   list.innerHTML = '';
   for (const gym of GYMS) {
     const cleared = profile.badges.includes(gym.id);
-    const open = canBattle(profile, gym.id);
+    const open = canBattle(profile, gym.id) || canPractice(profile, gym.id);
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = open ? 'primary' : '';
-    btn.style.width = '100%';
-    btn.style.marginBottom = '8px';
+    btn.dataset.gym = gym.id;
     btn.disabled = !open;
-    btn.innerHTML = `${gym.name}<br><span style="font-weight:400; font-size:9px;">${
-      cleared ? 'BADGE EARNED' : open ? gym.leaderTitle : 'LOCKED'
-    }</span>`;
+    btn.innerHTML = `<span>${gym.name.replace(' GYM', '')}</span><small>${
+      cleared ? '✓ BADGE EARNED · PRACTICE' : open ? '▶ ENTER GYM' : 'LOCKED'
+    }</small>`;
     btn.onclick = () => startGym(gym);
     list.appendChild(btn);
   }
 }
 
-function startGym(gym) {
+function startGym(gym, sprint = false) {
+  if (sprint) {
+    if (!canTrain(profile, gym.id) || profile.activeSession?.gymId !== gym.id) return;
+  } else if (!canBattle(profile, gym.id) && !canPractice(profile, gym.id)) return;
+  shortSession = sprint;
   gymId = gym.id;
   gameId = gym.game;
   handsWon = 0;
@@ -680,25 +869,40 @@ function startHand() {
 
   renderBattle();
   audio.sfx('deal');
+  const instructions = {
+    videopoker: 'Tap cards to hold or discard. DRAW plays your hand. Ask me if you need a hint.',
+    blackjack: 'Read your hand and mine. Choose your next move, or ask me for a hint.',
+    baccarat: 'Choose BANKER, PLAYER, or TIE. Ask me to compare the odds before you bet.',
+    holdem: 'Tap your best five cards, then CONFIRM 5. Ask me if you need a hint.',
+  };
+  const message = el('masterLine');
+  clearInterval(message._typer);
+  message._typer = null;
+  message.textContent = instructions[gameId];
+  el('masterPrompt').hidden = true;
+  document.querySelector('.battle-label').textContent = shortSession ? `FIVE HANDS · ${profile.activeSession.played}/${SESSION_HANDS} DONE` : `${canPractice(profile, gymId) ? 'PRACTICE' : 'GYM CHALLENGE'} · ${handsWon}/${HANDS_TO_WIN} GOOD PLAYS`;
 
   // A natural settles before anybody gets to touch anything.
   if (gameId === 'blackjack' && round.settled) settleBlackjack();
 }
 
-function settleHand({ optimal, difficulty, payout, line }) {
+function settleHand({ optimal, difficulty, payout, line, review }) {
+  if (handDone) return;
   handDone = true;
   handsAtGym++;
 
   // The XP contract: correctness alone decides XP, difficulty scales it, and
   // payout only moves chips. A losing hand played correctly still pays in full.
-  const applied = applyResult(profile, { optimal, difficulty, payout });
+  const applied = applyResult(profile, { optimal, difficulty, payout, game: GYM_BY_ID[gymId].game });
   profile = applied.profile;
+  if (!optimal && review) profile = recordMistake(profile, { game: gameId, ...review });
   if (optimal) handsWon++;
+  if (shortSession) profile = scoreSession(profile, optimal);
   save();
 
   const gym = GYM_BY_ID[gymId];
   const rate = handsAtGym ? handsWon / handsAtGym : 0;
-  const passed = handsAtGym >= HANDS_TO_WIN && rate >= PASS_RATE;
+  const passed = !shortSession && handsAtGym >= HANDS_TO_WIN && rate >= PASS_RATE;
 
   renderBattle();
   el('battleEndRow').hidden = false;
@@ -709,7 +913,16 @@ function settleHand({ optimal, difficulty, payout, line }) {
   const gainLine = optimal ? 'YOU GAIN ' + fmt(applied.gained) + ' XP.' : 'NO XP. WRONG DECISION.';
 
   let verdict;
-  if (passed && !awaitingBadge) {
+  if (shortSession) {
+    awaitingBadge = !profile.activeSession;
+    const session = profile.activeSession ?? profile.sessions[0];
+    verdict = awaitingBadge
+      ? `FIVE HANDS COMPLETE: ${session.optimal}/${SESSION_HANDS} CORRECT. RESULT SAVED. REVIEW MISSED PLAYS ON THE MAP, THEN TELL US WHAT WOULD MAKE YOU RETURN USING THE OPTIONAL FEEDBACK ON THE MAP.`
+      : `FIVE HANDS: ${session.played}/${SESSION_HANDS} DONE. ${session.optimal} CORRECT.`;
+  } else if (passed && canPractice(profile, gym.id)) {
+    awaitingBadge = true;
+    verdict = `${gym.leader}: PRACTICE COMPLETE. YOUR BADGE IS ALREADY EARNED. COME BACK TO KEEP TRAINING!`;
+  } else if (passed && !awaitingBadge) {
     awaitingBadge = true;
     const awarded = awardBadge(profile, gym.id);
     profile = awarded.profile;
@@ -761,12 +974,18 @@ function doDraw() {
   // the panel is still the correct hold.
   const best = bestHold(round.hand);
   const optimal = best.optimal.some((pattern) => pattern.join('') === round.holds.join(''));
+  const review = {
+    situation: round.hand.map(cardLabel).join(' '),
+    chosen: 'HOLD ' + (round.hand.filter((_, i) => round.holds[i]).map(cardLabel).join(' ') || 'NONE'),
+    correction: 'HOLD ' + (round.hand.filter((_, i) => best.holds[i]).map(cardLabel).join(' ') || 'NONE') + `. Expected return ${best.ev.toFixed(3)} credits per credit bet.`,
+  };
   const heldBefore = round.holds.filter(Boolean).length;
   drawRound(round);
   settleHand({
     optimal,
     difficulty: handDifficulty(round.result),
     payout: round.payout * heldBefore,
+    review,
     line: `${round.result.label} FOR ${fmt(round.payout)} CHIPS.`,
   });
 }
@@ -776,13 +995,19 @@ function bjAct(action) {
   if (handDone || !round || round.settled) return;
   const before = bjBest(round); // grade against the state the player is deciding in
   if (!legalActions(round).includes(action)) return;
+  const review = {
+    situation: `${round.hands[round.activeHand].cards.map(cardLabel).join(' ')} AGAINST ${cardLabel(round.dealerUpcard)}`,
+    chosen: ACTION_LABEL[action],
+    quiz: { choices: legalActions(round), optimal: before.optimal ?? [before.action] },
+    correction: `${ACTION_LABEL[before.action]}. Expected return ${before.ev.toFixed(3)} per bet under this gym's rules.`,
+  };
   if (action === 'hit') bjHit(round);
   else if (action === 'stand') bjStand(round);
   else if (action === 'double') bjDouble(round);
   else if (action === 'split') bjSplit(round);
   else return;
 
-  decisions.push({ action, optimal: Boolean(before.optimal?.includes(action)) });
+  decisions.push({ action, optimal: Boolean(before.optimal?.includes(action)), review });
   advice = null;
   el('coachPanel').hidden = true;
   el('why').hidden = true;
@@ -795,6 +1020,7 @@ function settleBlackjack() {
   settleHand({
     // A round with no decision at all (a natural) cannot be played wrong.
     optimal: decisions.every((d) => d.optimal),
+    review: decisions.find(d => !d.optimal)?.review,
     // handDifficulty reads a hand category, which blackjack rounds do not have
     // (round.result is a word). The difficulty here is the decision count: the
     // more places the player had to be right, the more a correct round is worth.
@@ -810,6 +1036,7 @@ function bacBet(side) {
   round = newBacRound(Math.random, side, TABLE_BET);
   settleHand({
     optimal: side === bacBest().side,
+    review: { situation: 'STANDARD BACCARAT WITH 5% BANKER COMMISSION', chosen: side.toUpperCase(), correction: 'BANKER has the lowest house edge. It still has a negative expected return; correct play does not guarantee a win.' },
     difficulty: handDifficulty(round.result),
     payout: round.payout,
     line: round.log.join(' '),
@@ -829,6 +1056,7 @@ function heConfirm() {
   const chosen = round.hand7.filter((_, i) => picked.has(i));
   settleHand({
     optimal: playsBestFive(round.hand7, chosen),
+    review: { situation: round.hand7.map(cardLabel).join(' '), chosen: chosen.map(cardLabel).join(' '), correction: `${round.result.label}: ${round.result.cards.map(cardLabel).join(' ')}. Choose five cards for the highest ranking hand; equally ranked selections are accepted.` },
     difficulty: handDifficulty(round.result),
     payout: 0,
     line: `YOU READ THE BOARD. IT IS ${round.result.label.toUpperCase()}.`,

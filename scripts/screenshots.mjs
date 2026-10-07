@@ -46,6 +46,8 @@ await send('Page.enable');
 await send('Runtime.enable');
 
 async function shot(name) {
+  const layout = await evaluate(`({ width: innerWidth, overflow: document.documentElement.scrollWidth > innerWidth, smallTargets: [...document.querySelectorAll('.screen:not([hidden]) button:not(:disabled), .topbar button:not([hidden])')].filter(b => b.getClientRects().length && b.getBoundingClientRect().height < 44).map(b => b.id || b.textContent) })`);
+  if (layout.overflow || layout.smallTargets.length) throw new Error('Mobile layout failure: ' + JSON.stringify(layout));
   const s = await send('Page.captureScreenshot', { format: 'png' });
   writeFileSync(new URL(`../web/shot-${name}.png`, import.meta.url), Buffer.from(s.data, 'base64'));
   console.log('wrote web/shot-' + name + '.png');
@@ -83,6 +85,30 @@ async function enterGym(index) {
 await send('Page.navigate', { url: BASE });
 await sleep(1200);
 await evaluate('document.fonts.ready');
+// Exercise actual synthesis: a valid score can still render silence or clip.
+const audioCheck = await evaluate(`(async () => {
+  const source = await (await fetch('audio.js')).text();
+  const probe = source + '\\nexport async function renderProbe() {' +
+    'ctx = new OfflineAudioContext(1, 44100 * 15, 44100);' +
+    'musicBus = ctx.createGain(); musicBus.gain.value = 0.42; musicBus.connect(ctx.destination); makeNoise();' +
+    'const score = SONGS.gamecorner; const data = compile(score); if(data.error) throw new Error(data.error);' +
+    'const sps = 60 / score.bpm / 4;' +
+    'for(const [step, events] of data.at) for(const ev of events) fire(ev, step * sps, sps, data.gain, score.voices);' +
+    'const buffer = await ctx.startRendering(); const samples = buffer.getChannelData(0);' +
+    'let peak = 0, sum = 0; for(const v of samples){if(!Number.isFinite(v)) throw new Error("Nonfinite audio"); peak = Math.max(peak, Math.abs(v)); sum += v*v;}' +
+    'return {peak, rms: Math.sqrt(sum/samples.length), loopSeconds: data.total*sps}; }';
+  const url = URL.createObjectURL(new Blob([probe], {type: 'text/javascript'}));
+  try { const module = await import(url); return await module.renderProbe(); }
+  finally { URL.revokeObjectURL(url); }
+})()`);
+if (audioCheck.peak >= 1 || audioCheck.rms < 0.005) throw new Error('Audio render failed: ' + JSON.stringify(audioCheck));
+console.log('gamecorner audio render:', JSON.stringify(audioCheck));
+for (const width of [320, 360, 393, 440]) {
+  await send('Emulation.setDeviceMetricsOverride', { width, height: 820, deviceScaleFactor: 2, mobile: true });
+  const overflow = await evaluate('document.documentElement.scrollWidth > innerWidth');
+  if (overflow) throw new Error('Title overflows at ' + width);
+}
+await send('Emulation.setDeviceMetricsOverride', { width: 393, height: 852, deviceScaleFactor: 2, mobile: true });
 await shot('title');
 
 await evaluate('document.getElementById("btnNew").click()');

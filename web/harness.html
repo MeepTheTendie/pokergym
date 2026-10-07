@@ -23,6 +23,10 @@ f.addEventListener('load', () => run(), { once: true });
 
 async function run() {
   const w = f.contentWindow, d = f.contentDocument;
+  // Sprite decoding is asynchronous; iframe load may precede module setup.
+  for (let i = 0; i < 100 && !d.getElementById('btnNew').onclick; i++) {
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
   w.addEventListener('error', (e) => { errors.push(e.message); log('APP ERROR: ' + e.message); });
   w.addEventListener('unhandledrejection', (e) => { errors.push(String(e.reason)); log('APP REJECT: ' + e.reason); });
 
@@ -36,7 +40,7 @@ async function run() {
   const dealerSigs = [];
   function sampleDealer(game) {
     const ctx = $('lessonDealer').getContext('2d');
-    const data = ctx.getImageData(0, 0, 48, 48).data;
+    const data = ctx.getImageData(0, 0, $('lessonDealer').width, $('lessonDealer').height).data;
     let painted = 0, hash = 0;
     for (let i = 0; i < data.length; i += 4) {
       if (data[i + 3] > 0) painted++;
@@ -304,6 +308,10 @@ async function run() {
   log('lessons done: ' + JSON.stringify(end.lessonsDone));
   log('gym buttons enabled: '
     + [...$('gymList').querySelectorAll('button')].map((b) => !b.disabled).join(','));
+  if ([...$('gymList').querySelectorAll('button')].some(b => b.disabled)) errors.push('earned gyms must remain available for practice');
+  for (const game of ['videopoker', 'blackjack', 'baccarat', 'holdem']) {
+    if (end.practice?.[game]?.played !== 10) errors.push('expected 10 tracked practice hands for ' + game);
+  }
 
   if (end.badges.length !== 4) errors.push('expected all four badges, got ' + JSON.stringify(end.badges));
   if (end.lessonsDone.length !== 4) errors.push('expected all four lessons, got ' + JSON.stringify(end.lessonsDone));
@@ -328,6 +336,11 @@ async function run() {
   await wait(40);
   log('resumed trainer: ' + d2.getElementById('trainerLine').textContent);
   log('resumed badges locked: ' + d2.querySelectorAll('#badgeList .badge.locked').length);
+  const mapPixels = d2.getElementById('mapTrainer').getContext('2d').getImageData(0,0,96,96).data;
+  const trainerPixels = d2.getElementById('sprite').getContext('2d').getImageData(0,0,96,96).data;
+  if (!mapPixels.every((pixel, i) => pixel === trainerPixels[i])) errors.push('Map trainer does not match selected trainer');
+  const resumedAudio = (await f.contentWindow.eval("import('./audio.js?v=20261006-audio3')")).default;
+  if (resumedAudio.status().track !== 'gamecorner') errors.push('Continue selected the wrong soundtrack');
 
   log('\n--- fonts + palette ---');
   const live = f.contentDocument;
