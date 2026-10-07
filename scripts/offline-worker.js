@@ -5,15 +5,17 @@ self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
     await cache.addAll(ASSETS.map(asset => new Request(asset, { cache: 'reload' })));
-    // Cloud hosting redirects index.html to /web/. Store a plain HTML response
-    // so an offline navigation does not need to follow that network redirect.
-    const html = await cache.match('/web/index.html');
-    const headers = new Headers(html.headers);
-    headers.delete('content-encoding');
-    headers.delete('content-length');
-    await cache.put('/web/index.html', new Response(await html.arrayBuffer(), {
-      status: html.status, statusText: html.statusText, headers,
-    }));
+    // Cloud hosting canonicalizes HTML URLs. Store plain responses so cached
+    // document navigation does not require or inherit a network redirect.
+    for (const asset of ASSETS.filter(asset => asset.endsWith('.html'))) {
+      const html = await cache.match(asset);
+      const headers = new Headers(html.headers);
+      headers.delete('content-encoding');
+      headers.delete('content-length');
+      await cache.put(asset, new Response(await html.arrayBuffer(), {
+        status: html.status, statusText: html.statusText, headers,
+      }));
+    }
   })());
   // Updates wait until existing game tabs close, avoiding mixed game versions.
 });
@@ -30,7 +32,8 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET' || url.origin !== self.location.origin) return;
   const asset = event.request.mode === 'navigate' &&
     (url.pathname === '/web/' || url.pathname === '/web/index.html')
-    ? '/web/index.html' : url.pathname;
+    ? '/web/index.html'
+    : url.pathname === '/web/privacy' ? '/web/privacy.html' : url.pathname;
   if (!ASSETS.includes(asset)) return;
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);

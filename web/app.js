@@ -66,6 +66,7 @@ let handsWon = 0;
 let handsAtGym = 0;
 let awaitingBadge = false;
 let shortSession = false;
+let requestedGym = GYMS.find(gym => gym.game === new URLSearchParams(location.search).get('practice')) ?? null;
 
 function save() {
   if (!profile) return;
@@ -193,11 +194,30 @@ el('btnMap').onclick = () => { renderMap(); show('scr-map'); };
 /* ---------------- title ---------------- */
 function initTitle() {
   el('btnContinue').disabled = !profile;
+  const invitation = el('practiceInvitation');
+  invitation.hidden = !requestedGym;
+  if (requestedGym) {
+    const unfinished = profile?.activeSession;
+    invitation.textContent = unfinished && unfinished.gymId !== requestedGym.id
+      ? `YOUR UNFINISHED ${TRAINING_LABEL[GYM_BY_ID[unfinished.gymId].game]} SESSION WILL RESUME FIRST. ALL FOUR GAMES ARE AVAILABLE ON THE MAP.`
+      : `FIVE-HAND ${TRAINING_LABEL[requestedGym.game]} PRACTICE. CHOOSE A TRAINER OR CONTINUE YOUR SAVE TO START.`;
+  }
   drawArt(el('titleTrainer'), profile?.classId ?? 'grinder');
   applyPalette(profile?.classId ?? null);
   show('scr-title');
 }
-el('btnContinue').onclick = () => { renderMap(); show('scr-map'); };
+function enterTraining() {
+  if (requestedGym) {
+    const gym = GYM_BY_ID[profile.activeSession?.gymId] ?? requestedGym;
+    requestedGym = null;
+    profile = beginSession(profile, gym.id);
+    save();
+    startGym(gym, true);
+    return;
+  }
+  renderMap(); show('scr-map');
+}
+el('btnContinue').onclick = enterTraining;
 el('btnNew').onclick = () => {
   pendingClass = null;
   applyPalette(profile?.classId ?? null);
@@ -259,8 +279,7 @@ el('btnBecome').onclick = () => {
   profile.createdAt = new Date().toISOString();
   save();
   applyPalette(pendingClass);
-  renderMap();
-  show('scr-map');
+  enterTraining();
 };
 
 el('btnShare').hidden = typeof navigator.share !== 'function';

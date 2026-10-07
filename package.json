@@ -14,6 +14,7 @@
     "build:itch": "node scripts/build-itch.mjs",
     "test:itch:cross-site": "POKERGYM_CROSS_SITE_TEST=1 node scripts/itch-browser-test.mjs",
     "test:itch": "node scripts/itch-browser-test.mjs",
+    "test:installability": "node scripts/installability-browser-test.mjs",
     "test:offline": "POKERGYM_OFFLINE_TEST=1 node scripts/itch-browser-test.mjs",
     "test:storage:denied": "POKERGYM_STORAGE_TEST=denied node scripts/itch-browser-test.mjs",
     "test:storage:quota": "POKERGYM_STORAGE_TEST=quota node scripts/itch-browser-test.mjs"

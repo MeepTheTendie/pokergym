@@ -100,13 +100,41 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     await guideEval('document.querySelector("summary").click()');
     assert.equal(await guideEval('document.querySelector("details").open'), true, 'Native answer disclosure works');
     assert.equal(await guideEval('document.querySelector(".cta").pathname'), '/web/', 'Guide links to playable demo');
-    console.log(`PASS: ${guide} guide loads at 390px, three hidden answers, reveal, no overflow and playable CTA.`);
+    const targetGame = guide === 'blackjack' ? 'blackjack' : 'videopoker';
+    assert.equal(await guideEval('new URL(document.querySelector(".cta").href).searchParams.get("practice")'), targetGame);
+    await guideEval('localStorage.clear(); document.querySelector(".cta").click()');
+    for (let i = 0; i < 100; i++) {
+      if (await guideEval('Boolean(document.getElementById("btnNew")?.onclick) && !document.getElementById("practiceInvitation").hidden')) break;
+      await sleep(100);
+    }
+    assert.equal(await guideEval('document.getElementById("practiceInvitation").hidden'), false, 'Selected training is explained before starting');
+    await guideEval('document.getElementById("btnNew").click(); document.querySelector(".class-card").click(); document.getElementById("btnBecome").click()');
+    assert.equal(await guideEval('document.getElementById("scr-lesson").hidden'), false, 'Guide starts its own lesson after trainer selection');
+    const expectedGym = targetGame === 'blackjack' ? 'countyfair' : 'pokergym';
+    const started = await guideEval('JSON.parse(localStorage.getItem("pokergym:save:v1"))');
+    assert.equal(started.activeSession.gymId, expectedGym);
+    assert.equal(started.activeSession.played, 0);
+    const preserved = { ...started, activeSession: { gymId: 'riverstone', played: 2, optimal: 1, startedAt: '2026-10-07T00:00:00.000Z' } };
+    await guideEval(`localStorage.setItem('pokergym:save:v1', ${JSON.stringify(JSON.stringify(preserved))}); location.reload()`);
+    for (let i = 0; i < 100; i++) {
+      if (await guideEval('Boolean(document.getElementById("btnContinue")?.onclick) && !document.getElementById("btnContinue").disabled')) break;
+      await sleep(100);
+    }
+    assert.ok(await guideEval('document.getElementById("practiceInvitation").textContent.includes("UNFINISHED")'));
+    await guideEval('document.getElementById("btnContinue").click()');
+    assert.deepEqual(await guideEval('JSON.parse(localStorage.getItem("pokergym:save:v1")).activeSession'), preserved.activeSession, 'Guide preserves and resumes another unfinished session');
+    assert.equal(await guideEval('document.getElementById("scr-lesson").hidden'), false);
+    assert.ok(await guideEval('document.documentElement.scrollWidth <= innerWidth'));
+    await guideEval('document.getElementById("btnMap").click(); document.getElementById("btnContinue").click()');
+    assert.equal(await guideEval('document.getElementById("scr-map").hidden'), false, 'Invitation consumed once; ordinary navigation remains available');
+    await guideEval('localStorage.clear()');
+    console.log(`PASS: ${guide} phone guide opens targeted five-hand lesson; unfinished other-game session is preserved and resumed.`);
     }
   }
   if (blockedStorage) await send('Page.addScriptToEvaluateOnNewDocument', { source: blockedStorage === 'denied'
     ? `window.testStorageDescriptor = Object.getOwnPropertyDescriptor(window, 'localStorage'); Object.defineProperty(window, 'localStorage', { configurable: true, get() { throw new DOMException('Blocked', 'SecurityError'); } });`
     : `window.testStorageSet = Storage.prototype.setItem; Storage.prototype.setItem = function() { throw new DOMException('Full', 'QuotaExceededError'); };` });
-  await send('Page.navigate', { url: liveUrl ? `${liveUrl}?smoke=${Date.now()}` : `http://${crossSite ? 'localhost' : '127.0.0.1'}:18997/${offlineTest || blockedStorage ? 'web/' : 'embed.html'}` });
+  await send('Page.navigate', { url: liveUrl ? `${liveUrl}?practice=unknown&smoke=${Date.now()}` : `http://${crossSite ? 'localhost' : '127.0.0.1'}:18997/${offlineTest || blockedStorage ? 'web/?practice=unknown' : 'embed.html'}` });
   async function gameContext(previousId) {
   for (let i = 0; i < 60; i++) {
       const tree = await send('Page.getFrameTree');
@@ -130,6 +158,30 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     }
     throw new Error(`Condition did not resolve: ${expression}`);
   }
+  async function checkPrivacy() {
+    assert.equal(await evaluate(`document.querySelector('a[href="privacy.html"]').target`), '_blank', 'Data guidance preserves the running game');
+    await evaluate(`(() => {
+      const frame = document.createElement('iframe');
+      frame.id = 'privacyCheck'; frame.src = 'privacy.html';
+      frame.style.cssText = 'position:fixed;inset:0;width:390px;height:600px;border:0;z-index:9999';
+      document.body.append(frame);
+    })()`);
+    await waitFor('document.getElementById("privacyCheck").contentDocument?.title === "Privacy and your data — Poker Gym"');
+    const result = await evaluate(`(() => {
+      const frame = document.getElementById('privacyCheck');
+      const doc = frame.contentDocument;
+      return { fits: doc.documentElement.scrollWidth <= frame.clientWidth,
+        returnPath: new URL(doc.querySelector('nav a').href).pathname,
+        expectedPath: new URL('index.html', document.baseURI).pathname,
+        scripts: doc.scripts.length,
+        controls: doc.body.textContent.includes('close Poker Gym tabs') && doc.body.textContent.includes('Delete any backup copies separately') };
+    })()`);
+    assert.equal(result.fits, true, 'Privacy guidance fits a 390px phone');
+    assert.equal(result.returnPath, result.expectedPath, 'Return link works on cloud and portable hosts');
+    assert.equal(result.scripts, 0, 'Privacy guidance loads without scripts');
+    assert.equal(result.controls, true, 'Local deletion and separate backup deletion are explained');
+    await evaluate('document.getElementById("privacyCheck").remove()');
+  }
   for (let i = 0; i < 60; i++) {
     if (await evaluate('Boolean(document.getElementById("btnNew")?.onclick)')) break;
     await sleep(100);
@@ -145,6 +197,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     console.log('PASS: localhost parent embeds 127.0.0.1 game in an isolated cross-site target.');
   }
   assert.equal(await evaluate('document.title'), 'POKERGYM');
+  await checkPrivacy();
   assert.ok(await evaluate('Boolean(document.getElementById("btnNew").onclick)'), `Modules loaded; runtime=${JSON.stringify(errors)}; failed requests=${JSON.stringify(failed)}`);
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), '390px embed has no horizontal overflow');
   await evaluate('document.getElementById("btnNew").click(); document.querySelector(".class-card").click(); document.getElementById("btnBecome").click()');
@@ -230,6 +283,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   await evaluate('document.getElementById("btnContinue").click()');
   assert.equal(await evaluate('document.getElementById("scr-map").hidden'), false);
   if (offlineTest) {
+    await checkPrivacy();
     await evaluate('document.querySelector("#gymList button:not(:disabled)").click(); document.getElementById("btnSkip").click(); document.getElementById("btnAsk").click()');
     assert.equal(await evaluate('document.getElementById("scr-battle").hidden'), false, 'Offline lesson, battle and coach work');
   }

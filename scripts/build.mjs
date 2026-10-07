@@ -9,7 +9,7 @@ await mkdir(path.join(output, 'web'), { recursive: true });
 // Explicit allowlist: never publish harnesses, screenshots, credentials or node_modules.
 const files = ['index.html', 'app.js', 'audio.js', 'sound-controls.js',
   'characters.js', 'world.js', 'sprites.js', 'gbc.css', 'manifest.webmanifest',
-  'icon.svg', 'icon-maskable.svg', 'offline.js', 'feedback.js'];
+  'icon.svg', 'icon-maskable.svg', 'offline.js', 'feedback.js', 'privacy.html'];
 for (const file of files) await cp(path.join(root, 'web', file), path.join(output, 'web', file));
 for (const folder of ['assets', 'fonts']) {
   await mkdir(path.join(output, 'web', folder), { recursive: true });
