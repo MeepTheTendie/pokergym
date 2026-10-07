@@ -12,7 +12,7 @@ import {
 } from '../src/games/blackjack.js';
 import { bestAction as bjBest, ACTION_LABEL } from '../src/coach/blackjack.js';
 import { newRound as newBacRound } from '../src/games/baccarat.js';
-import { bestBet as bacBest } from '../src/coach/baccarat.js';
+import { bestBet as bacBest, quizFor, tieBreakEven } from '../src/coach/baccarat.js';
 import { newRound as newHeRound } from '../src/games/holdem.js';
 import { playsBestFive } from '../src/coach/holdem.js';
 import { CLASSES, CLASS_BY_ID, STAT_LABEL } from '../src/rpg/classes.js';
@@ -704,9 +704,14 @@ function renderPlay() {
   }
 
   if (gameId === 'baccarat') {
-    if (!round) {
+    if (!round?.playerHand) {
+      const quiz = round?.quiz;
       renderZones([]);
-      el('pays').textContent = 'PLACE A BET. THE CARDS DO THE REST.';
+      if (handDone && quiz && !quiz.deal) {
+        el('pays').textContent = `${quiz.correct}. ${quiz.reason}`;
+        return;
+      }
+      el('pays').textContent = quiz ? quiz.prompt : 'PLACE A BET. THE CARDS DO THE REST.';
       return;
     }
     renderZones([
@@ -762,13 +767,24 @@ function renderStatus() {
   }
 
   if (gameId === 'baccarat') {
-    const best = bacBest();
-    const p = best.probabilities;
-    if (!round) {
-      el('handGrade').textContent = best.side.toUpperCase();
-      setGauge(p[best.side] * 100, 'mid');
-      el('potentialText').textContent =
-        `BEST BET WINS ${(p[best.side] * 100).toFixed(1)}% OF THE TIME`;
+    const p = bacBest().probabilities;
+    if (!round?.playerHand) {
+      const quiz = round?.quiz;
+      if (quiz?.type === 'commission') {
+        el('handGrade').textContent = '0.95:1';
+        setGauge(50, 'mid');
+        el('potentialText').textContent = 'BANKER WINS PAY 0.95:1 BECAUSE OF THE 5% COMMISSION.';
+        return;
+      }
+      if (quiz?.type === 'tieodds') {
+        el('handGrade').textContent = `~${tieBreakEven().toFixed(1)}:1`;
+        setGauge(50, 'mid');
+        el('potentialText').textContent = 'THE TIE BET BREAKS EVEN AT THAT PAYOUT. NEARER THAN THAT, IT LOSES.';
+        return;
+      }
+      el('handGrade').textContent = 'BANKER';
+      setGauge(p.banker * 100, 'mid');
+      el('potentialText').textContent = `BEST BET WINS ${(p.banker * 100).toFixed(1)}% OF THE TIME`;
       return;
     }
     el('handGrade').textContent = round.result.toUpperCase();
@@ -852,6 +868,10 @@ function setControls() {
     return;
   }
   if (gameId === 'baccarat') {
+    if (round?.quiz && !round.quiz.deal) {
+      renderQuizButtons();
+      return;
+    }
     for (const id of ['btnBanker', 'btnPlayer', 'btnTie']) el(id).disabled = handDone;
     return;
   }
@@ -881,7 +901,7 @@ function startHand() {
   } else if (gameId === 'blackjack') {
     round = newBjRound(Math.random, { bet: TABLE_BET });
   } else if (gameId === 'baccarat') {
-    round = null;
+    round = { quiz: quizFor() };
   } else {
     round = newHeRound();
   }
@@ -891,7 +911,7 @@ function startHand() {
   const instructions = {
     videopoker: 'Tap the cards you want to HOLD. What you leave alone gets redrawn in place. DRAW plays your hand.',
     blackjack: 'Read your hand and mine. Choose your next move, or ask me for a hint.',
-    baccarat: 'Choose BANKER, PLAYER, or TIE. Ask me to compare the odds before you bet.',
+    baccarat: 'Answer the percentage question. Every number you need is on the odds panel.',
     holdem: 'Tap your best five cards, then CONFIRM 5. Ask me if you need a hint.',
   };
   const message = el('masterLine');
@@ -1050,14 +1070,53 @@ function settleBlackjack() {
 }
 
 /* ---- baccarat ---- */
+function renderQuizButtons() {
+  const quiz = round?.quiz;
+  const row = el('rowBet');
+  if (!quiz || quiz.deal) return;
+  row.innerHTML = '';
+  for (const option of quiz.options) {
+    const button = document.createElement('button');
+    button.textContent = option;
+    button.dataset.quizAnswer = option;
+    button.dataset.quizCorrect = option === quiz.correct ? 'true' : 'false';
+    button.disabled = handDone;
+    button.onclick = () => { audio.sfx('chip'); bacAnswer(option); };
+    row.appendChild(button);
+  }
+}
+
+function bacAnswer(choice) {
+  if (handDone || !round?.quiz) return;
+  const quiz = round.quiz;
+  const correct = choice === quiz.correct;
+  settleHand({
+    optimal: correct,
+    difficulty: 1,
+    payout: 0,
+    review: {
+      situation: quiz.prompt,
+      chosen: choice,
+      correction: quiz.reason,
+    },
+    line: correct ? `CORRECT. ${quiz.correct}.` : `NO. ${choice} IS WRONG. THE ANSWER IS ${quiz.correct}.`,
+  });
+}
+
 function bacBet(side) {
   if (handDone) return;
+  const quiz = round?.quiz;
+  const optimal = quiz ? side.toUpperCase() === quiz.correct : side === bacBest().side;
   round = newBacRound(Math.random, side, TABLE_BET);
   settleHand({
-    optimal: side === bacBest().side,
-    review: { situation: 'STANDARD BACCARAT WITH 5% BANKER COMMISSION', chosen: side.toUpperCase(), correction: 'BANKER has the lowest house edge. It still has a negative expected return; correct play does not guarantee a win.' },
+    optimal,
     difficulty: handDifficulty(round.result),
     payout: round.payout,
+    review: {
+      situation: quiz?.prompt ?? 'STANDARD BACCARAT WITH 5% BANKER COMMISSION',
+      chosen: side.toUpperCase(),
+      correction: quiz?.reason ?? 'BANKER has the lowest house edge. It still has a negative expected return; correct play does not guarantee a win.',
+    },
     line: round.log.join(' '),
   });
 }
@@ -1135,6 +1194,14 @@ function buildAdvice() {
   }
 
   if (gameId === 'baccarat') {
+    const quiz = round?.quiz;
+    if (quiz && !quiz.deal) {
+      return {
+        text: `${quiz.correct}.`,
+        why: quiz.reason,
+        apply: () => bacAnswer(quiz.correct),
+      };
+    }
     const best = bacBest();
     const p = best.probabilities;
     return {

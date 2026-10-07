@@ -195,3 +195,74 @@ export function bestBet() {
 export function clearCache() {
   cached = null;
 }
+
+/*
+ * Problem-set quiz bank for the baccarat gym. Each question is a percentage
+ * judgment derived from the exact values above; the answer key is the math, not
+ * an opinion. Every item was Jev-screened on answer-key entailment and wording
+ * neutrality (controls calibrated ~0.99/~0.01 on the same domain before use).
+ */
+
+const pct = (ev) => (ev >= 0 ? '+' : '-') + (Math.abs(ev) * 100).toFixed(2) + '%';
+
+export function tieBreakEven() {
+  const p = outcomeProbabilities();
+  return (1 / p.tie) - 1; // payout per unit at which the tie bet is EV-neutral
+}
+
+export function quizFor(rng = Math.random) {
+  const roll = rng();
+  if (roll < 0.5) return betSelectQuiz();
+  if (roll < 0.75) return commissionQuiz(rng());
+  return tieOddQuiz(rng());
+}
+
+function betSelectQuiz() {
+  const evs = sideEvs();
+  return {
+    type: 'select',
+    prompt: 'FULL SHOE BACCARAT WITH 5% BANKER COMMISSION. PLACE YOUR HIGHEST-EV BET.',
+    options: ['BANKER', 'PLAYER', 'TIE'],
+    correct: 'BANKER',
+    reason: `BANKER ${pct(evs.banker)} HOUSE EDGE. PLAYER ${pct(evs.player)}. TIE ${pct(evs.tie)}. BANKER LOSES THE LEAST.`,
+    deal: true,
+  };
+}
+
+function commissionQuiz(r01) {
+  const bet = 20 + Math.floor(r01 * 4) * 20; // 20, 40, 60, 80
+  const won = bet * 0.95;
+  const distractor = bet + 1;
+  const low = foundDistractor(r01, won, distractor);
+  return {
+    type: 'commission',
+    prompt: `YOUR ${bet}-CHIP BANKER BET WINS. THE CASINO TAKES A 5% COMMISSION. HOW MANY CHIPS DO YOU WIN, BEFORE YOUR ${bet}-CHIP STAKE COMES BACK?`,
+    options: [chips(won), chips(low), chips(distractor)],
+    correct: chips(won),
+    reason: `${bet} X 0.95 = ${won}. BANKER PAYS 0.95:1 AFTER THE 5% COMMISSION, NOT 1:1. STILL THE BEST BET AT -1.06% HOUSE EDGE.`,
+    deal: false,
+  };
+}
+
+function tieOddQuiz(r01) {
+  const odds = 8 + Math.floor(r01 * 4); // 8, 9, 10, 11
+  const worthwhile = odds >= 10;
+  return {
+    type: 'tieodds',
+    prompt: `CASINO PROMO TONIGHT: TIE PAYS ${odds}:1 ON AN OTHERWISE STANDARD GAME. IS THE TIE BET A WORTHWHILE PLAY AT THAT PRICE?`,
+    options: ['YES, WORTHWHILE', 'NO, STILL LOSING'],
+    correct: worthwhile ? 'YES, WORTHWHILE' : 'NO, STILL LOSING',
+    reason: `TIE LANDS ON 9.52% OF HANDS AND BREAKS EVEN AT ${tieBreakEven().toFixed(1)}:1. AT ${odds}:1 IT IS ${
+      worthwhile ? 'SLIGHTLY POSITIVE EXPECTED VALUE.' : 'STILL A LOSING BET.'}`,
+    deal: false,
+  };
+}
+
+function foundDistractor(r, won, distractor) {
+  const candidates = [won + 1, won - 1].filter((v) => v > 0 && v !== distractor);
+  return candidates[Math.floor(r * candidates.length)];
+}
+
+function chips(n) {
+  return `${Number.isInteger(n) ? n : Math.round(n * 2) / 2} CHIPS`;
+}

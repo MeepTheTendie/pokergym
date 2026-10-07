@@ -151,14 +151,18 @@ async function run() {
     click('btnNext');
     await wait(50);
 
-    // Hand 2 in baccarat: the worst bet on the board, taken on purpose. A wrong
-    // decision must show the bad verdict, cost chips, and pay no XP, and the
-    // gym still has to be winnable at nine good plays out of ten.
+    // Hand 2 in baccarat: a wrong answer on purpose. A bad decision must show
+    // the bad verdict, cost chips, and pay no XP, and the gym still has to be
+    // winnable at nine good plays out of ten. Knowledge quizzes expose their
+    // answer key as data attributes on the option buttons; bet-selection hands
+    // still use the BANKER/PLAYER/TIE row, where TIE is the losing pick.
     if (game === 'baccarat' && !done()) {
-      click('btnTie');
+      const wrong = [...d.querySelectorAll('#rowBet button')].find((b) => b.dataset.quizCorrect === 'false');
+      if (wrong) wrong.click();
+      else click('btnTie');
       await wait(30);
       const full = $('masterLine')._dataset?.full ?? '';
-      log('hand 2: wrong bet on purpose -> ' + full);
+      log('hand 2: wrong answer on purpose -> ' + full);
       log('  wrong verdict: ' + full.includes('NO. THE BETTER MOVE')
         + ' | no XP line: ' + full.includes('NO XP. WRONG DECISION.'));
       settles++;

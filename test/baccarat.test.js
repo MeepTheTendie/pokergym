@@ -5,7 +5,7 @@ import { seededRng, shuffle } from '../src/cards.js';
 import { GAME, PAY_TABLE, cardValue, handTotal, newRound, newShoe } from '../src/games/baccarat.js';
 import {
   SHOE_SIZE, DECKS, PAIR_P, playerDraws, bankerDraws,
-  outcomeProbabilities, sideEvs, bestBet,
+  outcomeProbabilities, sideEvs, bestBet, quizFor, tieBreakEven,
 } from '../src/coach/baccarat.js';
 
 const near = (actual, expected, tol, label) =>
@@ -221,4 +221,51 @@ test('the pair rate agrees with deals of a real shuffled shoe', () => {
   const observed = pairs / trials;
   const sd = Math.sqrt(PAIR_P * (1 - PAIR_P) / trials);
   near(observed, PAIR_P, 3.5 * sd, `Monte Carlo pair rate over ${trials} deals`);
+});
+
+/* ---- the problem-set quiz bank ------------------------------------------ */
+
+const rngOf = (...values) => { let i = 0; return () => values[i++] ?? Math.random(); };
+
+test('the tie bet breaks even around 9.5:1', () => {
+  near(tieBreakEven(), 9.50906, 1e-3, 'break-even payout');
+});
+
+test('bet-select quizzes always key to banker and deal a real round', () => {
+  for (let seed = 1; seed <= 20; seed++) {
+    const q = quizFor(rngOf(seed / 100));
+    if (q.type !== 'select') continue;
+    assert.equal(q.correct, 'BANKER');
+    assert.deepEqual(q.options, ['BANKER', 'PLAYER', 'TIE']);
+    assert.equal(q.deal, true);
+    assert.ok(q.prompt.length > 0);
+  }
+});
+
+test('commission quizzes return banker wins minus the 5% commission', () => {
+  const q = quizFor(rngOf(0.6, 0.0)); // 20-chip bet
+  assert.equal(q.type, 'commission');
+  assert.equal(q.correct, '19 CHIPS');
+  assert.equal(q.options.length, 3);
+  assert.equal(new Set(q.options).size, 3, 'distractors are distinct');
+
+  const q2 = quizFor(rngOf(0.6, 0.9)); // 80-chip bet
+  assert.equal(q2.correct, '76 CHIPS');
+  assert.equal(q2.deal, false);
+  assert.ok(q2.prompt.includes('80-CHIP'));
+});
+
+test('tie promo quizzes flip to worthwhile only at 10:1 or higher', () => {
+  assert.equal(quizFor(rngOf(0.9, 0.0)).correct, 'NO, STILL LOSING');   // 8:1
+  assert.equal(quizFor(rngOf(0.9, 0.25)).correct, 'NO, STILL LOSING');  // 9:1
+  assert.equal(quizFor(rngOf(0.9, 0.5)).correct, 'YES, WORTHWHILE');    // 10:1
+  assert.equal(quizFor(rngOf(0.9, 0.75)).correct, 'YES, WORTHWHILE');   // 11:1
+  for (let seed = 1; seed <= 50; seed++) {
+    const q = quizFor(rngOf(0.9, seed / 100));
+    assert.equal(q.deal, false);
+    assert.equal(q.options.length, 2);
+    assert.ok(q.options.includes(q.correct));
+  }
+  const q = quizFor(rngOf(0.9, 0.75));
+  assert.ok(q.prompt.includes('11:1'));
 });
