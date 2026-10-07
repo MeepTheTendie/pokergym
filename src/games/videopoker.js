@@ -58,7 +58,7 @@ export function newRound(rng = Math.random) {
     game: GAME.id,
     hand,
     deck,
-    holds: [true, true, true, true, true],
+    holds: [false, false, false, false, false],
     drawn: false,
     result: null,
     payout: 0,
@@ -81,13 +81,10 @@ export function setHolds(round, holds) {
 
 export function draw(round) {
   if (round.drawn) return round;
-  const kept = [];
-  const discarded = [];
-  round.hand.forEach((card, i) => {
-    (round.holds[i] ? kept : discarded).push(card);
-  });
-  const replacements = round.deck.splice(0, discarded.length);
-  round.hand = kept.concat(replacements);
+  round.hand = round.hand.slice();
+  for (let i = 0; i < round.hand.length; i++) {
+    if (!round.holds[i]) round.hand[i] = round.deck.shift();
+  }
   round.result = evaluate5(round.hand);
   round.payout = payFor(round.result);
   round.drawn = true;

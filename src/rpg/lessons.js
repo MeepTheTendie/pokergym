@@ -13,7 +13,7 @@ export const LESSONS = {
       },
       {
         who: 'MASTER ROYALE',
-        text: 'TAP A CARD TO THROW IT AWAY. TAP IT AGAIN TO KEEP IT. THE CARDS YOU KEEP STAY ON THE TABLE.',
+        text: 'TAP A CARD TO HOLD IT. TAP IT AGAIN TO LET IT GO. WHAT YOU HOLD STAYS IN ITS SEAT.',
       },
       {
         who: 'MASTER ROYALE',

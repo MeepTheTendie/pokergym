@@ -636,7 +636,7 @@ function cardNode(card, zone, i) {
     const held = Boolean(zone.holds[i]);
     node.dataset.held = String(held);
     node.disabled = Boolean(zone.disabled);
-    node.setAttribute('aria-label', `${name}, ${held ? 'held' : 'discarded'}`);
+    node.setAttribute('aria-label', `${name}, ${held ? 'held' : 'to be redrawn'}`);
     node.onclick = () => { audio.sfx('chip'); zone.onCard(i); };
   } else if (zone.indices) {
     node.dataset.picked = String(picked.has(zone.indices[i]));
@@ -889,7 +889,7 @@ function startHand() {
   renderBattle();
   audio.sfx('deal');
   const instructions = {
-    videopoker: 'Tap cards to hold or discard. DRAW plays your hand. Ask me if you need a hint.',
+    videopoker: 'Tap the cards you want to HOLD. What you leave alone gets redrawn in place. DRAW plays your hand.',
     blackjack: 'Read your hand and mine. Choose your next move, or ask me for a hint.',
     baccarat: 'Choose BANKER, PLAYER, or TIE. Ask me to compare the odds before you bet.',
     holdem: 'Tap your best five cards, then CONFIRM 5. Ask me if you need a hint.',

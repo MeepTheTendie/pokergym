@@ -94,23 +94,38 @@ test('strategy is cached per canonical hand', () => {
   assert.equal(first, second);
 });
 
-test('round deals five cards and holds them by default', () => {
+test('round deals five cards and holds none by default', () => {
   const round = newRound(seededRng(11));
   assert.equal(round.hand.length, 5);
-  assert.deepEqual(round.holds, [true, true, true, true, true]);
+  assert.deepEqual(round.holds, [false, false, false, false, false]);
   assert.equal(round.drawn, false);
 });
 
-test('draw replaces only discarded cards', () => {
+test('draw.replace only discarded seats and never marks a drawn card held', () => {
   const round = newRound(seededRng(12));
+  const original = round.hand.slice();
   assert.equal(round.deck.length, 47);
-  const kept = round.hand.slice(0, 2);
-  setHolds(round, [true, true, false, false, false]);
+  setHolds(round, [false, true, false, true, false]);
   draw(round);
   assert.equal(round.hand.length, 5);
-  assert.deepEqual(round.hand.slice(0, 2), kept);
+  assert.deepEqual(round.hand[1], original[1]);
+  assert.deepEqual(round.hand[3], original[3]);
+  for (const i of [0, 2, 4]) {
+    assert.notDeepEqual(round.hand[i], original[i]);
+    assert.equal(round.holds[i], false);
+  }
   assert.equal(round.drawn, true);
   assert.equal(round.deck.length, 44);
+});
+
+test('draw keeps every held card in its original seat', () => {
+  const round = newRound(seededRng(16));
+  const original = round.hand.slice();
+  setHolds(round, [true, false, true, false, false]);
+  draw(round);
+  assert.deepEqual(round.hand[0], original[0]);
+  assert.deepEqual(round.hand[2], original[2]);
+  assert.equal(round.hand.filter((_, i) => round.holds[i]).length, 2);
 });
 
 test('payout is zero when the final hand loses', () => {
