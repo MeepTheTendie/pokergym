@@ -344,7 +344,11 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   await evaluate('document.querySelector("[data-session-gym=pokergym]").click()');
   // Lesson may already be complete in this test save.
   await evaluate('if (!document.getElementById("scr-lesson").hidden) document.getElementById("btnSkip").click()');
+  await evaluate('document.getElementById("btnAsk").click(); document.getElementById("btnApply").click()');
+  const chipsBeforeDraw = await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).chips');
   await evaluate('document.getElementById("btnDraw").click(); document.getElementById("btnDraw").click()');
+  const displayedPayout = await evaluate('Number(document.getElementById("pays").textContent.match(/WON ([\\d,]+)/)[1].replaceAll(",", ""))');
+  assert.equal(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).chips'), chipsBeforeDraw + 50 + displayedPayout, 'Video-poker chips match the displayed payout plus the correct-decision reward');
   assert.equal(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).activeSession.played'), 1, 'Repeated settlement cannot score twice');
   await evaluate('document.getElementById("btnMap").click()');
   assert.match(await evaluate('document.getElementById("btnResumeSession").textContent'), /1\/5/);
@@ -386,6 +390,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Feedback form fits 390px');
   // Actual short sessions in the three previously locked games, with no badge injection.
   for (const gym of ['countyfair', 'villaoak', 'riverstone']) {
+    if (gym === 'villaoak') await evaluate('window.baccaratTestRandom = Math.random; Math.random = () => 0.6');
     if (gym === 'countyfair') await evaluate(`(async () => {
       const { seededRng } = await import('../src/cards.js');
       window.retryTestRandom = Math.random; Math.random = seededRng(7);
@@ -398,9 +403,12 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     for (let step = 0; step < 20; step++) {
       if (!await evaluate('Boolean(JSON.parse(localStorage.getItem("pokergym:save:v1")).activeSession)')) break;
       await evaluate(`(() => {
-        if (!document.getElementById('battleEndRow').hidden) { document.getElementById('btnNext').click(); return; }
+        if (!document.getElementById('battleEndRow').hidden) {
+          if ('${gym}' === 'villaoak') Math.random = () => ${step % 4 === 1 ? 0.1 : 0.9};
+          document.getElementById('btnNext').click(); return;
+        }
         if ('${gym}' === 'countyfair') document.getElementById('btnStand').click();
-        else if ('${gym}' === 'villaoak') document.getElementById('btnBanker').click();
+        else if ('${gym}' === 'villaoak') document.querySelector('#rowBet [data-quiz-correct=true]').click();
         else { document.getElementById('btnAsk').click(); document.getElementById('btnApply').click(); document.getElementById('btnConfirm').click(); }
       })()`);
     }
@@ -408,6 +416,10 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     assert.equal(result.activeSession, null, `${gym} completes five hands`);
     assert.equal(result.sessions[0].gymId, gym);
     assert.equal(result.sessions[0].played, 5);
+    if (gym === 'villaoak') {
+      assert.equal(result.sessions[0].optimal, 5, 'Numeric and dealt baccarat answers both score correctly across transitions');
+      await evaluate('Math.random = window.baccaratTestRandom; delete window.baccaratTestRandom');
+    }
     if (gym === 'countyfair') {
       const captured = result.mistakes.filter(m => m.game === 'blackjack' && m.situation !== 'SYNTHETIC RETRY TEST' && m.quiz);
       assert.ok(captured.length > 0, 'Actual missed blackjack play captures a retry key');
