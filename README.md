@@ -1,6 +1,6 @@
 # Poker Gym
 
-[Play the free browser demo](https://pokergym.history-atlas.workers.dev/web/) · [Download the current portable demo](https://github.com/MeepTheTendie/pokergym/releases/tag/practice-demo-2026-10-07) · [Share player feedback](https://github.com/MeepTheTendie/pokergym/issues/1)
+[Play the free browser demo](https://pokergym.history-atlas.workers.dev/web/) · [Download the current portable demo](https://github.com/MeepTheTendie/pokergym/releases/tag/practice-demo-2026-10-08) · [Share player feedback](https://github.com/MeepTheTendie/pokergym/issues/1)
 
 Practice card-game decisions in a small retro RPG. Choose a trainer, play a five-hand session in any of four gyms, and get coaching on your choices. No signup, deposits, real-money wagering or paid membership.
 
@@ -33,7 +33,7 @@ The release ZIP is an HTML5 browser game for hosting or local serving, not an An
 
 Poker Gym is independent, with original artwork and music, and developed with AI assistance. Publication and documentation may be performed by an AI development assistant for the owner. No affiliation with Nintendo or Pokémon is claimed.
 
-The default branch tracks the current demo source. Releases and their tags are point-in-time snapshots: the live free demo and the [practice-demo-2026-10-07 release](https://github.com/MeepTheTendie/pokergym/releases/tag/practice-demo-2026-10-07) include later practice, backup, offline and mistake-review work.
+Releases and their tags are point-in-time source snapshots. The [practice-demo-2026-10-08 release](https://github.com/MeepTheTendie/pokergym/releases/tag/practice-demo-2026-10-08) contains the current published gameplay, including corrected video-poker payouts and mixed baccarat questions, alongside practice, backups, offline play and mistake review. Use that release tag to inspect the downloadable demo source; the default branch may differ from the live build.
 
 No recurring customer revenue is verified.
 
