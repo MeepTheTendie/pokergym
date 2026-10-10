@@ -1,6 +1,6 @@
 # Poker Gym
 
-[Play the free browser demo](https://pokergym.history-atlas.workers.dev/web/) · [Download the current portable demo](https://github.com/MeepTheTendie/pokergym/releases/tag/practice-demo-2026-10-08) · [Share player feedback](https://github.com/MeepTheTendie/pokergym/issues/1)
+[Play the free browser demo](https://pokergym.history-atlas.workers.dev/web/) · [Download the current portable demo](https://github.com/MeepTheTendie/pokergym/releases/latest) · [Share player feedback](https://github.com/MeepTheTendie/pokergym/issues/1)
 
 Practice card-game decisions in a small retro RPG. Choose a trainer, play a five-hand session in any of four gyms, and get coaching on your choices. No signup, deposits, real-money wagering or paid membership.
 
@@ -8,7 +8,7 @@ Practice card-game decisions in a small retro RPG. Choose a trainer, play a five
 
 1. Open the demo on your phone or computer and choose a trainer.
 2. On the map, choose a game's five-hand practice. Read its lesson, then make your own decisions before reading the coach.
-3. Visit the mistake notebook after practice. For new blackjack mistakes, answer the original decision again before revealing the explanation; scored retries are tracked separately from gameplay accuracy.
+3. Visit the mistake notebook after practice. For new blackjack and baccarat mistakes, answer the original decision again before revealing the explanation; scored retries are tracked separately from gameplay accuracy.
 4. Return later to review the decisions you missed. Longer gym challenges award badges; practice remains available in every game.
 
 The gyms cover Jacks or Better video poker, blackjack, baccarat and Hold'em hand evaluation. Hold'em practice does not teach a complete betting or bluffing strategy. Coaching uses the simulator's rules and assumptions; learning strategy cannot guarantee gambling profits.
@@ -33,7 +33,7 @@ The release ZIP is an HTML5 browser game for hosting or local serving, not an An
 
 Poker Gym is independent, with original artwork and music, and developed with AI assistance. Publication and documentation may be performed by an AI development assistant for the owner. No affiliation with Nintendo or Pokémon is claimed.
 
-Releases and their tags are point-in-time source snapshots. The [practice-demo-2026-10-08 release](https://github.com/MeepTheTendie/pokergym/releases/tag/practice-demo-2026-10-08) contains the current published gameplay, including corrected video-poker payouts and mixed baccarat questions, alongside practice, backups, offline play and mistake review. Use that release tag to inspect the downloadable demo source; the default branch may differ from the live build.
+Releases and their tags are point-in-time source snapshots. The [practice-demo-2026-10-10 release](https://github.com/MeepTheTendie/pokergym/releases/tag/practice-demo-2026-10-10) contains scored blackjack and baccarat mistake retries, corrected video-poker payouts and mixed baccarat questions, alongside practice, backups, offline play and mistake review. Older notebook entries without an original answer key support self-review only. The download link above follows the latest published release. Use that release tag to inspect the downloadable demo source; the default branch may differ from the live build.
 
 No recurring customer revenue is verified.
 
