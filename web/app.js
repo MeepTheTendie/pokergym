@@ -399,7 +399,7 @@ function renderMap() {
         reviewed.textContent = 'REVIEW SAVED';
       };
       entry.append(play, prompt, reveal, answer, reviewed, count);
-      if (mistake.game === 'blackjack' && validMistakeQuiz(mistake.quiz)) {
+      if (validMistakeQuiz(mistake.quiz, mistake.game)) {
         prompt.textContent = 'RETRY THIS ORIGINAL DECISION BEFORE REVEALING. ONE SCORED ANSWER PER VISIT; NO XP OR CHIP REWARDS.';
         const choices = document.createElement('div');
         choices.className = 'mistake-choices';
@@ -413,7 +413,7 @@ function renderMap() {
         let answered = false;
         for (const action of mistake.quiz.choices) {
           const button = document.createElement('button');
-          button.textContent = ACTION_LABEL[action];
+          button.textContent = mistake.game === 'blackjack' ? ACTION_LABEL[action] : action;
           button.dataset.retryAction = action;
           button.onclick = () => {
             if (answered) return;
@@ -868,7 +868,7 @@ function setControls() {
     return;
   }
   if (gameId === 'baccarat') {
-    if (round?.quiz && !round.quiz.deal) {
+    if (round?.quiz) {
       renderQuizButtons();
       return;
     }
@@ -1018,12 +1018,15 @@ function doDraw() {
     chosen: 'HOLD ' + (round.hand.filter((_, i) => round.holds[i]).map(cardLabel).join(' ') || 'NONE'),
     correction: 'HOLD ' + (round.hand.filter((_, i) => best.holds[i]).map(cardLabel).join(' ') || 'NONE') + `. Expected return ${best.ev.toFixed(3)} credits per credit bet.`,
   };
-  const heldBefore = round.holds.filter(Boolean).length;
+  // The pay table is credits per credit bet, which is the number shown on the
+  // line ("FOR N CHIPS"). Grant exactly that; do not scale by how many cards
+  // were held, or a five-card hold would pay five times the displayed amount
+  // and a hold-nothing draw would pay nothing no matter what it makes.
   drawRound(round);
   settleHand({
     optimal,
     difficulty: handDifficulty(round.result),
-    payout: round.payout * heldBefore,
+    payout: round.payout,
     review,
     line: `${round.result.label} FOR ${fmt(round.payout)} CHIPS.`,
   });
@@ -1073,7 +1076,7 @@ function settleBlackjack() {
 function renderQuizButtons() {
   const quiz = round?.quiz;
   const row = el('rowBet');
-  if (!quiz || quiz.deal) return;
+  if (!quiz) return;
   row.innerHTML = '';
   for (const option of quiz.options) {
     const button = document.createElement('button');
@@ -1081,7 +1084,11 @@ function renderQuizButtons() {
     button.dataset.quizAnswer = option;
     button.dataset.quizCorrect = option === quiz.correct ? 'true' : 'false';
     button.disabled = handDone;
-    button.onclick = () => { audio.sfx('chip'); bacAnswer(option); };
+    button.onclick = () => {
+      audio.sfx('chip');
+      if (quiz.deal) bacBet(option.toLowerCase());
+      else bacAnswer(option);
+    };
     row.appendChild(button);
   }
 }
@@ -1098,6 +1105,7 @@ function bacAnswer(choice) {
       situation: quiz.prompt,
       chosen: choice,
       correction: quiz.reason,
+      quiz: { choices: quiz.options, optimal: [quiz.correct] },
     },
     line: correct ? `CORRECT. ${quiz.correct}.` : `NO. ${choice} IS WRONG. THE ANSWER IS ${quiz.correct}.`,
   });
@@ -1108,6 +1116,7 @@ function bacBet(side) {
   const quiz = round?.quiz;
   const optimal = quiz ? side.toUpperCase() === quiz.correct : side === bacBest().side;
   round = newBacRound(Math.random, side, TABLE_BET);
+  round.quiz = quiz;
   settleHand({
     optimal,
     difficulty: handDifficulty(round.result),
@@ -1115,6 +1124,7 @@ function bacBet(side) {
     review: {
       situation: quiz?.prompt ?? 'STANDARD BACCARAT WITH 5% BANKER COMMISSION',
       chosen: side.toUpperCase(),
+      quiz: quiz ? { choices: quiz.options, optimal: [quiz.correct] } : undefined,
       correction: quiz?.reason ?? 'BANKER has the lowest house edge. It still has a negative expected return; correct play does not guarantee a win.',
     },
     line: round.log.join(' '),

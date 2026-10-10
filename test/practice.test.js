@@ -161,3 +161,31 @@ test('invalid quiz answer keys cannot create retry scores or survive external re
     assert.throws(() => readBackup(JSON.stringify({ ...p, mistakes: [{ ...p.mistakes[0], retries }] })));
   }
 });
+
+test('baccarat retries preserve all original question types and survive backup without rewards', async () => {
+  const { quizFor } = await import('../src/coach/baccarat.js');
+  const { recordMistake, answerMistakeQuiz, validMistakeQuiz } = await import('../src/rpg/state.js');
+  const { readBackup, writeBackup } = await import('../src/rpg/backup.js');
+  for (const roll of [0.1, 0.6, 0.9]) {
+    const question = quizFor(() => roll);
+    const wrong = question.options.find(a => a !== question.correct);
+    const base = recordMistake(createProfile('scholar'), {
+      game: 'baccarat', situation: question.prompt, chosen: wrong, correction: question.reason,
+      quiz: { choices: question.options, optimal: [question.correct] },
+    });
+    assert.equal(validMistakeQuiz(base.mistakes[0].quiz, 'baccarat'), true);
+    question.options.pop();
+    assert.ok(base.mistakes[0].quiz.choices.includes(wrong));
+    const scored = answerMistakeQuiz(answerMistakeQuiz(base, 0, wrong), 0, question.correct);
+    assert.deepEqual(scored.mistakes[0].retries, { attempted: 2, correct: 1 });
+    assert.deepEqual(readBackup(writeBackup(scored)), scored);
+    for (const key of ['xp', 'chips', 'handsPlayed', 'handsOptimal', 'practice', 'sessions']) assert.deepEqual(scored[key], base[key]);
+    assert.equal(answerMistakeQuiz(base, 0, 'invented'), base);
+    assert.equal(validMistakeQuiz(base.mistakes[0].quiz, 'holdem'), false);
+    for (const choices of [['', 'BANKER'], ['BANKER', 'BANKER'], [42, 'BANKER'], ['x'.repeat(81), 'BANKER']]) {
+      const quiz = { choices, optimal: ['BANKER'] };
+      assert.equal(validMistakeQuiz(quiz, 'baccarat'), false);
+      assert.throws(() => readBackup(JSON.stringify({ ...base, mistakes: [{ ...base.mistakes[0], quiz }] })));
+    }
+  }
+});

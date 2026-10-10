@@ -122,7 +122,7 @@ export function recordMistake(profile, { game, situation, chosen, correction, qu
   if (!GYMS.some(g => g.game === game)) return profile;
   if (![situation, chosen, correction].every(value => typeof value === 'string' && value.trim())) return profile;
   const entry = { game, situation: situation.slice(0, 600), chosen: chosen.slice(0, 600), correction: correction.slice(0, 1200) };
-  if (game === "blackjack" && validMistakeQuiz(quiz)) entry.quiz = { choices: [...quiz.choices], optimal: [...quiz.optimal] };
+  if (validMistakeQuiz(quiz, game)) entry.quiz = { choices: [...quiz.choices], optimal: [...quiz.optimal] };
   return { ...profile, mistakes: [entry, ...(profile.mistakes ?? [])].slice(0, 20) };
 }
 
@@ -154,18 +154,20 @@ export function scoreSession(profile, optimal, now = new Date().toISOString()) {
 }
 
 // Answer keys are captured from the original coach decision, never inferred from text.
-export function validMistakeQuiz(quiz) {
+export function validMistakeQuiz(quiz, game = "blackjack") {
   const actions = ['hit', 'stand', 'double', 'split'];
+  const validChoice = a => game === 'blackjack' ? actions.includes(a) :
+    game === 'baccarat' && typeof a === 'string' && a.trim().length > 0 && a.length <= 80;
   return Boolean(quiz && Array.isArray(quiz.choices) && quiz.choices.length >= 2 &&
     quiz.choices.length <= 4 && new Set(quiz.choices).size === quiz.choices.length &&
-    quiz.choices.every(a => actions.includes(a)) && Array.isArray(quiz.optimal) &&
+    quiz.choices.every(validChoice) && Array.isArray(quiz.optimal) &&
     quiz.optimal.length > 0 && quiz.optimal.length <= quiz.choices.length &&
     new Set(quiz.optimal).size === quiz.optimal.length && quiz.optimal.every(a => quiz.choices.includes(a)));
 }
 export function answerMistakeQuiz(profile, index, action) {
   if (!Number.isInteger(index)) return profile;
   const entry = profile.mistakes?.[index];
-  if (entry?.game !== 'blackjack' || !validMistakeQuiz(entry.quiz) || !entry.quiz.choices.includes(action)) return profile;
+  if (!entry || !validMistakeQuiz(entry.quiz, entry.game) || !entry.quiz.choices.includes(action)) return profile;
   const previous = entry.retries ?? { attempted: 0, correct: 0 };
   return { ...profile, mistakes: profile.mistakes.map((m, i) => i === index ? {
     ...m, retries: { attempted: previous.attempted + 1,
