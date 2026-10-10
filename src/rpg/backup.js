@@ -1,4 +1,4 @@
-import { deserialize, serialize, validMistakeQuiz } from './state.js';
+import { deserialize, serialize, validMistakeQuiz, validReviewSchedule } from './state.js';
 import { GYMS, GYM_BY_ID } from './gyms.js';
 
 const count = n => Number.isSafeInteger(n) && n >= 0;
@@ -17,7 +17,7 @@ export function readBackup(raw) {
       !list(p.badges, 4, id => Boolean(GYM_BY_ID[id])) ||
       !list(p.lessonsDone, 4, game) ||
       (p.practice != null && (typeof p.practice !== 'object' || Array.isArray(p.practice) || !Object.entries(p.practice).every(([id, s]) => game(id) && count(s?.played) && count(s?.optimal) && s.optimal <= s.played))) ||
-      (p.mistakes != null && !list(p.mistakes, 20, m => m && game(m.game) && text(m.situation, 600) && text(m.chosen, 600) && text(m.correction, 1200) && (m.reviews == null || count(m.reviews)) && (m.quiz == null || (m.game === "blackjack" && validMistakeQuiz(m.quiz))) && (m.retries == null || (m.quiz && count(m.retries.attempted) && count(m.retries.correct) && m.retries.correct <= m.retries.attempted)))) ||
+      (p.mistakes != null && !list(p.mistakes, 20, m => m && game(m.game) && text(m.situation, 600) && text(m.chosen, 600) && text(m.correction, 1200) && (m.schedule == null || (m.quiz && validReviewSchedule(m.schedule))) && (m.reviews == null || count(m.reviews)) && (m.quiz == null || validMistakeQuiz(m.quiz, m.game)) && (m.retries == null || (m.quiz && count(m.retries.attempted) && count(m.retries.correct) && m.retries.correct <= m.retries.attempted)))) ||
       (p.activeSession != null && (!session(p.activeSession) || p.activeSession.played >= 5)) ||
       (p.sessions != null && !list(p.sessions, 30, s => session(s) && s.played === 5 && text(s.completedAt, 100)))) throw new Error('Invalid backup');
   return p;

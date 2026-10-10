@@ -14,13 +14,13 @@ import { bestAction as bjBest, ACTION_LABEL } from '../src/coach/blackjack.js';
 import { newRound as newBacRound } from '../src/games/baccarat.js';
 import { bestBet as bacBest, quizFor, tieBreakEven } from '../src/coach/baccarat.js';
 import { newRound as newHeRound } from '../src/games/holdem.js';
-import { playsBestFive } from '../src/coach/holdem.js';
+import { playsBestFive, bestFiveQuiz } from '../src/coach/holdem.js';
 import { CLASSES, CLASS_BY_ID, STAT_LABEL } from '../src/rpg/classes.js';
 import { GYMS, GYM_BY_ID, gymForClass } from '../src/rpg/gyms.js';
 import { lessonFor, hasCompletedLesson, markLessonDone } from '../src/rpg/lessons.js';
 import {
   createProfile, applyResult, awardBadge, canBattle, canPractice, canTrain, levelFromXp,
-  serialize, deserialize, handDifficulty, practiceSummary, recordMistake, markMistakeReviewed, validMistakeQuiz, answerMistakeQuiz, beginSession, scoreSession, SESSION_HANDS,
+  serialize, deserialize, handDifficulty, practiceSummary, recommendedPractice, recordMistake, markMistakeReviewed, validMistakeQuiz, answerMistakeQuiz, mistakeReviewQueue, beginSession, scoreSession, SESSION_HANDS,
 } from '../src/rpg/state.js';
 import { drawArt, drawTrainerBack } from './characters.js';
 import audio from './audio.js?v=20261006-audio3';
@@ -350,10 +350,18 @@ function renderMap() {
     resume.onclick = () => startGym(GYM_BY_ID[profile.activeSession.gymId], true);
     sessions.append(resume);
   } else {
+    const recommendation = recommendedPractice(profile);
+    if (recommendation) {
+      const reason = document.createElement('p');
+      reason.id = 'practiceRecommendation';
+      reason.className = 'hint';
+      reason.textContent = `SUGGESTED NEXT: ${TRAINING_LABEL[recommendation.game]} · ${recommendation.optimal}/${recommendation.played} CORRECT. LOWEST RECORDED ACCURACY AMONG GAMES WITH AT LEAST FIVE HANDS. HINTED PLAYS COUNT TOO; THIS IS A PRACTICE PRIORITY, NOT A SKILL RATING.`;
+      sessions.append(reason);
+    }
     for (const gym of GYMS.filter(g => canTrain(profile, g.id))) {
       const button = document.createElement('button');
       button.dataset.sessionGym = gym.id;
-      button.textContent = `FIVE HANDS · ${TRAINING_LABEL[gym.game]}`;
+      button.textContent = `${gym.id === recommendation?.gymId ? 'SUGGESTED · ' : ''}FIVE HANDS · ${TRAINING_LABEL[gym.game]}`;
       button.onclick = () => { profile = beginSession(profile, gym.id); save(); startGym(gym, true); };
       sessions.append(button);
     }
@@ -371,16 +379,32 @@ function renderMap() {
   const notebook = el('mistakeReview');
   if (notebook) {
     notebook.replaceChildren();
-    for (const [index, mistake] of (profile.mistakes ?? []).entries()) {
+    const reviewSummary = document.createElement('p');
+    reviewSummary.id = 'reviewScheduleSummary';
+    reviewSummary.className = 'hint';
+    const refreshReviewSummary = () => {
+      const queue = mistakeReviewQueue(profile);
+      const due = queue.filter(row => row.due).length;
+      const next = queue.filter(row => row.scored && !row.due).sort((a, b) => a.dueAt - b.dueAt)[0];
+      reviewSummary.textContent = `${due} SCORED REVIEWS DUE · ${next ? `NEXT: ${new Date(next.dueAt).toLocaleString()}` : 'NEW MISSED DECISIONS ARE READY NOW'}. CORRECT DUE ANSWERS: 1, 3, 7, 14, THEN 30 DAYS. MISSES: 10 MINUTES. EARLY CORRECT RETRIES DO NOT ADVANCE THE SCHEDULE. SAVED ON THIS DEVICE; NO NOTIFICATIONS.`;
+    };
+    refreshReviewSummary();
+    if (profile.mistakes?.length) notebook.appendChild(reviewSummary);
+    for (const { index, entry: mistake, scored, due, dueAt } of mistakeReviewQueue(profile)) {
       const entry = document.createElement('details');
       const title = document.createElement('summary');
       title.textContent = `${GYMS.find(g => g.game === mistake.game)?.name ?? mistake.game}: ${mistake.situation}`;
       entry.appendChild(title);
+      const scheduleStatus = document.createElement('p');
+      scheduleStatus.className = 'hint';
+      scheduleStatus.textContent = scored ? (due ? 'DUE NOW · TRY WITHOUT THE ANSWER' : `NEXT REVIEW: ${new Date(dueAt).toLocaleString()} · EARLY PRACTICE AVAILABLE`) : 'SELF REVIEW · NO SCORED SCHEDULE';
+      entry.appendChild(scheduleStatus);
       const play = document.createElement('p');
       play.textContent = `YOUR PLAY: ${mistake.chosen}`;
       const prompt = document.createElement('p');
       prompt.textContent = 'WHAT WOULD YOU DO NEXT TIME? RECALL THE BETTER PLAY BEFORE REVEALING.';
       const answer = document.createElement('p');
+      answer.className = 'mistake-answer';
       answer.textContent = `COACH: ${mistake.correction}`;
       answer.hidden = true;
       const reveal = document.createElement('button');
@@ -399,7 +423,7 @@ function renderMap() {
         reviewed.textContent = 'REVIEW SAVED';
       };
       entry.append(play, prompt, reveal, answer, reviewed, count);
-      if (mistake.game === 'blackjack' && validMistakeQuiz(mistake.quiz)) {
+      if (validMistakeQuiz(mistake.quiz, mistake.game)) {
         prompt.textContent = 'RETRY THIS ORIGINAL DECISION BEFORE REVEALING. ONE SCORED ANSWER PER VISIT; NO XP OR CHIP REWARDS.';
         const choices = document.createElement('div');
         choices.className = 'mistake-choices';
@@ -411,15 +435,44 @@ function renderMap() {
         };
         result.textContent = retryCount();
         let answered = false;
-        for (const action of mistake.quiz.choices) {
+        const cardRetry = ['videopoker', 'holdem'].includes(mistake.game);
+        const bestFive = mistake.game === 'holdem';
+        let holdPattern = bestFive ? '0000000' : '00000';
+        if (cardRetry) {
+          prompt.textContent = 'RETRY THE ORIGINAL HOLD: CARD POSITIONS MATCH THE HAND ABOVE. SELECT CARDS, THEN CHECK HOLD. ONE SCORED ANSWER PER VISIT; NO XP OR CHIPS.';
+          if (bestFive) prompt.textContent = 'RETRY THE ORIGINAL BEST FIVE: FIRST TWO CARDS ARE YOUR HOLE CARDS, LAST FIVE ARE THE BOARD. SELECT EXACTLY FIVE, THEN CHECK. TIED BEST HANDS ARE ACCEPTED; NO XP OR CHIPS.';
+          mistake.situation.split(' ').forEach((card, position) => {
+            const toggle = document.createElement('button');
+            toggle.textContent = `${position + 1}: ${card}`;
+            toggle.setAttribute('aria-pressed', 'false');
+            toggle.dataset.retryCard = position;
+            toggle.onclick = () => {
+              if (answered) return;
+              const pattern = holdPattern.split('');
+              pattern[position] = pattern[position] === '1' ? '0' : '1';
+              holdPattern = pattern.join('');
+              toggle.setAttribute('aria-pressed', String(pattern[position] === '1'));
+              toggle.textContent = `${position + 1}: ${card}${pattern[position] === '1' ? (bestFive ? ' SELECTED' : ' HOLD') : ''}`;
+            };
+            choices.appendChild(toggle);
+          });
+        }
+        for (const option of cardRetry ? [bestFive ? 'check-five' : 'check-hold'] : mistake.quiz.choices) {
           const button = document.createElement('button');
-          button.textContent = ACTION_LABEL[action];
-          button.dataset.retryAction = action;
+          button.textContent = bestFive ? 'CHECK FIVE' : mistake.game === 'videopoker' ? 'CHECK HOLD (NONE SELECTED = DRAW FIVE)' : mistake.game === 'blackjack' ? ACTION_LABEL[option] : option;
+          button.dataset.retryAction = option;
           button.onclick = () => {
             if (answered) return;
+            if (bestFive && [...holdPattern].filter(bit => bit === '1').length !== 5) {
+              result.textContent = `SELECT EXACTLY FIVE CARDS. ${retryCount()}`;
+              return;
+            }
             answered = true;
+            const action = cardRetry ? holdPattern : option;
             profile = answerMistakeQuiz(profile, index, action);
             save();
+            scheduleStatus.textContent = `NEXT REVIEW: ${new Date(profile.mistakes[index].schedule.dueAt).toLocaleString()}`;
+            refreshReviewSummary();
             result.textContent = `${mistake.quiz.optimal.includes(action) ? 'CORRECT' : 'TRY THE COACH PLAY NEXT VISIT'}. ${retryCount()}`;
             for (const choice of choices.children) choice.disabled = true;
             answer.hidden = false; reveal.hidden = true; reviewed.hidden = false;
@@ -868,7 +921,7 @@ function setControls() {
     return;
   }
   if (gameId === 'baccarat') {
-    if (round?.quiz && !round.quiz.deal) {
+    if (round?.quiz) {
       renderQuizButtons();
       return;
     }
@@ -1015,15 +1068,20 @@ function doDraw() {
   const optimal = best.optimal.some((pattern) => pattern.join('') === round.holds.join(''));
   const review = {
     situation: round.hand.map(cardLabel).join(' '),
+    quiz: { choices: Array.from({ length: 32 }, (_, mask) => mask.toString(2).padStart(5, '0')),
+      optimal: best.optimal.map(pattern => pattern.map(Number).join('')) },
     chosen: 'HOLD ' + (round.hand.filter((_, i) => round.holds[i]).map(cardLabel).join(' ') || 'NONE'),
     correction: 'HOLD ' + (round.hand.filter((_, i) => best.holds[i]).map(cardLabel).join(' ') || 'NONE') + `. Expected return ${best.ev.toFixed(3)} credits per credit bet.`,
   };
-  const heldBefore = round.holds.filter(Boolean).length;
+  // The pay table is credits per credit bet, which is the number shown on the
+  // line ("FOR N CHIPS"). Grant exactly that; do not scale by how many cards
+  // were held, or a five-card hold would pay five times the displayed amount
+  // and a hold-nothing draw would pay nothing no matter what it makes.
   drawRound(round);
   settleHand({
     optimal,
     difficulty: handDifficulty(round.result),
-    payout: round.payout * heldBefore,
+    payout: round.payout,
     review,
     line: `${round.result.label} FOR ${fmt(round.payout)} CHIPS.`,
   });
@@ -1073,7 +1131,7 @@ function settleBlackjack() {
 function renderQuizButtons() {
   const quiz = round?.quiz;
   const row = el('rowBet');
-  if (!quiz || quiz.deal) return;
+  if (!quiz) return;
   row.innerHTML = '';
   for (const option of quiz.options) {
     const button = document.createElement('button');
@@ -1081,7 +1139,11 @@ function renderQuizButtons() {
     button.dataset.quizAnswer = option;
     button.dataset.quizCorrect = option === quiz.correct ? 'true' : 'false';
     button.disabled = handDone;
-    button.onclick = () => { audio.sfx('chip'); bacAnswer(option); };
+    button.onclick = () => {
+      audio.sfx('chip');
+      if (quiz.deal) bacBet(option.toLowerCase());
+      else bacAnswer(option);
+    };
     row.appendChild(button);
   }
 }
@@ -1098,6 +1160,7 @@ function bacAnswer(choice) {
       situation: quiz.prompt,
       chosen: choice,
       correction: quiz.reason,
+      quiz: { choices: quiz.options, optimal: [quiz.correct] },
     },
     line: correct ? `CORRECT. ${quiz.correct}.` : `NO. ${choice} IS WRONG. THE ANSWER IS ${quiz.correct}.`,
   });
@@ -1108,6 +1171,7 @@ function bacBet(side) {
   const quiz = round?.quiz;
   const optimal = quiz ? side.toUpperCase() === quiz.correct : side === bacBest().side;
   round = newBacRound(Math.random, side, TABLE_BET);
+  round.quiz = quiz;
   settleHand({
     optimal,
     difficulty: handDifficulty(round.result),
@@ -1115,6 +1179,7 @@ function bacBet(side) {
     review: {
       situation: quiz?.prompt ?? 'STANDARD BACCARAT WITH 5% BANKER COMMISSION',
       chosen: side.toUpperCase(),
+      quiz: quiz ? { choices: quiz.options, optimal: [quiz.correct] } : undefined,
       correction: quiz?.reason ?? 'BANKER has the lowest house edge. It still has a negative expected return; correct play does not guarantee a win.',
     },
     line: round.log.join(' '),
@@ -1134,7 +1199,7 @@ function heConfirm() {
   const chosen = round.hand7.filter((_, i) => picked.has(i));
   settleHand({
     optimal: playsBestFive(round.hand7, chosen),
-    review: { situation: round.hand7.map(cardLabel).join(' '), chosen: chosen.map(cardLabel).join(' '), correction: `${round.result.label}: ${round.result.cards.map(cardLabel).join(' ')}. Choose five cards for the highest ranking hand; equally ranked selections are accepted.` },
+    review: { quiz: bestFiveQuiz(round.hand7), situation: round.hand7.map(cardLabel).join(' '), chosen: chosen.map(cardLabel).join(' '), correction: `${round.result.label}: ${round.result.cards.map(cardLabel).join(' ')}. Choose five cards for the highest ranking hand; equally ranked selections are accepted.` },
     difficulty: handDifficulty(round.result),
     payout: 0,
     line: `YOU READ THE BOARD. IT IS ${round.result.label.toUpperCase()}.`,

@@ -84,7 +84,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   await send('Network.setCacheDisabled', { cacheDisabled: true });
   await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   if (topLevel) {
-    for (const guide of ['jacks-or-better', 'blackjack']) {
+    for (const guide of ['jacks-or-better', 'blackjack', 'holdem-best-five']) {
     const guideUrl = liveUrl
       ? new URL(`/guides/${guide}/?smoke=${Date.now()}`, liveUrl).href
       : `http://127.0.0.1:18997/guides/${guide}/`;
@@ -100,7 +100,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     await guideEval('document.querySelector("summary").click()');
     assert.equal(await guideEval('document.querySelector("details").open'), true, 'Native answer disclosure works');
     assert.equal(await guideEval('document.querySelector(".cta").pathname'), '/web/', 'Guide links to playable demo');
-    const targetGame = guide === 'blackjack' ? 'blackjack' : 'videopoker';
+    const targetGame = { blackjack: 'blackjack', 'jacks-or-better': 'videopoker', 'holdem-best-five': 'holdem' }[guide];
     assert.equal(await guideEval('new URL(document.querySelector(".cta").href).searchParams.get("practice")'), targetGame);
     await guideEval('localStorage.clear(); document.querySelector(".cta").click()');
     for (let i = 0; i < 100; i++) {
@@ -110,11 +110,11 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     assert.equal(await guideEval('document.getElementById("practiceInvitation").hidden'), false, 'Selected training is explained before starting');
     await guideEval('document.getElementById("btnNew").click(); document.querySelector(".class-card").click(); document.getElementById("btnBecome").click()');
     assert.equal(await guideEval('document.getElementById("scr-lesson").hidden'), false, 'Guide starts its own lesson after trainer selection');
-    const expectedGym = targetGame === 'blackjack' ? 'countyfair' : 'pokergym';
+    const expectedGym = { blackjack: 'countyfair', videopoker: 'pokergym', holdem: 'riverstone' }[targetGame];
     const started = await guideEval('JSON.parse(localStorage.getItem("pokergym:save:v1"))');
     assert.equal(started.activeSession.gymId, expectedGym);
     assert.equal(started.activeSession.played, 0);
-    const preserved = { ...started, activeSession: { gymId: 'riverstone', played: 2, optimal: 1, startedAt: '2026-10-07T00:00:00.000Z' } };
+    const preserved = { ...started, activeSession: { gymId: targetGame === 'holdem' ? 'countyfair' : 'riverstone', played: 2, optimal: 1, startedAt: '2026-10-07T00:00:00.000Z' } };
     await guideEval(`localStorage.setItem('pokergym:save:v1', ${JSON.stringify(JSON.stringify(preserved))}); location.reload()`);
     for (let i = 0; i < 100; i++) {
       if (await guideEval('Boolean(document.getElementById("btnContinue")?.onclick) && !document.getElementById("btnContinue").disabled')) break;
@@ -158,6 +158,33 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     }
     throw new Error(`Condition did not resolve: ${expression}`);
   }
+  await waitFor('Boolean(document.getElementById("btnNew")?.onclick)');
+  if (topLevel) {
+    await waitFor('!document.getElementById("installHelp").hidden');
+    for (const outcome of ['dismissed', 'accepted', 'error']) {
+      await evaluate(`(() => {
+        window.installTestCalls = 0;
+        const event = new Event('beforeinstallprompt', { cancelable: true });
+        event.prompt = async () => { window.installTestCalls++; ${outcome === 'error' ? "throw new Error('Test unavailable');" : ''} };
+        event.userChoice = Promise.resolve({ outcome: ${JSON.stringify(outcome)} });
+        window.dispatchEvent(event);
+        window.installTestPrevented = event.defaultPrevented;
+      })()`);
+      assert.equal(await evaluate('window.installTestPrevented'), true);
+      assert.equal(await evaluate('document.getElementById("btnInstall").hidden'), false);
+      await evaluate('document.getElementById("btnInstall").click(); document.getElementById("btnInstall").click()');
+      await waitFor(`document.getElementById('installStatus').textContent.includes(${JSON.stringify(outcome === 'error' ? 'BROWSER MENU' : outcome === 'accepted' ? 'REQUEST ACCEPTED' : 'SKIPPED')})`);
+      assert.equal(await evaluate('window.installTestCalls'), 1, 'Installation requires one explicit click and consumes each prompt once');
+      assert.equal(await evaluate('document.getElementById("btnInstall").hidden'), true);
+    }
+    await evaluate('window.dispatchEvent(new Event("appinstalled"))');
+    assert.equal(await evaluate('document.getElementById("installHelp").hidden'), true);
+    assert.match(await evaluate('document.getElementById("installStatus").textContent'), /HOME SCREEN/);
+    assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Install controls fit phone width');
+    console.log('PASS: synthetic install prompt dismissal, acceptance, failure and completion; no physical installation claimed.');
+  } else {
+    assert.equal(await evaluate('document.getElementById("btnInstall").hidden'), true, 'Embedded ZIP does not advertise cloud installation');
+  }
   async function checkPrivacy() {
     assert.equal(await evaluate(`document.querySelector('a[href="privacy.html"]').target`), '_blank', 'Data guidance preserves the running game');
     await evaluate(`(() => {
@@ -197,6 +224,16 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     console.log('PASS: localhost parent embeds 127.0.0.1 game in an isolated cross-site target.');
   }
   assert.equal(await evaluate('document.title'), 'POKERGYM');
+  const reorderedHolds = await evaluate(`(async () => {
+    const { bestHold, clearCache } = await import('../src/coach/videopoker.js');
+    clearCache();
+    const hand = [{r:11,s:0},{r:11,s:1},{r:7,s:2},{r:4,s:3},{r:2,s:0}];
+    const first = bestHold(hand);
+    const second = bestHold([hand[2],hand[0],hand[3],hand[1],hand[4]]);
+    return { first: first.holds, second: second.holds, ev: second.ev === first.ev };
+  })()`);
+  assert.deepEqual(reorderedHolds, { first: [true,true,false,false,false], second: [false,true,false,true,false], ev: true }, 'Cached coach holds follow reordered cards');
+  console.log('PASS: video-poker cache preserves hold positions for reordered cards.');
   await checkPrivacy();
   assert.ok(await evaluate('Boolean(document.getElementById("btnNew").onclick)'), `Modules loaded; runtime=${JSON.stringify(errors)}; failed requests=${JSON.stringify(failed)}`);
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), '390px embed has no horizontal overflow');
@@ -303,9 +340,9 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     await sleep(100);
   }
   await evaluate('document.getElementById("btnContinue").click(); document.querySelector("#mistakeReview summary").click()');
-  assert.equal(await evaluate('document.querySelector("#mistakeReview details p:nth-of-type(3)").hidden'), true, 'Coach answer starts hidden');
+  assert.equal(await evaluate('document.querySelector("#mistakeReview details .mistake-answer").hidden'), true, 'Coach answer starts hidden');
   await evaluate('document.querySelector("#mistakeReview button").click()');
-  assert.equal(await evaluate('document.querySelector("#mistakeReview details p:nth-of-type(3)").hidden'), false);
+  assert.equal(await evaluate('document.querySelector("#mistakeReview details .mistake-answer").hidden'), false);
   await evaluate('document.querySelectorAll("#mistakeReview button")[1].click()');
   assert.equal(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).mistakes[0].reviews'), 1);
   assert.equal(await evaluate('document.querySelectorAll("#mistakeReview button")[1].disabled'), true);
@@ -331,7 +368,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   await evaluate('document.querySelector("#mistakeReview [data-retry-action=stand]").click(); document.querySelector("#mistakeReview [data-retry-action=hit]").click()');
   assert.deepEqual(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).mistakes[0].retries'), { attempted: 1, correct: 0 }, 'Only first answer scores per visit');
   assert.match(await evaluate('document.querySelector("#mistakeReview details").textContent'), /TRY THE COACH PLAY NEXT VISIT/);
-  assert.equal(await evaluate('document.querySelector("#mistakeReview details p:nth-of-type(3)").hidden'), false);
+  assert.equal(await evaluate('document.querySelector("#mistakeReview details .mistake-answer").hidden'), false);
   await evaluate('document.getElementById("btnContinue").click(); document.querySelector("#mistakeReview summary").click(); document.querySelector("#mistakeReview [data-retry-action=hit]").click()');
   assert.deepEqual(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).mistakes[0].retries'), { attempted: 2, correct: 1 });
   const afterRetry = await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1"))');
@@ -339,12 +376,22 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   await evaluate('document.getElementById("btnContinue").click(); document.querySelector("#mistakeReview summary").click(); [...document.querySelectorAll("#mistakeReview details button")].find(b => b.textContent === "REVEAL COACH ANSWER").click(); document.querySelector("#mistakeReview [data-retry-action=hit]").click()');
   assert.deepEqual(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).mistakes[0].retries'), { attempted: 2, correct: 1 }, 'Reveal disqualifies scoring');
   await evaluate('document.getElementById("btnBackup").click()');
-  assert.deepEqual(await evaluate('JSON.parse(document.getElementById("backupText").value).mistakes[0].retries'), { attempted: 2, correct: 1 }, 'Retry record is portable');
+  assert.deepEqual(await evaluate('JSON.parse(document.getElementById("backupText").value).mistakes[0].retries'), { attempted: 2, correct: 1 },  'Retry record is portable');
+  const reviewSchedule = await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).mistakes[0].schedule');
+  assert.equal(reviewSchedule.streak, 0, 'Early correct answer does not advance a missed review');
+  assert.equal(reviewSchedule.dueAt - reviewSchedule.lastAnsweredAt, 600000);
+  assert.match(await evaluate('document.getElementById("reviewScheduleSummary").textContent'), /0 SCORED REVIEWS DUE/);
+  assert.match(await evaluate('document.querySelector("#mistakeReview details").textContent'), /NEXT REVIEW:/);
+  assert.deepEqual(await evaluate('JSON.parse(document.getElementById("backupText").value).mistakes[0].schedule'), reviewSchedule, 'Schedule travels in backup');
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Retry choices fit phone');
   await evaluate('document.querySelector("[data-session-gym=pokergym]").click()');
   // Lesson may already be complete in this test save.
   await evaluate('if (!document.getElementById("scr-lesson").hidden) document.getElementById("btnSkip").click()');
+  await evaluate('document.getElementById("btnAsk").click(); document.getElementById("btnApply").click()');
+  const chipsBeforeDraw = await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).chips');
   await evaluate('document.getElementById("btnDraw").click(); document.getElementById("btnDraw").click()');
+  const displayedPayout = await evaluate('Number(document.getElementById("pays").textContent.match(/WON ([\\d,]+)/)[1].replaceAll(",", ""))');
+  assert.equal(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).chips'), chipsBeforeDraw + 50 + displayedPayout, 'Video-poker chips match the displayed payout plus the correct-decision reward');
   assert.equal(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).activeSession.played'), 1, 'Repeated settlement cannot score twice');
   await evaluate('document.getElementById("btnMap").click()');
   assert.match(await evaluate('document.getElementById("btnResumeSession").textContent'), /1\/5/);
@@ -358,7 +405,30 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   assert.equal(await evaluate('document.getElementById("btnNext").textContent'), 'RETURN TO MAP');
   await evaluate('document.getElementById("btnNext").click()');
   assert.match(await evaluate('document.getElementById("shortSessions").textContent'), /[0-5]\/5 CORRECT/);
+  const suggested = await evaluate(`(async () => {
+    const { recommendedPractice } = await import('../src/rpg/state.js');
+    return recommendedPractice(JSON.parse(localStorage.getItem('pokergym:save:v1')));
+  })()`);
+  assert.ok(suggested, 'Missed completed-session decisions produce a practice recommendation');
+  assert.match(await evaluate('document.getElementById("practiceRecommendation").textContent'), /LOWEST RECORDED ACCURACY/);
+  assert.match(await evaluate(`document.querySelector('[data-session-gym="${suggested.gymId}"]').textContent`), /^SUGGESTED/);
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Session results fit phone');
+  const vpMiss = await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).mistakes.find(m => m.game === "videopoker")');
+  assert.ok(vpMiss?.quiz, 'Actual video-poker miss captures original hold patterns');
+  assert.equal(vpMiss.quiz.choices.length, 32);
+  await evaluate(`(() => {
+    const entry = [...document.querySelectorAll('#mistakeReview details')].find(e => e.querySelector('[data-retry-card]'));
+    entry.open = true;
+    const p = JSON.parse(localStorage.getItem('pokergym:save:v1'));
+    const m = p.mistakes.find(m => m.game === 'videopoker');
+    [...entry.querySelectorAll('[data-retry-card]')].forEach((button, i) => { if (m.quiz.optimal[0][i] === '1') button.click(); });
+    entry.querySelector('[data-retry-action="check-hold"]').click();
+    entry.querySelector('[data-retry-action="check-hold"]').click();
+    [...entry.querySelectorAll('[data-retry-card]')].forEach(b => b.click());
+  })()`);
+  assert.deepEqual(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).mistakes.find(m => m.game === "videopoker").retries'), { attempted: 1, correct: 1 });
+  assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Original-hold retry fits phone');
+  console.log('PASS: actual video-poker miss captures 32 original hold patterns; card selection scores once and fits phone.');
   assert.equal(await evaluate('document.getElementById("playerFeedback").hidden'), false, 'Feedback available after completed practice');
   assert.equal(await evaluate('document.getElementById("playerShare").hidden'), false);
   const invitation = await evaluate('document.getElementById("sharePreview").value');
@@ -386,7 +456,8 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Feedback form fits 390px');
   // Actual short sessions in the three previously locked games, with no badge injection.
   for (const gym of ['countyfair', 'villaoak', 'riverstone']) {
-    if (gym === 'countyfair') await evaluate(`(async () => {
+    if (gym === 'villaoak') await evaluate('window.baccaratTestRandom = Math.random; Math.random = () => 0.6');
+    if (gym === 'countyfair' || gym === 'riverstone') await evaluate(`(async () => {
       const { seededRng } = await import('../src/cards.js');
       window.retryTestRandom = Math.random; Math.random = seededRng(7);
     })()`);
@@ -394,13 +465,17 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     assert.equal(await evaluate('document.getElementById("scr-lesson").hidden'), false, `${gym} introduces its own lesson`);
     await evaluate('document.getElementById("btnSkip").click()');
     assert.equal(await evaluate('document.getElementById("scr-battle").hidden'), false);
-    if (gym === 'countyfair') await evaluate('Math.random = window.retryTestRandom; delete window.retryTestRandom');
+    if (gym === 'countyfair' || gym === 'riverstone') await evaluate('Math.random = window.retryTestRandom; delete window.retryTestRandom');
     for (let step = 0; step < 20; step++) {
       if (!await evaluate('Boolean(JSON.parse(localStorage.getItem("pokergym:save:v1")).activeSession)')) break;
       await evaluate(`(() => {
-        if (!document.getElementById('battleEndRow').hidden) { document.getElementById('btnNext').click(); return; }
+        if (!document.getElementById('battleEndRow').hidden) {
+          if ('${gym}' === 'villaoak') Math.random = () => ${step % 4 === 1 ? 0.1 : 0.9};
+          document.getElementById('btnNext').click(); return;
+        }
         if ('${gym}' === 'countyfair') document.getElementById('btnStand').click();
-        else if ('${gym}' === 'villaoak') document.getElementById('btnBanker').click();
+        else if ('${gym}' === 'villaoak') document.querySelector('#rowBet [data-quiz-correct=false]').click();
+        else if (${step} === 0) { for (let i = 0; i < 5; i++) document.querySelectorAll('[data-picked]')[i].click(); document.getElementById('btnConfirm').click(); }
         else { document.getElementById('btnAsk').click(); document.getElementById('btnApply').click(); document.getElementById('btnConfirm').click(); }
       })()`);
     }
@@ -408,6 +483,48 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     assert.equal(result.activeSession, null, `${gym} completes five hands`);
     assert.equal(result.sessions[0].gymId, gym);
     assert.equal(result.sessions[0].played, 5);
+    if (gym === 'riverstone') {
+      const captured = result.mistakes.find(m => m.game === 'holdem');
+      assert.ok(captured?.quiz, 'Actual Holdem miss captures the original seven-card key');
+      assert.equal(captured.quiz.choices.length, 21);
+      await evaluate('document.getElementById("btnNext").click()');
+      await evaluate(`(() => {
+        const entry = [...document.querySelectorAll('#mistakeReview details')].find(e => e.querySelector('[data-retry-action="check-five"]'));
+        entry.open = true;
+        entry.querySelector('[data-retry-action="check-five"]').click();
+      })()`);
+      assert.equal(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).mistakes.find(m => m.game === "holdem").retries'), undefined, 'Incomplete selection is not scored');
+      await evaluate(`(() => {
+        const entry = [...document.querySelectorAll('#mistakeReview details')].find(e => e.querySelector('[data-retry-action="check-five"]'));
+        const m = JSON.parse(localStorage.getItem('pokergym:save:v1')).mistakes.find(m => m.game === 'holdem');
+        [...entry.querySelectorAll('[data-retry-card]')].forEach((button, i) => { if (m.quiz.optimal[0][i] === '1') button.click(); });
+        entry.querySelector('[data-retry-action="check-five"]').click();
+        entry.querySelector('[data-retry-action="check-five"]').click();
+        [...entry.querySelectorAll('[data-retry-card]')].forEach(button => button.click());
+      })()`);
+      assert.deepEqual(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).mistakes.find(m => m.game === "holdem").retries'), { attempted: 1, correct: 1 });
+      await evaluate(`document.getElementById('btnContinue').click();
+        const entry = [...document.querySelectorAll('#mistakeReview details')].find(e => e.querySelector('[data-retry-action="check-five"]'));
+        entry.open = true;
+        [...entry.querySelectorAll('button')].find(button => button.textContent === 'REVEAL COACH ANSWER').click();
+        entry.querySelector('[data-retry-action="check-five"]').click();`);
+      assert.deepEqual(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).mistakes.find(m => m.game === "holdem").retries'), { attempted: 1, correct: 1 }, 'Persisted Holdem retry cannot score after reveal on another visit');
+      assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Seven-card retry fits phone');
+      console.log('PASS: actual Holdem miss captures 21 selections; incomplete pick is unscored; best-five retry scores once and fits phone.');
+    }
+    if (gym === 'villaoak') {
+      assert.equal(result.sessions[0].optimal, 0, 'Missed numeric and dealt baccarat answers score correctly across transitions');
+      const captured = result.mistakes.filter(m => m.game === 'baccarat');
+      assert.equal(captured.length, 5);
+      for (const m of captured) {
+        assert.ok(m.quiz.choices.includes(m.chosen));
+        assert.ok(!m.quiz.optimal.includes(m.chosen));
+      }
+      assert.ok(captured.some(m => m.quiz.choices.includes('BANKER')));
+      assert.ok(captured.some(m => m.quiz.choices.includes('YES, WORTHWHILE')));
+      assert.ok(captured.some(m => m.quiz.choices.some(c => c.endsWith(' CHIPS'))));
+      await evaluate('Math.random = window.baccaratTestRandom; delete window.baccaratTestRandom');
+    }
     if (gym === 'countyfair') {
       const captured = result.mistakes.filter(m => m.game === 'blackjack' && m.situation !== 'SYNTHETIC RETRY TEST' && m.quiz);
       assert.ok(captured.length > 0, 'Actual missed blackjack play captures a retry key');
@@ -417,11 +534,36 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
       }
     }
     assert.deepEqual(result.badges, [], 'Training never awards or unlocks badges');
-    await evaluate('document.getElementById("btnNext").click()');
+    if (gym !== 'riverstone') await evaluate('document.getElementById("btnNext").click()');
     assert.equal(await evaluate('document.querySelectorAll("[data-session-gym]").length'), 4);
     assert.equal(await evaluate('document.querySelector("[data-gym=riverstone]").disabled'), true);
     assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), `${gym} results fit phone`);
+    if (gym === 'villaoak') {
+      const before = await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1"))');
+      await evaluate(`document.querySelector('#mistakeReview summary').click();
+        document.querySelector('#mistakeReview details [data-retry-action]').click();
+        [...document.querySelectorAll('#mistakeReview details [data-retry-action]')].forEach(b => b.click())`);
+      const after = await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1"))');
+      assert.equal(after.mistakes[0].retries.attempted, 1, 'Baccarat scores only once per visit');
+      for (const key of ['xp', 'chips', 'handsPlayed', 'handsOptimal', 'practice', 'sessions']) assert.deepEqual(after[key], before[key]);
+      await evaluate(`document.getElementById('btnContinue').click();
+        document.querySelector('#mistakeReview summary').click();
+        const p = JSON.parse(localStorage.getItem('pokergym:save:v1'));
+        [...document.querySelectorAll('#mistakeReview details [data-retry-action]')].find(b => b.dataset.retryAction === p.mistakes[0].quiz.optimal[0]).click();
+        document.getElementById('btnBackup').click()`);
+      const saved = await evaluate('JSON.parse(document.getElementById("backupText").value)');
+      assert.equal(saved.mistakes[0].retries.attempted, 2);
+      assert.ok(saved.mistakes[0].retries.correct >= 1);
+      await evaluate(`document.getElementById('btnContinue').click();
+        document.querySelector('#mistakeReview summary').click();
+        [...document.querySelectorAll('#mistakeReview details button')].find(b => b.textContent === 'REVEAL COACH ANSWER').click();
+        document.querySelector('#mistakeReview details [data-retry-action]').click()`);
+      assert.deepEqual(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).mistakes[0].retries'), saved.mistakes[0].retries, 'Baccarat revealed answers cannot score');
+      assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Baccarat retry labels fit phone');
+    }
+
   }
+  console.log('PASS: actual baccarat misses capture all three question types; scored retries, once-per-visit/reveal guards and portable counts verified.');
   console.log('PASS: scored blackjack retry, no repeat/revealed-answer scoring, independent persisted counts and portable backup; original gameplay captures legal choices and answer key.');
   console.log('PASS: all four games available to a new trainer; blackjack, baccarat and Hold’em five-hand sessions complete without badges; badge journey remains locked.');
   assert.deepEqual(errors, []);

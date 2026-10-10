@@ -30,3 +30,12 @@ export function playsBestFive(hand7, chosen) {
   const picked = evaluate5(chosen);
   return compareStrength(picked.strength, best.strength) === 0;
 }
+
+// Preserve all tied best-five selections in the original seven-card order.
+export function bestFiveQuiz(hand7) {
+  if (!Array.isArray(hand7) || hand7.length !== 7) return null;
+  const choices = Array.from({ length: 128 }, (_, mask) => mask.toString(2).padStart(7, '0'))
+    .filter(pattern => [...pattern].filter(bit => bit === '1').length === 5);
+  const optimal = choices.filter(pattern => playsBestFive(hand7, hand7.filter((_, i) => pattern[i] === '1')));
+  return optimal.length ? { choices, optimal } : null;
+}
