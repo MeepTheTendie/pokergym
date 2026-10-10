@@ -213,8 +213,21 @@ export function tieBreakEven() {
 export function quizFor(rng = Math.random) {
   const roll = rng();
   if (roll < 0.5) return betSelectQuiz();
-  if (roll < 0.75) return commissionQuiz(rng());
-  return tieOddQuiz(rng());
+  if (roll < 0.75) return rotate(commissionQuiz(rng()), rng());
+  return rotate(tieOddQuiz(rng()), rng());
+}
+
+// Shuffle the button order so the correct choice is not always in the same
+// position (a fixed slot is a free answer for anyone who notices, and reusing
+// the value draw would correlate the slot with the answer). Takes the rng value
+// directly so the bank stays a pure function of the rng stream.
+function rotate(quiz, r) {
+  const options = quiz.options;
+  const at = Math.floor(r * options.length) % options.length;
+  return {
+    ...quiz,
+    options: options.slice(at).concat(options.slice(0, at)),
+  };
 }
 
 function betSelectQuiz() {

@@ -1,6 +1,32 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createProfile, applyResult, practiceSummary, serialize, deserialize, canPractice, canBattle, awardBadge } from '../src/rpg/state.js';
+import { recommendedPractice } from '../src/rpg/state.js';
+
+test('next practice uses measured accuracy, ignores small samples and preserves unfinished sessions', () => {
+  const base = createProfile('scholar');
+  assert.equal(recommendedPractice(base), null);
+  assert.equal(recommendedPractice(null), null);
+  const profile = { ...base, practice: {
+    videopoker: { played: 4, optimal: 0 },
+    blackjack: { played: 10, optimal: 6 },
+    baccarat: { played: 5, optimal: 2 },
+    holdem: { played: 5, optimal: 5 },
+  } };
+  const before = JSON.stringify(profile);
+  assert.equal(recommendedPractice(profile).gymId, 'villaoak');
+  assert.equal(JSON.stringify(profile), before);
+  assert.equal(recommendedPractice({ ...profile, activeSession: { gymId: 'countyfair' } }), null);
+  assert.equal(recommendedPractice({ ...base, practice: { holdem: { played: 5, optimal: 5 } } }), null);
+  // Compare exact ratios, not rounded display percentages; break equal ratios
+  // by fewer decisions to give the smaller sample another session.
+  assert.equal(recommendedPractice({ ...base, practice: {
+    blackjack: { played: 200, optimal: 101 }, baccarat: { played: 100, optimal: 50 },
+  } }).game, 'baccarat');
+  assert.equal(recommendedPractice({ ...base, practice: {
+    blackjack: { played: 10, optimal: 4 }, baccarat: { played: 5, optimal: 2 },
+  } }).game, 'baccarat');
+});
 
 test('practice accuracy measures decisions, not winning payouts, and persists', () => {
   const base = createProfile('scholar');
@@ -159,5 +185,62 @@ test('invalid quiz answer keys cannot create retry scores or survive external re
   const p = recordMistake(base, { game: 'blackjack', situation: '16 vs 10', chosen: 'STAND', correction: 'HIT', quiz: { choices: ['hit', 'stand'], optimal: ['hit'] } });
   for (const retries of [{ attempted: 1, correct: 2 }, { attempted: -1, correct: 0 }, { attempted: 1.5, correct: 0 }]) {
     assert.throws(() => readBackup(JSON.stringify({ ...p, mistakes: [{ ...p.mistakes[0], retries }] })));
+  }
+});
+
+test('baccarat retries preserve all original question types and survive backup without rewards', async () => {
+  const { quizFor } = await import('../src/coach/baccarat.js');
+  const { recordMistake, answerMistakeQuiz, validMistakeQuiz } = await import('../src/rpg/state.js');
+  const { readBackup, writeBackup } = await import('../src/rpg/backup.js');
+  for (const roll of [0.1, 0.6, 0.9]) {
+    const question = quizFor(() => roll);
+    const wrong = question.options.find(a => a !== question.correct);
+    const base = recordMistake(createProfile('scholar'), {
+      game: 'baccarat', situation: question.prompt, chosen: wrong, correction: question.reason,
+      quiz: { choices: question.options, optimal: [question.correct] },
+    });
+    assert.equal(validMistakeQuiz(base.mistakes[0].quiz, 'baccarat'), true);
+    question.options.pop();
+    assert.ok(base.mistakes[0].quiz.choices.includes(wrong));
+    const scored = answerMistakeQuiz(answerMistakeQuiz(base, 0, wrong), 0, question.correct);
+    assert.deepEqual(scored.mistakes[0].retries, { attempted: 2, correct: 1 });
+    assert.deepEqual(readBackup(writeBackup(scored)), scored);
+    for (const key of ['xp', 'chips', 'handsPlayed', 'handsOptimal', 'practice', 'sessions']) assert.deepEqual(scored[key], base[key]);
+    assert.equal(answerMistakeQuiz(base, 0, 'invented'), base);
+    assert.equal(validMistakeQuiz(base.mistakes[0].quiz, 'holdem'), false);
+    for (const choices of [['', 'BANKER'], ['BANKER', 'BANKER'], [42, 'BANKER'], ['x'.repeat(81), 'BANKER']]) {
+      const quiz = { choices, optimal: ['BANKER'] };
+      assert.equal(validMistakeQuiz(quiz, 'baccarat'), false);
+      assert.throws(() => readBackup(JSON.stringify({ ...base, mistakes: [{ ...base.mistakes[0], quiz }] })));
+    }
+  }
+});
+
+
+test('video poker recall scores exact original hold positions and preserves tied best holds', async () => {
+  const { recordMistake, answerMistakeQuiz, validMistakeQuiz } = await import('../src/rpg/state.js');
+  const { bestHold } = await import('../src/coach/videopoker.js');
+  const { readBackup, writeBackup } = await import('../src/rpg/backup.js');
+  const hand = [{ r: 2, s: 3 }, { r: 11, s: 2 }, { r: 5, s: 1 }, { r: 11, s: 3 }, { r: 8, s: 0 }];
+  const coach = bestHold(hand);
+  const quiz = { choices: Array.from({ length: 32 }, (_, mask) => mask.toString(2).padStart(5, '0')),
+    optimal: coach.optimal.map(pattern => pattern.map(Number).join('')) };
+  assert.deepEqual(quiz.optimal, ['01010']);
+  const base = recordMistake(createProfile('scholar'), { game: 'videopoker', situation: '2C JD 5H JC 8S', chosen: 'NONE', correction: 'HOLD JACKS', quiz });
+  quiz.optimal.pop();
+  let scored = answerMistakeQuiz(base, 0, '11000');
+  scored = answerMistakeQuiz(scored, 0, '01010');
+  assert.deepEqual(scored.mistakes[0].retries, { attempted: 2, correct: 1 });
+  assert.deepEqual(readBackup(writeBackup(scored)), scored);
+  for (const key of ['xp', 'chips', 'handsPlayed', 'handsOptimal', 'practice', 'sessions']) assert.deepEqual(scored[key], base[key]);
+  const tied = { ...base.mistakes[0].quiz, optimal: ['01010', '00000'] };
+  assert.equal(validMistakeQuiz(tied, 'videopoker'), true);
+  for (const action of tied.optimal) {
+    const p = { ...base, mistakes: [{ ...base.mistakes[0], quiz: tied }] };
+    assert.equal(answerMistakeQuiz(p, 0, action).mistakes[0].retries.correct, 1);
+  }
+  for (const bad of [{ choices: ['00000', '01010'], optimal: ['01010'] }, { ...tied, optimal: ['xxxxx'] }]) {
+    assert.equal(validMistakeQuiz(bad, 'videopoker'), false);
+    assert.throws(() => readBackup(JSON.stringify({ ...base, mistakes: [{ ...base.mistakes[0], quiz: bad }] })));
   }
 });

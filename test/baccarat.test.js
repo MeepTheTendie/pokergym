@@ -269,3 +269,23 @@ test('tie promo quizzes flip to worthwhile only at 10:1 or higher', () => {
   const q = quizFor(rngOf(0.9, 0.75));
   assert.ok(q.prompt.includes('11:1'));
 });
+
+test('the correct quiz choice is not pinned to a fixed button position', () => {
+  const positions = { commission: new Set(), tieodds: new Set() };
+  const rng = seededRng(20261007);
+  for (let i = 0; i < 4000; i++) {
+    const q = quizFor(rng);
+    assert.ok(q.options.includes(q.correct), 'answer key is always on offer');
+    assert.equal(new Set(q.options).size, q.options.length, `${q.type} options are distinct`);
+    const at = q.options.indexOf(q.correct);
+    if (q.type === 'commission') {
+      assert.equal(q.options.length, 3);
+      positions.commission.add(at);
+    } else if (q.type === 'tieodds') {
+      assert.equal(q.options.length, 2);
+      positions.tieodds.add(at);
+    }
+  }
+  assert.deepEqual([...positions.commission].sort((a, b) => a - b), [0, 1, 2], 'commission answer reaches every slot');
+  assert.deepEqual([...positions.tieodds].sort((a, b) => a - b), [0, 1], 'tie answer reaches both slots');
+});

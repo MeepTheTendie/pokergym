@@ -197,6 +197,16 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     console.log('PASS: localhost parent embeds 127.0.0.1 game in an isolated cross-site target.');
   }
   assert.equal(await evaluate('document.title'), 'POKERGYM');
+  const reorderedHolds = await evaluate(`(async () => {
+    const { bestHold, clearCache } = await import('../src/coach/videopoker.js');
+    clearCache();
+    const hand = [{r:11,s:0},{r:11,s:1},{r:7,s:2},{r:4,s:3},{r:2,s:0}];
+    const first = bestHold(hand);
+    const second = bestHold([hand[2],hand[0],hand[3],hand[1],hand[4]]);
+    return { first: first.holds, second: second.holds, ev: second.ev === first.ev };
+  })()`);
+  assert.deepEqual(reorderedHolds, { first: [true,true,false,false,false], second: [false,true,false,true,false], ev: true }, 'Cached coach holds follow reordered cards');
+  console.log('PASS: video-poker cache preserves hold positions for reordered cards.');
   await checkPrivacy();
   assert.ok(await evaluate('Boolean(document.getElementById("btnNew").onclick)'), `Modules loaded; runtime=${JSON.stringify(errors)}; failed requests=${JSON.stringify(failed)}`);
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), '390px embed has no horizontal overflow');
@@ -344,7 +354,11 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   await evaluate('document.querySelector("[data-session-gym=pokergym]").click()');
   // Lesson may already be complete in this test save.
   await evaluate('if (!document.getElementById("scr-lesson").hidden) document.getElementById("btnSkip").click()');
+  await evaluate('document.getElementById("btnAsk").click(); document.getElementById("btnApply").click()');
+  const chipsBeforeDraw = await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).chips');
   await evaluate('document.getElementById("btnDraw").click(); document.getElementById("btnDraw").click()');
+  const displayedPayout = await evaluate('Number(document.getElementById("pays").textContent.match(/WON ([\\d,]+)/)[1].replaceAll(",", ""))');
+  assert.equal(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).chips'), chipsBeforeDraw + 50 + displayedPayout, 'Video-poker chips match the displayed payout plus the correct-decision reward');
   assert.equal(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).activeSession.played'), 1, 'Repeated settlement cannot score twice');
   await evaluate('document.getElementById("btnMap").click()');
   assert.match(await evaluate('document.getElementById("btnResumeSession").textContent'), /1\/5/);
@@ -358,7 +372,30 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   assert.equal(await evaluate('document.getElementById("btnNext").textContent'), 'RETURN TO MAP');
   await evaluate('document.getElementById("btnNext").click()');
   assert.match(await evaluate('document.getElementById("shortSessions").textContent'), /[0-5]\/5 CORRECT/);
+  const suggested = await evaluate(`(async () => {
+    const { recommendedPractice } = await import('../src/rpg/state.js');
+    return recommendedPractice(JSON.parse(localStorage.getItem('pokergym:save:v1')));
+  })()`);
+  assert.ok(suggested, 'Missed completed-session decisions produce a practice recommendation');
+  assert.match(await evaluate('document.getElementById("practiceRecommendation").textContent'), /LOWEST RECORDED ACCURACY/);
+  assert.match(await evaluate(`document.querySelector('[data-session-gym="${suggested.gymId}"]').textContent`), /^SUGGESTED/);
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Session results fit phone');
+  const vpMiss = await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).mistakes.find(m => m.game === "videopoker")');
+  assert.ok(vpMiss?.quiz, 'Actual video-poker miss captures original hold patterns');
+  assert.equal(vpMiss.quiz.choices.length, 32);
+  await evaluate(`(() => {
+    const entry = [...document.querySelectorAll('#mistakeReview details')].find(e => e.querySelector('[data-retry-card]'));
+    entry.open = true;
+    const p = JSON.parse(localStorage.getItem('pokergym:save:v1'));
+    const m = p.mistakes.find(m => m.game === 'videopoker');
+    [...entry.querySelectorAll('[data-retry-card]')].forEach((button, i) => { if (m.quiz.optimal[0][i] === '1') button.click(); });
+    entry.querySelector('[data-retry-action="check-hold"]').click();
+    entry.querySelector('[data-retry-action="check-hold"]').click();
+    [...entry.querySelectorAll('[data-retry-card]')].forEach(b => b.click());
+  })()`);
+  assert.deepEqual(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).mistakes.find(m => m.game === "videopoker").retries'), { attempted: 1, correct: 1 });
+  assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Original-hold retry fits phone');
+  console.log('PASS: actual video-poker miss captures 32 original hold patterns; card selection scores once and fits phone.');
   assert.equal(await evaluate('document.getElementById("playerFeedback").hidden'), false, 'Feedback available after completed practice');
   assert.equal(await evaluate('document.getElementById("playerShare").hidden'), false);
   const invitation = await evaluate('document.getElementById("sharePreview").value');
@@ -386,6 +423,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Feedback form fits 390px');
   // Actual short sessions in the three previously locked games, with no badge injection.
   for (const gym of ['countyfair', 'villaoak', 'riverstone']) {
+    if (gym === 'villaoak') await evaluate('window.baccaratTestRandom = Math.random; Math.random = () => 0.6');
     if (gym === 'countyfair') await evaluate(`(async () => {
       const { seededRng } = await import('../src/cards.js');
       window.retryTestRandom = Math.random; Math.random = seededRng(7);
@@ -398,9 +436,12 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     for (let step = 0; step < 20; step++) {
       if (!await evaluate('Boolean(JSON.parse(localStorage.getItem("pokergym:save:v1")).activeSession)')) break;
       await evaluate(`(() => {
-        if (!document.getElementById('battleEndRow').hidden) { document.getElementById('btnNext').click(); return; }
+        if (!document.getElementById('battleEndRow').hidden) {
+          if ('${gym}' === 'villaoak') Math.random = () => ${step % 4 === 1 ? 0.1 : 0.9};
+          document.getElementById('btnNext').click(); return;
+        }
         if ('${gym}' === 'countyfair') document.getElementById('btnStand').click();
-        else if ('${gym}' === 'villaoak') document.getElementById('btnBanker').click();
+        else if ('${gym}' === 'villaoak') document.querySelector('#rowBet [data-quiz-correct=false]').click();
         else { document.getElementById('btnAsk').click(); document.getElementById('btnApply').click(); document.getElementById('btnConfirm').click(); }
       })()`);
     }
@@ -408,6 +449,19 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     assert.equal(result.activeSession, null, `${gym} completes five hands`);
     assert.equal(result.sessions[0].gymId, gym);
     assert.equal(result.sessions[0].played, 5);
+    if (gym === 'villaoak') {
+      assert.equal(result.sessions[0].optimal, 0, 'Missed numeric and dealt baccarat answers score correctly across transitions');
+      const captured = result.mistakes.filter(m => m.game === 'baccarat');
+      assert.equal(captured.length, 5);
+      for (const m of captured) {
+        assert.ok(m.quiz.choices.includes(m.chosen));
+        assert.ok(!m.quiz.optimal.includes(m.chosen));
+      }
+      assert.ok(captured.some(m => m.quiz.choices.includes('BANKER')));
+      assert.ok(captured.some(m => m.quiz.choices.includes('YES, WORTHWHILE')));
+      assert.ok(captured.some(m => m.quiz.choices.some(c => c.endsWith(' CHIPS'))));
+      await evaluate('Math.random = window.baccaratTestRandom; delete window.baccaratTestRandom');
+    }
     if (gym === 'countyfair') {
       const captured = result.mistakes.filter(m => m.game === 'blackjack' && m.situation !== 'SYNTHETIC RETRY TEST' && m.quiz);
       assert.ok(captured.length > 0, 'Actual missed blackjack play captures a retry key');
@@ -421,7 +475,32 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     assert.equal(await evaluate('document.querySelectorAll("[data-session-gym]").length'), 4);
     assert.equal(await evaluate('document.querySelector("[data-gym=riverstone]").disabled'), true);
     assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), `${gym} results fit phone`);
+    if (gym === 'villaoak') {
+      const before = await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1"))');
+      await evaluate(`document.querySelector('#mistakeReview summary').click();
+        document.querySelector('#mistakeReview details [data-retry-action]').click();
+        [...document.querySelectorAll('#mistakeReview details [data-retry-action]')].forEach(b => b.click())`);
+      const after = await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1"))');
+      assert.equal(after.mistakes[0].retries.attempted, 1, 'Baccarat scores only once per visit');
+      for (const key of ['xp', 'chips', 'handsPlayed', 'handsOptimal', 'practice', 'sessions']) assert.deepEqual(after[key], before[key]);
+      await evaluate(`document.getElementById('btnContinue').click();
+        document.querySelector('#mistakeReview summary').click();
+        const p = JSON.parse(localStorage.getItem('pokergym:save:v1'));
+        [...document.querySelectorAll('#mistakeReview details [data-retry-action]')].find(b => b.dataset.retryAction === p.mistakes[0].quiz.optimal[0]).click();
+        document.getElementById('btnBackup').click()`);
+      const saved = await evaluate('JSON.parse(document.getElementById("backupText").value)');
+      assert.equal(saved.mistakes[0].retries.attempted, 2);
+      assert.ok(saved.mistakes[0].retries.correct >= 1);
+      await evaluate(`document.getElementById('btnContinue').click();
+        document.querySelector('#mistakeReview summary').click();
+        [...document.querySelectorAll('#mistakeReview details button')].find(b => b.textContent === 'REVEAL COACH ANSWER').click();
+        document.querySelector('#mistakeReview details [data-retry-action]').click()`);
+      assert.deepEqual(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).mistakes[0].retries'), saved.mistakes[0].retries, 'Baccarat revealed answers cannot score');
+      assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Baccarat retry labels fit phone');
+    }
+
   }
+  console.log('PASS: actual baccarat misses capture all three question types; scored retries, once-per-visit/reveal guards and portable counts verified.');
   console.log('PASS: scored blackjack retry, no repeat/revealed-answer scoring, independent persisted counts and portable backup; original gameplay captures legal choices and answer key.');
   console.log('PASS: all four games available to a new trainer; blackjack, baccarat and Hold’em five-hand sessions complete without badges; badge journey remains locked.');
   assert.deepEqual(errors, []);
