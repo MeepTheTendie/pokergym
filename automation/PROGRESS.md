@@ -1045,3 +1045,21 @@ Verification (pre-commit, matches deployed source):
 - Post-deploy: live /src/rpg/drills.js 200, /sw.js 200, /web/index.html 200, and live web/app.js contains the new mastery/drill/coached markers. git diff --check clean.
 
 Next action: real-player daily-return/clarity/pricing feedback, or complete seller/payment onboarding. Do not treat the deploy or synthetic browser passes as demand.
+
+
+## 2026-10-12 — de-Pokémon copy pass + service-worker test fix, committed and deployed
+
+Outcome: finished the remaining player-facing "TRAINER" copy (now PLAYER/class/profile, consistent with the shipped "ONE SHARP PLAYER") and fixed the stale build test that read dist/web/sw.js instead of dist/sw.js. Committed the source and deployed it to the live Worker, so source and production match. No real customer demand, paid subscription or recurring revenue verified; US$200/month remains unmet.
+
+Actual changes:
+- test/build.test.js reads dist/sw.js (the path scripts/build.mjs has written since c877af5) and checks '/sw.js' is not in ASSETS. The CACHE version pattern, the /web/ or /src/ allowlist and the required-asset checks are unchanged. No application behavior changed.
+- Player-role "TRAINER" removed from shipped copy only: web/index.html ("PLAYER JOURNEY" topbar, "PLAYER" class detail, "PLAYER CARD" map card, share/feedback hints), web/app.js profile-replace confirmation, src/rpg/lessons.js Hold'em "READING DRILL", plus web/landing.html, web/privacy.html and the three public/guides pages. Internal identifiers/CSS (trainerIds, .trainer-card, trainerLine, TRAINER_RAMS, drawTrainerBack) and the `unknown trainer class` dev error are intentionally unchanged.
+- Deleted the stale dist/web/sw.js left by the pre-root build (dist is gitignored). A clean `rm -rf dist && npm run build` now ships only dist/sw.js, so the legacy /web/-scoped worker path is gone from production.
+
+Verification:
+- npm test 212/212 pass.
+- npm run test:offline PASS: offline cache ready, actual HTTP server stopped, offline reload, saved progress, lesson/battle/coach and notebook review.
+- `npm run deploy` (wrangler 4.148.0): Version ID ac3762e4-ea3c-4ade-806c-183710dd9c97, then a clean redeploy 187b7ac0-57d0-4a34-978f-26f2ca89c3ca after removing the stale asset.
+- Live checks: /web/ 200 (PLAYER JOURNEY / PLAYER CARD, no visible TRAINER), / 200 (PICK A CLASS), /sw.js 200 (CACHE pokergym-offline-d37c7ca2ce378f24ca2f, no self-cache), legacy /web/sw.js 404, guides and /web/privacy updated. Live 390px smoke test (POKERGYM_TEST_URL=https://pokergym.history-atlas.workers.dev/web/ npm run test:itch) PASS with zero runtime/game-asset errors. Synthetic browser passes are not real users or physical Android validation.
+
+Next action: physical Android install plus airplane-mode reopen, then the Google Play developer account and Android packaging. Real-player return/clarity/pricing feedback remains the gate for further product work.

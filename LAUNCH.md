@@ -65,3 +65,7 @@ Worker version 4787c4eb-799a-4a39-b814-8110e542b72a adds scored decision retries
 ## Privacy and local-data guidance release
 
 Worker version 3d730aef-a7d1-4325-bf89-e1683476284d publishes https://pokergym.history-atlas.workers.dev/web/privacy with source-checked local-storage, backup, feedback and hosting disclosures and browser data-removal guidance. Landing/game links, portable 390px embedding and live offline rendering passed. Cached HTML canonical-redirect handling was fixed after an initial live failure. Physical Android, store approval, player demand and recurring payments remain unverified. See automation/PROGRESS.md for evidence and access limits.
+
+## Copy cleanup and service-worker test fix release
+
+Worker version 187b7ac0-57d0-4a34-978f-26f2ca89c3ca removes the remaining player-role "TRAINER" copy (now PLAYER/class/profile, consistent with the shipped "ONE SHARP PLAYER") from the game, landing page, privacy page and guides, and drops a stale /web/-scoped service worker left by an earlier build. The build test now reads dist/sw.js, restoring 212/212. Offline checks and a live 390px smoke test passed with zero runtime or game asset errors. Physical Android installation, store approval, player demand and recurring payments remain unverified. See automation/PROGRESS.md for evidence and access limits.
