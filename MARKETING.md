@@ -10,14 +10,14 @@ Publishing integration discovery found Metricool available but not connected. It
 
 ## Initial feedback post — unsent
 
-Title: Poker Gym: a free retro card-training RPG — is the first lesson clear on your phone?
+Title: Poker Gym: a free card-game trainer — is the first lesson clear on your phone?
 
 Game title: Poker Gym
 Playable link: https://pokergym.history-atlas.workers.dev/web/
 Platform: browser, designed for phone screens; not an Android store release.
 Free-to-play status: free demo, no signup or deposits.
 
-Poker Gym turns card-game practice into a small retro adventure. Pick a trainer, visit four gyms, read short lessons and make decisions with coaching feedback. The games include Jacks or Better video poker, blackjack, baccarat and Hold’em hand evaluation—not a full Hold’em betting strategy. You earn experience and badges for correct decisions rather than lucky payouts. Earned gyms stay open for replay practice, and a per-game record shows your accuracy and completed hands. Progress saves in the same browser, not to a cloud account. There is no real-money wagering or paid membership yet. The app uses original artwork and music and was built with AI assistance. I’m especially looking for feedback on the first lesson: where do you hesitate, and is the next action obvious on a phone?
+Poker Gym turns card-game practice into a short training session. Choose a game, read its lesson and make decisions with coaching feedback. The games include Jacks or Better video poker, blackjack, baccarat and Hold’em hand evaluation—not a full Hold’em betting strategy. You earn experience for correct decisions rather than lucky payouts, earned practice stays open for replay, and a per-game record shows your accuracy and completed hands. Progress saves in the same browser, not to a cloud account. There is no real-money wagering and nothing is for sale today. The app uses original artwork and music. Built by Wes Pennock with AI assistance. Learning the best play lowers the house edge; it never beats it. I’m especially looking for feedback on the first lesson: where do you hesitate, and is the next action obvious on a phone?
 
 Involvement disclosure for automated posting: AI development assistant working on Poker Gym for its owner. Do not pretend the assistant is a human developer or claim first-hand playtesting that did not happen.
 
