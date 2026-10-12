@@ -1,0 +1,64 @@
+P2+P3+P4 batch release evidence — 2026-10-12
+==========================================
+
+Commit:            0e0d558,963625f,0834eb2 "Copy: reframe landing, README and MARKETING as a card-game trainer"
+Changed:           web/landing.html, README.md, MARKETING.md (copy only; no app logic, no OG tags)
+Worker Version ID: 91c80a68 (after P4 deploy)-e4e9-4b10-b567-ec81825a402c
+URL:               https://pokergym.history-atlas.workers.dev
+
+Unit suite
+----------
+node --test --test-concurrency=1 'test/**/*.test.js'
+tests 212 | pass 212 | fail 0 | duration_ms 10968.47
+
+Deploy (npm run deploy, wrangler 4.148.0)
+-----------------------------------------
+Built public demo in dist: game assets and strategy modules only.
+Read 57 files from /home/meep/Projects/pokergym/dist
+1 new or modified static asset uploaded (+ /index.html); 44 already uploaded.
+Total Upload: 0.31 KiB / gzip: 0.22 KiB
+Deployed pokergym triggers (0.60 sec)
+Current Version ID: f28565c5-e4e9-4b10-b567-ec81825a402c
+
+Live checks (curl)
+------------------
+GET /       200, 7622 bytes — contains "no signup, no ads, no third-party trackers"
+                            — 0 matches for retro RPG / gym badge / Choose a trainer /
+                              PICK A CLASS / CARD-GAME TRAINING ADVENTURE
+GET /web/   200
+
+Live 390px smoke (POKERGYM_TEST_URL=https://pokergym.history-atlas.workers.dev/web/ npm run test:itch)
+-----------------------------------------------------------------------------------------------------
+PASS: jacks-or-better phone guide opens targeted five-hand lesson; unfinished other-game session preserved and resumed.
+PASS: blackjack phone guide opens targeted five-hand lesson; unfinished other-game session preserved and resumed.
+PASS: holdem-best-five phone guide opens targeted five-hand lesson; unfinished other-game session preserved and resumed.
+PASS: synthetic install prompt dismissal, acceptance, failure and completion; no physical installation claimed.
+PASS: video-poker cache preserves hold positions for reordered cards.
+PASS: actual video-poker miss captures 32 original hold patterns; card selection scores once and fits phone.
+PASS: actual Holdem miss captures 21 selections; incomplete pick is unscored; best-five retry scores once and fits phone.
+PASS: actual baccarat misses capture all three question types; scored retries, once-per-visit/reveal guards and portable counts verified.
+PASS: scored blackjack retry, no repeat/revealed-answer scoring, independent persisted counts and portable backup; original gameplay captures legal choices and answer key.
+PASS: all four games available to a new trainer; blackjack, baccarat and Hold'em five-hand sessions complete without badges; badge journey remains locked.
+PASS: seeded daily drill mixes all four games deterministically; mid-drill progress persists and resumes; a replay scores no new XP or score; the result shares cleanly.
+PASS: haptics buzz once per settled hand, a dismissed toggle silences playback and persists across reloads.
+LIVE POKER GYM PHONE SMOKE TEST
+PASS: 390px live page, module/assets loading, trainer onboarding, lesson/battle/coach, save and resume,
+      hidden-answer mistake self-test, saved review, five-hand session resume/completion, voluntary
+      unsent feedback draft, private invitation copy/fallback/share states; zero runtime or game asset
+      network errors.
+
+Live installability (node scripts/installability-browser-test.mjs <live /web/>)
+-------------------------------------------------------------------------------
+Chromium 152.0.7977.82 Arch Linux; 3 icons; installabilityErrors: []; offlineStartUrlSaveResume: passed;
+physicalAndroidInstallation: unverified.
+
+Honest scope
+------------
+Copy-only release. No real-player demand, no paid entitlement and no recurring revenue verified.
+The page-visit counter deliberately does not exist yet (scheduled as P5 on day 2), so the landing page
+claims only "no signup, no ads, no third-party trackers." scripts/browser-test.mjs is harness-only
+(waits for the local harness.html "DONE" title, and the harness is excluded from the build); the
+production smoke test used is scripts/itch-browser-test.mjs with POKERGYM_TEST_URL.
+
+
+Price/feedback changes: web/feedback.js one-time US$4.99, web/index.html form updated, README.md updated, test/feedback.test.js updated. In-app Feedback links added to session recap and map TODAY panel (Email + GitHub). Live GitHub issue #1 and artifacts/feedback-issue.md updated. Two mailto subjects kept: Poker Gym feedback (quick links) vs Poker Gym player feedback (survey). All 212 tests pass, live 390px smoke and installability clean.
