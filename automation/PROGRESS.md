@@ -1103,3 +1103,18 @@ Verification (local only):
 - Not verified: production curl of tags, X/Discord unfurls (post-deploy). scripts/itch-browser-test.mjs fails at its feedback-draft assertion (line ~514) on b6308b7 as well, so it predates this change; scripts/browser-test.mjs harness did not finish cleanly on the base commit either.
 
 Next action: owner deploys (npm run deploy), runs the live smoke and the X/Discord unfurl check; then P5 (visit counter) separately.
+
+
+## 2026-10-12 — P6 desktop-friendly layout and keyboard play, committed, NOT deployed
+
+Outcome: /web/ now uses the screen on desktop and tablet instead of a phone-width strip; every game is playable by keyboard; player-facing copy is browser-neutral. No real customer demand or revenue verified.
+
+Verification (local serve, headless Chromium):
+- node --test test/*.test.js: 234/234 (adds test/keys.test.js).
+- Itch 390px suite, offline suite, installability check and screenshots.mjs layout asserts all pass (itch test's stale 'free-only' price value fixed in its own commit; it had blocked the suite since P4).
+- No horizontal scroll at 390/820/1280/1440/1920; shell width 94% (820), 95% (1280), 86% (1440), 65% (1920); title and all four hand screens fit without vertical scroll at 1280x800 and 1440x900; smallest visible text 11px at >=760px.
+- 390px title/map/hand screenshots before vs after: same layout (only random deal content differs).
+- Keyboard only (CDP key events, no clicks): a five-hand session completed in each of the four games ("FIVE HANDS COMPLETE"), plus direct S / 1 / 1 / 1 key checks in blackjack, baccarat, video poker and hold'em.
+- Not verified: real desktop browsers other than headless Chromium (Firefox/Safari), real touch devices after the change, production after deploy.
+
+Next action: owner deploys and checks /web/ at desktop width; then P5.
