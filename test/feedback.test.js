@@ -15,6 +15,8 @@ test('voluntary feedback safely encodes text and records intent without implying
   assert.equal(github.searchParams.get('title'), 'Poker Gym player feedback');
   assert.deepEqual([...github.searchParams.keys()], ['title', 'body']);
   assert.match(draft.body, /not a purchase or subscription/);
+  assert.ok(draft.body.includes('Possible one-time US$4.99 unlock'));
+  assert.ok(!draft.body.includes('US$5/month'));
   assert.ok(draft.body.endsWith(note));
   assert.equal([...url.searchParams.keys()].join(','), 'subject,body');
   assert.throws(() => feedbackDraft({ clarity: '', returnInterest: 'yes', priceInterest: 'interested' }));

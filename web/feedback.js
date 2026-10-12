@@ -9,7 +9,7 @@ export function feedbackDraft({ clarity, returnInterest, priceInterest, note = '
     'Poker Gym voluntary player feedback',
     `First session: ${clarity}`,
     `Return for short training: ${returnInterest}`,
-    `Possible US$5/month weekly drills + deeper review: ${priceInterest}`,
+    `Possible one-time US$4.99 unlock: ${priceInterest}`,
     'This is feedback on a possible offer, not a purchase or subscription.',
     '',
     `Confusing or missing: ${String(note).slice(0, 400).trim() || '(no comment)'}`,

@@ -17,7 +17,7 @@ Prefer a quick lesson first? Try the [three-hand video-poker guide](https://poke
 
 ## Help decide what comes next
 
-After a real session, [leave voluntary feedback](https://github.com/MeepTheTendie/pokergym/issues/1): which game/device did you use, where was the coaching unclear, and what would make you return next week? The thread also asks about interest in a hypothetical US$5/month weekly-drill and deeper-review offer. That offer is research, not an available subscription.
+After a real session, [leave voluntary feedback](https://github.com/MeepTheTendie/pokergym/issues/1): which game/device did you use, where was the coaching unclear, and what would make you return next week? The thread also asks about interest in a possible one-time US$4.99 unlock (extra weak-spot drill packs and more video-poker pay tables). That is a hypothetical offer for research only; nothing is for sale today and the free demo stays free.
 
 GitHub feedback is public and requires an account. Omit personal details and save backups. The demo also provides an email-draft alternative that you review and send yourself.
 
