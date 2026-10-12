@@ -12,7 +12,7 @@ if (status && window.top === window && document.querySelector('link[rel="manifes
     installPrompt = undefined;
     installButton.hidden = true;
     document.getElementById('installHelp').hidden = true;
-    installStatus.textContent = 'OPEN FROM YOUR HOME SCREEN FOR QUICK PRACTICE';
+    installStatus.textContent = 'OPEN FROM YOUR APPS OR HOME SCREEN FOR QUICK PRACTICE';
   };
   if (standalone()) installed();
   window.addEventListener('beforeinstallprompt', event => {

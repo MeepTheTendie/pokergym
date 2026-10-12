@@ -28,6 +28,7 @@ import {
   DAILY_GAME_LABEL,
 } from '../src/rpg/daily.js';
 import { parseEntryParams, isSharedDayCurrent, cleanEntrySearch, buildDailyShareText } from '../src/rpg/links.js';
+import { keyAction, shouldIgnoreKey } from '../src/rpg/keys.js';
 import { drillScenario, DRILL_HANDS, DRILL_GAMES } from '../src/rpg/drills.js';
 import { drawArt, drawTrainerBack } from './characters.js';
 import audio from './audio.js?v=20261006-audio3';
@@ -370,7 +371,7 @@ el('btnBecome').onclick = () => {
   if (profile && !becomeArmed) {
     becomeArmed = true;
     el('btnBecome').textContent = 'REPLACE YOUR SAVE?';
-    el('classDetailText').textContent = 'THIS REPLACES YOUR CURRENT PLAYER PROFILE, LEVEL, BADGES AND RECORD ON THIS BROWSER. TAP AGAIN TO CONFIRM, OR BACK TO KEEP YOUR SAVE.';
+    el('classDetailText').textContent = 'THIS REPLACES YOUR CURRENT PLAYER PROFILE, LEVEL, BADGES AND RECORD ON THIS BROWSER. PRESS AGAIN TO CONFIRM, OR BACK TO KEEP YOUR SAVE.';
     return;
   }
   becomeArmed = false;
@@ -1359,10 +1360,10 @@ function startHand() {
   renderBattle();
   audio.sfx('deal');
   const instructions = {
-    videopoker: 'Tap the cards you want to HOLD. What you leave alone gets redrawn in place. DRAW plays your hand.',
+    videopoker: 'Click or tap the cards to HOLD. What you leave alone gets redrawn in place. DRAW plays your hand.',
     blackjack: 'Read your hand and mine. Choose your next move, or ask me for a hint.',
     baccarat: 'Answer the percentage question. Every number you need is on the odds panel.',
-    holdem: 'Tap your best five cards, then CONFIRM 5. Ask me if you need a hint.',
+    holdem: 'Click or tap your best five, then CONFIRM 5. Ask me if you need a hint.',
   };
   const message = el('masterLine');
   clearInterval(message._typer);
@@ -1680,6 +1681,7 @@ function renderQuizButtons() {
     button.textContent = option;
     button.dataset.quizAnswer = option;
     button.dataset.quizCorrect = option === quiz.correct ? 'true' : 'false';
+    button.dataset.key = { BANKER: 'B', PLAYER: 'P', TIE: 'T' }[option] ?? String(quiz.options.indexOf(option) + 1);
     button.disabled = handDone;
     button.onclick = () => {
       audio.sfx('chip');
@@ -1877,15 +1879,38 @@ el('masterBox').onkeydown = (e) => {
   }
 };
 
+// Keyboard play (src/rpg/keys.js). A key only ever clicks a visible, enabled
+// on-screen button or selects a card, so it can do nothing a click could not.
+function usable(button) {
+  return button && !button.disabled && button.getClientRects().length > 0 && !button.closest('[hidden]');
+}
 document.addEventListener('keydown', (e) => {
-  if (!el('scr-lesson').hidden) {
-    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); advanceLesson(); }
+  const target = e.target instanceof Element ? e.target : null;
+  if (shouldIgnoreKey({
+    key: e.key, ctrlKey: e.ctrlKey, metaKey: e.metaKey, altKey: e.altKey,
+    targetTag: target?.tagName, targetEditable: target?.isContentEditable, targetRole: target?.getAttribute('role'),
+  })) return;
+  const screen = document.querySelector('.screen:not([hidden])')?.id?.replace('scr-', '');
+  const action = keyAction(e.key, { screen, game: gameId, handDone });
+  if (!action) return;
+  if (action.advance) { e.preventDefault(); advanceLesson(); return; }
+  if (action.card !== undefined) {
+    if (gameId === 'videopoker') {
+      if (round && !round.drawn && !handDone) { e.preventDefault(); toggleVpHold(action.card); }
+      return;
+    }
+    const card = el('zones').querySelectorAll('.card[data-picked]')[action.card];
+    if (usable(card)) { e.preventDefault(); card.click(); }
     return;
   }
-  if (gameId === 'videopoker' && e.key >= '1' && e.key <= '5'
-      && round && !round.drawn && !handDone && !el('scr-battle').hidden) {
-    toggleVpHold(Number(e.key) - 1);
+  if (action.option !== undefined || action.quiz) {
+    const options = [...el('rowBet').querySelectorAll('button')];
+    const choice = action.quiz ? options.find(b => b.dataset.quizAnswer === action.quiz) : options[action.option];
+    if (usable(choice)) { e.preventDefault(); choice.click(); }
+    return;
   }
+  const button = action.buttons.map(id => el(id)).find(usable);
+  if (button) { e.preventDefault(); button.click(); }
 });
 
 initTitle();

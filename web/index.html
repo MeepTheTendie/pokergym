@@ -53,9 +53,9 @@
   </div>
   <p class="hint" style="text-align:center; font-size:9px;">FOUR GAMES. FOUR MASTERS. ONE SHARP PLAYER.</p>
   <p class="hint" id="offlineStatus" role="status" style="text-align:center; font-size:9px;"></p>
-  <div style="text-align:center;"><button id="btnInstall" type="button" hidden>INSTALL FOR QUICK PRACTICE</button></div>
+  <div style="text-align:center;"><button id="btnInstall" type="button" hidden>INSTALL APP (OPTIONAL)</button></div>
   <p class="hint" id="installStatus" role="status" style="text-align:center; font-size:9px;"></p>
-  <p class="hint" id="installHelp" hidden style="text-align:center; font-size:9px;">ON ANDROID: OPEN YOUR BROWSER MENU AND LOOK FOR INSTALL APP OR ADD TO HOME SCREEN. CLEARING SITE DATA REMOVES YOUR SAVE.</p>
+  <p class="hint" id="installHelp" hidden style="text-align:center; font-size:9px;">PLAYS IN ANY BROWSER. TO KEEP IT HANDY, USE YOUR BROWSER'S INSTALL OR ADD-TO-HOME-SCREEN OPTION. CLEARING SITE DATA REMOVES YOUR SAVE.</p>
 </section>
 
 <!-- ============ CLASS SELECT ============ -->
@@ -206,14 +206,15 @@
       <span class="prompt" id="lessonPrompt">▼</span>
     </div>
     <div class="row">
-      <button id="btnSkip">SKIP</button>
-      <button id="btnLessonNext" class="primary">NEXT</button>
+      <button id="btnSkip" data-key="ESC">SKIP</button>
+      <button id="btnLessonNext" data-key="ENTER" class="primary">NEXT</button>
     </div>
   </div>
 </section>
 
 <!-- ============ BATTLE ============ -->
 <section id="scr-battle" class="screen" hidden>
+  <div class="battle-stage">
   <div class="scene">
     <span class="battle-label">MASTER EXAM</span>
     <canvas class="sprite master" id="masterSprite" width="48" height="48" aria-hidden="true"></canvas>
@@ -227,6 +228,8 @@
     <p class="hint" id="potentialText" style="margin:5px 0 0; font-size:9px; color:#3a4a3a;">HAND POTENTIAL</p>
   </div>
 
+  </div>
+  <div class="battle-talk">
   <div class="dialogue" id="masterBox" role="button" tabindex="0">
     <span class="nameplate" id="masterName">MASTER ROYALE</span>
     <p id="masterLine">&nbsp;</p>
@@ -238,20 +241,24 @@
     <p id="tipText" class="hint" style="margin:0;"></p>
   </div>
 
+  </div>
+  <div class="battle-table">
   <div class="window hand-panel">
     <h2 id="handTitle">YOUR HAND</h2>
     <div id="zones"></div>
     <p class="hint" id="pays" style="margin:8px 0 0; text-align:center;"></p>
   </div>
 
+  </div>
+  <div class="battle-side">
   <div class="window" id="coachPanel" hidden>
     <h2>COACH</h2>
     <div class="dialogue" style="background:var(--panel-2); margin-bottom:0;">
       <p id="advice" style="margin:0;"></p>
     </div>
     <div class="row">
-      <button id="btnWhy">WHY?</button>
-      <button id="btnApply" class="primary">APPLY PLAY</button>
+      <button id="btnWhy" data-key="W">WHY?</button>
+      <button id="btnApply" data-key="A" class="primary">APPLY PLAY</button>
     </div>
     <p class="hint" id="why" hidden style="margin:8px 0 0; font-size:10px;"></p>
   </div>
@@ -262,33 +269,34 @@
   </details>
 
   <div class="row">
-    <button id="btnAsk">ASK COACH</button>
-    <button id="btnDeal" class="primary">DEAL</button>
-    <button id="btnDraw">DRAW</button>
+    <button id="btnAsk" data-key="C">ASK COACH</button>
+    <button id="btnDeal" data-key="D" class="primary">DEAL</button>
+    <button id="btnDraw" data-key="D">DRAW</button>
   </div>
 
   <div class="row" id="rowActions" hidden>
-    <button id="btnHit">HIT</button>
-    <button id="btnStand" class="primary">STAND</button>
-    <button id="btnDouble">DOUBLE</button>
-    <button id="btnSplit">SPLIT</button>
+    <button id="btnHit" data-key="H">HIT</button>
+    <button id="btnStand" data-key="S" class="primary">STAND</button>
+    <button id="btnDouble" data-key="D">DOUBLE</button>
+    <button id="btnSplit" data-key="P">SPLIT</button>
   </div>
 
   <div class="row" id="rowBet" hidden>
-    <button id="btnBanker" class="primary">BANKER</button>
+    <button id="btnBanker"  class="primary">BANKER</button>
     <button id="btnPlayer">PLAYER</button>
     <button id="btnTie">TIE</button>
   </div>
 
   <div class="row" id="rowPick" hidden>
-    <button id="btnClear">CLEAR</button>
-    <button id="btnConfirm" class="primary">CONFIRM 5</button>
+    <button id="btnClear" data-key="X">CLEAR</button>
+    <button id="btnConfirm" data-key="ENTER" class="primary">CONFIRM 5</button>
   </div>
 
   <div class="window" id="sessionSummary" hidden></div>
 
   <div class="row" id="battleEndRow" hidden>
-    <button id="btnNext" class="primary">CONTINUE</button>
+    <button id="btnNext" class="primary" data-key="ENTER">CONTINUE</button>
+  </div>
   </div>
 </section>
 

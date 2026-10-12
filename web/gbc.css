@@ -514,8 +514,11 @@ button:focus-visible { outline: 3px solid #386a9c; outline-offset: 3px; }
 .payout-panel summary { cursor: pointer; min-height: 28px; font-size: 10px; }
 .payout-panel .paytable { margin-top: 8px; }
 #scr-battle { padding-bottom: 4px; }
-#scr-battle > .row { position: sticky; bottom: calc(env(safe-area-inset-bottom) + 8px); z-index: 3; padding: 6px; background: #d8dfc6; border: 1px solid #a1b18a; }
-#scr-battle > .row:has(~ .row:not([hidden])) { position: static; }
+#scr-battle .battle-side > .row { position: sticky; bottom: calc(env(safe-area-inset-bottom) + 8px); z-index: 3; padding: 6px; background: #d8dfc6; border: 1px solid #a1b18a; }
+#scr-battle .battle-side > .row:has(~ .row:not([hidden])) { position: static; }
+/* Layout groups for wide screens; on phones they vanish from the box tree so
+   the single column is exactly as before. */
+.battle-stage, .battle-talk, .battle-table, .battle-side { display: contents; }
 .row { gap: 8px; }
 .row button { font-size: 10px; }
 @media (max-width: 360px) {
@@ -589,3 +592,109 @@ button:focus-visible { outline: 3px solid #386a9c; outline-offset: 3px; }
 #playerFeedback label { display:block; margin:14px 0; line-height:1.7; }
 #playerFeedback select, #playerFeedback textarea { display:block; width:100%; max-width:100%; min-height:44px; margin-top:6px; padding:8px; font:16px/1.5 system-ui,sans-serif; color:#14121c; background:#fff; border:2px solid #4a4468; }
 #feedbackEmail { display:inline-block; padding:12px 0; }
+
+/* ===================== Desktop and tablet (>= 760px) =====================
+ * Phones keep the single column above, untouched. Wider screens get a wide
+ * shell, two-column title/map/hand layouts, larger type (nothing under 11px),
+ * and pixel art scaled by whole numbers only (2x or 3x the 240px canvases). */
+@media (min-width: 760px) {
+  html, body { font-size: 15px; }
+  .shell {
+    max-width: none; width: min(960px, calc(100% - 48px));
+    padding: 18px 28px 28px; min-height: 100vh;
+    box-shadow: 0 0 0 4px #31443d, 0 0 0 8px #15201d;
+    margin: 0 auto;
+  }
+  body { padding: 0; }
+  .topbar { margin-bottom: 18px; }
+  .brand { font-size: 14px; }
+  .brand small { font-size: 12px; margin-top: 7px; }
+  .topbar button { font-size: 12px; padding: 8px 14px; min-height: 44px; }
+  button, .row button { font-size: 13px; }
+  .hint, .shell .hint[style] { font-size: 13px !important; }
+  .window > h2, .world-heading h2 { font-size: 11px; }
+  .world-heading span, .map-caption, .zone-head, .payout-panel summary, .paytable { font-size: 13px; }
+  .nameplate, .battle-label, .statusbox .row1, .class-card .nm, .stat-label { font-size: 11px; }
+  .class-card .bl { font-size: 12px; }
+  .dialogue p { font-size: 15px; }
+  .trainer-card .dlg p { font-size: 13px; }
+  .trainer-card #trainerStats, .trainer-card .hint { font-size: 12px !important; }
+  #gymList button { font-size: 12px; }
+  #gymList small { font-size: 11px; }
+  .card { width: 72px; height: 100px; font-size: 20px; }
+  .card .pip { font-size: 24px; }
+  .card[data-held='true']::after, .card[data-picked='true']::after { font-size: 11px; }
+  .hand { gap: 10px; }
+  .title-art > span, .title-art > .title-league, .title-art > .title-gym { font-size: 12px; }
+
+  /* Title: art beside the menu. 2x art on tablets, 3x on desktops. */
+  #scr-title { display: grid; grid-template-columns: 1fr; justify-items: center; gap: 0 28px; }
+  #scr-title > * { width: 100%; }
+  #scr-title > .title-art { width: 480px; }
+  .title-art canvas.title-trainer { width: 96px; height: 96px; }
+  .title-menu { max-width: 480px; }
+  .title-menu h1 { font-size: 34px !important; }
+
+  /* Map: overworld on the left, today / progress on the right. */
+  #scr-map { display: grid; grid-template-columns: 480px 1fr; gap: 0 24px; align-items: start; }
+  #scr-map > * { grid-column: 2; min-width: 0; }
+  #scr-map > .world-panel { grid-column: 1; grid-row: 1 / span 12; margin-bottom: 10px; }
+  .overworld > #mapTrainer { width: 96px; height: 96px; }
+
+  /* Hand: table and cards on the left, coach and controls on the right. */
+  #scr-battle { display: grid; grid-template-columns: minmax(0, 1fr) 340px; grid-template-areas: "stage talk" "table side"; gap: 14px 22px; align-items: start; }
+  #scr-battle .battle-stage { display: block; grid-area: stage; }
+  #scr-battle .battle-talk { display: block; grid-area: talk; }
+  #scr-battle .battle-table { display: block; grid-area: table; }
+  #scr-battle .battle-side { display: flex; flex-direction: column; gap: 10px; grid-area: side; }
+  #scr-battle .battle-side > * { margin: 0; }
+  #scr-battle .battle-side > .row { position: static; flex-wrap: wrap; }
+  #scr-battle .battle-side > .row > button { flex: 1 1 40%; }
+  .scene { height: 176px; }
+  .master { width: 144px; height: 144px; top: 8px; right: 24px; }
+  .player { width: 144px; height: 144px; left: 24px; bottom: -8px; }
+  .battle-label { max-width: 240px; }
+  .hand-panel { padding: 16px; }
+  .hand-panel #zones { min-height: 120px; }
+  .dialogue { min-height: 0; padding-top: 30px; }
+  .nameplate { top: 8px; left: 10px; }
+  #scr-battle .battle-talk { display: flex; flex-direction: column; align-self: stretch; }
+  #scr-battle .battle-talk > #masterBox { flex: 1; margin-bottom: 0; }
+  #scr-battle .battle-talk > #tipBox { margin: 10px 0 0; }
+
+  /* Lesson and class select stay centred, just roomier. */
+  #scr-lesson, #scr-class, #scr-review { max-width: 760px; margin: 0 auto; }
+  .dealer { width: 144px; height: 144px; }
+}
+@media (min-width: 1100px) {
+  .shell { width: min(1240px, calc(100% - 64px)); }
+  #scr-title { grid-template-columns: 720px 1fr; align-items: center; justify-items: stretch; }
+  #scr-title { grid-template-rows: auto; align-content: start; align-items: start; }
+  #scr-title > * { grid-column: 2; margin-top: 0; }
+  #scr-title > .title-art { grid-column: 1; grid-row: 1 / span 8; width: 720px; }
+  #scr-title > .title-menu { margin: 0 0 14px; max-width: none; }
+  .title-art canvas.title-trainer { width: 144px; height: 144px; }
+  .title-art > span, .title-art > .title-league, .title-art > .title-gym { font-size: 15px; }
+  #scr-map { grid-template-columns: 720px 1fr; }
+  .overworld > #mapTrainer { width: 144px; height: 144px; }
+  #gymList button { font-size: 14px; }
+  #scr-battle { grid-template-columns: minmax(0, 1fr) 400px; }
+  .card { width: 84px; height: 118px; font-size: 24px; }
+  .card .pip { font-size: 28px; }
+}
+@media (min-width: 760px) { .prompt { font-size: 12px; } }
+/* Short desktop windows (e.g. 1280x800): tighten vertical rhythm so a hand fits. */
+@media (min-width: 760px) and (max-height: 860px) {
+  .shell { padding-top: 10px; }
+  .topbar { margin-bottom: 10px; }
+  .scene { height: 150px; }
+  .master, .player { width: 120px; height: 120px; }
+  .card { width: 72px; height: 100px; font-size: 20px; }
+  .card .pip { font-size: 24px; }
+  .zone { margin-bottom: 6px; }
+  #scr-battle { gap: 10px 22px; }
+}
+/* Key hints only where there is a keyboard and a fine pointer. */
+@media (min-width: 760px) and (hover: hover) and (pointer: fine) {
+  button[data-key]::after { content: ' [' attr(data-key) ']'; opacity: .7; font-weight: 400; }
+}

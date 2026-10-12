@@ -9,7 +9,7 @@ function render() {
   button.textContent = on ? 'SND ON' : 'SND OFF';
   button.setAttribute('aria-pressed', String(on));
   button.setAttribute('aria-label', on ? 'Mute sound' : 'Enable sound');
-  button.title = on ? 'Sound is on. Tap to mute.' : 'Sound is off. Tap to enable.';
+  button.title = on ? 'Sound is on. Press to mute.' : 'Sound is off. Press to enable.';
 }
 button.onclick = () => {
   try { audio.toggleMute(); }
@@ -22,9 +22,14 @@ function renderHaptics() {
   hapticButton.textContent = on ? 'HAPTICS ON' : 'HAPTICS OFF';
   hapticButton.setAttribute('aria-pressed', String(on));
   hapticButton.setAttribute('aria-label', on ? 'Disable haptics' : 'Enable haptics');
-  hapticButton.title = on ? 'Haptics on. Tap to disable.' : 'Haptics off. Tap to enable.';
+  hapticButton.title = on ? 'Haptics on. Press to disable.' : 'Haptics off. Press to enable.';
 }
 hapticButton.onclick = () => { toggleHaptics(); renderHaptics(); };
+// Vibration only means something on a touch device that supports it; desktop
+// Chrome exposes navigator.vibrate with no motor behind it, so hide the switch
+// unless the primary pointer is coarse too.
+const canVibrate = typeof navigator.vibrate === 'function' && Boolean(window.matchMedia?.('(pointer: coarse)').matches);
+hapticButton.hidden = !canVibrate;
 renderHaptics();
 
 for (const event of ['pointerdown', 'touchend', 'click', 'keydown']) {
