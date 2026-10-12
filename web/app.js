@@ -1,5 +1,5 @@
 import { readBackup, writeBackup } from '../src/rpg/backup.js';
-import { feedbackDraft } from './feedback.js';
+import { feedbackDraft } from './feedback.js?v=github-draft-1';
 import { SUIT_GLYPH, SUIT_NAME, rankLabel, cardLabel } from '../src/cards.js';
 import { CATEGORY_LABEL, evaluate5 } from '../src/evaluate.js';
 import {
@@ -11,28 +11,33 @@ import {
   hit as bjHit, stand as bjStand, double as bjDouble, split as bjSplit,
 } from '../src/games/blackjack.js';
 import { bestAction as bjBest, ACTION_LABEL } from '../src/coach/blackjack.js';
-import { newRound as newBacRound } from '../src/games/baccarat.js';
 import { bestBet as bacBest, quizFor, tieBreakEven } from '../src/coach/baccarat.js';
 import { newRound as newHeRound } from '../src/games/holdem.js';
-import { playsBestFive } from '../src/coach/holdem.js';
+import { playsBestFive, bestFiveQuiz } from '../src/coach/holdem.js';
 import { CLASSES, CLASS_BY_ID, STAT_LABEL } from '../src/rpg/classes.js';
 import { GYMS, GYM_BY_ID, gymForClass } from '../src/rpg/gyms.js';
-import { lessonFor, hasCompletedLesson, markLessonDone } from '../src/rpg/lessons.js';
+import { lessonFor, lessonIntro, lessonTips, hasCompletedLesson, markLessonDone } from '../src/rpg/lessons.js';
 import {
   createProfile, applyResult, awardBadge, canBattle, canPractice, canTrain, levelFromXp,
-  serialize, deserialize, handDifficulty, practiceSummary, recordMistake, markMistakeReviewed, validMistakeQuiz, answerMistakeQuiz, beginSession, scoreSession, SESSION_HANDS,
+  serialize, deserialize, sanitizeProfile, handDifficulty, practiceSummary, recommendedPractice, recordMistake, markMistakeReviewed, validMistakeQuiz, answerMistakeQuiz, mistakeReviewQueue, localDayKey, beginSession, scoreSession, SESSION_HANDS,
+  completeDaily, dailyOf, dailyCompleted, setDailyProgress,
 } from '../src/rpg/state.js';
+import {
+  dailyKey, dailyPlan, dailyNumber, seededRng as dailySeedRng, DAILY_HANDS,
+  DAILY_GAME_LABEL,
+} from '../src/rpg/daily.js';
 import { drawArt, drawTrainerBack } from './characters.js';
 import audio from './audio.js?v=20261006-audio3';
+import haptics from './haptics.js';
 import { drawWorld } from './world.js';
 
 const SAVE_KEY = 'pokergym:save:v1';
 const HANDS_TO_WIN = 10;
 const PASS_RATE = 0.7;
-// Stakes for the table games. Small enough that a correct hand is always
-// chip-positive (50 XP stipend +/- TABLE_BET), so the badge gate cannot be
-// reached by a player who is correct but ruined.
-const TABLE_BET = 20;
+// START TRAINING is the primary path: it quietly becomes this trainer and drops
+// the player straight into five hands of blackjack. CHOOSE STYLE stays one tap
+// away for anyone who wants to pick a different class first.
+const DEFAULT_CLASS = 'dealer';
 
 const HAND_TITLE = {
   videopoker: 'YOUR HAND',
@@ -47,15 +52,19 @@ const TRAINING_LABEL = {
 
 const el = (id) => document.getElementById(id);
 const fmt = (n) => Number(n).toLocaleString('en-US');
+// JavaScript motion (typing, smooth scroll, floats) defers to the CSS
+// prefers-reduced-motion rules so the setting is honoured by both layers.
+const reduceMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
 function storageWarning() {
   el('saveStatus').hidden = false;
   el('saveStatus').textContent = 'PROGRESS IS NOT SAVING. Browser storage is blocked or full. You can still practise in this tab. Prepare a backup below before closing or reloading; open the standalone game if embedded storage is blocked.';
 }
 let profile = null;
-try { profile = deserialize(localStorage.getItem(SAVE_KEY)); }
+try { profile = sanitizeProfile(deserialize(localStorage.getItem(SAVE_KEY))); }
 catch { storageWarning(); }
 let pendingClass = null;
+let becomeArmed = false; // BECOME asks for a second tap before replacing an existing save
 let round = null;
 let advice = null;
 let gameId = 'videopoker';
@@ -66,6 +75,13 @@ let handsWon = 0;
 let handsAtGym = 0;
 let awaitingBadge = false;
 let shortSession = false;
+let tutorialTips = []; // first-session lesson tips, shown one per hand after hands 1-4
+let newDeal = false;   // cards stagger in on a fresh deal only
+let holeShown = false; // blackjack: the dealer hole card has flipped face up
+let sessionBest = 0;   // best streak reached in the current five-hand session
+let sessionMistakes = []; // misses recorded this session, for the end-of-session summary
+let dailyMode = false;
+let dailyRun = null; // { key, plan, number, index, results, scored, finished }
 let requestedGym = GYMS.find(gym => gym.game === new URLSearchParams(location.search).get('practice')) ?? null;
 
 function save() {
@@ -116,22 +132,24 @@ el('btnConfirmRestore').onclick = () => {
  * theme. Nothing actually starts until the first click, because browsers will
  * not let an AudioContext run before a user gesture. */
 const BATTLE_THEME = {
-  pokergym: 'gamecorner',
-  countyfair: 'gamecorner',
-  villaoak: 'gamecorner',
-  riverstone: 'gamecorner',
+  pokergym: 'academy',
+  countyfair: 'academy',
+  villaoak: 'academy',
+  riverstone: 'academy',
 };
 const AMBIENT = {
-  'scr-title': 'gamecorner',
-  'scr-class': 'gamecorner',
-  'scr-map': 'gamecorner',
-  'scr-lesson': 'gamecorner',
+  'scr-title': 'academy',
+  'scr-class': 'academy',
+  'scr-map': 'academy',
+  'scr-review': 'academy',
+  'scr-lesson': 'academy',
 };
 
 function show(id) {
   for (const s of document.querySelectorAll('.screen')) s.hidden = true;
   el(id).hidden = false;
   el('btnMap').hidden = !['scr-battle', 'scr-lesson', 'scr-class'].includes(id) || !profile;
+  el('btnTitle').hidden = id !== 'scr-map' || !profile;
   window.scrollTo(0, 0);
   audio.music(AMBIENT[id] ?? (id === 'scr-battle' ? (BATTLE_THEME[gymId] ?? null) : null));
 }
@@ -189,18 +207,26 @@ function applyPalette(classId) {
 // Sound controls initialize in sound-controls.js, before the atlas is ready.
 drawWorld(el('titleWorld'), true);
 drawWorld(el('mapWorld'));
-el('btnMap').onclick = () => { renderMap(); show('scr-map'); };
+el('btnMap').onclick = () => { dailyMode = false; dailyRun = null; renderMap(); show('scr-map'); };
+el('btnTitle').onclick = () => { dailyMode = false; dailyRun = null; initTitle(); };
 
 /* ---------------- title ---------------- */
 function initTitle() {
   el('btnContinue').disabled = !profile;
+  el('btnDaily').hidden = !profile;
+  if (profile) {
+    const key = dailyKey();
+    el('btnDaily').textContent = dailyCompleted(profile, key)
+      ? `DAILY DRILL #${dailyNumber(key)} ✓`
+      : `DAILY DRILL #${dailyNumber(key)}`;
+  }
   const invitation = el('practiceInvitation');
   invitation.hidden = !requestedGym;
   if (requestedGym) {
     const unfinished = profile?.activeSession;
     invitation.textContent = unfinished && unfinished.gymId !== requestedGym.id
       ? `YOUR UNFINISHED ${TRAINING_LABEL[GYM_BY_ID[unfinished.gymId].game]} SESSION WILL RESUME FIRST. ALL FOUR GAMES ARE AVAILABLE ON THE MAP.`
-      : `FIVE-HAND ${TRAINING_LABEL[requestedGym.game]} PRACTICE. CHOOSE A TRAINER OR CONTINUE YOUR SAVE TO START.`;
+      : `FIVE-HAND ${TRAINING_LABEL[requestedGym.game]} PRACTICE. CHOOSE A STYLE OR CONTINUE YOUR SAVE TO START.`;
   }
   drawArt(el('titleTrainer'), profile?.classId ?? 'grinder');
   applyPalette(profile?.classId ?? null);
@@ -218,6 +244,30 @@ function enterTraining() {
   renderMap(); show('scr-map');
 }
 el('btnContinue').onclick = enterTraining;
+el('btnDaily').onclick = startDaily;
+el('btnReview').onclick = openReview;
+el('btnReviewDone').onclick = () => { renderMap(); show('scr-map'); };
+el('btnStart').onclick = startTraining;
+
+function startTraining() {
+  if (!profile) {
+    profile = createProfile(DEFAULT_CLASS);
+    profile.createdAt = new Date().toISOString();
+    save();
+    applyPalette(DEFAULT_CLASS);
+  }
+  if (requestedGym) { enterTraining(); return; }
+  startDefaultSession();
+}
+
+function startDefaultSession() {
+  if (profile.activeSession) { startGym(GYM_BY_ID[profile.activeSession.gymId], true); return; }
+  const gym = GYMS.find(g => g.game === 'blackjack');
+  profile = beginSession(profile, gym.id);
+  save();
+  startGym(gym, true);
+}
+
 el('btnNew').onclick = () => {
   pendingClass = null;
   applyPalette(profile?.classId ?? null);
@@ -249,6 +299,8 @@ function renderClassSelect() {
 
 function showClassDetail(cls) {
   const gym = gymForClass(cls.id);
+  becomeArmed = false;
+  el('btnBecome').textContent = 'BECOME THIS';
   el('classDetailName').textContent = cls.name;
   el('classDetailText').textContent = `${gym.name} is your first gym. ${cls.perk} ${cls.blurb}`;
   const stats = el('classDetailStats');
@@ -265,16 +317,25 @@ function showClassDetail(cls) {
     stats.appendChild(b);
   }
   el('classDetail').hidden = false;
-  el('classDetail').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  el('classDetail').scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block: 'nearest' });
 }
 
 el('btnBack').onclick = () => {
   pendingClass = null;
+  becomeArmed = false;
   applyPalette(profile?.classId ?? null);
   renderClassSelect();
 };
 el('btnBecome').onclick = () => {
   if (!pendingClass) return;
+  // Replacing an existing save is destructive, so require a confirming second tap.
+  if (profile && !becomeArmed) {
+    becomeArmed = true;
+    el('btnBecome').textContent = 'REPLACE YOUR SAVE?';
+    el('classDetailText').textContent = 'THIS REPLACES YOUR CURRENT TRAINER, LEVEL, BADGES AND RECORD ON THIS BROWSER. TAP AGAIN TO CONFIRM, OR BACK TO KEEP YOUR SAVE.';
+    return;
+  }
+  becomeArmed = false;
   profile = createProfile(pendingClass);
   profile.createdAt = new Date().toISOString();
   save();
@@ -314,11 +375,131 @@ el('feedbackForm').onsubmit = event => {
   });
   el('feedbackPreview').value = draft.body;
   el('feedbackEmail').href = draft.href;
+  el('feedbackGithub').href = draft.githubHref;
   el('feedbackDraft').hidden = false;
 };
 
 /* ---------------- map ---------------- */
+// The TODAY card offers exactly one primary action, picked by priority: resume
+// a live session, then the daily drill, then due mistake reviews, then five
+// hands of the weakest game. Everything else on the map is secondary.
+function computeToday() {
+  if (profile.activeSession) {
+    const s = profile.activeSession;
+    return {
+      state: `UNFINISHED SESSION · ${GYM_BY_ID[s.gymId].name} · ${s.played}/${SESSION_HANDS} HANDS DONE.`,
+      label: `RESUME FIVE HANDS · ${s.played}/${SESSION_HANDS}`,
+      action: () => startGym(GYM_BY_ID[s.gymId], true),
+    };
+  }
+  const key = dailyKey();
+  const number = dailyNumber(key);
+  const daily = dailyOf(profile);
+  const progress = daily.progress;
+  if (progress && progress.key === key && progress.index < DAILY_HANDS) {
+    return {
+      state: `DAILY DRILL #${number} IN PROGRESS · ${progress.index}/${DAILY_HANDS} HANDS DONE.`,
+      label: 'RESUME DAILY DRILL',
+      action: () => startDaily(),
+    };
+  }
+  if (daily.lastKey !== key) {
+    return {
+      state: `DAILY DRILL #${number} IS READY · FIVE HANDS · ONE MIX OF ALL FOUR GAMES.`,
+      label: `DAILY DRILL #${number}`,
+      action: () => startDaily(),
+    };
+  }
+  const due = mistakeReviewQueue(profile, localDayKey()).filter(row => row.due).length;
+  if (due) {
+    return {
+      state: `DAILY DRILL #${number} DONE. ${due} MISTAKE REVIEW${due === 1 ? '' : 'S'} DUE NOW.`,
+      label: `REVIEWS DUE: ${due}`,
+      action: () => openReview(),
+    };
+  }
+  const rec = recommendedPractice(profile);
+  const gym = rec ? GYM_BY_ID[rec.gymId] : gymForClass(profile.classId);
+  return {
+    state: `DAILY DRILL #${number} DONE. NEXT: KEEP TRAINING FIVE HANDS OF ${TRAINING_LABEL[gym.game]}.`,
+    label: `FIVE HANDS · ${TRAINING_LABEL[gym.game]}`,
+    action: () => {
+      if (!profile.activeSession) profile = beginSession(profile, gym.id);
+      save();
+      startGym(gym, true);
+    },
+  };
+}
+
+function renderToday() {
+  const state = el('todayState');
+  const actions = el('todayActions');
+  if (!state || !actions || !profile) return;
+  actions.replaceChildren();
+  el('dailySharePreview').hidden = true;
+  el('dailySharePreview').value = '';
+  el('dailyShareStatus').hidden = true;
+
+  const today = computeToday();
+  state.textContent = today.state;
+  const primary = document.createElement('button');
+  primary.className = 'primary';
+  primary.textContent = today.label;
+  primary.onclick = today.action;
+  actions.appendChild(primary);
+
+  // A completed daily can still be replayed or shared, but never with a second
+  // primary button.
+  const key = dailyKey();
+  const daily = dailyOf(profile);
+  if (daily.lastKey === key) {
+    const results = daily.history.find(entry => entry.key === key)?.results ?? [];
+    const text = dailyShareText(key, results, dailyNumber(key));
+    const again = document.createElement('button');
+    again.type = 'button';
+    again.textContent = 'REPLAY DAILY DRILL';
+    again.onclick = () => startDaily();
+    actions.appendChild(again);
+    const copy = document.createElement('button');
+    copy.type = 'button';
+    copy.textContent = 'COPY DAILY RESULT';
+    copy.onclick = () => shareDaily(text, false);
+    actions.appendChild(copy);
+    el('dailySharePreview').value = text;
+  }
+}
+
+function dailyShareText(key, results, number) {
+  const plan = dailyPlan(key);
+  const games = [...new Set(plan.map(entry => DAILY_GAME_LABEL[entry.game]))];
+  const tally = results.filter(v => v).length;
+  return `Poker Gym Daily #${number}  ${tally}/${DAILY_HANDS}\n${results.map(ok => ok ? '🟩' : '🟥').join('')}\n🃏 ${games.join(' · ')}\nhttps://pokergym.history-atlas.workers.dev/web/`;
+}
+
+async function shareDaily(text, useShare) {
+  const status = el('dailyShareStatus');
+  const preview = el('dailySharePreview');
+  try {
+    if (useShare && typeof navigator.share === 'function') {
+      await navigator.share({ title: 'Poker Gym Daily', text });
+      status.textContent = 'Share options closed. Delivery is handled by your chosen app.';
+    } else {
+      await navigator.clipboard.writeText(text);
+      status.textContent = 'Result copied. Nothing sent; paste it where you choose.';
+    }
+  } catch (error) {
+    status.textContent = error?.name === 'AbortError'
+      ? 'Sharing canceled. Nothing sent by Poker Gym.'
+      : 'Copy unavailable. Result selected; use your device’s Copy command. Nothing sent.';
+    preview.hidden = false;
+    preview.focus();
+    preview.select();
+  }
+  status.hidden = false;
+}
+
 function renderMap() {
+  renderToday();
   const cls = CLASS_BY_ID[profile.classId];
   drawArt(el('mapTrainer'), profile.classId);
   const lvl = levelFromXp(profile.xp);
@@ -329,7 +510,8 @@ function renderMap() {
     `${STAT_LABEL.focus} ${profile.stats.focus}  ${STAT_LABEL.nerve} ${profile.stats.nerve}  ${STAT_LABEL.read} ${profile.stats.read}`;
   el('xpBar').style.width = `${Math.round((lvl.into / lvl.needed) * 100)}%`;
   el('xpLine').textContent = `XP ${fmt(lvl.into)} / ${fmt(lvl.needed)}`;
-  el('chipCount').textContent = fmt(profile.chips);
+  el('scoreCount').textContent = fmt(profile.score);
+  el('bestStreak').textContent = fmt(profile.bestStreak);
   const practice = el('practiceSummary');
   if (practice) {
     practice.replaceChildren();
@@ -350,10 +532,18 @@ function renderMap() {
     resume.onclick = () => startGym(GYM_BY_ID[profile.activeSession.gymId], true);
     sessions.append(resume);
   } else {
+    const recommendation = recommendedPractice(profile);
+    if (recommendation) {
+      const reason = document.createElement('p');
+      reason.id = 'practiceRecommendation';
+      reason.className = 'hint';
+      reason.textContent = `SUGGESTED NEXT: ${TRAINING_LABEL[recommendation.game]} · ${recommendation.optimal}/${recommendation.played} CORRECT. LOWEST RECORDED ACCURACY AMONG GAMES WITH AT LEAST FIVE HANDS. HINTED PLAYS COUNT TOO; THIS IS A PRACTICE PRIORITY, NOT A SKILL RATING.`;
+      sessions.append(reason);
+    }
     for (const gym of GYMS.filter(g => canTrain(profile, g.id))) {
       const button = document.createElement('button');
       button.dataset.sessionGym = gym.id;
-      button.textContent = `FIVE HANDS · ${TRAINING_LABEL[gym.game]}`;
+      button.textContent = `${gym.id === recommendation?.gymId ? 'SUGGESTED · ' : ''}FIVE HANDS · ${TRAINING_LABEL[gym.game]}`;
       button.onclick = () => { profile = beginSession(profile, gym.id); save(); startGym(gym, true); };
       sessions.append(button);
     }
@@ -368,79 +558,10 @@ function renderMap() {
   el('playerFeedback').hidden = !(profile.sessions?.length);
   el('playerShare').hidden = !(profile.sessions?.length);
 
-  const notebook = el('mistakeReview');
-  if (notebook) {
-    notebook.replaceChildren();
-    for (const [index, mistake] of (profile.mistakes ?? []).entries()) {
-      const entry = document.createElement('details');
-      const title = document.createElement('summary');
-      title.textContent = `${GYMS.find(g => g.game === mistake.game)?.name ?? mistake.game}: ${mistake.situation}`;
-      entry.appendChild(title);
-      const play = document.createElement('p');
-      play.textContent = `YOUR PLAY: ${mistake.chosen}`;
-      const prompt = document.createElement('p');
-      prompt.textContent = 'WHAT WOULD YOU DO NEXT TIME? RECALL THE BETTER PLAY BEFORE REVEALING.';
-      const answer = document.createElement('p');
-      answer.textContent = `COACH: ${mistake.correction}`;
-      answer.hidden = true;
-      const reveal = document.createElement('button');
-      reveal.textContent = 'REVEAL COACH ANSWER';
-      const reviewed = document.createElement('button');
-      reviewed.textContent = 'I REVIEWED THIS';
-      reviewed.hidden = true;
-      const count = document.createElement('p');
-      count.textContent = `REVIEWED ${mistake.reviews ?? 0} TIMES · SELF CHECK, NO XP`;
-      reveal.onclick = () => { answer.hidden = false; reviewed.hidden = false; reveal.hidden = true; };
-      reviewed.onclick = () => {
-        profile = markMistakeReviewed(profile, index);
-        save();
-        count.textContent = `REVIEWED ${profile.mistakes[index].reviews} TIMES · SELF CHECK, NO XP`;
-        reviewed.disabled = true;
-        reviewed.textContent = 'REVIEW SAVED';
-      };
-      entry.append(play, prompt, reveal, answer, reviewed, count);
-      if (mistake.game === 'blackjack' && validMistakeQuiz(mistake.quiz)) {
-        prompt.textContent = 'RETRY THIS ORIGINAL DECISION BEFORE REVEALING. ONE SCORED ANSWER PER VISIT; NO XP OR CHIP REWARDS.';
-        const choices = document.createElement('div');
-        choices.className = 'mistake-choices';
-        const result = document.createElement('p');
-        result.setAttribute('aria-live', 'polite');
-        const retryCount = () => {
-          const retries = profile.mistakes[index].retries;
-          return `RETRIES: ${retries?.correct ?? 0}/${retries?.attempted ?? 0} CORRECT · SEPARATE FROM GAME ACCURACY`;
-        };
-        result.textContent = retryCount();
-        let answered = false;
-        for (const action of mistake.quiz.choices) {
-          const button = document.createElement('button');
-          button.textContent = ACTION_LABEL[action];
-          button.dataset.retryAction = action;
-          button.onclick = () => {
-            if (answered) return;
-            answered = true;
-            profile = answerMistakeQuiz(profile, index, action);
-            save();
-            result.textContent = `${mistake.quiz.optimal.includes(action) ? 'CORRECT' : 'TRY THE COACH PLAY NEXT VISIT'}. ${retryCount()}`;
-            for (const choice of choices.children) choice.disabled = true;
-            answer.hidden = false; reveal.hidden = true; reviewed.hidden = false;
-          };
-          choices.appendChild(button);
-        }
-        reveal.onclick = () => {
-          answered = true;
-          for (const choice of choices.children) choice.disabled = true;
-          result.textContent = `ANSWER REVEALED WITHOUT SCORING. ${retryCount()}`;
-          answer.hidden = false; reviewed.hidden = false; reveal.hidden = true;
-        };
-        entry.insertBefore(choices, reveal);
-        entry.appendChild(result);
-      }
-      notebook.appendChild(entry);
-    }
-    if (!profile.mistakes?.length) notebook.textContent = 'NO SAVED MISTAKES YET. MISSED DECISIONS WILL APPEAR HERE.';
-  }
+  renderReviewCard();
 
   const badges = el('badgeList');
+
   badges.innerHTML = '';
   for (const gym of GYMS) {
     const d = document.createElement('div');
@@ -469,7 +590,237 @@ function renderMap() {
   }
 }
 
+/* ---------------- mistake review ----------------
+ * Spaced recall over the saved notebook: only scored decisions reach the due
+ * queue, served one at a time with the battle card styling. A wrong retry resets
+ * to the first box and returns tomorrow; a correct answer at the last box marks
+ * the entry mastered. Correct reviews add a small Decision Score bonus, no XP.
+ */
+let reviewQueue = [];
+let reviewPos = 0;
+
+function renderReviewCard() {
+  const button = el('btnReview');
+  if (!button) return;
+  const due = mistakeReviewQueue(profile, localDayKey()).filter(row => row.due).length;
+  button.textContent = due ? `REVIEWS DUE: ${due}` : 'ALL CAUGHT UP';
+  button.classList.toggle('primary', due > 0);
+  button.disabled = !(profile.mistakes?.length);
+}
+
+function mistakeTitle(entry) {
+  return `${GYMS.find(g => g.game === entry.game)?.name ?? entry.game}: ${entry.situation}`;
+}
+
+function openReview() {
+  reviewQueue = mistakeReviewQueue(profile, localDayKey()).filter(row => row.due);
+  reviewPos = 0;
+  renderReview();
+  show('scr-review');
+}
+
+function renderReview() {
+  const summary = el('reviewSummary');
+  const card = el('reviewCard');
+  card.replaceChildren();
+  const queue = mistakeReviewQueue(profile, localDayKey());
+  const due = queue.filter(row => row.due).length;
+  const mastered = queue.filter(row => row.mastered).length;
+  summary.textContent = due
+    ? `${due} SCORED REVIEW${due === 1 ? '' : 'S'} DUE. RECALL THE BETTER PLAY BEFORE REVEALING. CORRECT REVIEWS ADD A SMALL DECISION SCORE BONUS; NO XP.${mastered ? ` ${mastered} MASTERED.` : ''}`
+    : `ALL CAUGHT UP. NEW MISSED DECISIONS BECOME DUE THE SAME DAY. CORRECT RETRIES RETURN THEM AFTER 2, 4, 8, THEN 16 DAYS.${mastered ? ` ${mastered} MASTERED.` : ''}`;
+  if (reviewPos < reviewQueue.length) {
+    renderReviewEntry(card, reviewQueue[reviewPos], true);
+  } else if (profile.mistakes?.length) {
+    const done = document.createElement('p');
+    done.className = 'hint';
+    done.textContent = 'ALL CAUGHT UP FOR TODAY. SCORED RETRIES RETURN ON THEIR SCHEDULED DAY; SELF-REVIEW ENTRIES ARE LISTED BELOW.';
+    card.append(done);
+  } else {
+    const empty = document.createElement('p');
+    empty.className = 'hint';
+    empty.textContent = 'NO SAVED MISTAKES YET. MISSED DECISIONS WILL APPEAR HERE, DUE THE SAME DAY.';
+    card.append(empty);
+  }
+  for (const row of mistakeReviewQueue(profile, localDayKey()).filter(r => !r.scored)) {
+    renderReviewEntry(card, row, false);
+  }
+}
+
+function renderReviewEntry(container, row, scoredDue) {
+  const entry = row.entry;
+  const hasQuiz = validMistakeQuiz(entry.quiz, entry.game);
+  const markReviewed = () => {
+    profile = markMistakeReviewed(profile, row.index);
+    save();
+  };
+  const block = document.createElement('div');
+  block.className = 'review-entry';
+  const heading = document.createElement('h3');
+  heading.textContent = mistakeTitle(entry);
+  block.append(heading);
+
+  const status = document.createElement('p');
+  status.className = 'hint';
+  if (entry.mastered) status.textContent = 'MASTERED · ANSWERED CORRECTLY AT THE FINAL BOX.';
+  else if (scoredDue && hasQuiz) status.textContent = 'DUE NOW · RECALL THE BETTER PLAY BEFORE REVEALING.';
+  else if (hasQuiz) status.textContent = `NEXT DUE ${entry.due ?? 'LATER'} · EARLY PRACTICE DOES NOT CHANGE THE SCHEDULE.`;
+  else status.textContent = 'SELF REVIEW · NO SCORED ANSWER KEY.';
+  block.append(status);
+
+  const play = document.createElement('p');
+  play.textContent = `YOUR PLAY: ${entry.chosen}`;
+  block.append(play);
+
+  const answer = document.createElement('p');
+  answer.className = 'mistake-answer';
+  answer.textContent = `COACH: ${entry.correction}`;
+  answer.hidden = true;
+  const reviewed = document.createElement('button');
+  reviewed.type = 'button';
+  reviewed.textContent = 'MARK SELF-REVIEWED';
+  reviewed.hidden = true;
+  reviewed.onclick = markReviewed;
+
+  if (hasQuiz && scoredDue) {
+    const cardRetry = ['videopoker', 'holdem'].includes(entry.game);
+    const bestFive = entry.game === 'holdem';
+    let holdPattern = bestFive ? '0000000' : '00000';
+    let answered = false;
+    const choices = document.createElement('div');
+    choices.className = 'mistake-choices';
+    const result = document.createElement('p');
+    result.setAttribute('aria-live', 'polite');
+    const next = document.createElement('button');
+    next.type = 'button';
+    next.className = 'primary';
+    next.textContent = 'NEXT REVIEW';
+    next.hidden = true;
+    next.onclick = () => { reviewPos += 1; renderReview(); renderReviewCard(); };
+    const submit = (action) => {
+      if (answered) return;
+      answered = true;
+      const correct = entry.quiz.optimal.includes(action);
+      profile = answerMistakeQuiz(profile, row.index, action, localDayKey());
+      save();
+      const updated = profile.mistakes[row.index];
+      for (const child of choices.children) child.disabled = true;
+      answer.hidden = false;
+      reviewed.hidden = false;
+      result.textContent = correct
+        ? (updated.mastered ? 'CORRECT · MASTERED. THIS ONE LEAVES THE DUE QUEUE.'
+          : `CORRECT · MOVED TO BOX ${updated.box} · NEXT REVIEW ${updated.due}. +5 DECISION SCORE.`)
+        : 'MISSED · BACK TO THE FIRST BOX · DUE TOMORROW.';
+      next.hidden = false;
+    };
+    if (['videopoker', 'holdem'].includes(entry.game)) {
+      const bestFive = entry.game === 'holdem';
+      entry.situation.split(' ').forEach((label, position) => {
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.textContent = `${position + 1}: ${label}`;
+        toggle.setAttribute('aria-pressed', 'false');
+        toggle.dataset.retryCard = position;
+        toggle.onclick = () => {
+          if (answered) return;
+          const pattern = holdPattern.split('');
+          pattern[position] = pattern[position] === '1' ? '0' : '1';
+          holdPattern = pattern.join('');
+          toggle.setAttribute('aria-pressed', pattern[position] === '1' ? 'true' : 'false');
+          toggle.textContent = `${position + 1}: ${label}${pattern[position] === '1' ? ' · HELD' : ''}`;
+        };
+        choices.append(toggle);
+      });
+      const check = document.createElement('button');
+      check.type = 'button';
+      check.className = 'primary';
+      check.textContent = bestFive ? 'CHECK BEST FIVE' : 'CHECK HOLD';
+      check.dataset.retryAction = bestFive ? 'bestfive' : 'hold';
+      check.onclick = () => {
+        if (bestFive && [...holdPattern].filter(bit => bit === '1').length !== 5) {
+          result.textContent = 'SELECT EXACTLY FIVE CARDS.';
+          return;
+        }
+        submit(holdPattern);
+      };
+      choices.append(check);
+    } else {
+      for (const action of entry.quiz.choices) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = ACTION_LABEL[action] ?? action;
+        button.dataset.retryAction = action;
+        button.onclick = () => submit(action);
+        choices.append(button);
+      }
+    }
+    const revealAnswer = document.createElement('button');
+    revealAnswer.type = 'button';
+    revealAnswer.textContent = 'REVEAL ANSWER';
+    revealAnswer.onclick = () => {
+      if (answered) return;
+      answered = true;
+      for (const child of choices.children) child.disabled = true;
+      answer.hidden = false;
+      reviewed.hidden = false;
+    };
+    block.append(choices, revealAnswer, result, answer, reviewed, next);
+  } else {
+    const revealAnswer = document.createElement('button');
+    revealAnswer.type = 'button';
+    revealAnswer.textContent = 'REVEAL ANSWER';
+    revealAnswer.onclick = () => { answer.hidden = false; reviewed.hidden = false; };
+    block.append(revealAnswer, answer, reviewed);
+  }
+  container.append(block);
+}
+
+/* ---------------- daily drill ----------------
+ * Five seeded hands, one mix of all four games, the same for every trainer on
+ * the same local date. Runs through the ordinary battle flow so the coach
+ * explains each hand; the first complete run of a day counts toward XP, score
+ * and the daily streak, and any replay is practice only.
+ */
+function startDaily() {
+  if (!profile || dailyMode) return;
+  const key = dailyKey();
+  const plan = dailyPlan(key);
+  const number = dailyNumber(key);
+  const daily = dailyOf(profile);
+  let index = 0;
+  let results = [];
+  if (daily.progress && daily.progress.key === key && daily.progress.index < DAILY_HANDS) {
+    index = daily.progress.index;
+    results = daily.progress.results.slice(0, index);
+  }
+  const completed = dailyCompleted(profile, key);
+  dailyRun = { key, plan, number, index, results, scored: !completed, finished: false };
+  dailyMode = true;
+  shortSession = false;
+  tutorialTips = [];
+  handsWon = 0;
+  handsAtGym = index;
+  awaitingBadge = false;
+  renderSprite(profile);
+  show('scr-battle');
+  loadDailyHand();
+}
+
+function loadDailyHand() {
+  if (!dailyRun || dailyRun.index >= DAILY_HANDS) return;
+  const entry = dailyRun.plan[dailyRun.index];
+  const gym = GYMS.find(g => g.game === entry.game);
+  gymId = gym.id;
+  gameId = gym.game;
+  el('masterLabel').textContent = gym.leader;
+  el('masterName').textContent = gym.leader;
+  drawDealer(el('masterSprite'), entry.game);
+  startHand();
+}
+
 function startGym(gym, sprint = false) {
+  dailyMode = false;
+  dailyRun = null;
   if (sprint) {
     if (!canTrain(profile, gym.id) || profile.activeSession?.gymId !== gym.id) return;
   } else if (!canBattle(profile, gym.id) && !canPractice(profile, gym.id)) return;
@@ -479,21 +830,36 @@ function startGym(gym, sprint = false) {
   handsWon = 0;
   handsAtGym = 0;
   awaitingBadge = false;
-  el('foeName').textContent = gym.leader;
+  sessionBest = 0;
+  sessionMistakes = [];
+  el('masterLabel').textContent = gym.leader;
   el('masterName').textContent = gym.leader;
   renderSprite(profile);
   drawDealer(el('masterSprite'), gym.game);
 
   const lesson = lessonFor(gym.game);
-  const begin = () => { show('scr-battle'); startHand(); };
-  if (lesson && !hasCompletedLesson(profile, gym.game)) startLesson(gym.game, begin);
+  const firstTime = Boolean(lesson) && !hasCompletedLesson(profile, gym.game);
+  const begin = () => {
+    // The pages beyond the intro surface one per hand across the first four
+    // hands of this first session.
+    tutorialTips = firstTime ? lessonTips(lesson).slice(0, 4) : [];
+    show('scr-battle');
+    startHand();
+  };
+  if (firstTime) startLesson(gym.game, begin);
   else begin();
 }
 
 function typewriter(node, text, done) {
-  let i = 0;
-  node.textContent = '';
   clearInterval(node._typer);
+  node._typer = null;
+  if (reduceMotion()) {
+    node.textContent = text;
+    done?.();
+    return;
+  }
+  node.textContent = '';
+  let i = 0;
   function tick() {
     node.textContent += text[i++];
     if (i >= text.length) {
@@ -530,30 +896,31 @@ function startLesson(gameIdArg, onDone) {
   lesson = lessonFor(gameIdArg);
   lessonIndex = 0;
   if (!lesson) { onDone(); return; }
+  lesson._pages = lessonIntro(lesson);
   lesson._onDone = onDone;
   el('lessonTitle').textContent = lesson.title;
-  el('lessonBar').innerHTML = lesson.pages.map(() => '<i></i>').join('');
+  el('lessonBar').innerHTML = lesson._pages.map(() => '<i></i>').join('');
   drawDealer(el('lessonDealer'), gameIdArg);
   show('scr-lesson');
   paintLessonPage();
 }
 
 function paintLessonPage() {
-  const page = lesson.pages[lessonIndex];
+  const page = lesson._pages[lessonIndex];
   el('lessonWho').textContent = page.who;
   el('lessonText')._dataset = { full: page.text };
-  el('lessonPage').textContent = `${lessonIndex + 1}/${lesson.pages.length}`;
-  const pct = ((lessonIndex + 1) / lesson.pages.length) * 100;
+  el('lessonPage').textContent = `${lessonIndex + 1}/${lesson._pages.length}`;
+  const pct = ((lessonIndex + 1) / lesson._pages.length) * 100;
   el('lessonGauge').style.width = `${pct}%`;
   [...el('lessonBar').children].forEach((n, i) => { n.classList.toggle('on', i <= lessonIndex); });
   el('lessonPrompt').hidden = true;
   typewriter(el('lessonText'), page.text, () => { el('lessonPrompt').hidden = false; });
-  el('btnLessonNext').textContent = lessonIndex === lesson.pages.length - 1 ? 'FIGHT!' : 'NEXT';
+  el('btnLessonNext').textContent = lessonIndex === lesson._pages.length - 1 ? 'PLAY!' : 'NEXT';
 }
 
 function advanceLesson() {
   if (finishTyping(el('lessonText'))) return;
-  if (lessonIndex < lesson.pages.length - 1) {
+  if (lessonIndex < lesson._pages.length - 1) {
     lessonIndex++;
     paintLessonPage();
     return;
@@ -610,7 +977,7 @@ function renderPotential() {
   el('potentialText').textContent =
     g.label === 'DEAD'
       ? 'NOTHING HERE PAYS. THE BEST YOU CAN DO STILL LOSES.'
-      : `BEST AVAILABLE RETURN IS ${best.ev.toFixed(2)} PER CREDIT.`;
+      : `BEST AVAILABLE RETURN IS ${best.ev.toFixed(2)} PER HAND UNDER THIS PAY TABLE.`;
 }
 
 /* ---------------- battle: cards on the table ---------------- */
@@ -647,6 +1014,7 @@ function cardNode(card, zone, i) {
     node.setAttribute('aria-label', name);
     node.disabled = true;
   }
+  if (zone.flip && i === 1) node.classList.add('flip-in');
   return node;
 }
 
@@ -663,63 +1031,59 @@ function renderZones(zones) {
       zone.appendChild(head);
     }
     const hand = document.createElement('div');
-    hand.className = 'hand';
+    hand.className = newDeal ? 'hand deal' : 'hand';
     z.cards.forEach((card, i) => hand.appendChild(cardNode(card, z, i)));
     zone.appendChild(hand);
     wrap.appendChild(zone);
   }
+  newDeal = false;
 }
 
 function renderPlay() {
   if (gameId === 'videopoker') {
     renderZones([{ cards: round.hand, holds: round.holds, disabled: round.drawn, onCard: toggleVpHold }]);
     el('pays').textContent = round.drawn
-      ? `YOU WON ${fmt(round.payout)} CHIPS`
+      ? `RESULT: ${round.result.label.toUpperCase()}. YOUR HOLD WAS ${round.holdBest ? 'BEST' : 'NOT BEST'}.`
       : `HOLDING ${round.holds.filter(Boolean).length} OF 5`;
     return;
   }
 
   if (gameId === 'blackjack') {
     const up = sumHand([round.dealerUpcard]).total;
+    const justRevealed = round.holeRevealed && !holeShown;
+    holeShown = round.holeRevealed;
     const zones = [{
       label: 'DEALER',
       note: round.holeRevealed ? String(sumHand(round.dealerHand).total) : `SHOWS ${up}`,
       cards: round.dealerHand,
       downAt: round.holeRevealed ? -1 : 1,
+      flip: justRevealed,
     }];
     round.hands.forEach((hand, i) => {
       const t = sumHand(hand.cards);
       zones.push({
-        label: round.hands.length > 1 ? `HAND ${i + 1} OF ${round.hands.length} · BET ${fmt(hand.bet)}` : 'YOU',
+        label: round.hands.length > 1 ? `HAND ${i + 1} OF ${round.hands.length}` : 'YOU',
         note: hand.status === 'bust' ? `BUST ${t.total}` : String(t.total),
         cards: hand.cards,
       });
     });
     renderZones(zones);
-    const live = round.hands[round.activeHand];
     el('pays').textContent = handDone
-      ? `NET ${round.payout >= 0 ? '+' : ''}${fmt(round.payout)} CHIPS`
-      : `BET ${fmt(live.bet)} · HAND ${round.activeHand + 1} OF ${round.hands.length}`;
+      ? outcomeLabel(round)
+      : (round.hands.length > 1 ? `HAND ${round.activeHand + 1} OF ${round.hands.length}` : 'YOUR MOVE.');
     return;
   }
 
   if (gameId === 'baccarat') {
-    if (!round?.playerHand) {
-      const quiz = round?.quiz;
-      renderZones([]);
-      if (handDone && quiz && !quiz.deal) {
-        el('pays').textContent = `${quiz.correct}. ${quiz.reason}`;
-        return;
-      }
-      el('pays').textContent = quiz ? quiz.prompt : 'PLACE A BET. THE CARDS DO THE REST.';
+    // Baccarat is a knowledge quiz: answer the percentage question, never back
+    // a side on a felt. Every number the player needs is on the odds panel.
+    renderZones([]);
+    const quiz = round?.quiz;
+    if (handDone && quiz) {
+      el('pays').textContent = `${quiz.correct}. ${quiz.reason}`;
       return;
     }
-    renderZones([
-      { label: 'PLAYER', note: String(round.playerTotal), cards: round.playerHand },
-      { label: 'BANKER', note: String(round.bankerTotal), cards: round.bankerHand },
-    ]);
-    el('pays').textContent =
-      `${round.result.toUpperCase()} · NET ${round.payout >= 0 ? '+' : ''}${fmt(round.payout)} CHIPS`;
+    el('pays').textContent = quiz ? quiz.prompt : '';
     return;
   }
 
@@ -744,9 +1108,9 @@ function renderStatus() {
     const cat = round.result.category;
     el('handGrade').textContent = round.result.label.toUpperCase();
     setGauge((cat / 9) * 100, cat >= 5 ? 'high' : cat >= 3 ? 'mid' : 'low');
-    el('potentialText').textContent = round.payout > 0
-      ? `${round.result.label.toUpperCase()} PAYS ${round.payout} CREDITS.`
-      : 'THE DRAW CHANGED NOTHING, AND NOTHING PAYS.';
+    el('potentialText').textContent = cat > 0
+      ? `${round.result.label.toUpperCase()} IS A PAYING HAND ON THIS PAY TABLE.`
+      : 'THE DRAW MADE NO PAYING HAND. THE HOLD WAS STILL THE PLAY.';
     return;
   }
 
@@ -761,35 +1125,29 @@ function renderStatus() {
     el('handGrade').textContent = best.action ? ACTION_LABEL[best.action] : 'DEAL';
     setGauge((best.ev + 1) * 40, best.ev >= 0.1 ? 'high' : best.ev >= -0.1 ? 'mid' : 'low');
     el('potentialText').textContent = best.action
-      ? `BEST PLAY ${ACTION_LABEL[best.action]} · EV ${best.ev.toFixed(2)} PER BET`
+      ? `BEST PLAY ${ACTION_LABEL[best.action]} · AVERAGE RESULT ${best.ev.toFixed(2)} PER HAND`
       : 'NATURAL. NO DECISION LEFT TO MAKE.';
     return;
   }
 
   if (gameId === 'baccarat') {
     const p = bacBest().probabilities;
-    if (!round?.playerHand) {
-      const quiz = round?.quiz;
-      if (quiz?.type === 'commission') {
-        el('handGrade').textContent = '0.95:1';
-        setGauge(50, 'mid');
-        el('potentialText').textContent = 'BANKER WINS PAY 0.95:1 BECAUSE OF THE 5% COMMISSION.';
-        return;
-      }
-      if (quiz?.type === 'tieodds') {
-        el('handGrade').textContent = `~${tieBreakEven().toFixed(1)}:1`;
-        setGauge(50, 'mid');
-        el('potentialText').textContent = 'THE TIE BET BREAKS EVEN AT THAT PAYOUT. NEARER THAN THAT, IT LOSES.';
-        return;
-      }
-      el('handGrade').textContent = 'BANKER';
-      setGauge(p.banker * 100, 'mid');
-      el('potentialText').textContent = `BEST BET WINS ${(p.banker * 100).toFixed(1)}% OF THE TIME`;
+    const quiz = round?.quiz;
+    if (quiz?.type === 'commission') {
+      el('handGrade').textContent = '0.95:1';
+      setGauge(50, 'mid');
+      el('potentialText').textContent = 'BANKER WINS PAY 0.95:1 BECAUSE OF THE 5% COMMISSION.';
       return;
     }
-    el('handGrade').textContent = round.result.toUpperCase();
-    setGauge(p[round.result] * 100, round.result === 'tie' ? 'low' : 'mid');
-    el('potentialText').textContent = `PLAYER ${round.playerTotal} · BANKER ${round.bankerTotal}`;
+    if (quiz?.type === 'tieodds') {
+      el('handGrade').textContent = `~${tieBreakEven().toFixed(1)}:1`;
+      setGauge(50, 'mid');
+      el('potentialText').textContent = 'THE TIE BET BREAKS EVEN AT THAT PAYOUT. NEARER THAN THAT, IT LOSES.';
+      return;
+    }
+    el('handGrade').textContent = 'BANKER';
+    setGauge(p.banker * 100, 'mid');
+    el('potentialText').textContent = `BANKER WINS ${(p.banker * 100).toFixed(1)}% OF THE TIME AND HAS THE LOWEST HOUSE EDGE`;
     return;
   }
 
@@ -807,7 +1165,7 @@ function payRow(label, amt, on) {
 
 function renderPaytable() {
   el('paytableTitle').textContent =
-    gameId === 'baccarat' ? 'ODDS' : gameId === 'holdem' ? 'RANKINGS' : 'PAYS';
+    gameId === 'baccarat' ? 'ODDS' : gameId === 'holdem' ? 'RANKINGS' : 'PAY TABLE';
   const rows = [];
 
   if (gameId === 'videopoker') {
@@ -854,7 +1212,9 @@ function setControls() {
   el('btnAsk').disabled = handDone;
 
   if (vp) {
-    el('btnDeal').disabled = handDone;
+    // A fresh hand is dealt automatically. DEAL stays disabled while a hand is
+    // live so it cannot be used to discard a bad deal and reroll for free.
+    el('btnDeal').disabled = !handDone;
     el('btnDraw').disabled = handDone;
     return;
   }
@@ -868,7 +1228,7 @@ function setControls() {
     return;
   }
   if (gameId === 'baccarat') {
-    if (round?.quiz && !round.quiz.deal) {
+    if (round?.quiz) {
       renderQuizButtons();
       return;
     }
@@ -892,18 +1252,23 @@ function startHand() {
   decisions = [];
   picked = new Set();
   advice = null;
+  newDeal = true;
+  holeShown = false;
   el('coachPanel').hidden = true;
   el('why').hidden = true;
+  el('tipBox').hidden = true;
+  el('sessionSummary').hidden = true;
   el('battleEndRow').hidden = true;
 
+  const rng = dailyMode && dailyRun ? dailySeedRng(dailyRun.plan[dailyRun.index].seed) : null;
   if (gameId === 'videopoker') {
-    round = newVpRound();
+    round = newVpRound(rng ?? undefined);
   } else if (gameId === 'blackjack') {
-    round = newBjRound(Math.random, { bet: TABLE_BET });
+    round = newBjRound(rng ?? Math.random);
   } else if (gameId === 'baccarat') {
-    round = { quiz: quizFor() };
+    round = { quiz: quizFor(rng ?? Math.random) };
   } else {
-    round = newHeRound();
+    round = newHeRound(rng ?? Math.random);
   }
 
   renderBattle();
@@ -919,24 +1284,32 @@ function startHand() {
   message._typer = null;
   message.textContent = instructions[gameId];
   el('masterPrompt').hidden = true;
-  document.querySelector('.battle-label').textContent = shortSession ? `FIVE HANDS · ${profile.activeSession.played}/${SESSION_HANDS} DONE` : `${canPractice(profile, gymId) ? 'PRACTICE' : 'GYM CHALLENGE'} · ${handsWon}/${HANDS_TO_WIN} GOOD PLAYS`;
+  document.querySelector('.battle-label').textContent = dailyMode && dailyRun
+    ? `DAILY DRILL #${dailyRun.number} · HAND ${dailyRun.index + 1}/${DAILY_HANDS}`
+    : shortSession ? `FIVE HANDS · ${profile.activeSession.played}/${SESSION_HANDS} DONE` : `${canPractice(profile, gymId) ? 'PRACTICE' : 'GYM CHALLENGE'} · ${handsWon}/${HANDS_TO_WIN} GOOD PLAYS`;
 
   // A natural settles before anybody gets to touch anything.
   if (gameId === 'blackjack' && round.settled) settleBlackjack();
 }
 
-function settleHand({ optimal, difficulty, payout, line, review }) {
+function settleHand({ optimal, difficulty, line, review }) {
   if (handDone) return;
   handDone = true;
   handsAtGym++;
 
-  // The XP contract: correctness alone decides XP, difficulty scales it, and
-  // payout only moves chips. A losing hand played correctly still pays in full.
-  const applied = applyResult(profile, { optimal, difficulty, payout, game: GYM_BY_ID[gymId].game });
+  if (dailyMode) return settleDailyHand({ optimal, difficulty, line, review });
+
+  // The XP and score contract: correctness alone decides both, difficulty
+  // scales them, and a losing hand played correctly still scores in full.
+  const applied = applyResult(profile, { optimal, difficulty, game: GYM_BY_ID[gymId].game });
   profile = applied.profile;
   if (!optimal && review) profile = recordMistake(profile, { game: gameId, ...review });
   if (optimal) handsWon++;
-  if (shortSession) profile = scoreSession(profile, optimal);
+  if (shortSession) {
+    if (optimal) sessionBest = Math.max(sessionBest, profile.streak);
+    else if (review) sessionMistakes.push(review);
+    profile = scoreSession(profile, optimal);
+  }
   save();
 
   const gym = GYM_BY_ID[gymId];
@@ -949,14 +1322,17 @@ function settleHand({ optimal, difficulty, payout, line, review }) {
   const say = optimal
     ? `${gym.leader}: GOOD READ. THAT IS THE PLAY.`
     : `${gym.leader}: NO. THE BETTER MOVE WAS DIFFERENT.`;
-  const gainLine = optimal ? 'YOU GAIN ' + fmt(applied.gained) + ' XP.' : 'NO XP. WRONG DECISION.';
+  const gainLine = optimal
+    ? `+${fmt(applied.points)} · STREAK ${fmt(profile.streak)} · +${fmt(applied.gained)} XP`
+    : 'STREAK RESET — SEE WHY';
 
   let verdict;
+  const exhausted = !shortSession && !passed && handsAtGym >= HANDS_TO_WIN;
   if (shortSession) {
     awaitingBadge = !profile.activeSession;
     const session = profile.activeSession ?? profile.sessions[0];
     verdict = awaitingBadge
-      ? `FIVE HANDS COMPLETE: ${session.optimal}/${SESSION_HANDS} CORRECT. RESULT SAVED. REVIEW MISSED PLAYS ON THE MAP, THEN TELL US WHAT WOULD MAKE YOU RETURN USING THE OPTIONAL FEEDBACK ON THE MAP.`
+      ? `FIVE HANDS COMPLETE: ${session.optimal}/${SESSION_HANDS} CORRECT. NEXT: ${computeToday().label}.`
       : `FIVE HANDS: ${session.played}/${SESSION_HANDS} DONE. ${session.optimal} CORRECT.`;
   } else if (passed && canPractice(profile, gym.id)) {
     awaitingBadge = true;
@@ -966,25 +1342,33 @@ function settleHand({ optimal, difficulty, payout, line, review }) {
     const awarded = awardBadge(profile, gym.id);
     profile = awarded.profile;
     save();
-    verdict = `${gym.leader}: ENOUGH. YOU HAVE THE ${gym.badge}. GYM BEATEN!`;
+    verdict = `${gym.leader}: ENOUGH. YOU HAVE THE ${gym.badge}. EXAM PASSED!`;
   } else if (passed) {
-    verdict = `${gym.leader}: WELL DONE. THE BADGE IS YOURS. GYM BEATEN!`;
+    verdict = `${gym.leader}: WELL DONE. THE BADGE IS YOURS. EXAM PASSED!`;
+  } else if (exhausted) {
+    // Ten hands is the exam. Below the pass line there is no eleventh hand.
+    awaitingBadge = true;
+    verdict = `${gym.leader}: EXAM OVER. ${handsWon} OF ${handsAtGym} GOOD PLAYS. YOU NEED ${Math.ceil(PASS_RATE * HANDS_TO_WIN)} OF ${HANDS_TO_WIN}. HEAD BACK AND TRY AGAIN WHEN READY.`;
   } else {
     verdict = `${handsWon} OF ${handsAtGym} GOOD PLAYS. YOU NEED ${Math.ceil(PASS_RATE * HANDS_TO_WIN)} OF ${HANDS_TO_WIN}. KEEP GOING.`;
   }
 
   // One cue per hand, in priority order: a badge outranks a level, which
-  // outranks the win itself.
-  audio.sfx(passed ? 'badge' : applied.leveled ? 'level' : optimal ? 'win' : 'lose');
+  // outranks the win itself. A win after a streak raises the arpeggio one
+  // semitone per step, capped at seven.
+  const cue = passed ? 'badge' : exhausted ? 'lose' : applied.leveled ? 'level' : optimal ? 'win' : 'lose';
+  const shift = cue === 'win' && profile.streak > 1 ? Math.min(profile.streak - 1, 7) : 0;
+  audio.sfx(cue, shift);
+  haptics.buzz(
+    cue === 'badge' ? 'badge' : cue === 'level' ? 'level' : cue === 'win' ? 'correct' : 'wrong',
+    audio.isMuted(),
+  );
 
-  if (applied.leveled) {
-    const elMap = el('scr-map');
-    const f = document.createElement('span');
-    f.className = 'xp-float';
-    f.textContent = `LEVEL UP +1`;
-    elMap.appendChild(f);
-    setTimeout(() => f.remove(), 950);
-  }
+  if (optimal) floatText(`+${fmt(applied.points)}`, 'gain-float');
+  if (applied.leveled) floatText('LEVEL UP +1', 'xp-float');
+  flashScene(optimal);
+
+  if (shortSession && !profile.activeSession) renderSessionSummary(profile.sessions[0]);
 
   const full = `${line} ${say} ${gainLine} ${verdict}`;
   el('masterLine')._dataset = { full };
@@ -995,6 +1379,110 @@ function settleHand({ optimal, difficulty, payout, line, review }) {
   el('coachPanel').hidden = true;
   el('why').hidden = true;
   el('btnNext').textContent = awaitingBadge ? 'RETURN TO MAP' : 'NEXT HAND';
+  maybeShowTip();
+}
+
+function maybeShowTip() {
+  if (!tutorialTips.length) return;
+  const tip = tutorialTips.shift();
+  el('tipText').textContent = tip.text;
+  el('tipBox').hidden = false;
+}
+
+function floatText(text, cls) {
+  const scene = document.querySelector('#scr-battle .scene');
+  if (!scene || reduceMotion()) return;
+  const f = document.createElement('span');
+  f.className = cls;
+  f.textContent = text;
+  scene.appendChild(f);
+  setTimeout(() => f.remove(), 950);
+}
+
+function flashScene(optimal) {
+  const scene = document.querySelector('#scr-battle .scene');
+  if (!scene) return;
+  const cls = optimal ? 'flash-ok' : 'shake';
+  scene.classList.remove('flash-ok', 'shake');
+  void scene.offsetWidth; // restart the animation if it is already applied
+  scene.classList.add(cls);
+  setTimeout(() => scene.classList.remove(cls), 520);
+}
+
+// A five-hand session ends with a compact recap: the score, the best streak
+// reached, and one miss worth another look. One tap dismisses it.
+function renderSessionSummary(session) {
+  const box = el('sessionSummary');
+  if (!box || !session) return;
+  box.replaceChildren();
+  const head = document.createElement('h2');
+  head.textContent = 'FIVE HANDS COMPLETE';
+  box.appendChild(head);
+  const score = document.createElement('p');
+  score.className = 'hint';
+  score.textContent = `${session.optimal}/${SESSION_HANDS} CORRECT · BEST STREAK ${sessionBest}`;
+  box.appendChild(score);
+  const miss = sessionMistakes[0];
+  if (miss) {
+    const detail = document.createElement('p');
+    detail.className = 'hint';
+    detail.textContent = `REVIEW: ${miss.situation} — ${miss.correction}`;
+    box.appendChild(detail);
+  }
+  const dismiss = document.createElement('button');
+  dismiss.type = 'button';
+  dismiss.textContent = 'GOT IT';
+  dismiss.onclick = () => { box.hidden = true; };
+  box.appendChild(dismiss);
+  box.hidden = false;
+}
+
+function settleDailyHand({ optimal, difficulty, line, review }) {
+  const run = dailyRun;
+  if (run.scored) {
+    const applied = applyResult(profile, { optimal, difficulty, game: GYM_BY_ID[gymId].game });
+    profile = applied.profile;
+    if (!optimal && review) profile = recordMistake(profile, { game: gameId, ...review });
+  } else if (!optimal && review) {
+    profile = recordMistake(profile, { game: gameId, ...review });
+  }
+
+  run.results = [...run.results, Boolean(optimal)].slice(0, DAILY_HANDS);
+  run.index = run.results.length;
+  if (run.index < DAILY_HANDS) {
+    // Persist after every hand so a closed tab resumes from the last completed hand.
+    profile = setDailyProgress(profile, { key: run.key, index: run.index, results: run.results });
+  } else {
+    profile = completeDaily(profile, run.key, run.results);
+    run.finished = true;
+  }
+  save();
+
+  renderBattle();
+  el('battleEndRow').hidden = false;
+
+  const tally = run.results.filter(Boolean).length;
+  const say = optimal
+    ? 'GOOD READ. THAT IS THE PLAY.'
+    : 'NO. THE BETTER MOVE WAS DIFFERENT.';
+  const verdict = run.finished
+    ? (run.scored
+        ? `DAILY DRILL #${run.number} COMPLETE: ${tally}/${DAILY_HANDS} CORRECT. COME BACK TOMORROW FOR #${run.number + 1}. THE STREAK IS ${fmt(profile.daily.streak)}.`
+        : `PRACTICE REPLAY DONE: ${tally}/${DAILY_HANDS} CORRECT. NO NEW XP OR SCORE TODAY.`)
+    : `DAILY DRILL · HAND ${run.index} OF ${DAILY_HANDS}. ${tally} CORRECT SO FAR.`;
+  const full = `${line} ${say} ${verdict}`;
+  el('masterLine')._dataset = { full };
+  el('masterPrompt').hidden = false;
+  typewriter(el('masterLine'), full);
+
+  advice = null;
+  el('coachPanel').hidden = true;
+  el('why').hidden = true;
+  el('btnNext').textContent = run.finished ? 'RETURN TO MAP' : 'NEXT HAND';
+  const cue = run.finished ? 'badge' : optimal ? 'win' : 'lose';
+  audio.sfx(cue);
+  haptics.buzz(cue === 'badge' ? 'badge' : cue === 'win' ? 'correct' : 'wrong', audio.isMuted());
+  flashScene(optimal);
 }
 
 /* ---- video poker ---- */
@@ -1015,17 +1503,20 @@ function doDraw() {
   const optimal = best.optimal.some((pattern) => pattern.join('') === round.holds.join(''));
   const review = {
     situation: round.hand.map(cardLabel).join(' '),
+    quiz: { choices: Array.from({ length: 32 }, (_, mask) => mask.toString(2).padStart(5, '0')),
+      optimal: best.optimal.map(pattern => pattern.map(Number).join('')) },
     chosen: 'HOLD ' + (round.hand.filter((_, i) => round.holds[i]).map(cardLabel).join(' ') || 'NONE'),
-    correction: 'HOLD ' + (round.hand.filter((_, i) => best.holds[i]).map(cardLabel).join(' ') || 'NONE') + `. Expected return ${best.ev.toFixed(3)} credits per credit bet.`,
+    correction: 'HOLD ' + (round.hand.filter((_, i) => best.holds[i]).map(cardLabel).join(' ') || 'NONE') + `. Average return ${best.ev.toFixed(3)} per hand under this pay table.`,
   };
-  const heldBefore = round.holds.filter(Boolean).length;
+  // The pay table lists the average return per hand. The draw result is shown
+  // for learning; the decision score comes from the hold, not the payout.
   drawRound(round);
+  round.holdBest = optimal;
   settleHand({
     optimal,
     difficulty: handDifficulty(round.result),
-    payout: round.payout * heldBefore,
     review,
-    line: `${round.result.label} FOR ${fmt(round.payout)} CHIPS.`,
+    line: `RESULT: ${round.result.label.toUpperCase()}. YOUR HOLD WAS ${optimal ? 'BEST' : 'NOT BEST'}.`,
   });
 }
 
@@ -1038,7 +1529,7 @@ function bjAct(action) {
     situation: `${round.hands[round.activeHand].cards.map(cardLabel).join(' ')} AGAINST ${cardLabel(round.dealerUpcard)}`,
     chosen: ACTION_LABEL[action],
     quiz: { choices: legalActions(round), optimal: before.optimal ?? [before.action] },
-    correction: `${ACTION_LABEL[before.action]}. Expected return ${before.ev.toFixed(3)} per bet under this gym's rules.`,
+    correction: `${ACTION_LABEL[before.action]}. Average result ${before.ev.toFixed(3)} per hand under this gym's rules.`,
   };
   if (action === 'hit') bjHit(round);
   else if (action === 'stand') bjStand(round);
@@ -1064,8 +1555,7 @@ function settleBlackjack() {
     // (round.result is a word). The difficulty here is the decision count: the
     // more places the player had to be right, the more a correct round is worth.
     difficulty: 1 + Math.min(decisions.length, 4) * 0.35,
-    payout: round.payout,
-    line: round.log[round.log.length - 1] ?? outcomeLabel(round),
+    line: outcomeLabel(round),
   });
 }
 
@@ -1073,7 +1563,7 @@ function settleBlackjack() {
 function renderQuizButtons() {
   const quiz = round?.quiz;
   const row = el('rowBet');
-  if (!quiz || quiz.deal) return;
+  if (!quiz) return;
   row.innerHTML = '';
   for (const option of quiz.options) {
     const button = document.createElement('button');
@@ -1081,7 +1571,10 @@ function renderQuizButtons() {
     button.dataset.quizAnswer = option;
     button.dataset.quizCorrect = option === quiz.correct ? 'true' : 'false';
     button.disabled = handDone;
-    button.onclick = () => { audio.sfx('chip'); bacAnswer(option); };
+    button.onclick = () => {
+      audio.sfx('chip');
+      bacAnswer(option);
+    };
     row.appendChild(button);
   }
 }
@@ -1093,31 +1586,13 @@ function bacAnswer(choice) {
   settleHand({
     optimal: correct,
     difficulty: 1,
-    payout: 0,
     review: {
       situation: quiz.prompt,
       chosen: choice,
       correction: quiz.reason,
+      quiz: { choices: quiz.options, optimal: [quiz.correct] },
     },
     line: correct ? `CORRECT. ${quiz.correct}.` : `NO. ${choice} IS WRONG. THE ANSWER IS ${quiz.correct}.`,
-  });
-}
-
-function bacBet(side) {
-  if (handDone) return;
-  const quiz = round?.quiz;
-  const optimal = quiz ? side.toUpperCase() === quiz.correct : side === bacBest().side;
-  round = newBacRound(Math.random, side, TABLE_BET);
-  settleHand({
-    optimal,
-    difficulty: handDifficulty(round.result),
-    payout: round.payout,
-    review: {
-      situation: quiz?.prompt ?? 'STANDARD BACCARAT WITH 5% BANKER COMMISSION',
-      chosen: side.toUpperCase(),
-      correction: quiz?.reason ?? 'BANKER has the lowest house edge. It still has a negative expected return; correct play does not guarantee a win.',
-    },
-    line: round.log.join(' '),
   });
 }
 
@@ -1134,9 +1609,8 @@ function heConfirm() {
   const chosen = round.hand7.filter((_, i) => picked.has(i));
   settleHand({
     optimal: playsBestFive(round.hand7, chosen),
-    review: { situation: round.hand7.map(cardLabel).join(' '), chosen: chosen.map(cardLabel).join(' '), correction: `${round.result.label}: ${round.result.cards.map(cardLabel).join(' ')}. Choose five cards for the highest ranking hand; equally ranked selections are accepted.` },
+    review: { quiz: bestFiveQuiz(round.hand7), situation: round.hand7.map(cardLabel).join(' '), chosen: chosen.map(cardLabel).join(' '), correction: `${round.result.label}: ${round.result.cards.map(cardLabel).join(' ')}. Choose five cards for the highest ranking hand; equally ranked selections are accepted.` },
     difficulty: handDifficulty(round.result),
-    payout: 0,
     line: `YOU READ THE BOARD. IT IS ${round.result.label.toUpperCase()}.`,
   });
 }
@@ -1170,7 +1644,7 @@ function buildAdvice() {
     const kept = round.hand.filter((_, i) => best.holds[i]);
     return {
       holds: best.holds,
-      text: `HOLD ${kept.length}. ${reasonFor(kept)} EV ${best.ev.toFixed(3)}/CREDIT.`,
+      text: `HOLD ${kept.length}. ${reasonFor(kept)} AVERAGE RETURN ${best.ev.toFixed(3)} PER HAND.`,
       why: `ALL 32 HOLDS: ${best.options.slice(0, 3)
         .map((o) => `${o.keptCount}HELD ${o.ev.toFixed(2)}`).join('  ')}`,
       apply: () => { setHolds(round, best.holds); renderBattle(); },
@@ -1186,7 +1660,7 @@ function buildAdvice() {
     }
     if (!best.action) return null;
     return {
-      text: `${ACTION_LABEL[best.action]}. EV ${best.ev.toFixed(3)} PER BET.`,
+      text: `${ACTION_LABEL[best.action]}. AVERAGE RESULT ${best.ev.toFixed(3)} PER HAND.`,
       why: best.alternatives
         .map((o) => `${o.label} ${o.ev >= 0 ? '+' : ''}${o.ev.toFixed(2)}`).join('  '),
       apply: () => bjAct(best.action),
@@ -1205,11 +1679,11 @@ function buildAdvice() {
     const best = bacBest();
     const p = best.probabilities;
     return {
-      text: `BET ${best.side.toUpperCase()}. ${best.alternatives
-        .map((o) => `${o.side.toUpperCase()} ${o.ev >= 0 ? '+' : ''}${o.ev.toFixed(4)}`)
-        .join('  ')} PER UNIT STAKED.`,
+      text: `BANKER HAS THE LOWEST HOUSE EDGE. AVERAGE RESULT ${(best.ev * 100).toFixed(2)}% PER HAND. ${best.alternatives
+        .map((o) => `${o.side.toUpperCase()} ${o.ev >= 0 ? '+' : ''}${(o.ev * 100).toFixed(2)}%`)
+        .join('  ')}.`,
       why: `WIN RATES: BANKER ${(p.banker * 100).toFixed(1)}%  PLAYER ${(p.player * 100).toFixed(1)}%  TIE ${(p.tie * 100).toFixed(1)}%.`,
-      apply: () => bacBet(best.side),
+      apply: () => bacAnswer(best.side.toUpperCase()),
     };
   }
 
@@ -1247,19 +1721,30 @@ el('btnApply').onclick = () => {
 };
 
 /* ---------------- battle controls ---------------- */
-el('btnDeal').onclick = () => startHand();
+el('btnDeal').onclick = () => { if (handDone) el('btnNext').click(); };
 el('btnDraw').onclick = doDraw;
 el('btnHit').onclick = () => bjAct('hit');
 el('btnStand').onclick = () => bjAct('stand');
 el('btnDouble').onclick = () => bjAct('double');
 el('btnSplit').onclick = () => bjAct('split');
-el('btnBanker').onclick = () => bacBet('banker');
-el('btnPlayer').onclick = () => bacBet('player');
-el('btnTie').onclick = () => bacBet('tie');
+el('btnBanker').onclick = () => bacAnswer('BANKER');
+el('btnPlayer').onclick = () => bacAnswer('PLAYER');
+el('btnTie').onclick = () => bacAnswer('TIE');
 el('btnConfirm').onclick = heConfirm;
 el('btnClear').onclick = () => { if (!handDone) { picked = new Set(); renderBattle(); } };
 
 el('btnNext').onclick = () => {
+  if (dailyMode && dailyRun) {
+    if (dailyRun.finished) {
+      dailyMode = false;
+      dailyRun = null;
+      renderMap();
+      show('scr-map');
+      return;
+    }
+    loadDailyHand();
+    return;
+  }
   if (awaitingBadge) {
     awaitingBadge = false;
     renderMap();

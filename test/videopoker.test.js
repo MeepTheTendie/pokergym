@@ -86,12 +86,34 @@ test('a jack pair is valued above a low pair', () => {
   assert.ok(jacks.ev > sevens.ev);
 });
 
-test('strategy is cached per canonical hand', () => {
+test('strategy is cached per ordered hand', () => {
   clearCache();
   const hand = [c(14, 's'), c(11, 's'), c(9, 's'), c(6, 's'), c(2, 's')];
   const first = bestHold(hand);
   const second = bestHold(hand);
   assert.equal(first, second);
+});
+
+test('cached advice keeps hold positions aligned when the same cards are reordered', () => {
+  clearCache();
+  const hand = advice['pair of jacks'].hand;
+  const first = bestHold(hand);
+  const order = [2, 0, 3, 1, 4];
+  const reordered = order.map(i => hand[i]);
+  const second = bestHold(reordered);
+  assert.deepEqual(second.holds, order.map(i => first.holds[i]));
+  near(second.ev, first.ev);
+  const heldCards = (cards, pattern) => cards.filter((_, i) => pattern[i]).map(cardLabel).sort();
+  assert.deepEqual(second.optimal.map(p => heldCards(reordered, p)),
+    first.optimal.map(p => heldCards(hand, p)));
+  for (const option of first.options) {
+    const mapped = order.map(i => option.holds[i]);
+    const equivalent = second.options.find(o => o.holds.every((hold, i) => hold === mapped[i]));
+    near(equivalent.ev, option.ev);
+    assert.equal(equivalent.ways, option.ways);
+  }
+  assert.equal(bestHold(hand), first, 'Original order remains cached');
+  assert.equal(bestHold(reordered), second, 'Reordered hand is also cached');
 });
 
 test('round deals five cards and holds none by default', () => {

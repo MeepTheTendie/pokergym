@@ -58,7 +58,7 @@ const GAMES = ['videopoker', 'blackjack', 'baccarat', 'holdem'];
 const SHOT_NAMES = ['battle', 'battle-blackjack', 'battle-baccarat', 'battle-holdem'];
 
 const save = (badges) => JSON.stringify({
-  version: 1, name: 'RED', classId: 'scholar', xp: 1069, chips: 3288,
+  version: 2, name: 'RED', classId: 'scholar', xp: 1069, score: 3288, streak: 4, bestStreak: 12,
   badges, stats: { focus: 6, nerve: 2, read: 3 }, gym: 'pokergym',
   handsPlayed: 40, handsOptimal: 39, lessonsDone: GAMES,
   createdAt: '2026-01-01T00:00:00.000Z',
@@ -91,7 +91,7 @@ const audioCheck = await evaluate(`(async () => {
   const probe = source + '\\nexport async function renderProbe() {' +
     'ctx = new OfflineAudioContext(1, 44100 * 15, 44100);' +
     'musicBus = ctx.createGain(); musicBus.gain.value = 0.42; musicBus.connect(ctx.destination); makeNoise();' +
-    'const score = SONGS.gamecorner; const data = compile(score); if(data.error) throw new Error(data.error);' +
+    'const score = SONGS.academy; const data = compile(score); if(data.error) throw new Error(data.error);' +
     'const sps = 60 / score.bpm / 4;' +
     'for(const [step, events] of data.at) for(const ev of events) fire(ev, step * sps, sps, data.gain, score.voices);' +
     'const buffer = await ctx.startRendering(); const samples = buffer.getChannelData(0);' +
@@ -102,7 +102,7 @@ const audioCheck = await evaluate(`(async () => {
   finally { URL.revokeObjectURL(url); }
 })()`);
 if (audioCheck.peak >= 1 || audioCheck.rms < 0.005) throw new Error('Audio render failed: ' + JSON.stringify(audioCheck));
-console.log('gamecorner audio render:', JSON.stringify(audioCheck));
+console.log('academy audio render:', JSON.stringify(audioCheck));
 for (const width of [320, 360, 393, 440]) {
   await send('Emulation.setDeviceMetricsOverride', { width, height: 820, deviceScaleFactor: 2, mobile: true });
   const overflow = await evaluate('document.documentElement.scrollWidth > innerWidth');

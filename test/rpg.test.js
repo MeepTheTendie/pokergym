@@ -7,7 +7,7 @@ import {
   createProfile, applyResult, awardBadge, canBattle,
   xpForLevel, levelFromXp, serialize, deserialize, handDifficulty, SAVE_VERSION,
 } from '../src/rpg/state.js';
-import { lessonFor, hasCompletedLesson, markLessonDone } from '../src/rpg/lessons.js';
+import { lessonFor, lessonIntro, lessonTips, LESSON_INTRO_PAGES, hasCompletedLesson, markLessonDone } from '../src/rpg/lessons.js';
 import { evaluate5 } from '../src/evaluate.js';
 
 test('every class maps to exactly one gym and every gym to one class', () => {
@@ -68,17 +68,37 @@ test('a correct play awards XP and an incorrect play awards none', () => {
   assert.equal(bad.profile.handsOptimal, 0);
 });
 
-test('a losing hand played correctly still pays full XP', () => {
+test('a losing hand played correctly still pays full score and XP', () => {
   const base = createProfile('scholar');
-  const winning = applyResult(base, { optimal: true, payout: 0 });
-  const r = applyResult(base, { optimal: true, payout: 0 });
+  const winning = applyResult(base, { optimal: true });
+  const r = applyResult(base, { optimal: true });
   assert.equal(r.gained, winning.gained);
+  assert.equal(r.points, winning.points);
 });
 
-test('an incorrect play cannot drive chips below zero', () => {
-  const broke = { ...createProfile('scholar'), chips: 10 };
-  const { profile } = applyResult(broke, { optimal: false });
-  assert.equal(profile.chips, 0);
+test('a correct decision scores and grows the streak; a wrong one only resets it', () => {
+  const first = applyResult(createProfile('scholar'), { optimal: true, difficulty: 1 });
+  assert.equal(first.points, 10);            // streak 0 -> x1.0
+  assert.equal(first.profile.score, 10);
+  assert.equal(first.profile.streak, 1);
+  assert.equal(first.profile.bestStreak, 1);
+
+  const second = applyResult(first.profile, { optimal: true, difficulty: 1 });
+  assert.equal(second.points, 11);           // streak 1 -> x1.1
+  assert.equal(second.profile.score, 21);
+  assert.equal(second.profile.streak, 2);
+
+  const wrong = applyResult(second.profile, { optimal: false });
+  assert.equal(wrong.points, 0);
+  assert.equal(wrong.profile.score, 21, 'score never decreases');
+  assert.equal(wrong.profile.streak, 0);
+  assert.equal(wrong.profile.bestStreak, 2);
+});
+
+test('the combo multiplier caps at a streak of nine', () => {
+  let p = createProfile('scholar');
+  for (let i = 0; i < 12; i++) p = applyResult(p, { optimal: true, difficulty: 1 }).profile;
+  assert.equal(applyResult(p, { optimal: true, difficulty: 1 }).points, 19); // x1.9
 });
 
 test('stats only increase when a level is gained', () => {
@@ -117,13 +137,13 @@ test('beating a gym unlocks exactly the next one', () => {
   for (const gym of GYMS) assert.equal(canBattle(profile, gym.id), false, 'all cleared');
 });
 
-test('awarding a badge pays chips and advances the current gym', () => {
+test('awarding a badge adds score and advances the current gym', () => {
   const base = createProfile('scholar');
   const first = GYMS[0];
   const { profile, badge } = awardBadge(base, first.id);
   assert.equal(badge.id, first.id);
   assert.deepEqual(profile.badges, [first.id]);
-  assert.equal(profile.chips, base.chips + 250);
+  assert.equal(profile.score, base.score + 250);
   assert.equal(profile.gym, GYMS[1].id);
 });
 
@@ -132,7 +152,7 @@ test('awarding the same badge twice is a no-op', () => {
   const twice = awardBadge(once, GYMS[0].id);
   assert.equal(twice.alreadyHad, true);
   assert.deepEqual(twice.profile.badges, once.badges);
-  assert.equal(twice.profile.chips, once.chips);
+  assert.equal(twice.profile.score, once.score);
 });
 
 test('higher ranked hands are worth more XP', () => {
@@ -187,6 +207,21 @@ test('a brand new profile has completed no lessons', () => {
   assert.deepEqual(createProfile('grinder').lessonsDone, []);
 });
 
+test('a lesson splits into a short intro and reusable tips', () => {
+  for (const game of ['videopoker', 'blackjack', 'baccarat', 'holdem']) {
+    const lesson = lessonFor(game);
+    const intro = lessonIntro(lesson);
+    const tips = lessonTips(lesson);
+    assert.equal(intro.length, LESSON_INTRO_PAGES);
+    assert.equal(intro.length + tips.length, lesson.pages.length);
+    assert.deepEqual(intro, lesson.pages.slice(0, LESSON_INTRO_PAGES));
+    assert.deepEqual(tips, lesson.pages.slice(LESSON_INTRO_PAGES));
+    assert.ok(tips.length >= 4, `${game} needs at least four tips`);
+  }
+  assert.deepEqual(lessonIntro(null), []);
+  assert.deepEqual(lessonTips(null), []);
+});
+
 test('save round-trips and rejects corrupt or stale data', () => {
   const profile = { ...createProfile('grinder'), badges: [GYMS[0].id], xp: 1234 };
   const back = deserialize(serialize(profile));
@@ -195,6 +230,27 @@ test('save round-trips and rejects corrupt or stale data', () => {
   assert.equal(deserialize('{not json'), null);
   assert.equal(deserialize(JSON.stringify({ ...profile, version: 99 })), null);
   assert.equal(deserialize(JSON.stringify({ ...profile, classId: 'nope' })), null);
+});
+
+test('version 1 saves migrate to score without wiping progress', () => {
+  const v1 = {
+    version: 1, name: 'RED', classId: 'scholar', xp: 1234, chips: 3288,
+    badges: [GYMS[0].id], stats: { focus: 6, nerve: 2, read: 3 }, gym: GYMS[1].id,
+    handsPlayed: 40, handsOptimal: 30, lessonsDone: ['videopoker'],
+    mistakes: [{ game: 'blackjack', situation: 'a', chosen: 'b', correction: 'c' }],
+    sessions: [{ gymId: GYMS[0].id, played: 5, optimal: 4, completedAt: '2026-01-01T00:00:00.000Z' }],
+  };
+  const migrated = deserialize(JSON.stringify(v1));
+  assert.equal(migrated.version, SAVE_VERSION);
+  assert.equal(migrated.chips, undefined);
+  assert.equal(migrated.score, 300);
+  assert.equal(migrated.streak, 0);
+  assert.equal(migrated.bestStreak, 0);
+  assert.equal(migrated.xp, 1234);
+  assert.deepEqual(migrated.badges, [GYMS[0].id]);
+  assert.deepEqual(migrated.lessonsDone, ['videopoker']);
+  assert.equal(migrated.mistakes.length, 1);
+  assert.equal(migrated.sessions.length, 1);
 });
 
 test('difficulty scales XP payout', () => {

@@ -16,43 +16,39 @@
 <div class="topbar">
   <span class="brand">♠ POKER GYM <small>TRAINER JOURNEY</small></span>
   <button id="btnMap" type="button" hidden>MAP</button>
+  <button id="btnTitle" type="button" hidden>TITLE</button>
   <button id="btnSound" class="sound-toggle" type="button" aria-pressed="true">SND ON</button>
+  <button id="btnHaptics" class="sound-toggle" type="button" aria-pressed="true">HAPTICS ON</button>
 </div>
 
 <p class="window hint" id="saveStatus" role="status" hidden></p>
 
-<details class="window" id="saveBackup">
-  <summary>BACK UP / RESTORE PROGRESS</summary>
-  <p class="hint">Copy your backup into a private note before clearing browser data or moving devices. Includes your trainer, records and mistake notebook. No upload or cloud sync. Restoring replaces this browser’s progress; it does not merge saves. Unfinished hands are redealt.</p>
-  <label for="backupText">PROGRESS BACKUP</label>
-  <textarea id="backupText" rows="4" maxlength="100000" spellcheck="false"></textarea>
-  <div class="row"><button id="btnBackup" type="button">PREPARE BACKUP</button><button id="btnRestore" type="button">CHECK BACKUP</button></div>
-  <button id="btnConfirmRestore" type="button" hidden>REPLACE LOCAL PROGRESS</button>
-  <p id="backupStatus" class="hint" role="status"></p>
-</details>
-
 <!-- ============ TITLE ============ -->
 <section id="scr-title" class="screen">
-  <div class="title-art"><canvas id="titleWorld" width="240" height="176" aria-hidden="true"></canvas><span>YOUR JOURNEY STARTS HERE</span><canvas id="titleTrainer" class="title-trainer" width="96" height="96" aria-hidden="true"></canvas><span class="title-gym gym-nw">GYM</span><span class="title-gym gym-ne">GYM</span><span class="title-gym gym-sw">GYM</span><span class="title-gym gym-se">GYM</span><span class="title-league">THE GYM LEAGUE</span></div>
+  <div class="title-art"><canvas id="titleWorld" width="240" height="176" aria-hidden="true"></canvas><span>YOUR JOURNEY STARTS HERE</span><canvas id="titleTrainer" class="title-trainer" width="96" height="96" aria-hidden="true"></canvas><span class="title-gym gym-nw">GYM</span><span class="title-gym gym-ne">GYM</span><span class="title-gym gym-sw">GYM</span><span class="title-gym gym-se">GYM</span><span class="title-league">THE CARD ACADEMY</span></div>
   <div class="window title-menu" style="text-align:center; padding:20px 12px;">
     <h1 style="font-size:20px; margin:0 0 4px; color:var(--gbc-1);">POKER</h1>
     <h1 style="font-size:20px; margin:0 0 14px; color:var(--r01);">GYM</h1>
     <p class="hint" style="font-size:10px; margin:0 0 16px;">TRAIN. LEVEL UP.<br>BEAT THE MASTERS.</p>
     <p id="practiceInvitation" class="hint" hidden></p>
     <div class="row" style="flex-direction:column; gap:10px;">
-      <button id="btnNew" class="primary">NEW GAME</button>
+      <button id="btnStart" class="primary">START TRAINING</button>
+      <button id="btnNew">CHOOSE STYLE</button>
       <button id="btnContinue">CONTINUE</button>
+      <button id="btnDaily" hidden>DAILY DRILL</button>
     </div>
   </div>
-  <p class="hint" style="text-align:center; font-size:9px;">FOUR GYMS. FOUR BADGES. ONE GREAT TRAINER.</p>
+  <p class="hint" style="text-align:center; font-size:9px;">FOUR GAMES. FOUR MASTERS. ONE SHARP PLAYER.</p>
   <p class="hint" id="offlineStatus" role="status" style="text-align:center; font-size:9px;"></p>
+  <div style="text-align:center;"><button id="btnInstall" type="button" hidden>INSTALL FOR QUICK PRACTICE</button></div>
+  <p class="hint" id="installStatus" role="status" style="text-align:center; font-size:9px;"></p>
   <p class="hint" id="installHelp" hidden style="text-align:center; font-size:9px;">ON ANDROID: OPEN YOUR BROWSER MENU AND LOOK FOR INSTALL APP OR ADD TO HOME SCREEN. CLEARING SITE DATA REMOVES YOUR SAVE.</p>
 </section>
 
 <!-- ============ CLASS SELECT ============ -->
 <section id="scr-class" class="screen" hidden>
   <div class="window">
-    <h2>CHOOSE YOUR TRAINER</h2>
+    <h2>CHOOSE YOUR STYLE</h2>
     <p class="hint" style="font-size:10px; margin:0 0 10px;">YOUR CLASS DECIDES YOUR FIRST GYM AND YOUR STRONGER STAT.</p>
     <div class="class-grid" id="classGrid"></div>
   </div>
@@ -69,6 +65,27 @@
 
 <!-- ============ GYM MAP ============ -->
 <section id="scr-map" class="screen" hidden>
+  <div class="window" id="todayCard">
+    <h2>TODAY</h2>
+    <p class="hint" id="todayState">YOUR NEXT STEP.</p>
+    <div class="row" id="todayActions"></div>
+    <textarea id="dailySharePreview" readonly rows="4" hidden aria-label="Daily result to copy"></textarea>
+    <p id="dailyShareStatus" class="hint" role="status" hidden>Nothing sent. Choose who receives it yourself.</p>
+  </div>
+
+  <div class="world-panel">
+    <div class="world-heading"><h2>THE CARD ACADEMY</h2><span>CHOOSE YOUR GAME</span></div>
+    <div class="overworld"><canvas id="mapWorld" width="240" height="208" aria-hidden="true"></canvas><canvas id="mapTrainer" width="96" height="96" aria-hidden="true"></canvas><div id="gymList"></div></div>
+    <p class="map-caption">Visit a gym. Learn the game. Earn your badge.</p>
+  </div>
+
+  <div class="window">
+    <h2>FIVE-HAND TRAINING</h2>
+    <p class="hint">CHOOSE ANY OF THE FOUR GAMES NOW — NO BADGES REQUIRED. READ ITS LESSON, FINISH FIVE HANDS, THEN REVIEW MISSED PLAYS. HOLD’EM TEACHES HAND EVALUATION. HINTS AVAILABLE; RESULTS INCLUDE ASSISTED PLAYS. NO BADGE AWARDED. UNFINISHED SESSIONS RESUME FROM THE LAST COMPLETED HAND.</p>
+    <div id="shortSessions" aria-live="polite"></div>
+    <p class="hint">LAST SEVEN RESULTS SHOWN. SAVED ONLY IN THIS BROWSER; NOT CLOUD SYNCED.</p>
+  </div>
+
   <div class="window trainer-card">
     <h2>YOUR TRAINER</h2>
     <div class="dlg">
@@ -80,7 +97,7 @@
     </div>
     <div class="meter" style="margin-top:10px;"><div id="xpBar"></div></div>
     <p class="hint" id="xpLine" style="margin:4px 0 0; font-size:10px;"></p>
-    <p class="hint" style="margin:6px 0 0; font-size:10px;">CHIPS <span id="chipCount">0</span></p>
+    <p class="hint" style="margin:6px 0 0; font-size:10px;">SCORE <span id="scoreCount">0</span> · BEST STREAK <span id="bestStreak">0</span></p>
   </div>
 
   <div class="window">
@@ -89,65 +106,75 @@
     <p class="hint">CORRECT DECISIONS, NOT LUCKY WINS. TRACKING STARTS WITH YOUR NEXT HAND. LOCAL SAVING REQUIRES AVAILABLE BROWSER STORAGE.</p>
   </div>
 
-  <div class="window">
-    <h2>FIVE-HAND TRAINING</h2>
-    <p class="hint">CHOOSE ANY OF THE FOUR GAMES NOW — NO BADGES REQUIRED. READ ITS LESSON, FINISH FIVE HANDS, THEN REVIEW MISSED PLAYS. HOLD’EM TEACHES HAND EVALUATION. HINTS AVAILABLE; RESULTS INCLUDE ASSISTED PLAYS. NO BADGE AWARDED. UNFINISHED SESSIONS RESUME FROM THE LAST COMPLETED HAND.</p>
-    <div id="shortSessions" aria-live="polite"></div>
-    <p class="hint">LAST SEVEN RESULTS SHOWN. SAVED ONLY IN THIS BROWSER; NOT CLOUD SYNCED.</p>
-  </div>
-
-  <div id="playerShare" class="window" hidden>
-    <h2>INVITE A PRACTICE PARTNER</h2>
-    <p class="hint">Share the free demo if it helped. Your trainer, scores and save stay private.</p>
-    <textarea id="sharePreview" readonly rows="4" aria-label="Invitation to copy">Try Poker Gym: free five-hand card-game practice with coaching and mistake review. No signup, deposits or real-money wagering. https://pokergym.history-atlas.workers.dev/web/</textarea>
-    <div class="row"><button id="btnShare" type="button" hidden>OPEN SHARE OPTIONS</button><button id="btnCopyShare" type="button">COPY INVITATION</button></div>
-    <p id="shareStatus" class="hint" role="status">Nothing sent. Choose who receives it yourself.</p>
-  </div>
-  <div id="playerFeedback" class="window" hidden>
-    <h2>HELP SHAPE YOUR NEXT SESSION</h2>
-    <p class="hint">YOU FINISHED FIVE HANDS. WHAT WOULD MAKE YOU COME BACK?</p>
-    <p class="hint"><a href="https://github.com/MeepTheTendie/pokergym/issues/1" target="_blank" rel="noopener noreferrer">SHARE FEEDBACK ON GITHUB</a> — OPTIONAL PUBLIC THREAD; GITHUB ACCOUNT REQUIRED. OMIT PERSONAL DETAILS AND SAVE BACKUPS. EMAIL IS ALSO AVAILABLE BELOW.</p>
-    <form id="feedbackForm">
-      <label>Was the first session clear?
-        <select id="feedbackClarity" required><option value="">CHOOSE</option><option value="clear">CLEAR</option><option value="confusing">CONFUSING</option></select>
-      </label>
-      <label>Would you return for short training?
-        <select id="feedbackReturn" required><option value="">CHOOSE</option><option value="yes">YES</option><option value="maybe">MAYBE</option><option value="no">NO</option></select>
-      </label>
-      <label>Would fresh weekly drills and deeper mistake review be worth US$5/month to you?
-        <select id="feedbackPrice" required><option value="">CHOOSE</option><option value="interested">INTERESTED</option><option value="unsure">UNSURE</option><option value="free-only">FREE ONLY</option></select>
-      </label>
-      <p class="hint">A POSSIBLE FUTURE OFFER. NO MEMBERSHIP OR CHECKOUT EXISTS TODAY. BASIC DEMO REMAINS FREE.</p>
-      <label>What was confusing or missing? (optional)
-        <textarea id="feedbackNote" maxlength="400" rows="3" placeholder="Please avoid personal or payment details."></textarea>
-      </label>
-      <button type="submit">PREPARE FEEDBACK</button>
-    </form>
-    <div id="feedbackDraft" hidden>
-      <p class="hint">NOT SENT. REVIEW THE DRAFT BELOW. OPEN YOUR EMAIL APP, THEN SEND IT YOURSELF. YOUR EMAIL ADDRESS WILL BE VISIBLE TO THE OWNER. NO GAME SAVE OR TRAINER NAME IS INCLUDED.</p>
-      <textarea id="feedbackPreview" readonly rows="8" aria-label="Feedback email draft"></textarea>
-      <a id="feedbackEmail">OPEN EMAIL DRAFT</a>
-      <p class="hint">NO EMAIL APP? COPY THE DRAFT AND EMAIL WESLEYMPENNOCK@GMAIL.COM. NOTHING IS UPLOADED BY THIS FORM.</p>
-    </div>
-  </div>
-
-  <div class="window">
-    <h2>REVIEW YOUR MISTAKES</h2>
-    <p class="hint">New blackjack mistakes include a scored retry of the original decision. Answer before revealing; retry records are separate from game accuracy. Older mistakes and other games use self review.</p>
-    <p class="hint">YOUR LAST 20 MISSED HANDS, NEWEST FIRST. TAP A HAND, RECALL THE BETTER PLAY, THEN REVEAL THE COACH'S ANSWER. SAVED ONLY IN THIS BROWSER.</p>
-    <div id="mistakeReview" class="hint"></div>
-  </div>
-
   <div class="window badge-case">
     <h2>BADGES</h2>
     <div class="badge-list" id="badgeList"></div>
   </div>
 
-  <div class="world-panel">
-    <div class="world-heading"><h2>THE GYM LEAGUE</h2><span>CHOOSE YOUR DESTINATION</span></div>
-    <div class="overworld"><canvas id="mapWorld" width="240" height="208" aria-hidden="true"></canvas><canvas id="mapTrainer" width="96" height="96" aria-hidden="true"></canvas><div id="gymList"></div></div>
-    <p class="map-caption">Visit a gym. Learn the game. Earn your badge.</p>
+  <details class="window" id="mapMore">
+    <summary>MORE · REVIEW, SHARE, FEEDBACK, BACKUP</summary>
+
+    <h2>REVIEW YOUR MISTAKES</h2>
+    <p class="hint">NEW MISSED DECISIONS IN ALL FOUR GAMES BECOME SCORED RETRIES. ANSWER BEFORE REVEALING; RETRY RECORDS STAY SEPARATE FROM GAME ACCURACY. OLDER ENTRIES WITHOUT AN ANSWER KEY USE SELF REVIEW.</p>
+    <div class="row"><button id="btnReview" type="button">ALL CAUGHT UP</button></div>
+    <p id="reviewScheduleSummary" class="hint">SPACED RECALL: A MISS IS DUE TODAY, THEN 2, 4, 8 AND 16 DAYS AFTER CORRECT RETRIES. A MISS SENDS IT BACK TO TOMORROW. CORRECT REVIEWS ADD A SMALL DECISION SCORE BONUS; NO XP. SAVED ONLY IN THIS BROWSER.</p>
+
+    <div id="playerShare" class="window" hidden>
+      <h2>INVITE A PRACTICE PARTNER</h2>
+      <p class="hint">Share the free demo if it helped. Your trainer, scores and save stay private.</p>
+      <textarea id="sharePreview" readonly rows="4" aria-label="Invitation to copy">Try Poker Gym: free five-hand card-game practice with coaching and mistake review. No signup, deposits or real-money wagering. https://pokergym.history-atlas.workers.dev/web/</textarea>
+      <div class="row"><button id="btnShare" type="button" hidden>OPEN SHARE OPTIONS</button><button id="btnCopyShare" type="button">COPY INVITATION</button></div>
+      <p id="shareStatus" class="hint" role="status">Nothing sent. Choose who receives it yourself.</p>
+    </div>
+    <div id="playerFeedback" class="window" hidden>
+      <h2>HELP SHAPE YOUR NEXT SESSION</h2>
+      <p class="hint">YOU FINISHED FIVE HANDS. WHAT WOULD MAKE YOU COME BACK?</p>
+      <p class="hint"><a href="https://github.com/MeepTheTendie/pokergym/issues/1" target="_blank" rel="noopener noreferrer">SHARE FEEDBACK ON GITHUB</a> — OPTIONAL PUBLIC THREAD; GITHUB ACCOUNT REQUIRED. OMIT PERSONAL DETAILS AND SAVE BACKUPS. EMAIL IS ALSO AVAILABLE BELOW.</p>
+      <form id="feedbackForm">
+        <label>Was the first session clear?
+          <select id="feedbackClarity" required><option value="">CHOOSE</option><option value="clear">CLEAR</option><option value="confusing">CONFUSING</option></select>
+        </label>
+        <label>Would you return for short training?
+          <select id="feedbackReturn" required><option value="">CHOOSE</option><option value="yes">YES</option><option value="maybe">MAYBE</option><option value="no">NO</option></select>
+        </label>
+        <label>Would fresh weekly drills and deeper mistake review be worth US$5/month to you?
+          <select id="feedbackPrice" required><option value="">CHOOSE</option><option value="interested">INTERESTED</option><option value="unsure">UNSURE</option><option value="free-only">FREE ONLY</option></select>
+        </label>
+        <p class="hint">A POSSIBLE FUTURE OFFER. NO MEMBERSHIP OR CHECKOUT EXISTS TODAY. BASIC DEMO REMAINS FREE.</p>
+        <label>What was confusing or missing? (optional)
+          <textarea id="feedbackNote" maxlength="400" rows="3" placeholder="Please avoid personal or payment details."></textarea>
+        </label>
+        <button type="submit">PREPARE FEEDBACK</button>
+      </form>
+      <div id="feedbackDraft" hidden>
+        <p class="hint">NOT SENT. REVIEW THE DRAFT BELOW, THEN CHOOSE GITHUB OR EMAIL. NO GAME SAVE OR TRAINER NAME IS INCLUDED.</p>
+        <textarea id="feedbackPreview" readonly rows="8" aria-label="Feedback draft"></textarea>
+        <p><a id="feedbackGithub" target="_blank" rel="noopener noreferrer">OPEN GITHUB DRAFT</a> — PUBLIC; GITHUB ACCOUNT REQUIRED. OPENING SHARES THESE ANSWERS WITH GITHUB IN THE LINK. REVIEW THERE AND SUBMIT YOURSELF. OMIT PERSONAL DETAILS.</p>
+        <a id="feedbackEmail">OPEN EMAIL DRAFT</a>
+        <p class="hint">EMAIL REVEALS YOUR EMAIL ADDRESS TO THE OWNER. YOU CAN ALSO COPY THE DRAFT TO THE EXISTING GITHUB THREAD OR EMAIL WESLEYMPENNOCK@GMAIL.COM. PREPARING THIS FORM DOES NOT UPLOAD ANYTHING.</p>
+      </div>
+    </div>
+
+    <details id="saveBackup">
+      <summary>BACKUP · BACK UP OR RESTORE PROGRESS</summary>
+      <p class="hint">Copy the text below into a private note. Progress is stored only in this browser; nothing is uploaded or cloud synced. Unfinished hands are redealt.</p>
+      <label for="backupText">PROGRESS BACKUP</label>
+      <textarea id="backupText" rows="4" maxlength="100000" spellcheck="false"></textarea>
+      <div class="row"><button id="btnBackup" type="button">PREPARE BACKUP</button><button id="btnRestore" type="button">CHECK BACKUP</button></div>
+      <button id="btnConfirmRestore" type="button" hidden>REPLACE LOCAL PROGRESS</button>
+      <p id="backupStatus" class="hint" role="status"></p>
+    </details>
+  </details>
+</section>
+
+<!-- ============ REVIEW ============ -->
+<section id="scr-review" class="screen" hidden>
+  <div class="window">
+    <h2>REVIEW YOUR MISTAKES</h2>
+    <div id="reviewSummary" class="hint" aria-live="polite"></div>
+    <div class="row"><button id="btnReviewDone" type="button">BACK TO MAP</button></div>
   </div>
+  <div class="window" id="reviewCard"></div>
 </section>
 
 <!-- ============ TUTORIAL ============ -->
@@ -175,15 +202,14 @@
 <!-- ============ BATTLE ============ -->
 <section id="scr-battle" class="screen" hidden>
   <div class="scene">
-    <span class="battle-label">GYM LEADER CHALLENGE</span>
-    <div class="ground foe-g"></div>
-    <div class="ground me-g"></div>
-    <canvas class="sprite foe" id="masterSprite" width="48" height="48" aria-hidden="true"></canvas>
-    <canvas class="sprite me" id="battleSprite" width="48" height="48" aria-hidden="true"></canvas>
+    <span class="battle-label">MASTER EXAM</span>
+    <canvas class="sprite master" id="masterSprite" width="48" height="48" aria-hidden="true"></canvas>
+    <div class="table-felt" aria-hidden="true"></div>
+    <canvas class="sprite player" id="battleSprite" width="48" height="48" aria-hidden="true"></canvas>
   </div>
 
   <div class="statusbox">
-    <div class="row1"><span id="foeName">MASTER ROYALE</span><span id="handGrade">JUNK</span></div>
+    <div class="row1"><span id="masterLabel">MASTER ROYALE</span><span id="handGrade">JUNK</span></div>
     <div class="gauge"><i id="potentialBar" style="width:0%"></i></div>
     <p class="hint" id="potentialText" style="margin:5px 0 0; font-size:9px; color:#3a4a3a;">HAND POTENTIAL</p>
   </div>
@@ -192,6 +218,11 @@
     <span class="nameplate" id="masterName">MASTER ROYALE</span>
     <p id="masterLine">&nbsp;</p>
     <span class="prompt" id="masterPrompt">▼</span>
+  </div>
+
+  <div class="window" id="tipBox" hidden>
+    <h2>COACH TIP</h2>
+    <p id="tipText" class="hint" style="margin:0;"></p>
   </div>
 
   <div class="window hand-panel">
@@ -213,7 +244,7 @@
   </div>
 
   <details class="window payout-panel">
-    <summary id="paytableTitle">PAYS / REFERENCE</summary>
+    <summary id="paytableTitle">PAY TABLE / REFERENCE</summary>
     <div class="paytable" id="paytable"></div>
   </details>
 
@@ -240,6 +271,8 @@
     <button id="btnClear">CLEAR</button>
     <button id="btnConfirm" class="primary">CONFIRM 5</button>
   </div>
+
+  <div class="window" id="sessionSummary" hidden></div>
 
   <div class="row" id="battleEndRow" hidden>
     <button id="btnNext" class="primary">CONTINUE</button>

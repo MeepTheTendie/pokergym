@@ -16,6 +16,7 @@ export function feedbackDraft({ clarity, returnInterest, priceInterest, note = '
   ].join('\n');
   return {
     body,
+    githubHref: `https://github.com/MeepTheTendie/pokergym/issues/new?title=${encodeURIComponent('Poker Gym player feedback')}&body=${encodeURIComponent(body)}`,
     href: `mailto:wesleympennock@gmail.com?subject=${encodeURIComponent('Poker Gym player feedback')}&body=${encodeURIComponent(body)}`,
   };
 }

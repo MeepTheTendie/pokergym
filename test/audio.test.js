@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { SONGS, SFX_NAMES, compileSong, validateSongs } from '../web/audio.js';
 
 const CHANNELS = ['lead', 'harm', 'bass', 'drum'];
-const TRACKS = ['gamecorner', 'title', 'map', 'battle1', 'battle2', 'battle3', 'battle4'];
+const TRACKS = ['academy', 'title', 'map', 'battle1', 'battle2', 'battle3', 'battle4'];
 
 test('every track compiles without errors', () => {
   assert.deepEqual(validateSongs(), []);

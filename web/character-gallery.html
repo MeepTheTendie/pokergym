@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>PokerGym character art</title><link rel="stylesheet" href="gbc.css">
 <style>body{padding:24px;background:#d8dfc6}main{max-width:960px;margin:auto}h1{font-size:16px}section{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}figure{margin:0;background:#f6f5e8;border:2px solid #263c35;padding:12px;text-align:center}canvas{width:100%;max-width:192px;image-rendering:pixelated}figcaption{font-size:11px}h2{font-size:11px}@media(max-width:600px){section{grid-template-columns:repeat(2,1fr)}}</style></head>
-<body><main><h1>MEET THE GYM LEAGUE</h1><div id="gallery"></div></main>
+<body><main><h1>MEET THE CARD ACADEMY</h1><div id="gallery"></div></main>
 <script type="module">
 import { drawArt } from './characters.js';
-const groups = [ ['TRAINERS', ['scholar','dealer','countess','grinder']], ['BATTLE BACK SPRITES', ['scholar:back','dealer:back','countess:back','grinder:back']], ['GYM LEADERS', ['videopoker','blackjack','baccarat','holdem']] ];
+const groups = [ ['TRAINERS', ['scholar','dealer','countess','grinder']], ['BATTLE BACK SPRITES', ['scholar:back','dealer:back','countess:back','grinder:back']], ['MASTERS', ['videopoker','blackjack','baccarat','holdem']] ];
 const names = {videopoker:'MASTER ROYALE',blackjack:'MASTER BUST',baccarat:'MASTER NEUTRAL',holdem:'MASTER RIVER'};
 for(const [title, ids] of groups){const heading=document.createElement('h2');heading.textContent=title;gallery.append(heading);const section=document.createElement('section');gallery.append(section);for(const id of ids){const figure=document.createElement('figure');const canvas=document.createElement('canvas');drawArt(canvas,id);const label=document.createElement('figcaption');label.textContent=names[id] ?? id.replace(':back','').toUpperCase();figure.append(canvas,label);section.append(figure);}}
 </script></body></html>
