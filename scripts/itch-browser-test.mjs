@@ -510,7 +510,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   assert.equal(await evaluate('window.sharedInvitation'), invitation);
 
 
-  await evaluate(`document.getElementById('feedbackClarity').value = 'confusing'; document.getElementById('feedbackReturn').value = 'maybe'; document.getElementById('feedbackPrice').value = 'free-only'; document.getElementById('feedbackNote').value = 'More drills & clearer hints?'; document.getElementById('feedbackForm').requestSubmit();`);
+  await evaluate(`document.getElementById('feedbackClarity').value = 'confusing'; document.getElementById('feedbackReturn').value = 'maybe'; document.getElementById('feedbackPrice').value = 'unsure'; document.getElementById('feedbackNote').value = 'More drills & clearer hints?'; document.getElementById('feedbackForm').requestSubmit();`);
   assert.equal(await evaluate('document.getElementById("feedbackDraft").hidden'), false);
   assert.match(await evaluate('document.getElementById("feedbackDraft").textContent'), /NOT SENT/);
   const feedback = await evaluate(`({ href: document.getElementById('feedbackEmail').href, body: document.getElementById('feedbackPreview').value })`);
