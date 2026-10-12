@@ -1086,3 +1086,20 @@ Verification:
 - Note for future runs: scripts/browser-test.mjs is harness-only (it waits for the local harness.html "DONE" title, and the harness is excluded from the build), so the production smoke test is scripts/itch-browser-test.mjs with POKERGYM_TEST_URL, as used above. Evidence file: artifacts/copy-refresh-2026-10-12.txt (gitignored).
 
 Next action: the owner-approved prompt sequence continues with the OG-image/meta prompt, the share-link/entry-params prompt and the feedback-link/one-time-price prompt as one batch, then the anonymous page-visit counter separately on day 2. Real-player return/clarity/pricing feedback remains the gate for further product work; a live deploy or a synthetic browser pass is not demand.
+
+
+## 2026-10-12 — P2 (OG image + meta) and P3 (share link ref/d + entry params), committed, NOT deployed
+
+Outcome: link previews and attributable, deep-linkable Daily Drill shares are implemented and pushed; deploy is pending on the owner's machine (Cloudflare login lives there). No real customer demand, paid subscription or recurring revenue verified.
+
+Actual changes:
+- f9529a5 (P2): web/og.png 1200x630 from scripts/og-image.mjs (served http origin, fonts.ready, font-loaded + pixel non-blank assertions); build copies it to dist/og.png only and excludes it from service-worker ASSETS by name; landing gets og:image*/twitter:*; /web/ gets the full set, canonical, new title and learning-first description; test/og.test.js; itch browser test expects the new title.
+- 2a94568 (P3): src/rpg/links.js with the fixed PUBLISHED_REFS whitelist + classifyRef() (single source of truth for P5), share link /web/?ref=share&d=<n>, invite ?ref=invite, ±1-day shared-daily entry for returning and new visitors (profile created on tap), ?practice= unchanged and winning on precedence, ref/d stripped via replaceState and never stored; test/links.test.js.
+
+Verification (local only):
+- node --test test/*.test.js: 226/226 pass (212 previous + 11 links + 3 og).
+- Built dist: /og.png served, not in sw.js ASSETS; generated PNG inspected visually (Press Start 2P title, J♠ J♥ 2♣ 5♦ 9♣, green/green/red/green/green grid).
+- Headless Chromium against a local serve of dist: fresh-profile shared link shows Daily Drill #n first and creates the save on tap; returning player gets "PLAY TODAY'S DAILY DRILL #n" for d=today-1; d=today-2 ignored; ?practice=blackjack + d routes to blackjack; address bar loses ref/d and keeps practice; only pokergym:save:v1 in storage, no session storage, no cookie; shared link opens offline under the service worker; zero console errors.
+- Not verified: production curl of tags, X/Discord unfurls (post-deploy). scripts/itch-browser-test.mjs fails at its feedback-draft assertion (line ~514) on b6308b7 as well, so it predates this change; scripts/browser-test.mjs harness did not finish cleanly on the base commit either.
+
+Next action: owner deploys (npm run deploy), runs the live smoke and the X/Discord unfurl check; then P5 (visit counter) separately.
