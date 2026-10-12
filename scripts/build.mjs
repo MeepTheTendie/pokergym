@@ -24,12 +24,17 @@ await cp(path.join(root, 'src'), path.join(output, 'src'), { recursive: true });
 await cp(path.join(root, 'web/landing.html'), path.join(output, 'index.html'));
 await cp(path.join(root, 'public/sitemap.xml'), path.join(output, 'sitemap.xml'));
 await cp(path.join(root, 'public/guides'), path.join(output, 'guides'), { recursive: true });
+// Link-preview image: served only at the site root (/og.png). It is not in the
+// web/ allowlist above, so it never lands in dist/web/; the ASSETS filter below
+// also excludes it by name so a 1200x630 image is never precached by the worker.
+await cp(path.join(root, 'web/og.png'), path.join(output, 'og.png'));
+const NOT_PRECACHED = new Set(['/web/sw.js', '/web/og.png', '/og.png']);
 const assets = [];
 async function collect(folder) {
   for (const entry of await readdir(path.join(output, folder), { withFileTypes: true })) {
     const relative = `${folder}/${entry.name}`;
     if (entry.isDirectory()) await collect(relative);
-    else if (relative !== 'web/sw.js') assets.push(`/${relative}`);
+    else if (!NOT_PRECACHED.has(`/${relative}`)) assets.push(`/${relative}`);
   }
 }
 await collect('web');

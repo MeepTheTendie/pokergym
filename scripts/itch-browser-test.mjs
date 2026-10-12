@@ -224,7 +224,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     assert.equal(parent.result.value, true, 'Parent cannot read embedded player storage');
     console.log('PASS: localhost parent embeds 127.0.0.1 game in an isolated cross-site target.');
   }
-  assert.equal(await evaluate('document.title'), 'POKERGYM');
+  assert.equal(await evaluate('document.title'), 'Poker Gym — free card-game trainer');
   const reorderedHolds = await evaluate(`(async () => {
     const { bestHold, clearCache } = await import('../src/coach/videopoker.js');
     clearCache();
