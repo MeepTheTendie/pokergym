@@ -29,7 +29,7 @@ test('public build contains its module graph without repository or diagnostic fi
   assert.match(landing, /Play free demo/);
   assert.match(landing, /href="\/web\/"/);
   assert.doesNotMatch(landing, /http-equiv="refresh"/);
-  const worker = await readFile(path.join(root, 'web/sw.js'), 'utf8');
+  const worker = await readFile(path.join(root, 'sw.js'), 'utf8');
   assert.match(worker, /pokergym-offline-[a-f0-9]{20}/);
   const assets = JSON.parse(worker.match(/const ASSETS = (\[[^\n]+\]);/)[1]);
   for (const asset of assets) {
@@ -39,5 +39,5 @@ test('public build contains its module graph without repository or diagnostic fi
   for (const asset of ['/web/index.html', '/web/offline.js', '/web/icon-192.png', '/src/rpg/state.js', '/src/coach/videopoker.js']) {
     assert.ok(assets.includes(asset), `${asset} is available before going offline`);
   }
-  assert.ok(!assets.includes('/web/sw.js'), 'Worker does not cache itself');
+  assert.ok(!assets.includes('/sw.js'), 'Worker does not cache itself');
 });

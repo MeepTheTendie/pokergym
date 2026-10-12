@@ -338,7 +338,7 @@ el('btnBecome').onclick = () => {
   if (profile && !becomeArmed) {
     becomeArmed = true;
     el('btnBecome').textContent = 'REPLACE YOUR SAVE?';
-    el('classDetailText').textContent = 'THIS REPLACES YOUR CURRENT TRAINER, LEVEL, BADGES AND RECORD ON THIS BROWSER. TAP AGAIN TO CONFIRM, OR BACK TO KEEP YOUR SAVE.';
+    el('classDetailText').textContent = 'THIS REPLACES YOUR CURRENT PLAYER PROFILE, LEVEL, BADGES AND RECORD ON THIS BROWSER. TAP AGAIN TO CONFIRM, OR BACK TO KEEP YOUR SAVE.';
     return;
   }
   becomeArmed = false;

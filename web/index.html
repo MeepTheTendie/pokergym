@@ -14,7 +14,7 @@
 <div class="shell">
 
 <div class="topbar">
-  <span class="brand">♠ POKER GYM <small>TRAINER JOURNEY</small></span>
+  <span class="brand">♠ POKER GYM <small>PLAYER JOURNEY</small></span>
   <button id="btnMap" type="button" hidden>MAP</button>
   <button id="btnTitle" type="button" hidden>TITLE</button>
   <button id="btnSound" class="sound-toggle" type="button" aria-pressed="true">SND ON</button>
@@ -53,7 +53,7 @@
     <div class="class-grid" id="classGrid"></div>
   </div>
   <div class="window" id="classDetail" hidden>
-    <h2 id="classDetailName">TRAINER</h2>
+    <h2 id="classDetailName">PLAYER</h2>
     <p class="hint" id="classDetailText" style="font-size:10px; margin:0 0 8px;"></p>
     <div class="badge-list" id="classDetailStats"></div>
     <div class="row">
@@ -87,7 +87,7 @@
   </div>
 
   <div class="window trainer-card">
-    <h2>YOUR TRAINER</h2>
+    <h2>PLAYER CARD</h2>
     <div class="dlg">
       <canvas class="sprite" id="sprite" width="48" height="48" aria-hidden="true"></canvas>
       <div>
@@ -121,7 +121,7 @@
 
     <div id="playerShare" class="window" hidden>
       <h2>INVITE A PRACTICE PARTNER</h2>
-      <p class="hint">Share the free demo if it helped. Your trainer, scores and save stay private.</p>
+      <p class="hint">Share the free demo if it helped. Your progress, scores and save stay private.</p>
       <textarea id="sharePreview" readonly rows="4" aria-label="Invitation to copy">Try Poker Gym: free five-hand card-game practice with coaching and mistake review. No signup, deposits or real-money wagering. https://pokergym.history-atlas.workers.dev/web/</textarea>
       <div class="row"><button id="btnShare" type="button" hidden>OPEN SHARE OPTIONS</button><button id="btnCopyShare" type="button">COPY INVITATION</button></div>
       <p id="shareStatus" class="hint" role="status">Nothing sent. Choose who receives it yourself.</p>
@@ -147,7 +147,7 @@
         <button type="submit">PREPARE FEEDBACK</button>
       </form>
       <div id="feedbackDraft" hidden>
-        <p class="hint">NOT SENT. REVIEW THE DRAFT BELOW, THEN CHOOSE GITHUB OR EMAIL. NO GAME SAVE OR TRAINER NAME IS INCLUDED.</p>
+        <p class="hint">NOT SENT. REVIEW THE DRAFT BELOW, THEN CHOOSE GITHUB OR EMAIL. NO GAME SAVE OR PLAYER PROFILE IS INCLUDED.</p>
         <textarea id="feedbackPreview" readonly rows="8" aria-label="Feedback draft"></textarea>
         <p><a id="feedbackGithub" target="_blank" rel="noopener noreferrer">OPEN GITHUB DRAFT</a> — PUBLIC; GITHUB ACCOUNT REQUIRED. OPENING SHARES THESE ANSWERS WITH GITHUB IN THE LINK. REVIEW THERE AND SUBMIT YOURSELF. OMIT PERSONAL DETAILS.</p>
         <a id="feedbackEmail">OPEN EMAIL DRAFT</a>
