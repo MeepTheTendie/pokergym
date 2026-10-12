@@ -27,6 +27,7 @@ import {
   dailyKey, dailyPlan, dailyNumber, seededRng as dailySeedRng, DAILY_HANDS,
   DAILY_GAME_LABEL,
 } from '../src/rpg/daily.js';
+import { parseEntryParams, isSharedDayCurrent, cleanEntrySearch, buildDailyShareText } from '../src/rpg/links.js';
 import { drillScenario, DRILL_HANDS, DRILL_GAMES } from '../src/rpg/drills.js';
 import { drawArt, drawTrainerBack } from './characters.js';
 import audio from './audio.js?v=20261006-audio3';
@@ -88,7 +89,15 @@ let dailyRun = null; // { key, plan, number, index, results, scored, finished }
 let drillMode = null; // 'master' | 'weak' | null — a rigged five-hand drill session
 let drillIndex = 0;
 let drillLabel = ''; // the situation name for the current drill hand
-let requestedGym = GYMS.find(gym => gym.game === new URLSearchParams(location.search).get('practice')) ?? null;
+const entryParams = parseEntryParams(location.search);
+let requestedGym = GYMS.find(gym => gym.game === entryParams.practice) ?? null;
+// A shared Daily Drill link (?d=<n>) highlights today's drill when n is within
+// one day of today's number; otherwise it is ignored silently. ref is read only
+// to strip it: it is never stored (no localStorage, cookie or sessionStorage).
+let sharedDaily = isSharedDayCurrent(entryParams.day, dailyNumber(dailyKey()));
+if (new URLSearchParams(location.search).has('ref') || new URLSearchParams(location.search).has('d')) {
+  try { history.replaceState(history.state, '', location.pathname + cleanEntrySearch(location.search) + location.hash); } catch {}
+}
 
 function save() {
   if (!profile) return;
@@ -219,13 +228,25 @@ el('btnTitle').onclick = () => { dailyMode = false; dailyRun = null; initTitle()
 /* ---------------- title ---------------- */
 function initTitle() {
   el('btnContinue').disabled = !profile;
-  el('btnDaily').hidden = !profile;
-  if (profile) {
-    const key = dailyKey();
-    el('btnDaily').textContent = dailyCompleted(profile, key)
-      ? `DAILY DRILL #${dailyNumber(key)} ✓`
-      : `DAILY DRILL #${dailyNumber(key)}`;
+  // Without a save the daily is reachable only from a shared link (option a).
+  el('btnDaily').hidden = !profile && !sharedDaily;
+  const key = dailyKey();
+  const number = dailyNumber(key);
+  const done = profile && dailyCompleted(profile, key);
+  if (sharedDaily) {
+    el('btnDaily').textContent = profile
+      ? `PLAY TODAY'S DAILY DRILL #${number}${done ? ' ✓' : ''}`
+      : `DAILY DRILL #${number}`;
+  } else if (profile) {
+    el('btnDaily').textContent = done ? `DAILY DRILL #${number} ✓` : `DAILY DRILL #${number}`;
   }
+  // Practice wins for routing: with ?practice= the start button stays primary.
+  const promoteDaily = sharedDaily && !requestedGym;
+  el('btnDaily').classList.toggle('primary', promoteDaily);
+  el('btnStart').classList.toggle('primary', !promoteDaily);
+  const row = el('btnStart').parentElement;
+  if (promoteDaily) row.insertBefore(el('btnDaily'), row.firstElementChild);
+  else row.appendChild(el('btnDaily'));
   const invitation = el('practiceInvitation');
   invitation.hidden = !requestedGym;
   if (requestedGym) {
@@ -250,7 +271,18 @@ function enterTraining() {
   renderMap(); show('scr-map');
 }
 el('btnContinue').onclick = enterTraining;
-el('btnDaily').onclick = startDaily;
+el('btnDaily').onclick = () => {
+  // A new visitor from a shared link: create the local profile on tap, exactly
+  // as START TRAINING does, then go straight into the daily.
+  if (!profile) {
+    profile = createProfile(DEFAULT_CLASS);
+    profile.createdAt = new Date().toISOString();
+    save();
+    applyPalette(DEFAULT_CLASS);
+  }
+  sharedDaily = false;
+  startDaily();
+};
 el('btnReview').onclick = openReview;
 el('btnReviewDone').onclick = () => { renderMap(); show('scr-map'); };
 el('btnStart').onclick = startTraining;
@@ -482,8 +514,7 @@ function renderToday() {
 function dailyShareText(key, results, number) {
   const plan = dailyPlan(key);
   const games = [...new Set(plan.map(entry => DAILY_GAME_LABEL[entry.game]))];
-  const tally = results.filter(v => v).length;
-  return `Poker Gym Daily #${number}  ${tally}/${DAILY_HANDS}\n${results.map(ok => ok ? '🟩' : '🟥').join('')}\n🃏 ${games.join(' · ')}\nhttps://pokergym.history-atlas.workers.dev/web/`;
+  return buildDailyShareText({ number, results, total: DAILY_HANDS, games });
 }
 
 async function shareDaily(text, useShare) {
