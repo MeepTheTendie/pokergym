@@ -68,16 +68,33 @@ export function shoeSize(decks = GAME.decks) {
   return decks * 52;
 }
 
-export function newRound(rng = Math.random, { bet = BET, decks = GAME.decks } = {}) {
+export function newRound(rng = Math.random, { bet = BET, decks = GAME.decks, player = null, dealer = null } = {}) {
   const shoe = newShoe(rng, decks);
+  let hands;
+  let dealerHand;
+  if (player && dealer) {
+    if (player.length !== 2 || dealer.length !== 2) {
+      throw new Error('Rigged blackjack hands need exactly two cards each');
+    }
+    for (const card of [...player, ...dealer]) {
+      const at = shoe.findIndex(c => c.r === card.r && c.s === card.s);
+      if (at === -1) throw new Error(`Rigged card not in the shoe: ${card.r}/${card.s}`);
+      shoe.splice(at, 1);
+    }
+    hands = [newHand(player.map(c => ({ ...c })), bet)];
+    dealerHand = dealer.map(c => ({ ...c }));
+  } else {
+    hands = [newHand([shoe.shift(), shoe.shift()], bet)];
+    dealerHand = [shoe.shift(), shoe.shift()];
+  }
   const round = {
     game: GAME.id,
     deck: shoe,
     decks,
     bet,
-    hands: [newHand([shoe.shift(), shoe.shift()], bet)],
+    hands,
     activeHand: 0,
-    dealerHand: [shoe.shift(), shoe.shift()],
+    dealerHand,
     dealerUpcard: null,
     holeRevealed: false,
     settled: false,

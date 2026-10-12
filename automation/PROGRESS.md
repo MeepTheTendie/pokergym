@@ -513,3 +513,518 @@ Exact blockers: https://www.githubstatus.com/api/v2/status.json currently report
 Reason to stop: the free demo, feedback paths, portable distribution, practice/retry, offline/browser installation and privacy prerequisites are already implemented/tested. More speculative drills, guide polish or repeated synthetic checks would not resolve the current acquisition/payment access gaps. Physical-device verification cannot be honestly performed without a device. Do not infer demand from this agent's requests or test runs.
 
 Next action: connect an owner-authorized social publisher or itch.io publishing account to distribute the existing demo and collect real return/pricing feedback; alternatively supply seller/payment onboarding through an authorized provider to unblock actual recurring checkout and server-verified entitlements. Retry the already-prepared README after GitHub service recovery, verifying remote main first. No further polling or work scheduled by this iteration.
+
+
+## 2026-10-08 — fixed baccarat question transitions; deployed pending training corrections
+
+Outcome: repaired a real gameplay crash in the current baccarat problem set and deployed the verified build to https://pokergym.history-atlas.workers.dev/web/ . Cloudflare Worker version 77e83e42-eb75-4c3a-bc97-c85e6d7ae21c. No real player demand, marketing post, checkout, payment or recurring revenue verified; US$200/month remains unmet.
+
+Inspected launch/marketing/checkpoints, owner AGENTS.md, actual dirty diffs, current source, live landing and baccarat module, remote main and GitHub service status before acting. Notes were stale: local and remote main already match 86ace22ba5f2303f01d3bca2c046bfe357e55cb6, with newer video-poker controls and baccarat questions. GitHub status now reports All Systems Operational; the old README-only push blocker is no longer a current outstanding source-publication gap. Preserved the three initially dirty files and extended only web/app.js; did not commit, stage, reset or push. No subagents, goals, schedulers, runner/timer/service/model/permission changes, secret reads, spending or external messages.
+
+Actual changes:
+- web/app.js now renders both numeric and dealt-hand baccarat choices through the current quiz controls. Numeric questions formerly replaced the original static buttons; a subsequent dealt-hand question then accessed missing Banker/Player/Tie nodes and could crash. Dealt rounds retain their quiz so settled buttons render disabled and subsequent questions rebuild correctly.
+- scripts/itch-browser-test.mjs uses current quiz choices instead of the obsolete static Banker button. Deterministically alternates commission, dealt-hand and tie-odds questions through a five-hand session, asserting five correct decisions. Restores the synthetic RNG afterward.
+- Added browser verification that a coach-approved video-poker draw adds the displayed payout plus the existing 50-chip correct-decision reward, and cannot settle twice.
+- Published the pre-existing dirty answer-order randomization and video-poker payout correction after inspection/testing. Commission/tie answer positions vary; video-poker payout matches its displayed table rather than multiplying by held-card count. These fixes were already present before this iteration and are not claimed as newly authored here.
+
+Verification:
+- npm test: 183 passed, zero failures, including the existing dirty answer-position regression.
+- Final npm run test:offline passed locally with HTTP server stopped, including the new mixed-question and chip-accounting assertions; zero runtime/game asset network errors.
+- npm run build and project-local Wrangler deploy --dry-run passed; npm run deploy uploaded three changed assets (app, baccarat coach, content-versioned offline worker).
+- Final POKERGYM_TEST_URL=https://pokergym.history-atlas.workers.dev/web/ npm run test:offline passed all existing onboarding, guide deep links, preserved sessions, four-game five-hand practice, scored blackjack retries, backups, unsent feedback/share checks and actual network-disabled reload, plus the new mixed baccarat and payout assertions. Phone viewport 390px; physical Android remains unverified.
+- git diff --check passed. ZIP rebuilt locally as part of the browser commands; existing public release assets were not replaced. Applied Wrangler skill and checked installed deploy help plus https://developers.cloudflare.com/workers/wrangler/commands/ .
+
+Exact access limits: available tool inventory has GitHub and Metricool, but no callable itch.io publisher or subscription payment processor. Previous Metricool evidence found no connected social network; did not repoll unchanged accounts/inboxes or feedback threads. Seller identity and authorized provider onboarding remain necessary before live subscriptions. No authoritative payment evidence is available. Physical Android channel remains unverified.
+
+Next action: distribute this stable free demo through an owner-authorized connected social channel or itch.io publisher to obtain real return-value/pricing feedback. Seller onboarding then recurring checkout, server-verified entitlements, cancellation and recovery remain required before paid launch. Avoid further speculative guides; close existing app tabs to activate the offline update. This bounded iteration ends after the concrete verified repair and checkpoint.
+
+
+## 2026-10-08 — published current portable gameplay release
+
+Outcome: published https://github.com/MeepTheTendie/pokergym/releases/tag/practice-demo-2026-10-08 at 2026-10-08T16:23:42Z and updated the production landing download link. Cloudflare Worker version 082013fe-5a62-4606-92d2-166f84862dae. Public ZIP now includes current video-poker controls/payout correction, baccarat question bank/answer-order variation and mixed-question transition fix, plus existing retry/backup/privacy functionality. No real player response, paid customer or recurring revenue verified; US$200/month remains unmet.
+
+Inspected LAUNCH.md, MARKETING.md, current checkpoints, /home/meep/AGENTS.md, actual dirty diffs, source/build files, live baccarat module, authenticated GitHub releases and Poker Gym feedback issue before acting. Feedback issue currently has zero comments; this single relevant check is not customer evidence. Prior public release lacked current gameplay. Preserved all five initially dirty files, ordinary index, HEAD (86ace22ba5f2303f01d3bca2c046bfe357e55cb6) and default branch. No new game logic, subagents, goals, schedules, runner/timer/service/model/permission changes, paid services, secret reads or unsolicited messages.
+
+Actual changes/publication:
+- Rebuilt and tested artifacts/pokergym-itch.zip. Published a separate source tag pointing to snapshot bd5bc3b923296eac2791f75097b886d47eaa4726 using a temporary GIT_INDEX_FILE and explicit AI-assistant author/committer identity. Only new tag pushed; earlier releases preserved. Snapshot contains inspected current app/build/test/public files and excludes automation/local notes. Snapshot precedes this iteration's landing-only release-link change.
+- Published non-draft latest release with ZIP, PRACTICE-SHA256SUMS.txt and honest training/return/feedback guidance, free scope, browser/storage/device limits and AI involvement disclosure. This is GitHub distribution, not itch.io or Android-store publication, demand validation or revenue.
+- web/landing.html now links practice-demo-2026-10-08; production deployment uploaded only index.html. README still links the preserved previous release; no default-branch source publication claimed.
+- MARKETING.md records actual publication. Local logs, release notes, snapshot ID, public verification download and checksum remain in ignored artifacts/.
+
+Verification:
+- npm test: all 183 tests passed, zero failures; log artifacts/unit-2026-10-08-release.txt.
+- npm run test:itch:cross-site: actual rebuilt ZIP passed nested cross-site 390px Chromium embedding, current controls, mixed baccarat five-hand questions, video-poker payout accounting, four-game practice, scored blackjack retries, saved independent counts, backup/restore, privacy and voluntary unsent feedback. Zero runtime/game-asset network errors; log artifacts/portable-2026-10-08-release.txt. These are synthetic checks, not physical Android or customer evidence.
+- Authenticated GitHub release API confirms non-draft release and uploaded ZIP/checksum. Unauthenticated HTTPS downloads of both match local tested files byte-for-byte (cmp).
+- ZIP: 1,708,880 bytes; SHA-256 980436296f873ecf22057fcca0d9b56a09cc9255f42ff158bab6ca1b724e4f96. Our download is not player evidence.
+- npm run build and project-local Wrangler deploy --dry-run passed; npm run deploy succeeded. Unauthenticated curl plus assertions verified live landing contains new release link and omits old one. No full live gameplay rerun for the link-only deployment; prior live fix verification remains in preceding checkpoint.
+- git diff --check passed. Snapshot script asserted unchanged porcelain status/HEAD before pushing. Applied /home/meep/.agents/skills/wrangler/SKILL.md, installed deploy help and https://developers.cloudflare.com/workers/wrangler/commands/ . No publication failures this iteration.
+
+Exact access limits: current callable inventory has GitHub and Metricool but no itch.io publisher or subscription payment processor. Earlier Metricool evidence found no connected social network; no new social connection claimed or unchanged account/inbox polling performed. Seller identity and authorized payment-provider onboarding are required before live recurring checkout; no authoritative payment evidence available. Physical Android test channel remains unverified.
+
+Next action: distribute the verified current demo through an owner-authorized connected wider social channel or itch.io publisher, then obtain actual first-session/return/pricing feedback before speculative training expansion. Seller onboarding must precede live recurring checkout, server-verified entitlements, cancellation and recovery. Repository README can later be pointed to the new release while preserving dirty changes. This bounded iteration ends after concrete publication, public verification and checkpoint.
+
+
+## 2026-10-08 — published GitHub discovery paths and current README
+
+Outcome: repaired actual public distribution gaps in the authorized GitHub channel. Repository homepage now points directly to the playable demo, and public README links the current portable release. No player demand, paid subscription or recurring revenue verified; US$200/month remains unmet. Finished this bounded iteration after publication and verification.
+
+Inspected LAUNCH.md, MARKETING.md, progress history, /home/meep/AGENTS.md, current README/source status, live landing, actual remote main, GitHub repository metadata and current callable inventory. The live landing already linked today's release, but repository homepage was empty, topics absent and README still linked yesterday's release. Preserved every initial dirty file, local HEAD and ordinary index. No app logic changes, deployments, subagents, goals, schedulers, runner/timer/service/model/permission changes, spending, unsolicited messages or credential reads.
+
+Actual changes/publication:
+- Authenticated gh repo edit published homepage https://pokergym.history-atlas.workers.dev/web/ and an accurate description emphasizing free five-hand practice, coaching, mistake review and no real-money wagering. Added browser-game, card-game, blackjack, video-poker, poker-training and offline-first topics. No visibility/account/security settings changed.
+- README.md now links practice-demo-2026-10-08 in both places. Corrected source-status wording: release tags identify point-in-time published source; default branch may differ from the live build. Existing AI-assistance disclosure and honest free/hypothetical-subscription limits retained.
+- Published README-only commit bc24ed09cbeeb308a1a48e653c4ab821661196d9 to remote main with explicit Poker Gym AI Development Assistant identity using temporary GIT_INDEX_FILE and commit-tree. Checked remote parent before a normal fast-forward push; no force push. Main advanced from 86ace22ba5f2303f01d3bca2c046bfe357e55cb6. Local HEAD deliberately remains at that prior commit and README remains a local modification; ordinary index bytes unchanged. Future work must account for this remote-only README commit before pushing main.
+- MARKETING.md records verified publication. Local evidence: ignored artifacts/readme-publication-2026-10-08.txt and artifacts/public-readme-2026-10-08.md.
+
+Verification:
+- Read-back gh repo view confirms exact homepage/description and all six topics.
+- Unauthenticated public raw README downloaded and cmp verified exact bytes against local README. Assertions confirm old release link removed and qualified source-status wording present.
+- All five unique README destinations followed redirects and returned HTTP 200: playable demo, today's release, opt-in feedback issue and both guides. These agent requests are not player evidence.
+- Commit diff contains only README.md; remote main SHA matches published commit. Local HEAD and ordinary index hash verified unchanged. git diff --check passed. No strategy/browser rerun warranted for documentation/metadata-only publication. Verification completed at 2026-10-08T16:26Z.
+
+Exact access limits: current callable inventory exposes GitHub and Metricool, but no itch.io publisher, subscription payment processor or Android-device tool. Previous Metricool inspection reported no connected social network; did not repeatedly poll unchanged accounts or inboxes, and no new connection claimed. Seller identity and authorized payment-provider onboarding are still required before live recurring checkout; no authoritative payment evidence exists. Wider-channel audience and physical Android remain unverified.
+
+Next action: connect an owner-authorized wider social channel or itch.io publisher and distribute the existing verified demo for actual return-value/pricing feedback. Alternatively complete seller/payment onboarding to enable recurring checkout, server-verified entitlements, cancellation and recovery. Avoid further speculative guides and repeated synthetic checks. This iteration made useful authorized distribution progress, so it is not a claim of complete blockage or target achievement.
+
+## 2026-10-08 — checked player-feedback email; stopped at acquisition/payment access gap
+
+Outcome: checked the existing voluntary email feedback channel through authenticated Gmail. A scoped incoming-mail search returned zero matching messages, so no real player feedback, purchase interest, customer payment or recurring revenue was verified. No useful additional authorized product/distribution action was identified in this bounded iteration; US$200/month remains unmet.
+
+Inspected LAUNCH.md, MARKETING.md, progress history, /home/meep/AGENTS.md, current file inventory, package/config, feedback implementation, dirty status and actual public landing before relying on notes. Live landing fetched successfully and links practice-demo-2026-10-08, both practice guides, the opt-in GitHub feedback issue and privacy page. Remote main is bc24ed09cbeeb308a1a48e653c4ab821661196d9, matching the preceding README publication checkpoint. adb is absent from PATH. Current app is an asset-only Worker with no subscription checkout/entitlement backend; voluntary email draft explicitly describes a hypothetical offer.
+
+Actual action/verification:
+- Authenticated Gmail search limited to incoming Poker Gym/PokerGym subject matches, excluding Sent, Drafts, Spam and Trash; returned emails=[] with no next page. No unrelated inbox content accessed, messages sent, or account changes made. This establishes only no matching mail in that connected mailbox, not no players or no feedback anywhere.
+- Current tool inventory includes GitHub, Gmail and Metricool, but no callable itch.io publisher, subscription payment processor or Android device channel. Existing evidence reports no connected Metricool social network; did not repeat unchanged brand/account or GitHub-feedback polling.
+- Preserved all eight initially dirty files, ordinary index and HEAD. Only this local checkpoint changed. No code changes warranted another synthetic gameplay suite; git diff --check performed after checkpoint. No goals, subagents, schedulers, runner/timer/service/model/permission changes, paid services, secret reads, external publication or notification.
+
+Exact blockers: wider audience distribution requires an owner-authorized connected social network or itch.io publishing access; seller identity and authorized payment-provider onboarding are required for genuine recurring checkout, server-verified entitlements, cancellation and recovery. Physical Android testing requires an available device channel. No authoritative recurring-payment evidence is available. Existing GitHub distribution is already published; another release or guide without new player value would not resolve these gaps.
+
+Next action: connect one owner-authorized wider distribution channel and obtain actual first-session/return/pricing feedback, or complete seller/payment-provider onboarding. Do not infer demand from agent test requests, email absence or public downloads. Stop this iteration without scheduled polling or speculative training expansion.
+
+## 2026-10-09 — bounded access audit; stopped without speculative changes
+
+Outcome: no useful new authorized product/distribution step identified with available access. Recurring revenue remains unverified; US$200/month is not achieved. No publication, customer contact, payment or owner notification occurred.
+
+Inspected LAUNCH.md, MARKETING.md, automation/PROGRESS.md, /home/meep/AGENTS.md, current dirty status/diff summary, package scripts, manifest, installability verification source, feedback pricing language, asset-only Worker configuration, actual live landing/game response and remote main before relying on notes. Preserved all eight initially dirty files, HEAD and ordinary index; only appended this checkpoint.
+
+Verification: production game returned HTTP 200; fetched production landing contains practice-demo-2026-10-08 and the public opt-in feedback thread. Remote main remains bc24ed09cbeeb308a1a48e653c4ab821661196d9. Existing October 7 evidence already verifies Chromium installability and offline manifest launch, so did not repeat that completed synthetic check. adb is absent from PATH. No code changed, so no gameplay-suite rerun warranted. git diff --check passed after checkpoint.
+
+Exact access blockers: current callable tool inventory includes Metricool but no itch.io publisher, subscription payment processor or Android-device channel. Earlier authenticated Metricool evidence found no connected social network; no new connection supplied and no unchanged account/inbox/feedback polling performed. Genuine recurring checkout requires owner seller identity and authorized payment-provider onboarding. Physical Android verification requires an available device. Existing GitHub release/discovery paths are already published; duplicating releases or adding speculative guides does not resolve acquisition or payment access. No authoritative customer/payment evidence is available.
+
+Next action: supply one owner-authorized connected social channel or itch.io publishing access to distribute the existing demo for actual return/pricing feedback; alternatively complete seller/payment-provider onboarding to enable recurring checkout and verified entitlements. Stop now. No goals, subagents, schedulers, runner/timer/service/model/permission changes, spending, credential reads or unrelated account access.
+
+## 2026-10-10 — shipped scored baccarat mistake retries
+
+Outcome: new baccarat mistakes now support scored recall of the original decision, giving returning players a concrete practice activity across commission arithmetic, tie-price judgments and standard bet selection. Published to https://pokergym.history-atlas.workers.dev/web/ , Cloudflare Worker version 7699764b-fd05-4e21-97d2-a24d5dfbe12f. No real player demand, paid subscription or recurring revenue verified; US$200/month remains unmet. Ended this bounded iteration after implementation, publication, live verification and checkpoint.
+
+Inspected LAUNCH.md, MARKETING.md, progress history, /home/meep/AGENTS.md, current source/tests/config, dirty status and live game HTTP 200 before acting. Current tool inventory still exposes Metricool but no callable itch.io publisher or payment processor. Did not repoll unchanged social accounts, inboxes or feedback threads. Preserved all eight initially dirty files, ordinary index and HEAD; no commits, resets, pushes, subagents, goals, schedulers, automation runner/timer/service/model/permission changes, spending, credential reads or external messages. Applied jevgrep and Wrangler skills; scoped retrieval found no additional AGENTS.md instructions. Checked project-local deploy help and https://developers.cloudflare.com/workers/wrangler/commands/ .
+
+Actual changes:
+- src/rpg/state.js validates game-specific bounded quiz choices, copies the original answer arrays into new baccarat notebook entries, and scores retries independently from XP/chips/gameplay accuracy. Existing blackjack quiz format/default validation remains compatible; legacy baccarat entries remain self-review only because no original answer key exists.
+- src/rpg/backup.js validates baccarat quiz/retry records during manual backup restoration; unsupported games, duplicate/empty/oversized/non-string choices and invalid answer subsets remain rejected.
+- web/app.js captures the actual question options and correct answer before numeric or dealt baccarat rounds settle. Notebook renders original baccarat labels as text, with existing one-answer-per-visit and reveal-without-scoring behavior.
+- test/practice.test.js adds original-question/backup/score-isolation and invalid-input coverage for all three baccarat question types. scripts/itch-browser-test.mjs now intentionally misses a mixed five-hand baccarat session, checks real captured keys, and verifies retry controls, counts, reveal guard, backup output and phone width.
+
+Verification:
+- npm test: 184 passed, 0 failed; artifacts/unit-2026-10-10.txt.
+- npm run test:offline: passed actual rebuilt ZIP, 390px standalone gameplay and notebook tests, then reload with HTTP server stopped; zero runtime/game asset network errors. artifacts/offline-2026-10-10.txt. No physical Android verification or public ZIP release claimed.
+- npm run build and project-local wrangler deploy --dry-run passed. npm run deploy published four changed assets (app, state, backup and versioned service worker); artifacts/dry-run-2026-10-10.txt and artifacts/deploy-2026-10-10.txt.
+- Initial live test failed because an unqualified Cloudflare state-module URL still served previous bytes while app.js had updated; curl/cmp confirmed the mismatch. A fresh query fetch matched source, then the ordinary URL also matched. No source change or second deployment was needed.
+- Final POKERGYM_TEST_URL=https://pokergym.history-atlas.workers.dev/web/ npm run test:offline passed actual mixed baccarat capture/retries, original blackjack checks, onboarding, sessions, backup, phone width, and browser-network-disabled reload/continued practice; zero runtime/game asset network errors. artifacts/live-offline-final-2026-10-10.txt. These synthetic checks are not player demand or customer evidence.
+- git diff --check passed after checkpoint. Existing public portable release remains October 8 and does not yet include today's baccarat retry feature. Old open offline tabs must close to activate the new cache.
+
+Exact access blockers/remaining work: no callable itch.io publisher or subscription payment processor; earlier authenticated Metricool evidence found no connected social network and no new connection supplied. Seller identity and authorized payment-provider onboarding are necessary for live recurring checkout, server-verified entitlements, cancellation and recovery. Physical Android device testing remains unavailable. No authoritative recurring-payment evidence exists.
+
+Next action: distribute the live demo through an owner-authorized connected wider channel and obtain actual return-value/pricing feedback; seller onboarding then enables real subscription work. A subsequent portable release may include this verified feature, but do not count release downloads, synthetic tests or untested subscription projections as revenue. No owner notification claimed.
+
+
+## 2026-10-10 — published portable baccarat recall practice
+
+Outcome: published a tested portable download of today's scored baccarat mistake-retry feature through the existing authorized GitHub distribution channel. Latest public release: https://github.com/MeepTheTendie/pokergym/releases/tag/practice-demo-2026-10-10 . No real customer feedback, subscription or recurring revenue verified; US$200/month remains unmet. Completed this bounded iteration after concrete publication and public verification.
+
+Inspected LAUNCH.md, MARKETING.md, progress history, /home/meep/AGENTS.md, actual dirty worktree, current source/build/browser checks, live state module, prior public release and remote main. Live state.js matched local bytes. The previous portable download lacked today's baccarat scored recall; closed that concrete distribution gap. Preserved all eleven initially dirty files, local HEAD 86ace22ba5f2303f01d3bca2c046bfe357e55cb6 and ordinary index. No application logic edits, deployments, default-branch pushes, resets, subagents, new goals, schedules, runner/timer/service/model/permission changes, spending, credential reads or unsolicited messages.
+
+Actual changes/publication:
+- Rebuilt artifacts/pokergym-itch.zip through the actual cross-site test. Published separate source snapshot dd69b092ddc98e399a6ab9cd669246eb52380c8b, parent remote main bc24ed09cbeeb308a1a48e653c4ab821661196d9, under practice-demo-2026-10-10. Temporary GIT_INDEX_FILE and explicit AI-assistant author/committer identity preserved the ordinary index and local HEAD; only new tag pushed. Snapshot overlays inspected source/build/tests/public files and README, excluding new local marketing/progress notes. Remote main remains unchanged; future main pushes must account for its existing remote-only README commit.
+- Published latest non-draft GitHub release with the tested ZIP and SHA-256 file. Description gives an honest five-hand/return/retry routine, original-question and legacy-note limits, private-browser backup guidance, opt-in feedback thread, free/hypothetical-subscription scope and explicit AI involvement. No paid offering or Android installer claimed.
+- Prepended a link to the new release in the October 8 release description; preserved the full original body and original assets. Existing landing/README links still target October 8 and can now lead to the newer release without a game deployment. MARKETING.md records actual publication.
+
+Verification:
+- npm test: 184 passed, 0 failed; artifacts/unit-portable-2026-10-10.txt.
+- npm run test:itch:cross-site: rebuilt actual ZIP passed cross-site nested 390px Chromium embedding, original baccarat answers for all three question types, scored blackjack/baccarat retries, once-per-visit/reveal guards, portable counts, backup/restore, save/resume, onboarding and four-game practice; zero runtime/game-asset network errors. artifacts/cross-site-portable-2026-10-10.txt. Synthetic verification, not physical Android or real player evidence.
+- Unauthenticated HTTPS downloads of public ZIP and checksum matched tested local files byte-for-byte via cmp. ZIP SHA-256: 76702da7ad9d77c02ba4dcbb677528bab743af41f83cbf758d96bc3df6e8d9f9. Our downloads are not player evidence.
+- Authenticated GitHub read-back confirms both assets, non-draft/non-prerelease status and latest tag practice-demo-2026-10-10. Prior release read-back equals the intended prepended link plus exact original body. Evidence in artifacts/public-release-2026-10-10.json, artifacts/previous-release-final-readback-2026-10-10.json and artifacts/source-portable-2026-10-10.txt. Public verification finished 2026-10-10T21:18Z.
+- Initial prior-release update script could not parse gh JSON because the mise shim emitted setup text on stdout; failed before any release edit. Parsed the recorded JSON from its opening brace, then completed the edit and verified exact read-back. No failed publication claim hidden.
+- git diff --check passed after checkpoint. App unchanged in this iteration, so no repeated deployment/live gameplay suite warranted.
+
+Exact access limits: current callable inventory includes Metricool but no itch.io publisher, subscription payment processor or Android-device channel. Earlier authenticated Metricool evidence found no connected social network; no new connection supplied and no repeated unchanged account/inbox polling. Genuine live subscriptions require seller identity and authorized payment-provider onboarding before checkout, server-verified entitlements, cancellation and recovery. No authoritative payment evidence available. No owner notification claimed.
+
+Next action: distribute this verified current demo through an owner-authorized wider connected channel or itch.io publisher and collect actual return-value/pricing feedback; complete seller/payment onboarding to enable real recurring checkout. This iteration ends promptly after publication and checkpoint; no target achievement or complete-blockage claim.
+
+## 2026-10-10 — current portable download from production landing
+
+Outcome: production landing now sends players directly to the latest published portable practice release, currently practice-demo-2026-10-10 with scored baccarat retries. Removed the extra hop through the obsolete October 8 release. Cloudflare Worker version 81ede818-5dec-42ae-9976-539d628e21a2. No player demand, customer payment or recurring revenue verified; US$200/month remains unmet.
+
+Inspected launch/marketing/progress notes, /home/meep/AGENTS.md, eleven initially dirty files, current build/config and actual live landing/latest-release redirect. Preserved prior worktree changes, HEAD and ordinary index. Applied Wrangler skill and retrieved current command documentation plus installed deploy help. No goals, subagents, schedulers, runner/timer/service/model/permission changes, spending, secret reads or messages.
+
+Actual change: web/landing.html download anchor now uses https://github.com/MeepTheTendie/pokergym/releases/latest rather than a dated release. README remains unchanged in this iteration and still identifies October 8; its publication requires accounting for the remote-only README commit recorded above. MARKETING.md records live entry-point change.
+
+Verification: npm run build and local Wrangler deploy --dry-run passed. Authenticated deployment reported exactly one changed asset, /index.html. Live HTML fetched with curl matches local source byte-for-byte; parsed anchors contain exactly one latest-release link and no October 8 link. Following the link returned HTTP 200 at practice-demo-2026-10-10. Live app.js, state.js, backup.js, baccarat.js and sw.js each match built bytes. No gameplay change warranted repeating the already-passed gameplay suite. git diff --check passed. Evidence: artifacts/latest-link-dry-run-2026-10-10.txt, latest-link-deploy-2026-10-10.txt, latest-link-verification-2026-10-10.txt and landing-before/after-latest-2026-10-10.html.
+
+Verification limitation/error: initial Python urllib fetch received HTTP 403; the shell then proceeded to the authorized deployment. Replaced that fetch with curl and successfully verified all five gameplay/service-worker files after deployment. Deployment itself confirms only landing changed. No browser or physical Android test claimed for this link-only edit; agent requests are not customer evidence.
+
+Exact access limits: callable inventory has no itch.io publisher, subscription payment processor or Android-device channel. Prior authenticated Metricool evidence found no connected social network; did not repoll unchanged accounts. Seller identity and authorized payment-provider onboarding remain necessary for genuine recurring checkout, server-verified entitlements, cancellation and recovery. No authoritative recurring-payment evidence exists.
+
+Next action: distribute the current verified demo through an owner-authorized wider connected channel and collect real return-value/pricing feedback, or complete seller/payment onboarding. Stop this bounded iteration after the verified distribution fix and local checkpoint. No owner notification claimed.
+
+## 2026-10-10 — corrected public README training/download entry point
+
+Outcome: published a concrete correction to the public GitHub player entry point, which still described October 8 as current after the October 10 baccarat-retry release. Current portable download now follows releases/latest; the return-practice routine covers both scored blackjack and baccarat decisions and explicitly identifies legacy entries as self-review only. No real customer demand, paid subscription or recurring revenue verified; US$200/month remains unmet. Ended this bounded iteration promptly after publication, verification and checkpoint.
+
+Inspected LAUNCH.md, MARKETING.md, progress history, /home/meep/AGENTS.md, current inventory/source/config/dirty diff, actual production landing, latest public release, remote main and authenticated opt-in feedback thread. The landing fetch succeeded; latest release is practice-demo-2026-10-10, non-draft/non-prerelease. Feedback issue 1 is open with zero comments at inspection; no messages sent and no unrelated inbox accessed. Callable tool discovery exposes Metricool but no itch.io publishing, payment processor or Android-device channel. Did not repeat unchanged social-account polling.
+
+Actual change/publication: updated README.md and published it alone through GitHub's contents API with the inspected existing file SHA, explicit AI-assistant author/committer identity and message. New remote-main commit 82dbee89f0bc527c60b307b7f4819fb867adf489 has parent bc24ed09cbeeb308a1a48e653c4ab821661196d9. Preserved all eleven initially dirty files and their prior edits, ordinary index and local HEAD 86ace22ba5f2303f01d3bca2c046bfe357e55cb6. No checkout, reset, merge, game deployment or unrelated push. MARKETING.md records the actual publication.
+
+Verification: unauthenticated commit-pinned public README downloaded to artifacts/public-readme-2026-10-10.md and cmp matched local README exactly. Authenticated commit read-back confirms README.md is the only changed file and the expected parent. Latest-download redirect returns HTTP 200 at practice-demo-2026-10-10. git diff --check passed. No app behavior changed, so no repeated gameplay tests warranted. Agent HTTP requests are not demand evidence. No social post, owner notification, checkout or payment claimed.
+
+Exact blockers/remaining work: no callable subscription processor or itch.io publisher; last authenticated Metricool evidence recorded no connected social network, with no new connection supplied (not freshly revalidated this iteration). Genuine subscriptions require owner seller identity and authorized payment-provider onboarding before checkout, server-verified entitlements, cancellation and recovery. Physical Android verification requires an available device channel. No authoritative recurring-payment evidence exists. Remote main now has this additional README-only commit; future source integration must preserve it and the earlier remote-only README commit.
+
+Next action: connect an owner-authorized wider publishing channel or itch.io publisher to distribute the already verified demo and collect real first-session/return/pricing feedback; alternatively complete seller/payment onboarding. Avoid further cosmetic releases without new player value or feedback. No goals, subagents, schedulers, runner/timer/service/model/permission changes, spending, credential reads or unsolicited outreach.
+
+## 2026-10-10 — shipped recommendations for return practice
+
+Outcome: production five-hand training now suggests the game with the lowest recorded decision accuracy among games with at least five tracked hands and some missed decisions. The map explains the exact correct/played counts, minimum sample and inclusion of hinted plays; explicitly describes a practice priority rather than a skill rating. All four choices remain available. Published https://pokergym.history-atlas.workers.dev/web/ , Worker version d66a1262-ffc8-489c-9f38-770d98bcd729. No real player feedback, subscription or recurring revenue verified; US$200/month remains unmet.
+
+Inspected launch/marketing/progress history, /home/meep/AGENTS.md, actual dirty files, session/accuracy source, browser harness, manifest and production state. Applied jevgrep (scoped source retrieval reported no additional AGENTS.md) and Wrangler skills, installed CLI help and current official command documentation https://developers.cloudflare.com/workers/wrangler/commands/ . Preserved all eleven initially dirty files, ordinary index and HEAD. No commits, resets, account messages, new goals, subagents, schedulers, spending, credential reads or automation runner/timer/service/model/permission changes.
+
+Actual changes:
+- src/rpg/state.js adds pure recommendedPractice: ignores samples below five decisions, all-correct games, absent/legacy records and profiles with an unfinished session. Compares exact ratios rather than rounded displayed percentages; ties favor fewer decisions, then existing gym order. No save schema, rewards, entitlements or measurement collection added.
+- web/app.js explains the suggestion above existing session buttons and labels the matching button SUGGESTED. Existing resume path takes precedence and actual session creation/scoring is reused.
+- test/practice.test.js covers minimum sample, legacy/null, all-correct, unfinished session, exact-ratio/tie choices and immutability. scripts/itch-browser-test.mjs verifies an actual completed session with mistakes produces the explanation and matching labeled button at phone width.
+
+Verification:
+- npm test: 185 passed, zero failed; artifacts/recommendation-unit-2026-10-10.txt.
+- npm run test:offline passed rebuilt portable ZIP, current game/session/notebook/backup/feedback/share checks and new recommendation assertions at 390px, followed by reload with the actual HTTP server stopped. artifacts/recommendation-offline-2026-10-10.txt.
+- Build and installed Wrangler deploy --dry-run passed; authorized deployment changed exactly app.js, state.js and versioned sw.js. artifacts/recommendation-build-2026-10-10.txt, recommendation-dry-run-2026-10-10.txt and recommendation-deploy-2026-10-10.txt.
+- Final POKERGYM_TEST_URL=https://pokergym.history-atlas.workers.dev/web/ npm run test:offline passed actual live recommendation assertions, existing gameplay checks and network-disabled offline reload; zero runtime/game-asset network errors. artifacts/recommendation-live-2026-10-10.txt.
+- Also reran existing production Chromium installability check successfully (zero installability errors, exact offline start-URL save/resume). This repeated previously completed evidence; physical Android installation remains unverified and no additional platform-readiness claim follows. Synthetic checks are not demand.
+
+Exact access limits: current callable inventory exposes Metricool publishing but no subscription processor, itch.io publisher or Android-device channel. Prior authenticated Metricool evidence found no connected social network; no new connection supplied and did not repeatedly poll accounts/inboxes/feedback. Genuine checkout requires owner seller identity and authorized payment-provider onboarding, followed by server-verified entitlements, cancellation and recovery. No authoritative payment evidence available. Public October 10 ZIP predates this suggestion; local tested ZIP includes it, but no further public release created for this small change. Existing offline tabs must close to activate the updated cache.
+
+Next action: connect an owner-authorized wider distribution channel and collect actual first-session/return/pricing feedback on the current demo; alternatively complete seller/payment-provider onboarding to enable genuine subscriptions. Stop this bounded iteration after tested player value, publication and checkpoint. No owner notification or target achievement claimed.
+
+
+## 2026-10-10 — corrected video-poker coaching for reordered hands
+
+Outcome: fixed and published an actual strategy/grading error rather than adding more surface polish. Repeating the same five cards in a different order previously reused hold positions from the earlier order, potentially recommending and grading the wrong cards. Production now caches by ordered cards. Worker version 07b967c1-bf65-41ea-85e5-e695607d6d06 at https://pokergym.history-atlas.workers.dev/web/ . No actual player feedback, paid subscription or recurring revenue verified; US$200/month remains unmet.
+
+Inspected LAUNCH.md, MARKETING.md, progress history, /home/meep/AGENTS.md, actual dirty worktree, strategy/cache/capture/backup source and browser harness. Live pre-change video-poker module confirmed the sorted cache key. Applied jevgrep scoped to src (no additional AGENTS.md found) and Wrangler skill, installed project deploy help and current official documentation https://developers.cloudflare.com/workers/wrangler/commands/ . Preserved all eleven initially dirty files and their earlier edits, ordinary index and local HEAD. No commits, resets, subagents, goals, schedulers, runner/timer/service/model/permission changes, secret reads, spending or account messages.
+
+Actual changes:
+- src/coach/videopoker.js changes the strategy cache key from sorted to ordered packed cards, with a comment explaining positional hold patterns. Identical ordered hands retain cache hits; different orders are computed independently. This may increase computation/cache entries when identical cards recur in different orders, but avoids incorrect advice and grading without changing strategy math.
+- test/videopoker.test.js adds a regression that primes the cache with a jack pair, reorders the cards, checks the actual held cards and optimal patterns, then compares EV and draw counts for every one of the 32 mapped hold options. Both orders retain their own cache entries.
+- scripts/itch-browser-test.mjs checks the same real coach module and reordered hold positions in portable and live browsers. Planned video-poker retry scoring was deferred when this prerequisite correctness bug was found; no new retry feature claimed.
+
+Verification:
+- New targeted regression failed before the fix: cached [true,true,false,false,false] was returned instead of [false,true,false,true,false]. After correction npm test passed all 186 tests, zero failures; artifacts/ordered-hold-unit-2026-10-10.txt.
+- npm run test:offline passed rebuilt actual ZIP, new reordered-hand assertion, existing phone gameplay/onboarding/backup/session/mistake tests and offline reload with local HTTP server stopped; zero runtime/game asset network errors. artifacts/ordered-hold-offline-2026-10-10.txt.
+- npm run build and project-local wrangler deploy --dry-run passed. Authorized deployment uploaded exactly two changed assets: /src/coach/videopoker.js and /web/sw.js. Evidence: artifacts/ordered-hold-build-2026-10-10.txt, ordered-hold-dry-run-2026-10-10.txt and ordered-hold-deploy-2026-10-10.txt.
+- Unqualified live video-poker module fetched after deployment matches local source byte-for-byte via cmp; before/after bytes saved in artifacts/ordered-hold-live-before-2026-10-10.js and ordered-hold-live-after-2026-10-10.js.
+- POKERGYM_TEST_URL=https://pokergym.history-atlas.workers.dev/web/ npm run test:offline passed production reordered-hand regression, existing 390px gameplay checks and browser-network-disabled offline reload; zero runtime/game asset network errors. artifacts/ordered-hold-live-2026-10-10.txt. Synthetic tests are not customer demand or payment evidence. Physical Android testing not claimed.
+- git diff --check passed before checkpoint and was rerun after it. Public GitHub ZIP still predates this fix; local rebuilt ZIP includes it. Existing offline tabs must close to activate the new version.
+
+Exact access limits: current callable tool inventory includes Metricool but no subscription payment processor, itch.io publisher or physical Android-device channel. Prior authenticated Metricool evidence recorded no connected social network; no new connection was supplied and unchanged account/inbox state was not repeatedly polled. Live subscriptions require owner seller identity and authorized payment-provider onboarding before checkout, server-verified entitlements, cancellation and recovery. No authoritative recurring-payment evidence available. No owner notification claimed.
+
+Next action: obtain real player return-value/pricing feedback through an authorized wider publishing channel, or complete seller/payment-provider onboarding; scored original video-poker retries remain a concrete training extension once this correction is integrated into the next distribution release. Stop this bounded iteration after the tested live correction and checkpoint.
+
+## 2026-10-10 — shipped scored original video-poker hold recall
+
+Outcome: published a concrete return-training extension at https://pokergym.history-atlas.workers.dev/web/ . New missed video-poker decisions now support selecting the original held cards before revealing coaching, with independent scored retry counts. Worker version 183569ab-2136-4a18-9879-cf1eb9c09bae. No real player feedback, paid subscription or recurring revenue verified; US$200/month remains unmet.
+
+Inspected LAUNCH.md, MARKETING.md, progress history, /home/meep/AGENTS.md, actual dirty worktree, live pre-change app module, strategy capture/scoring/backup paths and browser harness. Used jevgrep scoped to src (no additional AGENTS.md), Wrangler skill, project-local deploy help and current official commands documentation https://developers.cloudflare.com/workers/wrangler/commands/ . Preserved all initially dirty files and prior edits, index and HEAD. No goals, subagents, schedulers, commits, resets, automation runner/timer/service/model/permission changes, secret reads, spending or account messages.
+
+Actual changes:
+- web/app.js captures all 32 position-specific hold patterns and every tied optimal pattern from the original coach before drawing. Notebook uses five numbered card toggle buttons with aria-pressed state and a Check Hold button, supports holding none, hides coaching until submission/reveal, and reuses the existing once-per-visit/reveal scoring guard. No XP/chip reward or alteration to gameplay accuracy. Legacy entries remain self-review only.
+- src/rpg/state.js validates complete five-bit hold choices and original optimal keys; existing backup validation automatically supports the new quiz type and rejects malformed keys. Capture copies arrays, and scoring persists separately from gameplay.
+- test/practice.test.js covers ordered original jack-pair holds, wrong/correct scoring, tied acceptable patterns, independent rewards/accuracy, backup round-trip and malformed external quiz rejection.
+- scripts/itch-browser-test.mjs checks a mistake captured from actual video-poker gameplay, all 32 choices, correct card selection, blocked repeated submission/toggling, persisted retry counts and phone width. Existing blackjack/baccarat reveal guards and full offline/game flows remain covered.
+
+Verification:
+- npm test: 187 passed, zero failed; artifacts/vp-retry-unit-2026-10-10.txt. Initial new fixture mistakenly used rank/suit fields rather than repository r/s fields; first run failed, corrected fixture, then full suite passed. No product strategy error inferred from that fixture failure.
+- npm run test:offline: actual rebuilt portable ZIP passed 390px browser checks including new actual-capture retry, existing gameplay/onboarding/session/notebook/backup/feedback/share checks and offline reload with HTTP server stopped; zero runtime or game-asset network errors. artifacts/vp-retry-offline-2026-10-10.txt.
+- npm run build and project-local wrangler deploy --dry-run passed; authenticated production deployment uploaded exactly /web/app.js, /src/rpg/state.js and versioned /web/sw.js. Evidence: artifacts/vp-retry-build-2026-10-10.txt, vp-retry-dry-run-2026-10-10.txt, vp-retry-deploy-2026-10-10.txt.
+- POKERGYM_TEST_URL=https://pokergym.history-atlas.workers.dev/web/ npm run test:offline passed the same new original-hold retry on production plus network-disabled offline reload, with zero runtime/game-asset network errors. artifacts/vp-retry-live-2026-10-10.txt. Synthetic checks are not physical Android verification or customer demand.
+- git diff --check passed before checkpoint and rerun afterward. Current public GitHub portable ZIP predates both this extension and the preceding ordered-cache fix; local rebuilt ZIP includes both. Existing offline game tabs must close to activate updates.
+
+Exact access limits: callable inventory exposes Metricool but no subscription payment processor, itch.io publisher or physical Android-device channel. Prior authenticated Metricool evidence found no connected social network; no new connection supplied and unchanged account/inbox state was not repeatedly polled. Genuine recurring checkout requires owner seller identity and authorized payment-provider onboarding, then server-verified entitlements, cancellation and recovery. No authoritative payment evidence available. No owner notification claimed.
+
+Next action: distribute the current corrected training build through an authorized wider connected channel and collect real return-value/pricing feedback, or complete seller/payment-provider onboarding. Include the ordered-cache fix and hold retries together in the next meaningful public portable release. Stop this bounded iteration after tested live player value and checkpoint.
+
+
+## 2026-10-10 — published corrected portable hold-recall training
+
+Outcome: closed a concrete distribution gap: latest public ZIP now includes the live ordered-card video-poker coaching fix, scored original-hold retries and return-practice suggestions. Release https://github.com/MeepTheTendie/pokergym/releases/tag/hold-recall-demo-2026-10-10 . No customer demand, subscription or recurring revenue verified; US$200/month remains unmet. Stop this bounded iteration after publication, verification and checkpoint.
+
+Inspected LAUNCH.md, MARKETING.md, progress history, /home/meep/AGENTS.md, dirty source/tests/build files, actual latest GitHub release, remote main and live video-poker module (matched local source byte-for-byte). Preserved all 13 initially dirty files, ordinary index and local HEAD; no source logic edits or cloud redeployment. No goals, subagents, schedulers, automation runner/timer/service/model/permission changes, new spending, credential reads or unsolicited outreach. Used existing authenticated GitHub CLI without extracting secrets.
+
+Actual publication: rebuilt artifacts/pokergym-itch.zip; separate tagged source snapshot 4cc09714f63252803587c3e540c3d7c9ee057c53, parent remote main 82dbee89f0bc527c60b307b7f4819fb867adf489. Temporary GIT_INDEX_FILE overlays current app/build/test/public files and README; marketing/progress notes excluded. Only new tag pushed, remote main remains unchanged, older release assets preserved. Published non-draft/non-prerelease latest release with tested ZIP, SHA-256 file, honest return-practice instructions, legacy-note limits, free scope and explicit AI involvement. Existing latest-download entry points now resolve to it without additional page edits. MARKETING.md records publication.
+
+Verification: npm test passed 187/187 (artifacts/hold-release-unit-2026-10-10.txt). npm run test:itch:cross-site rebuilt the actual ZIP and passed nested 390px cross-site Chromium checks, including original 32-pattern hold capture/scoring, reordered-card cache correctness, blackjack/baccarat retries, once-per-visit scoring guards, onboarding, saves and portable backups; zero runtime/game-asset network errors (artifacts/hold-release-browser-2026-10-10.txt). Public unauthenticated ZIP/checksum downloads matched tested local files byte-for-byte. ZIP SHA-256 9353702b84447d9a8ce39cfd3b1b12a6ed6863d90ed899edf716414235ef7f3d. Authenticated latest-release read-back confirms tag/status/assets; latest redirect HTTP 200. Source/index/HEAD evidence: artifacts/source-hold-release-2026-10-10.txt. Release read-back: artifacts/public-hold-release-2026-10-10.json. git diff --check passed and rerun after checkpoint. These requests/tests are not player demand or physical Android evidence. Initial snapshot attempt referenced nonexistent guides directory and failed before commit/tag; corrected by selecting existing paths, with ordinary index untouched.
+
+Exact access limits: callable inventory includes GitHub/Metricool but no subscription processor, itch.io publisher or physical Android-device channel. Previously inspected Metricool had no connected social network; no new connection supplied and unchanged accounts/inboxes were not repolled. Genuine checkout requires owner seller identity and authorized payment-provider onboarding, then server-verified entitlements, cancellation and recovery. No authoritative recurring payment evidence exists. No owner notification claimed.
+
+Next action: distribute this corrected release through an owner-authorized wider connected channel and obtain real return-value/pricing feedback, or complete seller/payment-provider onboarding. Avoid further cosmetic releases without new player value.
+
+## 2026-10-10 — published recall-first Hold’em learning guide
+
+Outcome: published useful educational marketing on the existing authenticated Cloudflare site: https://pokergym.history-atlas.workers.dev/guides/holdem-best-five/ . Three recall-first puzzles explain playing the board, the single kicker in two pair, and an ace-low straight, then link directly into free five-hand Hold’em training. Worker version 50217f39-495b-438d-bda3-7ad2d10811f2. No external player response, subscription or recurring revenue verified; US$200/month remains unmet. This is site content publication, not a social post or evidence of search indexing/audience.
+
+Inspected LAUNCH.md, MARKETING.md, progress history, /home/meep/AGENTS.md, actual dirty worktree, live landing, current evaluator/grader, existing guides, practice-entry browser checks and deployment configuration. Used Wrangler skill, project-local deploy help and current official documentation https://developers.cloudflare.com/workers/wrangler/commands/ . Preserved prior dirty edits; no commits, resets, subagents, goals, schedulers, automation runner/timer/service/model/permission changes, new spending, secret credential reads or unsolicited messages.
+
+Actual changes:
+- New public/guides/holdem-best-five/index.html uses native hidden-answer disclosures, clear phone layout, scope/AI involvement disclosures, honest self-review limits and an opt-in public feedback link. Clarifies that this trainer teaches card selection rather than betting strategy and that Hold’em notebook retries are not scored.
+- web/landing.html and public/sitemap.xml make the lesson discoverable from current entry points.
+- scripts/itch-browser-test.mjs extends existing guide checks to Hold’em, including correct gym/session entry and preservation of a different unfinished game. Existing browser tests preserved.
+
+Verification:
+- Direct Node checks against evaluate and playsBestFive passed all three exact hands: royal flush on the board, kings/sevens with ace kicker, five-high wheel. Expected complete strength arrays matched, correct selections accepted and weaker alternatives rejected. artifacts/holdem-guide-examples-2026-10-10.txt. No strategy logic changed, and no new unit test or full unit-suite run was needed for this static lesson.
+- npm run build, project-local wrangler deploy --dry-run and authorized production deployment succeeded. Uploaded exactly three changed public assets: landing, sitemap and new guide; no game module or offline-cache change. artifacts/holdem-guide-build-2026-10-10.txt, holdem-guide-dry-run-2026-10-10.txt, holdem-guide-deploy-2026-10-10.txt.
+- npm run test:offline passed all three guide phone checks, actual targeted trainer/lesson entry, unfinished-session preservation, existing gameplay/notebook/backup/session checks and offline reload with the local HTTP server stopped. artifacts/holdem-guide-offline-2026-10-10.txt.
+- POKERGYM_TEST_URL=https://pokergym.history-atlas.workers.dev/web/ npm run test:offline passed the same three guide checks on production, existing phone gameplay and network-disabled offline game reload, with zero runtime/game-asset network errors. artifacts/holdem-guide-live-2026-10-10.txt. The new guide itself is not claimed to be cached offline.
+- Unauthenticated live guide, landing and sitemap fetches matched local source byte-for-byte via cmp. Saved artifacts/holdem-guide-live-2026-10-10.html, holdem-guide-live-landing-2026-10-10.html, holdem-guide-live-sitemap-2026-10-10.xml. git diff --check passed and rerun after checkpoint. Synthetic checks are not physical Android or customer-demand evidence.
+
+Exact access limits: current callable inventory exposes Metricool publishing but no subscription processor, itch.io publisher or physical Android-device channel. Prior authenticated Metricool inspection found no connected social network; no new connection supplied and unchanged accounts/inboxes/feedback were not repolled. Wider posting requires an owner-authorized connected channel. Genuine recurring checkout requires owner seller identity and authorized payment-provider onboarding, followed by verified entitlements, cancellation and recovery; neither a fake paywall nor invented seller details were added. No authoritative payment evidence available. No owner notification claimed.
+
+Next action: distribute this lesson and current playable demo through an owner-authorized wider connected channel to collect actual clarity/return/pricing feedback; alternatively complete seller/payment-provider onboarding. Stop this bounded iteration after useful content publication, live verification and checkpoint.
+
+
+## 2026-10-10 — shipped browser-assisted installation for return practice
+
+Outcome: live free trainer now offers INSTALL FOR QUICK PRACTICE when the browser supplies an installation prompt. Published https://pokergym.history-atlas.workers.dev/web/ as Worker version f5214149-5ae5-4a4f-bfa6-044e54b8e06b. No real player demand, paid subscriptions or recurring revenue verified; US$200/month remains unmet. This bounded iteration ends after a concrete Android browser readiness improvement and checkpoint.
+
+Inspected launch/marketing/progress notes, /home/meep/AGENTS.md, actual dirty worktree, live manifest, installability harness, offline module, build/portable paths and deployment config. Used jevgrep scoped to web (no additional AGENTS.md) and Wrangler skill. Current references: https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeinstallprompt_event and https://developers.cloudflare.com/workers/wrangler/commands/ plus installed deploy help. Preserved initial dirty changes, HEAD and index; no commits/resets, subagents, new goals, schedulers, automation configuration changes, credential reads, account messages or spending.
+
+Actual changes:
+- web/index.html adds a hidden install button and accessible status on the entry screen.
+- web/offline.js shows it only after a browser beforeinstallprompt event and only for the standalone cloud game. A player click invokes and consumes the offered prompt once. Dismissal/error leaves gameplay available and retains browser-menu guidance. Request acceptance is described as a request, not completed installation; appinstalled hides installation guidance, with a guard against later async results overwriting completed status. Already standalone launches hide installation controls. Portable embeds remain untouched.
+- scripts/itch-browser-test.mjs checks synthetic browser offer/acceptance/dismissal/error/completion, prompt consumption, phone width and absence of installation advertising in the actual embedded ZIP. These simulations are not physical Android installation evidence.
+
+Verification:
+- Pre-change live npm run test:installability passed: Chromium 152 parsed manifest/icons, reported zero installation errors and resumed saved trainer from exact manifest start URL with networking disabled.
+- npm run test:offline passed local 390px installation UI simulations, existing gameplay/review/backup/feedback/guide checks and offline reload with actual server stopped: artifacts/install-button-offline-2026-10-10.txt.
+- npm run build and project-local wrangler deploy --dry-run passed; authenticated deploy uploaded exactly /web/index.html, /web/offline.js and versioned /web/sw.js. artifacts/install-button-build-2026-10-10.txt, install-button-dry-run-2026-10-10.txt, install-button-deploy-2026-10-10.txt.
+- npm run test:itch:cross-site passed actual ZIP nested phone-width checks and hidden installation controls: artifacts/install-button-embed-2026-10-10.txt. Local ZIP rebuilt but no GitHub release published for this browser-only improvement.
+- Post-change live npm run test:installability passed with zero installability errors and offline save/resume: artifacts/install-button-readiness-2026-10-10.txt. Unqualified live offline.js matched local bytes via cmp: artifacts/install-button-live-module-2026-10-10.js.
+- Final sequential POKERGYM_TEST_URL=https://pokergym.history-atlas.workers.dev/web/ npm run test:offline passed installation simulations, existing phone/game checks and browser-network-disabled reload with zero runtime/game-asset network errors: artifacts/install-button-live-retry-2026-10-10.txt. Initial live attempt hung because I ran two harnesses concurrently with shared test ports; stopped only that isolated node/browser and reran sequentially. Initial incomplete log retained as install-button-live-2026-10-10.txt. No app failure inferred from the harness collision.
+- git diff --check passed before checkpoint and rerun after. No strategy change or full unit-suite rerun needed for this browser UI change. Physical Android installation and store distribution remain unverified. Existing offline tabs must close to activate the update.
+
+Exact access limits: current tool inventory exposes Metricool but no subscription payment processor, itch.io publisher or physical Android-device capability. Previously inspected Metricool has no connected social channel; no new connection supplied, so unchanged accounts/inboxes were not repolled. Wider publishing requires an owner-authorized connected channel. Live recurring checkout requires seller identity and authorized payment-provider onboarding, then checkout/verified entitlements/cancellation/recovery. No authoritative payment evidence available; no owner notification claimed.
+
+Next action: get real players through an authorized wider distribution channel and measure first-session clarity, return value and pricing interest; complete seller/payment onboarding when available. Verify installation on a physical Android device before claiming Android installation or store readiness. Avoid another cosmetic portable release for this browser-only change.
+
+## 2026-10-10 — shipped scored original best-five Hold’em retries
+
+Outcome: completed the remaining game’s original-decision recall loop. New missed Hold’em selections now offer a seven-card retry, accept every equally strong best-five combination and persist separate retry accuracy. Live free game: https://pokergym.history-atlas.workers.dev/web/ . Cloudflare version f7678713-2dc7-41a2-91a1-370de27dc030. No real customer demand, paid subscription or recurring revenue verified; US$200/month remains unmet. This bounded iteration ends after tested player value, deployment and checkpoint.
+
+Inspected LAUNCH.md, MARKETING.md, progress history, /home/meep/AGENTS.md, actual dirty worktree, live state module (matched source byte-for-byte), existing Hold’em evaluator/grader and notebook/backup/browser flow. Used jevgrep scoped to web and Wrangler skill; current deployment reference https://developers.cloudflare.com/workers/wrangler/commands/ and installed project-local deploy help. Preserved all initial dirty changes, ordinary index and HEAD. No commits/resets, subagents, new goals, schedulers, automation configuration changes, paid services, secret reads or unsolicited account messages.
+
+Actual changes:
+- src/coach/holdem.js exports bestFiveQuiz: enumerates all 21 five-of-seven patterns in original card order and captures every selection accepted by the real grader, including tied kickers.
+- web/app.js captures that key when the original Hold’em hand settles; notebook renders seven accessible selection buttons and CHECK FIVE. Incomplete/overfull selections are not scored. Shared once-per-visit/reveal guards disable further submissions and card toggles after scoring/reveal. Retry records award no XP/chips and do not alter game accuracy.
+- src/rpg/state.js validates complete 21-pattern keys, exactly five selected bits, unique choices and in-range acceptable answers; existing backup validator supports the new type without changes. Older entries without captured keys remain self-review only.
+- web/index.html corrects the outdated blackjack-only notebook guidance to cover all four games. public/guides/holdem-best-five/index.html now explains the available scored retry and legacy limits.
+- test/practice.test.js checks tied original kickers, wrong/correct scoring, invalid selection counts/keys, copied answer arrays, no reward/accuracy changes and backup round-trip/rejection.
+- scripts/itch-browser-test.mjs captures a missed selection from actual seeded Hold’em gameplay, verifies 21 original choices, unscored incomplete selection, one correct submission, blocked repeated/toggled/revealed-answer scoring, persistence across map revisits and phone layout.
+
+Verification:
+- npm test passed 188/188, zero failed: artifacts/holdem-retry-unit-2026-10-10.txt.
+- npm run test:offline passed local 390px gameplay/review/backup/guide/install checks and offline reload with the actual server stopped: artifacts/holdem-retry-offline-retry-2026-10-10.txt. Initial harness run clicked hidden Next twice after the new retry returned to the map, producing a null-session error; corrected the harness’s duplicate navigation and reran. Initial failure retained in holdem-retry-offline-2026-10-10.txt. No normal player transition failure inferred from that programmatic hidden-button click.
+- npm run build and project-local wrangler deploy --dry-run passed; authenticated deploy uploaded six changed assets: coach/holdem, state, app, index, versioned service worker and Hold’em guide. artifacts/holdem-retry-build-2026-10-10.txt, holdem-retry-dry-run-2026-10-10.txt, holdem-retry-deploy-2026-10-10.txt.
+- POKERGYM_TEST_URL=https://pokergym.history-atlas.workers.dev/web/ npm run test:offline passed the final harness, including persisted Hold’em retry/reveal guard and network-disabled offline reload, zero runtime/game-asset errors: artifacts/holdem-retry-live-2026-10-10.txt.
+- npm run test:itch:cross-site passed final actual rebuilt ZIP in nested 390px cross-site Chromium, including the new retry/reveal checks and existing flows: artifacts/holdem-retry-embed-2026-10-10.txt. Local portable ZIP is current; no new GitHub release published during this iteration.
+- Unauthenticated live coach module and updated guide matched source byte-for-byte: artifacts/holdem-retry-live-coach-2026-10-10.js and holdem-retry-live-guide-2026-10-10.html. git diff --check passed before checkpoint and rerun afterward. Synthetic browser checks are not physical Android verification or demand evidence. Existing offline tabs must close to activate the update.
+
+Exact access limits: inspected callable inventory exposes Metricool but no subscription payment processor, itch.io publisher or physical Android-device channel. Previous authenticated Metricool inspection found no connected social network; no new connection supplied, so unchanged accounts/inboxes were not repolled. Wider posting needs an owner-authorized connected channel. Actual recurring checkout requires owner seller identity and authorized payment-provider onboarding, then server-verified entitlements/cancellation/recovery. No fabricated seller identity, paywall or payment evidence added. No owner notification claimed.
+
+Next action: obtain real player clarity/return/pricing feedback through an authorized wider distribution channel, or complete seller/payment-provider onboarding. All four new mistake types now support scored recall; prioritize demand/payment access over further notebook polishing. Include this original best-five feature in the next meaningful portable release.
+
+
+## 2026-10-10 — shipped persistent spaced mistake recall
+
+Outcome: live trainer now provides a concrete return-practice loop: scored mistakes are prioritized when due, correct due answers schedule recall after 1, 3, 7, 14, then 30 days; missed retries return after ten minutes. Published https://pokergym.history-atlas.workers.dev/web/ as Cloudflare version bc1159fd-d8a2-425a-83dd-a6a4af5b0c55. No real player demand, subscription or recurring revenue verified; US$200/month remains unmet. End this bounded iteration after verified player value and checkpoint.
+
+Inspected LAUNCH.md, MARKETING.md, progress history, /home/meep/AGENTS.md, dirty worktree, actual live state module (matched pre-change source), save/backup/notebook code and deployment configuration. Used jevgrep scoped to src/rpg and Wrangler skill, installed deploy help and current official reference https://developers.cloudflare.com/workers/wrangler/commands/. Preserved all initially dirty work, HEAD and ordinary index. No subagents, goals, schedulers, automation runner/timer/service/model/permission changes, new spending, secret reads or unsolicited messages.
+
+Actual changes:
+- src/rpg/state.js adds validated local review schedules and a due-first queue retaining original notebook indices. Early correct retries still count toward separate retry accuracy but do not advance spaced recall. Misses reset the streak; revealing/self-reviewing alone never schedules scored recall. Legacy unscheduled scored entries start due; unscored legacy notes remain self-review. Existing bounded 20-note retention remains.
+- src/rpg/backup.js validates schedule timestamps/streaks and preserves them in manual backups. Local legacy saves remain compatible.
+- web/app.js displays due count, next local review date, per-note due/early-practice status and interval rules, then updates scheduling status after scoring. Explicit device-local storage and no notifications. All games use their previously captured original answer keys; no gameplay reward or accuracy changes.
+- test/practice.test.js covers exact due boundaries, all intervals/cap, early retries, miss reset, ordering/original indices, invalid dates/backups, legacy saves, backup round-trip and unchanged rewards.
+- scripts/itch-browser-test.mjs verifies actual wrong-then-early-correct scheduling, visible due/next status and backup persistence; answer visibility selector now uses a stable class instead of paragraph position.
+
+Verification:
+- npm test: 189/189 passed, zero failures; artifacts/review-schedule-unit-2026-10-10.txt.
+- npm run test:offline: passed local 390px full game/review/backup/guide/install simulations and actual server-stopped offline reload; artifacts/review-schedule-offline-2026-10-10.txt. Actual portable ZIP rebuilt locally; no new GitHub release claimed.
+- npm run build, project-local wrangler deploy --dry-run and authenticated production deploy passed. Uploaded exactly state.js, backup.js, app.js and versioned sw.js. artifacts/review-schedule-build-2026-10-10.txt, review-schedule-dry-run-2026-10-10.txt, review-schedule-deploy-2026-10-10.txt.
+- POKERGYM_TEST_URL=https://pokergym.history-atlas.workers.dev/web/ npm run test:offline: passed production phone/game/schedule persistence checks and network-disabled offline reload with zero runtime/game-asset errors; artifacts/review-schedule-live-2026-10-10.txt. Public state module matches source byte-for-byte: artifacts/review-schedule-live-state-2026-10-10.js.
+- git diff --check passed and rerun after checkpoint. Synthetic clock tests do not establish real return visits or physical Android verification. Scheduling follows the device clock, has no reminders, and is not an account/cloud entitlement. Existing offline tabs must close to activate the update.
+
+Exact access limits: current callable inventory has Metricool publishing tools but no subscription payment processor, itch.io publisher or physical Android-device channel. Prior authenticated Metricool inspection found no connected social network; no new connection was supplied, so unchanged accounts/inboxes were not repolled. Wider social posting needs an owner-authorized connected channel. Actual recurring checkout requires owner seller identity and authorized payment-provider onboarding, followed by server-verified entitlements/cancellation/recovery. No authoritative payment evidence available, fake paywall or invented seller details added. No owner notification claimed.
+
+Next action: put this return-practice loop in front of real players through an authorized connected channel and collect repeat-use/pricing feedback; alternatively complete seller/payment-provider onboarding. Avoid further notebook expansion without demand evidence. Include scored Hold’em and spaced recall together in the next meaningful portable distribution update.
+
+
+## 2026-10-10 — published portable all-game spaced recall
+
+Outcome: closed the distribution gap between the live return-practice loop and public portable download. Published https://github.com/MeepTheTendie/pokergym/releases/tag/spaced-recall-demo-2026-10-10 at 2026-10-10T21:39:56Z, non-draft/non-prerelease latest release. No verified real customer demand, subscription or recurring revenue; US$200/month remains unmet. Stop this bounded iteration after concrete distribution, verification and checkpoint.
+
+Inspected LAUNCH.md, MARKETING.md, progress history, /home/meep/AGENTS.md, dirty files, actual live state module (matched current source), build/package/release instructions, public latest release and remote main. Earlier public download was hold-recall-demo-2026-10-10 and lacked scored Hold’em retries/spaced recall. Preserved initial dirty work, ordinary index bytes and local HEAD 86ace22. No subagents, long-running goals, schedulers, automation runner/timer/service/model/permission edits, new spending, credential reads or unsolicited messages. No strategy/app logic change or Cloudflare deploy this iteration.
+
+Actual changes/publication:
+- Rebuilt and tested artifacts/pokergym-itch.zip. Uploaded ZIP and SPACED-RECALL-SHA256SUMS.txt as a separate latest GitHub release through the existing authenticated owner account. Honest release description includes the original-decision retry/return routine, due intervals, device clock/local saves, no notifications, 20-note retention, legacy self-review limits, free scope and explicit AI involvement. Invites voluntary feedback after actual play; does not claim demand. Earlier releases preserved.
+- Source snapshot ebe96388824f832d8f0c2958d2558c1618d9d444, parent remote main 82dbee89f0bc527c60b307b7f4819fb867adf489. Temporary GIT_INDEX_FILE overlays current app/build/test/public files and README. Automation and local launch/marketing/checkpoint notes excluded from new overlay. Only new source tag pushed; remote main and ordinary local HEAD/index unchanged. Snapshot evidence: artifacts/spaced-release-source-2026-10-10.txt.
+- README.md locally documents all-game retries, exact recall intervals/device-local limits and new source snapshot. Included in release tag, not separately published to main. MARKETING.md records verified release.
+
+Verification:
+- npm test passed 189/189, zero failures: artifacts/spaced-release-unit-2026-10-10.txt.
+- npm run test:itch:cross-site passed the actual rebuilt ZIP in nested 390px cross-site Chromium, original video-poker/Hold’em/baccarat/blackjack retry checks, review schedule/backup persistence and existing gameplay flows, zero runtime/game-asset errors: artifacts/spaced-release-browser-2026-10-10.txt. This is synthetic browser verification, not physical Android or real repeat use.
+- Unauthenticated public ZIP/checksum downloads matched tested local bytes via cmp: artifacts/spaced-release-public-2026-10-10.zip and spaced-release-public-checksum-2026-10-10.txt. ZIP SHA-256: 4078dd47c4d192dea85c887e90fcdd7b3270f11a90a163268955065dfc08007a.
+- Public /releases/latest resolves to spaced-recall-demo-2026-10-10 with HTTP 200. Authenticated release view confirms non-draft/non-prerelease publication; artifacts/spaced-release-publication-2026-10-10.json contains CLI mise preamble plus the JSON result. No app source modified after browser verification. git diff --check passed before publication and after checkpoint.
+
+Exact access limits: current callable inventory exposes GitHub and Metricool, but no subscription payment processor, itch.io publisher or physical Android-device capability. Prior authenticated Metricool inspection found no connected social network; no new connection supplied, so unchanged accounts/inboxes/feedback were not repolled. Wider posting requires an owner-authorized connected channel. Actual recurring checkout requires owner seller identity and authorized payment-provider onboarding, then server-verified entitlements/cancellation/recovery. No authoritative recurring payment evidence is available. No invented seller identity, fake paywall or owner notification claimed.
+
+Next action: distribute this now-current return-practice demo through an authorized wider connected channel and collect actual return/pricing feedback, or complete seller/payment onboarding. Avoid further recall polishing or another same-day cosmetic release without player evidence.
+
+
+## 2026-10-10 — shipped reviewed GitHub feedback drafts
+
+Outcome: completed a concrete demand-collection improvement in the live free game. After five hands, players can prepare their clarity, return-interest and hypothetical US$5/month answers once, then open a prefilled GitHub issue draft instead of needing an email app or manually retyping answers. Production version 430d4e10-728d-4263-9928-46228ae47a5f at https://pokergym.history-atlas.workers.dev/web/ . No player submission, actual demand, subscription or recurring revenue verified; US$200/month remains unmet.
+
+Inspected launch/marketing/progress notes, /home/meep/AGENTS.md, current dirty worktree, deployed feedback module, current feedback/privacy/browser flows and authenticated repository settings. Repository is public, not archived and has issues enabled (artifacts/feedback-github-repo-2026-10-10.json). Used Wrangler skill, installed deploy help, official Wrangler command reference and GitHub issue-query documentation. Preserved all initial dirty work, local HEAD and ordinary index. No subagents, goals, schedulers, automation configuration changes, secret reads, new spending or unsolicited messages. No synthetic issue or email submitted.
+
+Actual changes:
+- web/feedback.js creates a safely encoded GitHub draft URL with the same reviewed answers as the existing email draft, bounded optional note and explicit hypothetical-offer language. No automatic upload or gameplay identifiers.
+- web/app.js sets the new link after form validation. Its feedback import now uses a version query to avoid combining the new consumer with a stale module at deployment.
+- web/index.html offers public GitHub and email choices after preview, explains GitHub account/public submission, link transfer and email identity disclosure, and retains the existing thread/manual-copy alternative.
+- web/privacy.html explains draft link transfer, browser-history implications, explicit player submission and absence of save/trainer/score data.
+- test/feedback.test.js checks destination, parameters and exact Unicode/special-character body preservation. scripts/itch-browser-test.mjs checks the actual completed-session draft and public/account disclosure.
+
+Verification:
+- Targeted node --test test/feedback.test.js passed, zero failures: artifacts/feedback-github-unit-2026-10-10.txt. No strategy/state changes; no full unit rerun required.
+- Initial and final local npm run test:offline passed 390px gameplay, completed-session draft, existing review/backup/share/install checks and actual server-stopped offline reload: artifacts/feedback-github-offline-2026-10-10.txt and feedback-github-versioned-offline-2026-10-10.txt.
+- Build, project-local dry-run and authenticated deploy passed twice; final artifacts/feedback-github-versioned-{build,dry-run,deploy}-2026-10-10.txt. First deploy version 3efd8a87-2280-4581-944d-cb4b737de52f uploaded feedback/app/index/privacy/service worker; final deployment changes app import and service-worker version.
+- Two initial live harness runs failed the new link assertion because an older feedback module was served: artifacts/feedback-github-live-2026-10-10.txt and feedback-github-live-retry-2026-10-10.txt. Unqualified curl initially also returned old bytes while a fresh query returned new bytes; later unqualified curl matched. Versioned the dependency and reran local/deploy checks rather than accepting the inconsistent result.
+- Final production POKERGYM_TEST_URL=https://pokergym.history-atlas.workers.dev/web/ npm run test:offline passed including exact GitHub draft-body preservation, full phone flow and network-disabled reload, zero runtime/game-asset network errors: artifacts/feedback-github-versioned-live-2026-10-10.txt. Versioned public feedback module matched source byte-for-byte: artifacts/feedback-github-versioned-live-module-2026-10-10.js.
+- git diff --check passed before and after checkpoint. Browser tests do not establish real player feedback or physical Android installation. Existing offline tabs must close for updates. Portable ZIP was rebuilt by the harness; no new GitHub release published for this feedback-flow change.
+
+Exact access limits: callable inventory provides GitHub and Metricool but no subscription payment processor, itch.io publisher or physical Android device capability. Prior Metricool inspection found no connected social channel; no newly supplied connection, so unchanged accounts/inboxes were not repolled. Wider social distribution needs an owner-authorized connected channel. Recurring checkout needs actual seller identity and authorized payment-provider onboarding, followed by server-verified entitlements/cancellation/recovery. No authoritative recurring payment evidence available. No owner notification claimed.
+
+Next action: get real players through an authorized wider channel and use the now-prefilled feedback path to collect first-session/return/pricing evidence; alternatively complete seller/payment-provider onboarding. Prioritize those access steps over more recall or cosmetic release work.
+## 2026-10-10 — authoritative distribution-demand baseline
+
+Outcome: checked actual authenticated GitHub distribution evidence at 2026-10-10T21:43:54Z rather than shipping another unvalidated feature. No real player feedback or recurring payment verified. US$200/month remains unmet.
+
+Inspected LAUNCH.md, MARKETING.md, current progress, /home/meep/AGENTS.md, dirty worktree, manifest/installability harness, current feedback implementation and callable account capabilities. Preserved all existing changes, ordinary index and HEAD. No subagents, goals, scheduling/configuration changes, new spending, credentials inspected or messages sent.
+
+Actual verification and baseline:
+- Authenticated `gh api repos/MeepTheTendie/pokergym/traffic/views` succeeded: returned September 26–October 9 daily window totals of one view and one unique visitor, both on October 8. Repository traffic is not game traffic; identity and player status are unknown and owner/automation visits cannot be excluded. This is the first recorded authoritative repository-view baseline, not proof of demand.
+- Authenticated all-state issues query returned only issue #1, open with zero comments; no submitted player feedback issue appeared. No inbox or unrelated account accessed.
+- Authenticated releases query reported latest spaced-recall-demo-2026-10-10 ZIP/checksum download counts of zero. Older ZIP counts were 1, 1, 1, 2 and 3 respectively for practice October 10, hold recall, practice October 8, practice October 7 and initial free demo. Prior recorded synthetic public-download verifications mean these older counts cannot be attributed to players. GitHub counter latency and limited returned traffic window remain limitations.
+- Fresh HTTPS production feedback module fetched successfully and matched web/feedback.js byte-for-byte with cmp. No app code changed and no redundant gameplay/installability suite warranted. git diff --check passed before and after checkpoint.
+
+Exact critical-path blockers: current tool inventory exposes authenticated GitHub and Metricool, but no payment processor, itch.io publisher or physical Android device. Prior Metricool account check found no connected social network; no newly supplied connection, so it was not repeatedly polled. Wider distribution needs a connected owner-authorized publishing account or itch.io publisher access. Checkout needs actual seller identity and authorized payment-provider onboarding; no fabricated identity, fake paywall, test revenue or payment evidence. Existing product already has free five-hand practice, all-game scored recall, spaced return scheduling, offline/backup/install flows and reviewed feedback drafts. No customer-evidenced next product correction is available, so stop instead of further recall/visual polishing or duplicate release publication.
+
+Next action: connect an owner-authorized wider publishing channel and present the existing demo to real players, or complete seller/payment onboarding. Use actual first-session/return/pricing feedback to choose the next product change. No owner notification claimed.
+
+
+## 2026-10-11 — bounded critical-path access audit
+
+Outcome: no useful new authorized action identified beyond checking current state and recording the blocking access requirements. No product change, publication, player submission or recurring payment claimed. US$200/month remains unverified. Stop this iteration rather than duplicate releases, expand training without player evidence, or repeatedly poll unchanged accounts.
+
+Inspected LAUNCH.md, MARKETING.md, recent progress, /home/meep/AGENTS.md, actual dirty worktree, package/deployment configuration, installation harness and current callable tools. Fresh HTTPS production feedback.js fetched and compared with web/feedback.js using cmp: identical bytes, exit 0. Existing installation harness already checks manifest/icon validity, Chromium installation errors and offline start/save resume; previous successful runs are documented, so no redundant suite was run. Physical Android installation remains unverified. Preserved all initially dirty files, HEAD and ordinary index; only this checkpoint changed. No subagents, goals, schedulers, runner/timer/service/model/permission changes, credential reads, new spending or messages sent.
+
+Exact access blockers: current inventory includes authenticated GitHub and Metricool tools but no payment processor, itch.io publishing capability or physical Android-device channel. Previously verified Metricool has no connected social network; no new connection supplied, so unchanged account/inbox/traffic state was not polled again. GitHub already hosts the tested current spaced-recall release and opt-in feedback paths. A further same-product release or README edit would not resolve audience access. Wider distribution requires an owner-authorized connected publishing account or itch.io publisher access. Actual recurring checkout requires real seller identity and authorized payment-provider onboarding, followed by server-verified entitlements, cancellation and account recovery. No invented seller details, fake paywall or projected/test revenue used.
+
+Validation: fresh live feedback module equals current source. git diff --check passed after checkpoint. No app changes require new gameplay tests. Earlier authoritative traffic/download counters were explicitly contaminated or unattributable; they remain insufficient player-demand evidence. No new authoritative payment evidence available and no owner notification claimed.
+
+Next action: provide an authorized wider publishing channel to reach real players, or complete seller/payment-provider onboarding. Then publish the existing demo with honest AI-involvement disclosure and collect actual first-session/return/pricing feedback, or implement and verify real recurring checkout. This iteration is blocked on those external access steps, not on unfinished notebook polishing.
+
+## 2026-10-12 — finish in-progress offline harness and ship to production
+
+Outcome: finished the in-progress browser-harness rewrite (daily drill + haptics coverage plus the baccarat/Hold'em/video-poker session checks) so every suite is green, then deployed the current demo to production. No real player feedback, purchase or recurring revenue verified; the US$200/month objective remains unmet.
+
+Inspected the dirty worktree, automation/PROGRESS.md, scripts/itch-browser-test.mjs, web/app.js, src/rpg/state.js, src/rpg/daily.js, package.json and prior checkpoints before editing. Preserved all existing uncommitted changes. No commits, resets, scheduler/runner/service/model/permission changes or subagents. git diff --check passes after the checkpoint.
+
+Actual changes (harness only; no gameplay behavior changed):
+- scripts/itch-browser-test.mjs: fixed the pre-existing duplicate `const backup` SyntaxError by renaming the later binding to `boxBackup`.
+- Stale assertion updated from `endsWith(' CHIPS')` to `endsWith(' UNITS')` to match the current baccarat question bank.
+- Replaced the incorrect global `btnReview` "ALL CAUGHT UP" assertion in the Hold'em review block. That button counts the entire due queue (app.js:585), and earlier countyfair/villaoak iterations legitimately leave scored mistakes due, so it read "REVIEWS DUE: 10". The check now asserts the specific reviewed Hold'em entry is no longer due via `state.mistakeDue`.
+- Added the `u` flag to the daily-share emoji assertion; without it `[🟩🟥]` matched UTF-16 code units rather than code points and never matched five squares.
+- Removed a trailing blank line at EOF in test/practice.test.js.
+
+Verification:
+- npm test: 205 pass, 0 fail.
+- POKERGYM_OFFLINE_TEST=1 node scripts/itch-browser-test.mjs: passed full 390px offline flow, including seeded daily drill, mid-drill resume, replay scoring nothing, share copy, haptics toggle/reload, and offline reload with the actual HTTP server stopped.
+- node scripts/itch-browser-test.mjs (ZIP embed), POKERGYM_CROSS_SITE_TEST=1, POKERGYM_STORAGE_TEST=denied, POKERGYM_STORAGE_TEST=quota, and scripts/installability-browser-test.mjs all passed with zero runtime/game-asset errors.
+- npm run build and `wrangler deploy --dry-run` passed; authorized production deploy succeeded: Worker version 70106bf8-7f03-4bbe-b08e-4469f982f93b at https://pokergym.history-atlas.workers.dev/web/ (output: artifacts/deploy-2026-10-12.txt).
+- Live POKERGYM_TEST_URL=https://pokergym.history-atlas.workers.dev/web/ node scripts/itch-browser-test.mjs passed the full phone smoke test with zero runtime/game asset network errors.
+- Rebuilt the still-unlisted portable ZIP: artifacts/pokergym-itch.zip, SHA-256 1008bece9c34a64f6e53b6efa5b9ea640fb0bafe6409d0ce88e64adbbef03f26.
+
+Exact access blockers unchanged: authenticated GitHub and Metricool exist, but no payment processor, itch.io publisher or physical Android channel. Browser tests are not customers. No seller identity invented and no projected/test revenue claimed.
+
+Next action: distribute through an owner-authorized wider channel (or complete seller/payment onboarding) and use actual first-session/return/pricing feedback to choose the next product change; do not treat deployments or synthetic browser passes as demand.
+
+
+## 2026-10-12 — published current portable daily-drill release
+
+Outcome: closed a concrete distribution gap: the live game had a daily drill while the latest public portable release remained the October 10 spaced-recall demo. Published https://github.com/MeepTheTendie/pokergym/releases/tag/daily-drill-demo-2026-10-12 as the latest non-draft/non-prerelease release. No real customer demand, paid subscription or recurring revenue verified; US$200/month remains unmet. Stop this bounded iteration after publication, verification and checkpoint.
+
+Inspected LAUNCH.md, MARKETING.md, progress, /home/meep/AGENTS.md, dirty worktree, actual live daily module, latest authenticated release, source/build/browser flows and current callable capabilities. Live daily.js matched source byte-for-byte. Preserved all existing dirty work, ordinary index and local HEAD; remote main remains unchanged. No app edits, Cloudflare deploy, subagents, goals, schedulers, runner/timer/service/model/permission changes, new spending, credential reads or unsolicited messages.
+
+Actual changes:
+- Rebuilt and published artifacts/pokergym-itch.zip plus DAILY-DRILL-SHA256SUMS.txt using existing authenticated GitHub. Release describes five date-seeded decisions spanning four games, first-completion rewards, practice replay limits, device-local saves/clock, optional haptics and reviewed feedback drafts. Honest free scope, AI involvement and voluntary feedback invitation; no paid offer or demand claim. Earlier releases preserved. Existing latest-release links reach this version.
+- Source snapshot 45cefbf18b75a4e8b3b951177da48a4f205257c4, parent remote main 82dbee89f0bc527c60b307b7f4819fb867adf489. Temporary GIT_INDEX_FILE overlays src/web/public/scripts/test and package/config/README files; only new source tag pushed. Local launch/marketing/automation notes excluded. Initial snapshot attempt failed on nonexistent wrangler.toml; corrected to actual wrangler.jsonc before creating the snapshot. No ordinary index mutation.
+- MARKETING.md records verified publication. Release description/source evidence retained in artifacts/daily-release-{body,source}-2026-10-12 files.
+
+Verification:
+- npm test passed 205/205, zero failures: artifacts/daily-release-unit-2026-10-12.txt.
+- npm run test:itch:cross-site passed actual rebuilt ZIP in nested cross-site 390px Chromium, including daily mix determinism, mid-drill resume, replay no-new-XP/score, share output, haptics persistence, original-decision reviews and feedback flow; zero runtime/game-asset errors: artifacts/daily-release-browser-2026-10-12.txt. Synthetic browser tests are not real users or physical Android validation.
+- Unauthenticated public ZIP and checksum matched tested local files with cmp (exit 0): artifacts/daily-release-public-2026-10-12.zip and daily-release-public-checksum-2026-10-12.txt. SHA-256 10f342885ec3ad6a9d288d4536da3e5809d981f1e511aba3f8b45679aac9784d.
+- Public /releases/latest returned HTTP 200 resolving to daily-drill-demo-2026-10-12. Authenticated publication details: artifacts/daily-release-publication-2026-10-12.json. git diff --check passed before publication and after checkpoint.
+
+Exact access blockers: callable inventory includes GitHub and Metricool but no subscription payment processor, itch.io publisher or physical Android channel. Prior Metricool inspection found no connected social network; no newly supplied connection, so unchanged social accounts/inboxes/traffic were not repolled. Wider player acquisition requires an owner-authorized connected publishing channel or itch.io publisher access. Real recurring checkout requires actual seller identity and authorized payment-provider onboarding, then server-verified entitlements, cancellation and account recovery. No authoritative recurring-payment evidence available; no owner notification or player submission claimed.
+
+Next action: use an authorized wider channel to reach real players and collect daily-return/clarity/pricing feedback through the existing draft flow, or complete seller/payment onboarding. Avoid another same-product release or further polishing without player evidence.
+
+
+## 2026-10-12 — Poker Gym engagement changes P7–P9 (mastery ranks, drills, hint economy)
+
+Outcome: finished the outstanding engagement changes from engagement_changes.md on the dirty worktree and verified every existing flow still passes. No deploy and no release this iteration; the live worker and published ZIP are unchanged from the earlier same-day checkpoints. No real customer demand, paid subscription or recurring revenue verified; US$200/month remains unmet. Stop this bounded iteration after verification and checkpoint.
+
+Actual changes (uncommitted, worktree dirty; local HEAD 86ce22f):
+- P9 hint economy: `applyResult(state, {optimal, difficulty, game, coached})` in src/rpg/state.js. Applying the coach still grants XP and increments practice counts, but awards no Decision Score, cannot start/extend a streak and cannot reset one, and does not count toward the five-hand session. web/app.js tracks a per-hand `coachedHand`, sets it in showCoach(), consumes it in settleHand(), skips session/score/streak/float-text on coached hands and hides the coach button in daily mode.
+- P7 mastery ranks: state.js exports MASTERY_FLOOR (10 uncoached decisions), MASTERY_TIERS (70% bronze / 80% silver / 90% gold), MASTERY_LABEL and masteryRank(), computed from a rolling `practice[game].recent` list of the last ≤20 un-hinted decisions. applyResult maintains `recent` only for uncoached hands; sanitizeProfile preserves it. Map rows show rank badges plus a legend.
+- P7 drills: new src/rpg/drills.js with BLACKJACK_DRILLS (11) and VIDEOPOKER_DRILLS (9) scenario banks, DRILL_GAMES, DRILL_HANDS=5, drillBank/orderDrills/drillScenario. Weak-spot mode orders blackjack scenarios by the previously-missed situation `type`. Map shows MASTER DRILL / WEAK-SPOT DRILL buttons (own data-drill-gym hooks, so the four data-session-gym hooks are untouched).
+- P7 mistake types: recordMistake/sanitizeMistake persist a `type` (MISTAKE_TYPES, validMistakeType); blackjack misses classify soft/hard/pair via bjSituationType.
+- Rigging for drills/tests only: blackjack newRound(rng, {bet, decks, player, dealer}) and videopoker newRound(rng, {hand}); bad rig cards throw.
+
+Verification:
+- Full unit suite `node --test --test-concurrency=1 'test/**/*.test.js'`: 212/212 pass, 0 fail, ~10.3s. New test/drills.test.js (7) covers coached scoring, mastery thresholds/rolling, sanitize of recent+type, drill-bank decidability, weak-spot ordering and rig validation.
+- Browser harness (Chromium 152, rebuilt artifacts/pokergym-itch.zip): `npm run test:itch`, POKERGYM_OFFLINE_TEST=1 (real HTTP server stopped + offline reload), POKERGYM_CROSS_SITE_TEST=1, and storage denied/quota all pass. scripts/itch-browser-test.mjs updated: coached hands asserted to add no score/streak/session credit while still granting XP; un-hinted hands play the coach’s exact (or a deliberately bad) hold so sessions still complete five scored hands; the blocked/quota and held’em loops no longer rely on coach-applied hands for session progress.
+- `scripts/installability-browser-test.mjs` against https://pokergym.history-atlas.workers.dev/web/: manifest/start-url/icons with 0 installability errors, offline start-url save/resume passed (physical Android install still unverified).
+- `npm run build` succeeds; `git diff --check` clean.
+
+Next action: with the harness green and the worktree carrying no new runtime errors, the next real step is an owner-authorized deploy of these uncommitted changes and, above all, real-player daily-return/clarity/pricing feedback. Do not treat synthetic browser passes as demand; avoid further polishing without player evidence.
+
+
+## 2026-10-12 — post-release bounded access checkpoint
+
+Outcome: inspected current state after today’s daily-drill deployment and portable publication. No additional useful authorized product/distribution action identified. No new release, outreach, player feedback or payment claimed; US$200/month remains unverified. Stop instead of another same-product publication or unvalidated training expansion.
+
+Inspected LAUNCH.md, MARKETING.md, recent automation/PROGRESS.md, /home/meep/AGENTS.md, actual dirty worktree, package.json, wrangler.jsonc and callable tool inventory. No repository-specific AGENTS.md found. Preserved all existing dirty files, ordinary index and HEAD. No subagents, goals, schedulers, runner/timer/service/model/permission changes, credentials read, spending or messages sent.
+
+Verification: freshly fetched https://pokergym.history-atlas.workers.dev/src/rpg/daily.js and compared with src/rpg/daily.js using cmp; identical bytes, exit 0. git diff --check passed before checkpoint. No application changes, so no redundant gameplay suite run; today’s earlier 205-test and browser evidence remains documented above. Live module equality is deployment evidence only, not real player demand or revenue.
+
+Exact blockers: current callable inventory contains authenticated GitHub and Metricool, but no subscription payment processor, itch.io publisher or physical Android-device capability. Prior Metricool inspection found no connected social network; no newly supplied connection or access change, so unchanged accounts, inboxes and traffic were not repolled. GitHub already has today’s verified daily-drill release and reviewed feedback entry points. Wider acquisition needs an owner-authorized connected publishing account or itch.io publisher access. Real recurring checkout needs actual seller identity and authorized payment-provider onboarding, then server-verified entitlements, cancellation and recovery. No authoritative recurring payment evidence available. No fabricated identity, fake paywall, owner notification or synthetic demand claimed.
+
+Next action: connect an authorized wider publishing channel to reach real players with the existing demo, or complete seller/payment onboarding. Use real return/clarity/pricing feedback to choose the next product change.

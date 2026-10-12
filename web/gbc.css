@@ -333,15 +333,23 @@ button:focus-visible { outline: 4px solid var(--t02); outline-offset: 2px; }
   margin-bottom: 10px;
   overflow: hidden;
 }
-.foe, .me { position: absolute; image-rendering: pixelated; }
-.foe { top: 6px; right: 10px; width: 96px; height: 96px; }
-.me { bottom: 4px; left: 10px; width: 96px; height: 96px; }
-.ground {
-  position: absolute; border-radius: 50%;
-  background: var(--gbc-2); box-shadow: 0 0 0 3px var(--gbc-1);
+.master, .player { position: absolute; image-rendering: pixelated; }
+.master { top: 6px; right: 10px; width: 96px; height: 96px; }
+.player { bottom: 4px; left: 10px; width: 96px; height: 96px; }
+/* A felt card table between the two sides replaces the old oval battle pads.
+ * The master stands behind it (drawn before it), the player in front. */
+.table-felt {
+  position: absolute; left: 0; right: 0; top: 58%; height: 32%;
+  background: linear-gradient(#1f6b3a, #14502b);
+  border-top: 3px solid #0c3720;
+  border-bottom: 3px solid #0c3720;
+  box-shadow: inset 0 6px 0 rgba(255,255,255,.06), inset 0 -12px 16px rgba(0,0,0,.28);
 }
-.ground.foe-g { top: 86px; right: 2px; width: 104px; height: 26px; }
-.ground.me-g  { bottom: -6px; left: 2px; width: 104px; height: 22px; }
+.table-felt::after {
+  content: ''; position: absolute; inset: 20% 9%;
+  border: 2px dashed rgba(255,255,255,.18);
+  border-radius: 999px;
+}
 
 /* the classic white dialogue box with a name plate and blinking prompt */
 .dialogue {
@@ -488,11 +496,9 @@ button:focus-visible { outline: 3px solid #386a9c; outline-offset: 3px; }
 .class-card .nm { font-size: 8px; }
 .scene { height: 125px; box-shadow: none; border: 2px solid var(--ink); background: #f6f5e8; margin-bottom: 0; }
 .battle-label { position: absolute; top: 10px; left: 10px; font-size: 8px; color: #526451; max-width: 120px; }
-.foe { width: 88px; height: 88px; top: 8px; right: 22px; }
-.me { width: 80px; height: 80px; left: 20px; bottom: 0; }
-.ground { background: #dbe3c4; box-shadow: none; border-bottom: 2px solid #8b9d79; }
-.ground.foe-g { top: 83px; right: 14px; }
-.ground.me-g { left: 10px; }
+.master { width: 88px; height: 88px; top: 8px; right: 22px; }
+.player { width: 80px; height: 80px; left: 20px; bottom: 0; }
+.table-felt { background: linear-gradient(#1f6b3a, #14502b); }
 .statusbox { border: 0; border-bottom: 2px solid var(--ink); background: var(--panel); padding: 10px; }
 .statusbox .row1 { font-size: 8px; gap: 8px; }
 .dialogue { min-height: 64px; padding: 15px 12px 12px; }
@@ -520,16 +526,61 @@ button:focus-visible { outline: 3px solid #386a9c; outline-offset: 3px; }
   .hand { gap: 5px; }
   .row button { font-size: 9px; padding: 8px 4px; }
 }
+/* Deal, flip and result feedback. Every one of these is switched off by the
+ * prefers-reduced-motion rule below, so motion is opt-in by OS setting. */
+@keyframes deal-in {
+  from { opacity: 0; transform: translateY(-10px) scale(0.96); }
+  to   { opacity: 1; transform: none; }
+}
+.hand.deal .card { animation: deal-in 130ms ease-out both; }
+.hand.deal .card:nth-child(1) { animation-delay: 0ms; }
+.hand.deal .card:nth-child(2) { animation-delay: 40ms; }
+.hand.deal .card:nth-child(3) { animation-delay: 80ms; }
+.hand.deal .card:nth-child(4) { animation-delay: 120ms; }
+.hand.deal .card:nth-child(n+5) { animation-delay: 160ms; }
+
+@keyframes flip-in {
+  from { transform: rotateY(90deg); }
+  to   { transform: rotateY(0); }
+}
+.card.flip-in { animation: flip-in 220ms ease-out; }
+
+@keyframes scene-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+.scene.shake { animation: scene-shake 320ms ease-in-out; }
+
+@keyframes scene-flash {
+  0%   { box-shadow: inset 0 0 0 3px var(--gbc-1), 0 0 0 3px var(--gbc-0); }
+  40%  { box-shadow: inset 0 0 0 3px #2f7d32, 0 0 0 3px #2f7d32; }
+  100% { box-shadow: inset 0 0 0 3px var(--gbc-1), 0 0 0 3px var(--gbc-0); }
+}
+.scene.flash-ok { animation: scene-flash 420ms ease-out; }
+
+.gain-float {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  font-weight: 700;
+  font-size: 12px;
+  color: #2f7d32;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: xpup 900ms ease-out forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
 
 /* Character art gets enough space to read the pose on a phone. */
 .scene { height: 154px; }
-.foe { width: 120px; height: 120px; right: 12px; top: 8px; }
-.me { width: 104px; height: 104px; left: 12px; bottom: 0; }
-.ground.foe-g { top: 116px; right: 20px; width: 104px; height: 18px; }
-.ground.me-g { left: 8px; bottom: -3px; width: 112px; height: 18px; }
+.master { width: 120px; height: 120px; right: 12px; top: 8px; }
+.player { width: 104px; height: 104px; left: 12px; bottom: 0; }
 .class-portrait { width: 112px; height: 112px; }
 .trainer-card { padding-left: 92px; }
 .trainer-card .sprite { width: 80px; height: 80px; left: 6px; top: 15px; }

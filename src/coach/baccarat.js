@@ -213,15 +213,28 @@ export function tieBreakEven() {
 export function quizFor(rng = Math.random) {
   const roll = rng();
   if (roll < 0.5) return betSelectQuiz();
-  if (roll < 0.75) return commissionQuiz(rng());
-  return tieOddQuiz(rng());
+  if (roll < 0.75) return rotate(commissionQuiz(rng()), rng());
+  return rotate(tieOddQuiz(rng()), rng());
+}
+
+// Shuffle the button order so the correct choice is not always in the same
+// position (a fixed slot is a free answer for anyone who notices, and reusing
+// the value draw would correlate the slot with the answer). Takes the rng value
+// directly so the bank stays a pure function of the rng stream.
+function rotate(quiz, r) {
+  const options = quiz.options;
+  const at = Math.floor(r * options.length) % options.length;
+  return {
+    ...quiz,
+    options: options.slice(at).concat(options.slice(0, at)),
+  };
 }
 
 function betSelectQuiz() {
   const evs = sideEvs();
   return {
     type: 'select',
-    prompt: 'FULL SHOE BACCARAT WITH 5% BANKER COMMISSION. PLACE YOUR HIGHEST-EV BET.',
+    prompt: 'FULL SHOE BACCARAT WITH 5% BANKER COMMISSION. WHICH SIDE HAS THE LOWEST HOUSE EDGE?',
     options: ['BANKER', 'PLAYER', 'TIE'],
     correct: 'BANKER',
     reason: `BANKER ${pct(evs.banker)} HOUSE EDGE. PLAYER ${pct(evs.player)}. TIE ${pct(evs.tie)}. BANKER LOSES THE LEAST.`,
@@ -236,10 +249,10 @@ function commissionQuiz(r01) {
   const low = foundDistractor(r01, won, distractor);
   return {
     type: 'commission',
-    prompt: `YOUR ${bet}-CHIP BANKER BET WINS. THE CASINO TAKES A 5% COMMISSION. HOW MANY CHIPS DO YOU WIN, BEFORE YOUR ${bet}-CHIP STAKE COMES BACK?`,
-    options: [chips(won), chips(low), chips(distractor)],
-    correct: chips(won),
-    reason: `${bet} X 0.95 = ${won}. BANKER PAYS 0.95:1 AFTER THE 5% COMMISSION, NOT 1:1. STILL THE BEST BET AT -1.06% HOUSE EDGE.`,
+    prompt: `YOU WIN A BANKER BET OF ${bet} UNITS WITH A 5% COMMISSION TAKEN. HOW MANY UNITS DO YOU KEEP FROM THE WINNINGS, NOT COUNTING YOUR ORIGINAL STAKE?`,
+    options: [units(won), units(low), units(distractor)],
+    correct: units(won),
+    reason: `${bet} × 0.95 = ${won}. BANKER PAYS 0.95:1 AFTER THE 5% COMMISSION, NOT 1:1. STILL THE BEST BET AT -1.06% HOUSE EDGE.`,
     deal: false,
   };
 }
@@ -249,7 +262,7 @@ function tieOddQuiz(r01) {
   const worthwhile = odds >= 10;
   return {
     type: 'tieodds',
-    prompt: `CASINO PROMO TONIGHT: TIE PAYS ${odds}:1 ON AN OTHERWISE STANDARD GAME. IS THE TIE BET A WORTHWHILE PLAY AT THAT PRICE?`,
+    prompt: `PROMO: TIE PAYS ${odds}:1 ON AN OTHERWISE STANDARD GAME. IS THE TIE BET A WORTHWHILE PLAY AT THAT PRICE?`,
     options: ['YES, WORTHWHILE', 'NO, STILL LOSING'],
     correct: worthwhile ? 'YES, WORTHWHILE' : 'NO, STILL LOSING',
     reason: `TIE LANDS ON 9.52% OF HANDS AND BREAKS EVEN AT ${tieBreakEven().toFixed(1)}:1. AT ${odds}:1 IT IS ${
@@ -263,6 +276,6 @@ function foundDistractor(r, won, distractor) {
   return candidates[Math.floor(r * candidates.length)];
 }
 
-function chips(n) {
-  return `${Number.isInteger(n) ? n : Math.round(n * 2) / 2} CHIPS`;
+function units(n) {
+  return `${Number.isInteger(n) ? n : Math.round(n * 2) / 2} UNITS`;
 }

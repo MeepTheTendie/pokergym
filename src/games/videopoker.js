@@ -51,12 +51,20 @@ export function payLabelFor(result) {
   return payFor(result) ? PAY_LABEL[result.category] : PAY_LABEL[0];
 }
 
-export function newRound(rng = Math.random) {
+export function newRound(rng = Math.random, { hand = null } = {}) {
   const deck = freshDeck(rng);
-  const hand = deck.splice(0, 5);
+  if (Array.isArray(hand)) {
+    if (hand.length !== 5) throw new Error('Rigged video poker hands need exactly five cards');
+    for (const card of hand) {
+      const at = deck.findIndex(c => c.r === card.r && c.s === card.s);
+      if (at === -1) throw new Error(`Rigged card not in the deck: ${card.r}/${card.s}`);
+      deck.splice(at, 1);
+    }
+  }
+  const dealt = Array.isArray(hand) ? hand.map(c => ({ ...c })) : deck.splice(0, 5);
   return {
     game: GAME.id,
-    hand,
+    hand: dealt,
     deck,
     holds: [false, false, false, false, false],
     drawn: false,

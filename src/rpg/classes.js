@@ -53,7 +53,7 @@ export const CLASSES = [
     accent: '#6ee7b7',
     biases: { [STATS.FOCUS]: 2, [STATS.NERVE]: 1, [STATS.READ]: 1 },
     growth: { [STATS.FOCUS]: 1.3, [STATS.READ]: 1.2, [STATS.NERVE]: 1.0 },
-    perk: 'Correct plays pay 40% more XP, and you keep more chips when you lose.',
+    perk: 'Correct plays pay 40% more XP.',
   },
 ];
 

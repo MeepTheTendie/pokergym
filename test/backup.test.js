@@ -16,8 +16,21 @@ test('backups round-trip legacy profiles, practice, active sessions and notebook
 });
 test('malformed external saves are rejected before changing local progress', () => {
   const p = createProfile('scholar');
-  for (const patch of [{ stats: null }, { xp: -1 }, { chips: '500' }, { badges: ['missing'] }, { lessonsDone: null }, { mistakes: [null] }, { sessions: [{}] }, { activeSession: { gymId: 'missing' } }, { practice: { bad: {} } }, { handsOptimal: 99 }, { version: 2 }]) {
+  for (const patch of [{ stats: null }, { xp: -1 }, { score: -1 }, { streak: -1 }, { bestStreak: -1 }, { streak: 2, bestStreak: 1 }, { badges: ['missing'] }, { lessonsDone: null }, { mistakes: [null] }, { sessions: [{}] }, { activeSession: { gymId: 'missing' } }, { practice: { bad: {} } }, { handsOptimal: 99 }, { version: 99 }]) {
     assert.throws(() => readBackup(JSON.stringify({ ...p, ...patch })));
   }
   for (const raw of ['oops', 'null', 'x'.repeat(100001)]) assert.throws(() => readBackup(raw));
+});
+
+test('a version 1 backup is migrated and accepted instead of rejected', () => {
+  const v1 = JSON.stringify({
+    version: 1, name: 'RED', classId: 'scholar', xp: 500, chips: 900,
+    badges: [], stats: { focus: 4, nerve: 1, read: 1 }, gym: 'pokergym',
+    handsPlayed: 10, handsOptimal: 8, lessonsDone: ['videopoker'],
+  });
+  const migrated = readBackup(v1);
+  assert.equal(migrated.score, 80);
+  assert.equal(migrated.streak, 0);
+  assert.equal(migrated.bestStreak, 0);
+  assert.equal(migrated.xp, 500);
 });

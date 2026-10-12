@@ -81,7 +81,7 @@ async function run() {
     const full = $('masterLine')._dataset?.full ?? $('masterLine').textContent;
     log('  hand ' + i + ': ' + full);
     log('    grade=' + $('handGrade').textContent + ' xp=' + $('xpLine').textContent
-      + ' chips=' + $('chipCount').textContent);
+      + ' score=' + $('scoreCount').textContent + ' best=' + $('bestStreak').textContent);
   }
 
   async function backToMap() {
@@ -152,14 +152,13 @@ async function run() {
     await wait(50);
 
     // Hand 2 in baccarat: a wrong answer on purpose. A bad decision must show
-    // the bad verdict, cost chips, and pay no XP, and the gym still has to be
-    // winnable at nine good plays out of ten. Knowledge quizzes expose their
-    // answer key as data attributes on the option buttons; bet-selection hands
-    // still use the BANKER/PLAYER/TIE row, where TIE is the losing pick.
+    // the bad verdict, reset the streak, and pay no XP, and the gym still has to
+    // be winnable at nine good plays out of ten. The knowledge quiz exposes its
+    // answer key as data attributes on the option buttons in the BANKER/PLAYER/
+    // TIE row.
     if (game === 'baccarat' && !done()) {
       const wrong = [...d.querySelectorAll('#rowBet button')].find((b) => b.dataset.quizCorrect === 'false');
       if (wrong) wrong.click();
-      else click('btnTie');
       await wait(30);
       const full = $('masterLine')._dataset?.full ?? '';
       log('hand 2: wrong answer on purpose -> ' + full);
@@ -183,7 +182,7 @@ async function run() {
     log('hands played: ' + settles + ' | back on map: ' + home
       + ' | badges locked: ' + d.querySelectorAll('#badgeList .badge.locked').length
       + ' of ' + d.querySelectorAll('#badgeList .badge').length);
-    log('chips: ' + $('chipCount').textContent + ' | xp: ' + $('xpLine').textContent);
+    log('score: ' + $('scoreCount').textContent + ' | best streak: ' + $('bestStreak').textContent + ' | xp: ' + $('xpLine').textContent);
     return home;
   }
 
@@ -212,7 +211,7 @@ async function run() {
   log('trainer line: ' + $('trainerLine').textContent);
   log('stats line: ' + $('trainerStats').textContent);
   log('xp bar width: ' + $('xpBar').style.width);
-  log('chips: ' + $('chipCount').textContent);
+  log('score: ' + $('scoreCount').textContent + ' | best streak: ' + $('bestStreak').textContent);
   log('badges shown: ' + $('badgeList').children.length);
   const gymBtns = $('gymList').querySelectorAll('button');
   log('gym buttons: ' + gymBtns.length + ' | first enabled: ' + !gymBtns[0].disabled
@@ -236,8 +235,8 @@ async function run() {
 
   log('\n--- battle ---');
   log('battle visible: ' + visible('scr-battle'));
-  log('scene sprites: foe=' + !!d.querySelector('.scene .foe') + ' me=' + !!d.querySelector('.scene .me'));
-  log('foe name: ' + $('foeName').textContent);
+  log('scene sprites: master=' + !!d.querySelector('.scene .master') + ' player=' + !!d.querySelector('.scene .player'));
+  log('master label: ' + $('masterLabel').textContent);
   log('hand title: ' + $('handTitle').textContent + ' | paytable title: ' + $('paytableTitle').textContent);
   log('hand grade: ' + $('handGrade').textContent);
   log('potential bar width: ' + $('potentialBar').style.width);
@@ -273,7 +272,7 @@ async function run() {
   await wait(30);
   log('result: ' + $('masterLine').textContent);
   log('xp bar after: ' + $('xpBar').style.width);
-  log('chips after: ' + $('chipCount').textContent);
+  log('score after: ' + $('scoreCount').textContent + ' | best streak: ' + $('bestStreak').textContent);
   log('draw disabled after settle: ' + $('btnDraw').disabled + ' | ask disabled: ' + $('btnAsk').disabled);
 
   log('\n--- play out 10 hands, always taking the coach play ---');
@@ -293,7 +292,7 @@ async function run() {
   log('map visible: ' + visible('scr-map'));
   log('badges locked count: ' + d.querySelectorAll('#badgeList .badge.locked').length + ' of ' + d.querySelectorAll('#badgeList .badge').length);
   log('gym2 enabled: ' + !$('gymList').querySelectorAll('button')[1].disabled);
-  log('chips: ' + $('chipCount').textContent);
+  log('score: ' + $('scoreCount').textContent + ' | best streak: ' + $('bestStreak').textContent);
 
   log('\n--- persistence ---');
   log('localStorage save written: ' + (w.localStorage.getItem('pokergym:save:v1') !== null));
@@ -321,7 +320,7 @@ async function run() {
   if (end.lessonsDone.length !== 4) errors.push('expected all four lessons, got ' + JSON.stringify(end.lessonsDone));
   if (end.handsPlayed !== 40) errors.push('expected 40 settled hands, got ' + end.handsPlayed);
   if (end.xp <= 0) errors.push('expected XP to be earned, got ' + end.xp);
-  if (end.chips <= 500) errors.push('expected chips to grow under optimal play, got ' + end.chips);
+  if (end.score <= 0) errors.push('expected decision score under correct play, got ' + end.score);
 
   const sigs = dealerSigs.map(s => s.hash);
   const unique = new Set(sigs).size;
@@ -344,7 +343,7 @@ async function run() {
   const trainerPixels = d2.getElementById('sprite').getContext('2d').getImageData(0,0,96,96).data;
   if (!mapPixels.every((pixel, i) => pixel === trainerPixels[i])) errors.push('Map trainer does not match selected trainer');
   const resumedAudio = (await f.contentWindow.eval("import('./audio.js?v=20261006-audio3')")).default;
-  if (resumedAudio.status().track !== 'gamecorner') errors.push('Continue selected the wrong soundtrack');
+  if (resumedAudio.status().track !== 'academy') errors.push('Continue selected the wrong soundtrack');
 
   log('\n--- fonts + palette ---');
   const live = f.contentDocument;

@@ -8,8 +8,8 @@ Practice card-game decisions in a small retro RPG. Choose a trainer, play a five
 
 1. Open the demo on your phone or computer and choose a trainer.
 2. On the map, choose a game's five-hand practice. Read its lesson, then make your own decisions before reading the coach.
-3. Visit the mistake notebook after practice. For new blackjack and baccarat mistakes, answer the original decision again before revealing the explanation; scored retries are tracked separately from gameplay accuracy.
-4. Return later to review the decisions you missed. Longer gym challenges award badges; practice remains available in every game.
+3. Visit the mistake notebook after practice. For new mistakes in all four games, retry the original decision before revealing the explanation; scored retries are tracked separately from gameplay accuracy.
+4. Return when the notebook shows reviews due. A missed decision is due the same day, then a correct retry schedules recall after 2, 4, 8, then 16 days; a wrong retry sends it back to tomorrow. This schedule stays on your device and sends no reminders. Longer gym challenges award badges; practice remains available in every game.
 
 The gyms cover Jacks or Better video poker, blackjack, baccarat and Hold'em hand evaluation. Hold'em practice does not teach a complete betting or bluffing strategy. Coaching uses the simulator's rules and assumptions; learning strategy cannot guarantee gambling profits.
 
@@ -33,7 +33,7 @@ The release ZIP is an HTML5 browser game for hosting or local serving, not an An
 
 Poker Gym is independent, with original artwork and music, and developed with AI assistance. Publication and documentation may be performed by an AI development assistant for the owner. No affiliation with Nintendo or Pokémon is claimed.
 
-Releases and their tags are point-in-time source snapshots. The [practice-demo-2026-10-10 release](https://github.com/MeepTheTendie/pokergym/releases/tag/practice-demo-2026-10-10) contains scored blackjack and baccarat mistake retries, corrected video-poker payouts and mixed baccarat questions, alongside practice, backups, offline play and mistake review. Older notebook entries without an original answer key support self-review only. The download link above follows the latest published release. Use that release tag to inspect the downloadable demo source; the default branch may differ from the live build.
+Releases and their tags are point-in-time source snapshots. The [spaced-recall-demo-2026-10-10 release](https://github.com/MeepTheTendie/pokergym/releases/tag/spaced-recall-demo-2026-10-10) contains scored original-decision retries in all four games and persistent spaced recall, alongside practice, backups, offline play and mistake review. Older notebook entries without an original answer key support self-review only. The download link above follows the latest published release. Use that release tag to inspect the downloadable demo source; the default branch may differ from the live build.
 
 No recurring customer revenue is verified.
 

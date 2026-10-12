@@ -7,7 +7,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 export async function build(output = path.join(root, 'dist')) {
 await mkdir(path.join(output, 'web'), { recursive: true });
 // Explicit allowlist: never publish harnesses, screenshots, credentials or node_modules.
-const files = ['index.html', 'app.js', 'audio.js', 'sound-controls.js',
+const files = ['index.html', 'app.js', 'audio.js', 'sound-controls.js', 'haptics.js',
   'characters.js', 'world.js', 'sprites.js', 'gbc.css', 'manifest.webmanifest',
   'icon.svg', 'icon-maskable.svg', 'offline.js', 'feedback.js', 'privacy.html'];
 for (const file of files) await cp(path.join(root, 'web', file), path.join(output, 'web', file));
@@ -42,7 +42,10 @@ for (const asset of assets) {
   hash.update(asset);
   hash.update(await readFile(path.join(output, asset.slice(1))));
 }
-await writeFile(path.join(output, 'web/sw.js'), template
+// The worker lives at the site root so its scope covers both /web/ and /src/;
+// a worker under /web/ cannot intercept the module assets that /web/index.html
+// imports from /src/.
+await writeFile(path.join(output, 'sw.js'), template
   .replace('__VERSION__', hash.digest('hex').slice(0, 20))
   .replace('__ASSETS__', JSON.stringify(assets)));
 }

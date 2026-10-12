@@ -328,8 +328,8 @@ const SFX_PLAYS = {
   },
   hit:    (t) => voice(t, 69, 0.11, { type: 'pulse', duty: 0.125, vol: 0.2, bus: sfxBus, hold: 0.4, glide: 0.6 }),
   stand:  (t) => voice(t, 62, 0.12, { type: 'pulse', duty: 0.125, vol: 0.2, bus: sfxBus, hold: 0.5, glide: 1.4 }),
-  win:    (t) => [72, 76, 79, 84].forEach((n, i) =>
-    voice(t + i * 0.07, n, 0.16, { type: 'pulse', duty: 0.25, vol: 0.2, bus: sfxBus, hold: 0.6 })),
+  win:    (t, shift = 0) => [72, 76, 79, 84].forEach((n, i) =>
+    voice(t + i * 0.07, n + shift, 0.16, { type: 'pulse', duty: 0.25, vol: 0.2, bus: sfxBus, hold: 0.6 })),
   lose:   (t) => [67, 63, 58].forEach((n, i) =>
     voice(t + i * 0.11, n, 0.2, { type: 'pulse', duty: 0.5, vol: 0.18, bus: sfxBus, hold: 0.6 })),
   bust:   (t) => {
@@ -356,7 +356,7 @@ const SONGS = {
   /* Original arcade theme: animated call/response, chromatic pickups and
      bouncing single-note accompaniment instead of sustained synth chords.
      Three pitched voices + restrained noise, in the handheld sound idiom. */
-  gamecorner: {
+  academy: {
     bpm: 144, bars: 8, gain: 0.85,
     voices: {
       lead: { duty: 0.5, gate: 0.82, attack: 0.002, hold: 0.35, vol: 0.10 },
@@ -540,15 +540,15 @@ export function music(name) {
   if (desired && !muted) startSequencer();
 }
 
-/** Fire a one-shot sound effect. */
-export function sfx(name) {
+/** Fire a one-shot sound effect. `shift` transposes pitch-aware cues. */
+export function sfx(name, shift = 0) {
   const play = SFX_PLAYS[name];
   // Before a gesture there is no context to play into, and asking for one just
   // earns a "AudioContext was not allowed to start" warning from the browser.
   if (!play || muted || !unlocked) return;
   if (!ensure()) return;
   if (ctx.state === 'suspended') { ctx.resume().catch(() => {}); return; }
-  play(ctx.currentTime + 0.001);
+  play(ctx.currentTime + 0.001, shift);
 }
 
 export function setMuted(v) {

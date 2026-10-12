@@ -53,7 +53,7 @@ export const LESSONS = {
       },
       {
         who: 'MASTER ROYALE',
-        text: 'TO BEAT ME, PLAY TEN HANDS AND MAKE AT LEAST SEVEN OF THEM CORRECT. WRONG MOVES COST YOU CHIPS.',
+        text: 'TO BEAT ME, PLAY TEN HANDS AND MAKE AT LEAST SEVEN OF THEM CORRECT. WRONG MOVES RESET YOUR STREAK.',
       },
       {
         who: 'MASTER ROYALE',
@@ -121,7 +121,7 @@ export const LESSONS = {
     pages: [
       {
         who: 'MASTER NEUTRAL',
-        text: 'TWO SIDES. PLAYER OR BANKER. NO DECISIONS ABOUT HITTING. THE CARDS DECIDE. YOU ONLY DECIDE WHERE TO PUT YOUR CHIP.',
+        text: 'TWO SIDES. PLAYER OR BANKER. NO DECISIONS ABOUT HITTING. THE CARDS DECIDE. YOU ONLY DECIDE WHICH SIDE THE MATH FAVORS.',
       },
       {
         who: 'MASTER NEUTRAL',
@@ -225,8 +225,21 @@ export const LESSONS = {
   },
 };
 
+// A lesson opens with at most three short pages of context. Everything after
+// that becomes a tip: shown one at a time in the coach box across the first
+// four hands of the player's first session, then never again.
+export const LESSON_INTRO_PAGES = 3;
+
 export function lessonFor(gameId) {
   return LESSONS[gameId] ?? null;
+}
+
+export function lessonIntro(lesson) {
+  return lesson ? lesson.pages.slice(0, LESSON_INTRO_PAGES) : [];
+}
+
+export function lessonTips(lesson) {
+  return lesson ? lesson.pages.slice(LESSON_INTRO_PAGES) : [];
 }
 
 export function hasCompletedLesson(profile, gameId) {

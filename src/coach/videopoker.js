@@ -128,8 +128,10 @@ export function countDraws(poolLength, need) {
 
 const STRATEGY_CACHE = new Map();
 
-function canonicalKey(hand) {
-  return hand.map(pack).sort((a, b) => a - b).join(',');
+function orderedKey(hand) {
+  // Cached hold patterns refer to positions in the original hand.
+  // Sorting cards here would reuse those positions for a different deal order.
+  return hand.map(pack).join(',');
 }
 
 export function holdPatterns(size = 5) {
@@ -141,7 +143,7 @@ export function holdPatterns(size = 5) {
 }
 
 export function bestHold(hand, { deck = makeDeck(), cache = STRATEGY_CACHE } = {}) {
-  const key = canonicalKey(hand);
+  const key = orderedKey(hand);
   if (cache.has(key)) return cache.get(key);
 
   const packedHand = hand.map(pack);
