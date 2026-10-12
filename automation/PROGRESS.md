@@ -1063,3 +1063,26 @@ Verification:
 - Live checks: /web/ 200 (PLAYER JOURNEY / PLAYER CARD, no visible TRAINER), / 200 (PICK A CLASS), /sw.js 200 (CACHE pokergym-offline-d37c7ca2ce378f24ca2f, no self-cache), legacy /web/sw.js 404, guides and /web/privacy updated. Live 390px smoke test (POKERGYM_TEST_URL=https://pokergym.history-atlas.workers.dev/web/ npm run test:itch) PASS with zero runtime/game-asset errors. Synthetic browser passes are not real users or physical Android validation.
 
 Next action: physical Android install plus airplane-mode reopen, then the Google Play developer account and Android packaging. Real-player return/clarity/pricing feedback remains the gate for further product work.
+
+
+## 2026-10-12 — public copy refresh (landing/README/MARKETING), committed and deployed
+
+Outcome: reframed the first-places a visitor reads as a learning-first card-game trainer rather than a retro RPG, committed it and deployed it, so the GitHub page and the live landing page no longer contradict the shipped product. No app logic, OG tags, price or counter changed. No real customer demand, paid subscription or recurring revenue verified; US$200/month remains unmet.
+
+Actual changes:
+- Commit 0e0d558 (author configured from local git config): web/landing.html, README.md, MARKETING.md only. Copy-only, 13 insertions / 13 deletions.
+- web/landing.html: meta description, hero tagline/sub/note, all three tiles, the "What you're playing today" section, the footer. The "An Android store release and paid training membership are not available yet" line now reads "nothing is for sale today; if a one-time paid unlock is added later, the free demo stays free," matching the one-time offer in marketing_plan_v2.md §8 rather than implying a recurring membership.
+- README.md: the framing paragraph, steps 1 and 4, the games paragraph and the project-status paragraph. MARKETING.md: the unsent post's title and body, including the house-edge line the ground rules require in posts.
+- Removed from those three surfaces: "retro RPG", "retro card-training", "retro adventure", "gym badges", "Choose a trainer", "Pick a trainer", "PICK A CLASS", "EARN YOUR BADGES", "retro gym league" and "paid membership". Required strings present verbatim: the house-edge sentence and the AI disclosure in all three files, "no signup, no ads, no third-party trackers" in landing and README.
+- Deliberately deferred (not missed): the page-visit-counts clause, which ships with the counter in a later prompt, and the in-app/README price question, which a later prompt changes to the one-time US$4.99 offer. The landing footer's mailto subject is unchanged because that later prompt owns it.
+- Kept intact: the headline, the illustrative hand aside, the three public guides links, the privacy link, the feedback mailto, GitHub issue #1 and the portable-release download links, and the "Play free demo" CTA the build test greps for.
+
+Verification:
+- `node --test --test-concurrency=1 'test/**/*.test.js'`: 212/212 pass, 0 fail, ~11.0s.
+- `npm run deploy` (wrangler 4.148.0): 1 new/modified asset uploaded (+ /index.html), 44 already uploaded; Version ID f28565c5-e4e9-4b10-b567-ec81825a402c at https://pokergym.history-atlas.workers.dev.
+- Live curl: / 200 (7622 bytes) containing "no signup, no ads, no third-party trackers" and zero matches for the removed retro/badge/class phrases; /web/ 200.
+- Live 390px smoke test `POKERGYM_TEST_URL=https://pokergym.history-atlas.workers.dev/web/ npm run test:itch`: all guide, retry, daily-drill, haptics and live smoke checks PASS with zero runtime or game asset network errors.
+- Live installability check on the deployed /web/: 3 icons, zero installability errors, offline start-url save/resume passed; physical Android installation still unverified.
+- Note for future runs: scripts/browser-test.mjs is harness-only (it waits for the local harness.html "DONE" title, and the harness is excluded from the build), so the production smoke test is scripts/itch-browser-test.mjs with POKERGYM_TEST_URL, as used above. Evidence file: artifacts/copy-refresh-2026-10-12.txt (gitignored).
+
+Next action: the owner-approved prompt sequence continues with the OG-image/meta prompt, the share-link/entry-params prompt and the feedback-link/one-time-price prompt as one batch, then the anonymous page-visit counter separately on day 2. Real-player return/clarity/pricing feedback remains the gate for further product work; a live deploy or a synthetic browser pass is not demand.
