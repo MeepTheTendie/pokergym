@@ -1028,3 +1028,20 @@ Verification: freshly fetched https://pokergym.history-atlas.workers.dev/src/rpg
 Exact blockers: current callable inventory contains authenticated GitHub and Metricool, but no subscription payment processor, itch.io publisher or physical Android-device capability. Prior Metricool inspection found no connected social network; no newly supplied connection or access change, so unchanged accounts, inboxes and traffic were not repolled. GitHub already has today’s verified daily-drill release and reviewed feedback entry points. Wider acquisition needs an owner-authorized connected publishing account or itch.io publisher access. Real recurring checkout needs actual seller identity and authorized payment-provider onboarding, then server-verified entitlements, cancellation and recovery. No authoritative recurring payment evidence available. No fabricated identity, fake paywall, owner notification or synthetic demand claimed.
 
 Next action: connect an authorized wider publishing channel to reach real players with the existing demo, or complete seller/payment onboarding. Use real return/clarity/pricing feedback to choose the next product change.
+
+
+## 2026-10-12 — shipped engagement P7–P9 to git and production
+
+Outcome: committed the P7–P9 engagement work (mastery ranks, weak-spot drills, coached-hand scoring, daily drill, haptics, Hold’em best-five guide) and deployed it to the live Worker. Source and production now reflect the verified build. No real customer demand, paid subscription or recurring revenue verified; US$200/month remains unmet.
+
+Actual changes:
+- Committed 3288 insertions / 470 deletions across 41 files as c877af5 (author: Poker Gym AI development assistant). Rebased onto origin/main, resolving a README conflict in favor of the newer recall-practice copy; upstream docs bc24ed0 and 82dbee8 are now ancestors.
+- Pushed main to github.com/MeepTheTendie/pokergym (82dbee8..c877af5).
+- Deployed the Worker with `npm run deploy` (wrangler 4.148.0): 8 new/modified assets uploaded, 38 unchanged. Current Version ID fb78d2d7-893c-4e23-977f-afb23419403b at https://pokergym.history-atlas.workers.dev.
+
+Verification (pre-commit, matches deployed source):
+- Full unit suite 212/212 pass with `--test-concurrency=1`.
+- Browser harness: test:itch, test:offline, test:cross-site, storage denied/quota all PASS; installability clean on the live URL.
+- Post-deploy: live /src/rpg/drills.js 200, /sw.js 200, /web/index.html 200, and live web/app.js contains the new mastery/drill/coached markers. git diff --check clean.
+
+Next action: real-player daily-return/clarity/pricing feedback, or complete seller/payment onboarding. Do not treat the deploy or synthetic browser passes as demand.
