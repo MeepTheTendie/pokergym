@@ -1,4 +1,6 @@
 // No network, storage, identity, or gameplay data is collected here.
+// This subject split (survey uses 'Poker Gym player feedback', quick links use
+// 'Poker Gym feedback') is intentional, not drift.
 export function feedbackDraft({ clarity, returnInterest, priceInterest, note = '' }) {
   if (!['clear', 'confusing'].includes(clarity)
       || !['yes', 'maybe', 'no'].includes(returnInterest)
