@@ -1118,3 +1118,21 @@ Verification (local serve, headless Chromium):
 - Not verified: real desktop browsers other than headless Chromium (Firefox/Safari), real touch devices after the change, production after deploy.
 
 Next action: owner deploys and checks /web/ at desktop width; then P5.
+
+
+## 2026-10-13 — playpokergym.com canonical domain + P5 visit counter, committed, NOT deployed
+
+Outcome: the site is set up to serve at https://playpokergym.com (zone active on the owner's Cloudflare account, Cloudflare Registrar, nameservers desi/gerald.ns.cloudflare.com, no DNS records yet, no Workers custom domains yet — read-only check, nothing changed). workers.dev stays enabled with no redirect. P5 adds the aggregate visit counter. No real customer demand or revenue verified.
+
+Actual changes:
+- Domain commit: wrangler custom domains playpokergym.com + www; all current absolute URLs (OG/twitter/canonical, share and invite links, guides, sitemap, README, MARKETING current links, privacy) moved to https://playpokergym.com; new robots.txt; live test scripts accept the new domain. Dated history (LAUNCH.md, this file, MARKETING dated entries) untouched.
+- P5 commit: worker/index.js + worker/count.js in front of assets for /, /web/, /web, /web/index.html only; Analytics Engine dataset pokergym_visits; ref via classifyRef()/PUBLISHED_REFS from src/rpg/links.js; npm run stats via AE SQL API with token from CLOUDFLARE_API_TOKEN or the keyring; privacy and landing copy updated.
+
+Verification:
+- node --test test/*.test.js: 242/242 (adds test/worker.test.js).
+- wrangler 4.148.0 (Node 22) deploy --dry-run: bindings env.VISITS (AE) and env.ASSETS, 60 assets.
+- wrangler dev: / and /web/ 200 through the worker; /guides/blackjack/, /sitemap.xml, /robots.txt, /og.png, /src/rpg/links.js, /web/app.js, /sw.js 200; /web, /web/index.html, /web/privacy.html 307 (assets html_handling, as before). Headless browser behind wrangler dev: shared-link flows, service worker control and offline reload all pass, zero console errors.
+- Not verified: custom-domain provisioning, real AE writes and npm run stats (need deploy and an API token).
+- Note: localStorage is per origin, so a save made on pokergym.history-atlas.workers.dev does not appear on playpokergym.com; players can move it with the in-app backup.
+
+Next action: owner deploys (npm run deploy), checks https://playpokergym.com/, /web/, /og.png, creates the Account Analytics Read token for npm run stats.
