@@ -26,7 +26,7 @@ test('public build contains its module graph without repository or diagnostic fi
   await access(path.join(root, 'web/assets/characters-v2.png'));
   await access(path.join(root, 'web/index.html'));
   const landing = await readFile(path.join(root, 'index.html'), 'utf8');
-  assert.match(landing, /Play free demo/);
+  assert.match(landing, /Start training free/);
   assert.match(landing, /href="\/web\/"/);
   assert.doesNotMatch(landing, /http-equiv="refresh"/);
   const worker = await readFile(path.join(root, 'sw.js'), 'utf8');
