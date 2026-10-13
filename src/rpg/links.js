@@ -19,6 +19,9 @@ export function classifyRef(value) {
   return PUBLISHED_REFS.includes(text) ? text : 'other';
 }
 
+// Landing-page entry: ?daily=1 promotes today's Daily Drill on the title screen.
+export const DAILY_ENTRY_URL = '/web/?daily=1';
+
 // The daily-result link: attributable (ref=share) and deep-linked (d=number).
 export function shareUrl(number) {
   return `${APP_URL}?ref=share&d=${number}`;
@@ -50,6 +53,7 @@ export function parseEntryParams(search) {
     ref: classifyRef(params.get('ref')),
     day: parseDay(params.get('d')),
     practice: params.get('practice') || null,
+    daily: params.get('daily') === '1',
   };
 }
 
@@ -65,6 +69,7 @@ export function cleanEntrySearch(search) {
   const params = new URLSearchParams(search ?? '');
   params.delete('ref');
   params.delete('d');
+  params.delete('daily');
   const rest = params.toString();
   return rest ? `?${rest}` : '';
 }

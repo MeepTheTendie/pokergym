@@ -30,6 +30,7 @@ await cp(path.join(root, 'public/guides'), path.join(output, 'guides'), { recurs
 // also excludes it by name so a 1200x630 image is never precached by the worker.
 await cp(path.join(root, 'web/og.png'), path.join(output, 'og.png'));
 await cp(path.join(root, 'web/mascot.webp'), path.join(output, 'mascot.webp'));
+await cp(path.join(root, 'web/coach-shot.webp'), path.join(output, 'coach-shot.webp'));
 const NOT_PRECACHED = new Set(['/web/sw.js', '/web/og.png', '/og.png']);
 const assets = [];
 async function collect(folder) {

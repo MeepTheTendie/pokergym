@@ -51,12 +51,12 @@ test('parseEntryParams: d values', () => {
 });
 
 test('parseEntryParams: missing params', () => {
-  assert.deepEqual(parseEntryParams(''), { ref: 'none', day: null, practice: null });
-  assert.deepEqual(parseEntryParams(undefined), { ref: 'none', day: null, practice: null });
+  assert.deepEqual(parseEntryParams(''), { ref: 'none', day: null, practice: null, daily: false });
+  assert.deepEqual(parseEntryParams(undefined), { ref: 'none', day: null, practice: null, daily: false });
 });
 
 test('parseEntryParams: ref and practice together', () => {
-  assert.deepEqual(parseEntryParams('?ref=share&d=9&practice=blackjack'), { ref: 'share', day: 9, practice: 'blackjack' });
+  assert.deepEqual(parseEntryParams('?ref=share&d=9&practice=blackjack'), { ref: 'share', day: 9, practice: 'blackjack', daily: false });
   assert.equal(parseEntryParams('?ref=Evil').ref, 'other');
 });
 
@@ -73,4 +73,16 @@ test('cleanEntrySearch strips ref and d but keeps practice', () => {
   assert.equal(cleanEntrySearch('?ref=share&d=3'), '');
   assert.equal(cleanEntrySearch('?ref=share&d=3&practice=blackjack'), '?practice=blackjack');
   assert.equal(cleanEntrySearch('?practice=holdem'), '?practice=holdem');
+});
+
+test('?daily=1 is a supported Daily Drill entry param and is stripped from the address', async () => {
+  const { DAILY_ENTRY_URL } = await import('../src/rpg/links.js');
+  assert.equal(DAILY_ENTRY_URL, '/web/?daily=1');
+  assert.equal(parseEntryParams('?daily=1').daily, true);
+  assert.equal(parseEntryParams('?daily=yes').daily, false);
+  assert.equal(parseEntryParams('').daily, false);
+  assert.equal(parseEntryParams('?daily=1').ref, 'none');
+  assert.equal(cleanEntrySearch('?daily=1&practice=blackjack'), '?practice=blackjack');
+  const landing = (await import('node:fs')).readFileSync(new URL('../web/landing.html', import.meta.url), 'utf8');
+  assert.ok(landing.includes(`href="${DAILY_ENTRY_URL}"`));
 });

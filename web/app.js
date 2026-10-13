@@ -95,8 +95,8 @@ let requestedGym = GYMS.find(gym => gym.game === entryParams.practice) ?? null;
 // A shared Daily Drill link (?d=<n>) highlights today's drill when n is within
 // one day of today's number; otherwise it is ignored silently. ref is read only
 // to strip it: it is never stored (no localStorage, cookie or sessionStorage).
-let sharedDaily = isSharedDayCurrent(entryParams.day, dailyNumber(dailyKey()));
-if (new URLSearchParams(location.search).has('ref') || new URLSearchParams(location.search).has('d')) {
+let sharedDaily = entryParams.daily || isSharedDayCurrent(entryParams.day, dailyNumber(dailyKey()));
+if (['ref', 'd', 'daily'].some(k => new URLSearchParams(location.search).has(k))) {
   try { history.replaceState(history.state, '', location.pathname + cleanEntrySearch(location.search) + location.hash); } catch {}
 }
 
