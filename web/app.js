@@ -509,6 +509,10 @@ function renderToday() {
     fb.className = 'hint';
     fb.innerHTML = 'Feedback? <a href="mailto:wesleympennock@gmail.com?subject=Poker%20Gym%20feedback">Email</a> · <a href="https://github.com/MeepTheTendie/pokergym/issues/1" target="_blank" rel="noopener noreferrer">GitHub</a>';
     actions.appendChild(fb);
+    const tip = document.createElement('p');
+    tip.className = 'hint tip-link';
+    tip.innerHTML = TIP_HTML;
+    actions.appendChild(tip);
   }
 }
 
@@ -1511,6 +1515,10 @@ function flashScene(optimal) {
 
 // A five-hand session ends with a compact recap: the score, the best streak
 // reached, and one miss worth another look. One tap dismisses it.
+// Optional tip link. Unlocks nothing; the app stays free.
+const TIP_URL = 'https://ko-fi.com/playpokergym';
+const TIP_HTML = `Poker Gym is free. If it helped, you can <a href="${TIP_URL}" target="_blank" rel="noopener">Support Poker Gym ☕</a> on Ko-fi.`;
+
 function renderSessionSummary(session) {
   const box = el('sessionSummary');
   if (!box || !session) return;
@@ -1538,6 +1546,10 @@ function renderSessionSummary(session) {
   fb.className = 'hint';
   fb.innerHTML = 'Feedback? <a href="mailto:wesleympennock@gmail.com?subject=Poker%20Gym%20feedback">Email</a> · <a href="https://github.com/MeepTheTendie/pokergym/issues/1" target="_blank" rel="noopener noreferrer">GitHub</a>';
   box.appendChild(fb);
+  const tip = document.createElement('p');
+  tip.className = 'hint tip-link';
+  tip.innerHTML = TIP_HTML;
+  box.appendChild(tip);
   box.hidden = false;
 }
 
