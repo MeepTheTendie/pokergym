@@ -37,3 +37,17 @@ Releases and their tags are point-in-time source snapshots. The [spaced-recall-d
 
 No recurring customer revenue is verified.
 
+
+## Visit stats (owner only)
+
+The site counts page-like requests to `/` and `/web/` per UTC day and by link label (`ref`, from the fixed list in `src/rpg/links.js`), in Workers Analytics Engine. No IPs, user agents or cookies are stored. These are page-like requests, not people: link-preview bots and crawlers count too.
+
+One-time setup for `npm run stats`:
+
+1. Cloudflare dashboard → My Profile → API Tokens → Create Token → Custom token with **Account · Account Analytics · Read** for this account only.
+2. Store it in the desktop keyring (never in the repo):
+   `secret-tool store --label='Cloudflare Analytics (pokergym stats)' service cloudflare-analytics account pokergym`
+   (paste the token when prompted). Alternatively export `CLOUDFLARE_API_TOKEN` for one run.
+3. The account id is read from `.wrangler/cache/wrangler-account.json` (created by any wrangler command) or `CLOUDFLARE_ACCOUNT_ID`.
+
+Then `npm run stats` prints the last 30 days as date / path / ref / count.
