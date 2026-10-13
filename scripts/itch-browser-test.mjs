@@ -16,7 +16,7 @@ const blockedStorage = process.env.POKERGYM_STORAGE_TEST;
 if (blockedStorage && !['denied', 'quota'].includes(blockedStorage)) throw new Error('Unknown storage test');
 const topLevel = Boolean(liveUrl || offlineTest || blockedStorage);
 if (crossSite && topLevel) throw new Error('Cross-site mode requires the portable ZIP');
-if (liveUrl && liveUrl !== 'https://pokergym.history-atlas.workers.dev/web/') throw new Error('Live smoke test is restricted to Poker Gym');
+if (liveUrl && !['https://playpokergym.com/web/', 'https://pokergym.history-atlas.workers.dev/web/'].includes(liveUrl)) throw new Error('Live smoke test is restricted to Poker Gym');
 const children = [];
 let ws;
 try {
@@ -496,7 +496,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   assert.equal(await evaluate('document.getElementById("playerFeedback").hidden'), false, 'Feedback available after completed practice');
   assert.equal(await evaluate('document.getElementById("playerShare").hidden'), false);
   const invitation = await evaluate('document.getElementById("sharePreview").value');
-  assert.match(invitation, /https:\/\/pokergym.history-atlas.workers.dev\/web\//);
+  assert.match(invitation, /https:\/\/playpokergym\.com\/web\//);
   assert.doesNotMatch(invitation, /pokergym:save|CORRECT|ZIP TEST/);
   await evaluate(`Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async text => { window.copiedInvitation = text; } } }); document.getElementById('btnCopyShare').click();`);
   await waitFor(`document.getElementById('shareStatus').textContent.includes('Invitation copied')`);
@@ -717,7 +717,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     [...document.querySelectorAll('#todayActions button')].find(b => b.textContent === 'COPY DAILY RESULT').click();
     return text;
   })()`);
-  assert.match(replayCopy, /^Poker Gym Daily #\d+  \d\/5\n[🟩🟥]{5}\n🃏 (video poker|blackjack|baccarat|hold'em)( · (video poker|blackjack|baccarat|hold'em)){3}\nhttps:\/\/pokergym\.history-atlas\.workers\.dev\/web\//u);
+  assert.match(replayCopy, /^Poker Gym Daily #\d+  \d\/5\n[🟩🟥]{5}\n🃏 (video poker|blackjack|baccarat|hold'em)( · (video poker|blackjack|baccarat|hold'em)){3}\nhttps:\/\/playpokergym\.com\/web\//u);
   assert.equal(await evaluate('window.dailyCopied'), replayCopy, 'Share copies the same seeded result text');
   assert.equal(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).daily.history[0].key'), key, 'The first scored run stays the only history entry');
   console.log('PASS: seeded daily drill mixes all four games deterministically; mid-drill progress persists and resumes; a replay scores no new XP or score; the result shares cleanly.');

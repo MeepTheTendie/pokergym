@@ -6,7 +6,9 @@ import path from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 
 // Fresh isolated profile; never inspect the owner's browser or account data.
-const url = 'https://pokergym.history-atlas.workers.dev/web/';
+// Live check: the canonical domain by default; POKERGYM_INSTALL_URL may point at
+// https://pokergym.history-atlas.workers.dev/web/ (still served) before the domain is live.
+const url = process.env.POKERGYM_INSTALL_URL ?? 'https://playpokergym.com/web/';
 const temp = await mkdtemp(path.join(tmpdir(), 'pokergym-install-test-'));
 const browser = spawn('chromium', ['--headless=new', '--no-sandbox', '--disable-dev-shm-usage',
   `--user-data-dir=${temp}`, '--remote-debugging-port=19398', 'about:blank'], { stdio: 'ignore' });

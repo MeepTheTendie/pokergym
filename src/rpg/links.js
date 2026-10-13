@@ -5,7 +5,7 @@
 // visit counter imports this list and classifyRef(); to publish a new ref,
 // edit this list (and its tests) — never add a second rule elsewhere.
 
-export const SITE_ORIGIN = 'https://pokergym.history-atlas.workers.dev';
+export const SITE_ORIGIN = 'https://playpokergym.com';
 export const APP_URL = `${SITE_ORIGIN}/web/`;
 
 export const PUBLISHED_REFS = Object.freeze(['share', 'invite', 'webgames', 'sideproject', 'hn', 'videopoker']);

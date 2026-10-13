@@ -1,6 +1,6 @@
 # Poker Gym
 
-[Play the free browser demo](https://pokergym.history-atlas.workers.dev/web/) · [Download the current portable demo](https://github.com/MeepTheTendie/pokergym/releases/latest) · [Share player feedback](https://github.com/MeepTheTendie/pokergym/issues/1)
+[Play the free browser demo](https://playpokergym.com/web/) · [Download the current portable demo](https://github.com/MeepTheTendie/pokergym/releases/latest) · [Share player feedback](https://github.com/MeepTheTendie/pokergym/issues/1)
 
 Practice card-game decisions in a free training game. Pick a game, play a five-hand session with coaching on every decision, and keep missed hands coming back until they stick. Free to play: no signup, no ads, no third-party trackers, no real-money wagering, and nothing is for sale today.
 
@@ -13,7 +13,7 @@ Practice card-game decisions in a free training game. Pick a game, play a five-h
 
 The games cover Jacks or Better video poker, blackjack, baccarat and Hold'em hand evaluation. Hold'em practice does not teach a complete betting or bluffing strategy. Coaching uses the simulator's rules and assumptions. Learning the best play lowers the house edge; it never beats it.
 
-Prefer a quick lesson first? Try the [three-hand video-poker guide](https://pokergym.history-atlas.workers.dev/guides/jacks-or-better/) or [three blackjack decisions](https://pokergym.history-atlas.workers.dev/guides/blackjack/), with answers hidden until you reveal them.
+Prefer a quick lesson first? Try the [three-hand video-poker guide](https://playpokergym.com/guides/jacks-or-better/) or [three blackjack decisions](https://playpokergym.com/guides/blackjack/), with answers hidden until you reveal them.
 
 ## Help decide what comes next
 

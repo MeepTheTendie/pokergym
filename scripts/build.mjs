@@ -23,6 +23,7 @@ for (const entry of await readdir(path.join(root, 'web'))) {
 await cp(path.join(root, 'src'), path.join(output, 'src'), { recursive: true });
 await cp(path.join(root, 'web/landing.html'), path.join(output, 'index.html'));
 await cp(path.join(root, 'public/sitemap.xml'), path.join(output, 'sitemap.xml'));
+await cp(path.join(root, 'public/robots.txt'), path.join(output, 'robots.txt'));
 await cp(path.join(root, 'public/guides'), path.join(output, 'guides'), { recursive: true });
 // Link-preview image: served only at the site root (/og.png). It is not in the
 // web/ allowlist above, so it never lands in dist/web/; the ASSETS filter below

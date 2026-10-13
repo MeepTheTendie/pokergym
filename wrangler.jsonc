@@ -5,6 +5,13 @@
   "observability": {
     "enabled": true
   },
+  // Canonical domain (zone playpokergym.com is on this account). Custom domains
+  // create their DNS records and certificates on deploy. workers.dev stays on.
+  "routes": [
+    { "pattern": "playpokergym.com", "custom_domain": true },
+    { "pattern": "www.playpokergym.com", "custom_domain": true }
+  ],
+  "workers_dev": true,
   "assets": {
     "directory": "dist"
   }

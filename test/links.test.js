@@ -30,13 +30,13 @@ test("classifyRef maps junk to 'other'", () => {
 });
 
 test('share and invite URLs', () => {
-  assert.equal(shareUrl(42), 'https://pokergym.history-atlas.workers.dev/web/?ref=share&d=42');
-  assert.equal(inviteUrl(), 'https://pokergym.history-atlas.workers.dev/web/?ref=invite');
+  assert.equal(shareUrl(42), 'https://playpokergym.com/web/?ref=share&d=42');
+  assert.equal(inviteUrl(), 'https://playpokergym.com/web/?ref=invite');
 });
 
 test('daily share text keeps the format and carries ref=share&d=<n>', () => {
   const text = buildDailyShareText({ number: 7, results: [true, true, false, true, true], total: 5, games: ['Blackjack', 'Baccarat'] });
-  assert.equal(text, 'Poker Gym Daily #7  4/5\n🟩🟩🟥🟩🟩\n🃏 Blackjack · Baccarat\nhttps://pokergym.history-atlas.workers.dev/web/?ref=share&d=7');
+  assert.equal(text, 'Poker Gym Daily #7  4/5\n🟩🟩🟥🟩🟩\n🃏 Blackjack · Baccarat\nhttps://playpokergym.com/web/?ref=share&d=7');
   assert.match(text, /ref=share&d=7$/);
 });
 

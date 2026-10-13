@@ -2,8 +2,8 @@
 
 ## Verified status
 
-Playable demo: https://pokergym.history-atlas.workers.dev/web/
-Landing: https://pokergym.history-atlas.workers.dev/
+Playable demo: https://playpokergym.com/web/
+Landing: https://playpokergym.com/
 No social posts, player responses, paid subscribers or recurring revenue verified yet. No daily marketing schedule configured.
 
 Publishing integration discovery found Metricool available but not connected. It supports connected-brand inspection, post creation/scheduling and analytics. A connection alone would not establish authorized social accounts or a working daily agent schedule; inspect those after connection.
@@ -13,7 +13,7 @@ Publishing integration discovery found Metricool available but not connected. It
 Title: Poker Gym: a free card-game trainer — is the first lesson clear on your phone?
 
 Game title: Poker Gym
-Playable link: https://pokergym.history-atlas.workers.dev/web/
+Playable link: https://playpokergym.com/web/
 Platform: browser, designed for phone screens; not an Android store release.
 Free-to-play status: free demo, no signup or deposits.
 
