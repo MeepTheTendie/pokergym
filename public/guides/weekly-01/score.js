@@ -165,6 +165,18 @@
   if (!feedback) { render(); return; }
   const draft = document.getElementById('pack-feedback-draft');
   const review = document.getElementById('pack-feedback-review');
+  const copyFeedback = document.getElementById('pack-feedback-copy');
+  const copyStatus = document.getElementById('pack-feedback-copy-status');
+  if (copyFeedback && copyStatus) copyFeedback.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(draft.value);
+      copyStatus.textContent = 'Copied your edited draft. Paste it into a feedback conversation you choose. Nothing was sent.';
+    } catch {
+      copyStatus.textContent = 'Copy unavailable. Select and copy the draft below. Nothing was sent.';
+      draft.focus();
+      draft.select();
+    }
+  };
   function updateDraftLinks() {
     const body = encodeURIComponent(draft.value.slice(0, 1800));
     const subject = encodeURIComponent('Poker Gym drill pack 01 feedback');
@@ -188,9 +200,13 @@
       `Useful or unclear: ${document.getElementById('pack-note').value.slice(0, 400).trim() || '(no comment)'}`,
     ].filter((line, index) => line || index === 5).join('\n');
     updateDraftLinks();
+    if (copyStatus) copyStatus.textContent = '';
     review.hidden = false;
     draft.focus();
   });
-  draft.addEventListener('input', updateDraftLinks);
+  draft.addEventListener('input', () => {
+    updateDraftLinks();
+    if (copyStatus) copyStatus.textContent = '';
+  });
   render();
 })();

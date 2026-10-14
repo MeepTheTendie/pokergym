@@ -138,6 +138,16 @@ try {
     assert.equal(new URL(href).searchParams.get('body'), 'Edited: no scores & no comment');
   }
   assert.equal(await evaluate('JSON.stringify({...localStorage})'), beforeFeedback);
+  await evaluate(`Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async text => { window.__copiedFeedback = text; } } }); document.getElementById('pack-feedback-copy').click()`);
+  await waitFor('document.getElementById("pack-feedback-copy-status").textContent.startsWith("Copied your edited draft.")');
+  assert.equal(await evaluate('window.__copiedFeedback'), 'Edited: no scores & no comment');
+  await evaluate(`document.getElementById('pack-feedback-draft').value = 'A further edit'; document.getElementById('pack-feedback-draft').dispatchEvent(new Event('input'))`);
+  assert.equal(await evaluate('document.getElementById("pack-feedback-copy-status").textContent'), '', 'Editing clears stale copied confirmation');
+  await evaluate(`Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async () => { throw new Error('clipboard denied'); } } }); document.getElementById('pack-feedback-copy').click()`);
+  await waitFor('document.getElementById("pack-feedback-copy-status").textContent.startsWith("Copy unavailable.")');
+  assert.equal(await evaluate('document.activeElement.id'), 'pack-feedback-draft');
+  assert.equal(await evaluate('document.getElementById("pack-feedback-draft").selectionEnd'), 'A further edit'.length);
+  assert.equal(await evaluate('JSON.stringify({...localStorage})'), beforeFeedback, 'Copying feedback does not persist or alter local records');
   assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
   await navigate();
   assert.equal(await evaluate('document.getElementById("pack-feedback-review").hidden'), true);
