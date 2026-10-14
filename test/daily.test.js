@@ -2,12 +2,39 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  dailyKey, seededRng, dailyPlan, dailyNumber, dayGap, DAILY_HANDS, DAILY_GAMES,
+  dailyKey, seededRng, dailyPlan, dailyNumber, dayGap, DAILY_HANDS, DAILY_GAMES, dailySummary,
 } from '../src/rpg/daily.js';
 import { createProfile, completeDaily, dailyCompleted, setDailyProgress } from '../src/rpg/state.js';
 import { readBackup, writeBackup } from '../src/rpg/backup.js';
 
 const draws = (rng, n) => Array.from({ length: n }, () => rng());
+
+test('daily summary uses calendar windows and attributes each decision to its seeded game', () => {
+  const row = (key, correct) => ({ key, results: Array.from({ length: 5 }, (_, i) => i < correct) });
+  const history = [row('2026-10-14', 3), row('2026-10-08', 5), row('2026-10-07', 2),
+    row('2026-10-01', 1), row('2026-09-30', 5), row('2026-10-15', 5)];
+  const summary = dailySummary(history, '2026-10-14');
+  assert.deepEqual(summary.recent, { sessions: 2, hands: 10, correct: 8 });
+  assert.deepEqual(summary.previous, { sessions: 2, hands: 10, correct: 3 });
+  assert.deepEqual(summary.entries.map(row => row.key), ['2026-10-14', '2026-10-08', '2026-10-07', '2026-10-01']);
+  for (const game of summary.games) {
+    const expected = history.slice(0, 2).flatMap(row => dailyPlan(row.key).map((hand, i) => ({ ...hand, correct: row.results[i] }))).filter(hand => hand.game === game.game);
+    assert.equal(game.hands, expected.length);
+    assert.equal(game.correct, expected.filter(hand => hand.correct).length);
+  }
+});
+
+test('daily summary ignores incomplete, malformed and duplicate scores without changing history', () => {
+  const first = { key: '2026-10-14', results: [true, false, true, false, true] };
+  const history = [first, { ...first, results: Array(5).fill(true) }, null,
+    { key: '2026-10-13', results: [true] }, { key: '2026-10-12', results: [1, 1, 1, 1, 1] },
+    { key: '2026-09-31', results: Array(5).fill(true) }];
+  const original = structuredClone(history);
+  assert.deepEqual(dailySummary(history, '2026-10-14').recent, { sessions: 1, hands: 5, correct: 3 });
+  assert.equal(dailySummary(history, '2026-10-14').entries.length, 1);
+  assert.deepEqual(history, original);
+  assert.deepEqual(dailySummary(undefined, '2026-10-14').recent, { sessions: 0, hands: 0, correct: 0 });
+});
 
 test('dailyKey formats the local calendar date as YYYY-MM-DD', () => {
   assert.equal(dailyKey(new Date(2026, 9, 12)), '2026-10-12');

@@ -693,6 +693,13 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   })()`);
   await evaluate('document.getElementById("btnNext").click()');
   assert.equal(await evaluate('document.getElementById("scr-map").hidden'), false);
+  await evaluate('document.getElementById("dailyHistory").open = true');
+  const recordBeforeReplay = await evaluate('document.getElementById("dailyHistoryContent").textContent');
+  assert.ok(recordBeforeReplay.includes(`LAST 7 DAYS: ${beforeReplay.tally}/5 CORRECT`), 'Record displays the actual first score');
+  assert.ok(recordBeforeReplay.includes(`${key} · ${beforeReplay.tally}/5 CORRECT`), 'Record displays the local date');
+  assert.match(recordBeforeReplay, /PREVIOUS 7 DAYS: NO COMPLETED DRILLS/);
+  assert.equal(await evaluate('document.documentElement.scrollWidth <= window.innerWidth'), true,
+    `Open record fits phone width: ${JSON.stringify(await evaluate(`({ width: innerWidth, scroll: document.documentElement.scrollWidth, overflowing: [...document.querySelectorAll('#scr-map *')].filter(e => e.getBoundingClientRect().right > innerWidth).map(e => [e.tagName, e.id, e.textContent.slice(0, 50)]) })`))}`);
   // A replay re-runs the same five hands but scores nothing new.
   await evaluate(`[...document.querySelectorAll('#todayActions button')].find(b => b.textContent === 'REPLAY DAILY DRILL').click()`);
   assert.match(await label(), /DAILY DRILL #\d+ · HAND 1\/5/);
@@ -711,6 +718,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   assert.equal(afterReplay.streak, beforeReplay.streak, 'A replay leaves the streak untouched');
   assert.equal(afterReplay.lastKey, key, 'The replayed day is still today');
   await evaluate('document.getElementById("btnNext").click()');
+  assert.equal(await evaluate('document.getElementById("dailyHistoryContent").textContent'), recordBeforeReplay, 'Replay cannot replace the displayed first score');
   const replayCopy = await evaluate(`(() => {
     const text = document.getElementById('dailySharePreview').value;
     Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async value => { window.dailyCopied = value; } } });

@@ -25,7 +25,7 @@ import {
 } from '../src/rpg/state.js';
 import {
   dailyKey, dailyPlan, dailyNumber, seededRng as dailySeedRng, DAILY_HANDS,
-  DAILY_GAME_LABEL,
+  DAILY_GAME_LABEL, dailySummary,
 } from '../src/rpg/daily.js';
 import { parseEntryParams, isSharedDayCurrent, cleanEntrySearch, buildDailyShareText } from '../src/rpg/links.js';
 import { keyAction, shouldIgnoreKey } from '../src/rpg/keys.js';
@@ -491,6 +491,7 @@ function renderToday() {
   // primary button.
   const key = dailyKey();
   const daily = dailyOf(profile);
+  renderDailyHistory(daily.history, key);
   if (daily.lastKey === key) {
     const results = daily.history.find(entry => entry.key === key)?.results ?? [];
     const text = dailyShareText(key, results, dailyNumber(key));
@@ -514,6 +515,31 @@ function renderToday() {
     tip.innerHTML = TIP_HTML;
     actions.appendChild(tip);
   }
+}
+
+function renderDailyHistory(history, key) {
+  const host = el('dailyHistoryContent');
+  host.replaceChildren();
+  const summary = dailySummary(history, key);
+  const line = text => {
+    const p = document.createElement('p');
+    p.className = 'hint';
+    p.textContent = text;
+    host.appendChild(p);
+  };
+  if (!summary.entries.length) {
+    line('FINISH A DAILY DRILL TO START YOUR RECORD. NO COMPLETED DRILLS IN THE LAST 14 DAYS.');
+    return;
+  }
+  const score = row => row.hands ? `${row.correct}/${row.hands} CORRECT (${Math.round(100 * row.correct / row.hands)}%) · ${row.sessions} DRILLS` : 'NO COMPLETED DRILLS';
+  line(`LAST 7 DAYS: ${score(summary.recent)}`);
+  line(`PREVIOUS 7 DAYS: ${score(summary.previous)}`);
+  line('BY GAME · LAST 7 DAYS:');
+  for (const row of summary.games) {
+    line(`${DAILY_GAME_LABEL[row.game].toUpperCase()}: ${row.hands ? `${row.correct}/${row.hands} CORRECT` : 'NO HANDS'}`);
+  }
+  line('RECENT DAYS:');
+  for (const row of summary.entries) line(`${row.key} · ${row.correct}/${DAILY_HANDS} CORRECT`);
 }
 
 function dailyShareText(key, results, number) {

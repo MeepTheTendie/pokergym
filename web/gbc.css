@@ -154,6 +154,11 @@ button:focus-visible { outline: 4px solid var(--t02); outline-offset: 2px; }
 
 .row { display: flex; gap: 8px; margin-top: 8px; }
 .row > button { flex: 1; }
+#todayActions { flex-wrap: wrap; }
+#todayActions > button { flex: 1 1 140px; min-width: 0; }
+#todayActions > p { flex-basis: 100%; margin: 4px 0; }
+#dailyHistory { margin-top: 12px; }
+#dailyHistory > summary { cursor: pointer; min-height: 44px; padding: 8px 0; }
 
 /* Cards: GBC green tile with a hard 3D edge */
 .hand { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }

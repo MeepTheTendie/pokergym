@@ -71,3 +71,33 @@ export const DAILY_GAME_LABEL = {
   baccarat: 'baccarat',
   holdem: "hold'em",
 };
+
+// Calendar windows, not the last seven sessions: a missed day is no attempt.
+// Only complete first-attempt records count. Replays never replace them.
+export function dailySummary(history = [], today = dailyKey()) {
+  const seen = new Set();
+  const entries = (Array.isArray(history) ? history : []).filter(entry => {
+    if (!entry || !/^\d{4}-\d{2}-\d{2}$/.test(entry.key) || seen.has(entry.key) ||
+        !Array.isArray(entry.results) || entry.results.length !== DAILY_HANDS ||
+        !entry.results.every(value => typeof value === 'boolean')) return false;
+    const gap = dayGap(today, entry.key);
+    if (!Number.isFinite(gap) || gap < 0 || gap >= 14) return false;
+    if (new Date(keyToDay(entry.key) * DAY_MS).toISOString().slice(0, 10) !== entry.key) return false;
+    seen.add(entry.key);
+    return true;
+  }).sort((a, b) => b.key.localeCompare(a.key));
+  const tally = rows => ({ sessions: rows.length, hands: rows.length * DAILY_HANDS,
+    correct: rows.reduce((sum, row) => sum + row.results.filter(Boolean).length, 0) });
+  const recent = entries.filter(entry => dayGap(today, entry.key) < 7);
+  const previous = entries.filter(entry => dayGap(today, entry.key) >= 7);
+  const games = DAILY_GAMES.map(game => ({ game, correct: 0, hands: 0 }));
+  for (const entry of recent) {
+    dailyPlan(entry.key).forEach((hand, i) => {
+      const game = games.find(row => row.game === hand.game);
+      game.hands++;
+      if (entry.results[i]) game.correct++;
+    });
+  }
+  return { recent: tally(recent), previous: tally(previous), games,
+    entries: entries.map(entry => ({ key: entry.key, correct: entry.results.filter(Boolean).length })) };
+}
