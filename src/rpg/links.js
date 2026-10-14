@@ -8,7 +8,7 @@
 export const SITE_ORIGIN = 'https://playpokergym.com';
 export const APP_URL = `${SITE_ORIGIN}/web/`;
 
-export const PUBLISHED_REFS = Object.freeze(['share', 'invite', 'webgames', 'sideproject', 'hn', 'videopoker']);
+export const PUBLISHED_REFS = Object.freeze(['share', 'invite', 'webgames', 'sideproject', 'hn', 'videopoker', 'youtube']);
 
 // A ref in the list maps to itself; missing/blank maps to 'none'; everything
 // else (case variants, junk, prototype keys) maps to 'other'.
