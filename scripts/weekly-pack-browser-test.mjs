@@ -88,6 +88,8 @@ try {
   const beforeShare = await evaluate('JSON.stringify({...localStorage})');
   await navigate();
   assert.match(await evaluate('document.getElementById("pack-score").textContent'), /3\/5 correct.*5\/5 completed/);
+  assert.match(await evaluate('document.querySelector(".decision-result").textContent'), /you chose stand; review the explanation/);
+  assert.match(await evaluate('document.querySelectorAll(".decision-result")[1].textContent'), /revealed before choosing/);
   assert.equal(await evaluate('document.querySelectorAll("details[open]").length'), 5);
   assert.equal(await evaluate('document.querySelectorAll("article button:not(:disabled)").length'), 0);
   assert.equal(await evaluate('document.getElementById("pack-share").hidden'), false);
@@ -108,6 +110,7 @@ try {
   assert.equal(await evaluate('document.getElementById("pack-share").hidden'), true);
   assert.equal(await evaluate('document.getElementById("pack-share-text").hidden'), true);
   assert.equal(await evaluate('document.querySelectorAll("details[open]").length'), 0);
+  assert.equal(await evaluate("localStorage.getItem('pokergym:weekly-01:choices:v1')"), null, 'Retry clears prior choices');
   await finish();
   assert.match(await evaluate('document.getElementById("pack-history").textContent'), /First completed attempt: 3\/5.*Latest completed attempt: 5\/5/);
   await navigate();
@@ -138,6 +141,17 @@ try {
   assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
   await navigate();
   assert.equal(await evaluate('document.getElementById("pack-feedback-review").hidden'), true);
+  // Invalid stored moves cannot invent a choice or inject markup.
+  await evaluate("localStorage.setItem('pokergym:weekly-01:choices:v1', JSON.stringify(['<script>', 'hit', 'split', 'stand', 'hit']))");
+  await navigate();
+  assert.doesNotMatch(await evaluate('document.querySelector(".decision-result").textContent'), /you chose/);
+  assert.doesNotMatch(await evaluate('document.querySelectorAll(".decision-result")[1].textContent'), /you chose/);
+  assert.match(await evaluate('document.querySelectorAll(".decision-result")[2].textContent'), /you chose split; correct/);
+  // Legacy attempts without chosen moves still resume.
+  await evaluate("localStorage.removeItem('pokergym:weekly-01:choices:v1')");
+  await navigate();
+  assert.match(await evaluate('document.getElementById("pack-score").textContent'), /5\/5 correct/);
+  assert.doesNotMatch(await evaluate('document.querySelector(".decision-result").textContent'), /you chose/);
   // A corrupted stored record must not become a score or execute markup.
   await evaluate(`localStorage.setItem('pokergym:weekly-01:scores:v1', JSON.stringify({ first: { correct: 999, revealed: 0 }, latest: { correct: 5, revealed: 0 } }))`);
   await navigate();
@@ -161,6 +175,7 @@ try {
   await send('Network.emulateNetworkConditions', { offline: true, latency: 0, downloadThroughput: 0, uploadThroughput: 0 });
   await navigate();
   assert.match(await evaluate('document.getElementById("pack-score").textContent'), /1\/5 correct.*1\/5 completed/);
+  assert.match(await evaluate('document.querySelector(".decision-result").textContent'), /you chose hit; correct/, 'Offline resume retains the actual move');
   await finish();
   assert.match(await evaluate('document.getElementById("pack-score").textContent'), /5\/5 correct.*5\/5 completed/);
   for (const suffix of ['', '/', '/index.html?ref=share']) {

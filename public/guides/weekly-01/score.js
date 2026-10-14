@@ -1,6 +1,7 @@
 (() => {
   const key = 'pokergym:weekly-01:scores:v1';
   const attemptKey = 'pokergym:weekly-01:attempt:v1';
+  const choicesKey = 'pokergym:weekly-01:choices:v1';
   const cards = [...document.querySelectorAll('article[data-answer]')];
   const score = document.getElementById('pack-score');
   const history = document.getElementById('pack-history');
@@ -11,6 +12,7 @@
   const shareStatus = document.getElementById('pack-share-status');
   let saved = null;
   let results = [];
+  let chosen = [];
   let saving = true;
   const valid = value => value && Number.isInteger(value.correct) && value.correct >= 0 &&
     value.correct <= cards.length && Number.isInteger(value.revealed) && value.revealed >= 0 &&
@@ -27,12 +29,26 @@
       results = attempt.map(value => value === null ? undefined : value);
     }
   } catch { saving = false; }
+  // Keep legacy attempts valid; only restore choices consistent with their score.
+  try {
+    const value = JSON.parse(localStorage.getItem(choicesKey));
+    if (Array.isArray(value) && value.length === cards.length) {
+      chosen = value.map((move, index) => {
+        const legal = ['hit', 'stand', 'double', ...([2, 3].includes(index) ? ['split'] : [])];
+        return typeof results[index] === 'boolean' && legal.includes(move) &&
+          (move === cards[index].dataset.answer) === results[index] ? move : null;
+      });
+    }
+  } catch { saving = false; }
   function saveAttempt() {
     const started = results.some(value => value !== undefined);
     try {
       if (started) localStorage.setItem(attemptKey,
         JSON.stringify(Array.from({ length: cards.length }, (_, index) => results[index] ?? null)));
       else localStorage.removeItem(attemptKey);
+      if (started) localStorage.setItem(choicesKey,
+        JSON.stringify(Array.from({ length: cards.length }, (_, index) => chosen[index] ?? null)));
+      else localStorage.removeItem(choicesKey);
     } catch { saving = false; }
   }
   function render() {
@@ -102,6 +118,7 @@
       button.onclick = () => {
         if (results[index] !== undefined) return;
         const correct = move === card.dataset.answer;
+        chosen[index] = move;
         record(index, correct);
         response.textContent = `${button.textContent}: ${correct ? 'correct' : 'review the explanation'}.`;
         details.open = true;
@@ -127,12 +144,13 @@
       choices.querySelectorAll('button').forEach(button => { button.disabled = true; });
       response.textContent = results[index] === 'revealed'
         ? 'Resumed: answer revealed before choosing, no point this attempt.'
-        : `Resumed: ${results[index] ? 'correct' : 'review the explanation'}.`;
+        : `Resumed: ${chosen[index] ? 'you chose ' + chosen[index] + '; ' : ''}${results[index] ? 'correct' : 'review the explanation'}.`;
       details.open = true;
     }
   });
   retry.onclick = () => {
     results = [];
+    chosen = [];
     saveAttempt();
     cards.forEach(card => {
       card.querySelector('details').open = false;
