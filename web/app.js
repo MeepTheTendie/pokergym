@@ -1,5 +1,5 @@
 import { readBackup, writeBackup } from '../src/rpg/backup.js';
-import { feedbackDraft } from './feedback.js?v=github-draft-1';
+import { feedbackDraft } from './feedback.js?v=recurring-research-1';
 import { SUIT_GLYPH, SUIT_NAME, rankLabel, cardLabel } from '../src/cards.js';
 import { CATEGORY_LABEL, evaluate5 } from '../src/evaluate.js';
 import {
