@@ -1,6 +1,6 @@
 # Poker Gym
 
-[Play the free browser demo](https://playpokergym.com/web/) · [Download the current portable demo](https://github.com/MeepTheTendie/pokergym/releases/latest) · [Share player feedback](https://github.com/MeepTheTendie/pokergym/issues/1)
+[Try the five-decision weekly sample](https://playpokergym.com/guides/weekly-01/) · [Play the free browser demo](https://playpokergym.com/web/) · [Download the current portable demo](https://github.com/MeepTheTendie/pokergym/releases/latest) · [Share player feedback](https://github.com/MeepTheTendie/pokergym/issues/1)
 
 Practice card-game decisions in a free training game. Pick a game, play a five-hand session with coaching on every decision, and keep missed hands coming back until they stick. Free to play: no signup, no ads, no third-party trackers, no real-money wagering, and nothing is for sale today.
 
@@ -17,7 +17,9 @@ Prefer a quick lesson first? Try the [three-hand video-poker guide](https://play
 
 ## Help decide what comes next
 
-After a real session, [leave voluntary feedback](https://github.com/MeepTheTendie/pokergym/issues/1): which game/device did you use, where was the coaching unclear, and what would make you return next week? The thread also asks about interest in a possible one-time US$4.99 unlock (extra weak-spot drill packs and more video-poker pay tables). That is a hypothetical offer for research only; nothing is for sale today and the free demo stays free.
+Try the [free five-decision blackjack sample](https://playpokergym.com/guides/weekly-01/), choose before revealing each explanation, then retry on a later day. It saves your unfinished attempt and first/latest completed scores in the same browser. An explicit download button enables offline practice.
+
+After trying it, [leave voluntary feedback](https://github.com/MeepTheTendie/pokergym/issues/1): what was your first score, which explanation was unclear, and would fresh weekly drill packs and mistake review be worth US$5/month to you (interested, unsure or free-only)? What would make you return next week? This is a possible recurring offer for research, with no promised release schedule, signup or purchase. Nothing is for sale today and the free demo stays free.
 
 GitHub feedback is public and requires an account. Omit personal details and save backups. The demo also provides an email-draft alternative that you review and send yourself.
 
