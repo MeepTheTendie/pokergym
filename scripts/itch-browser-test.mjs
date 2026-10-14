@@ -85,7 +85,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   await send('Network.setCacheDisabled', { cacheDisabled: true });
   await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   if (topLevel) {
-    for (const guide of ['jacks-or-better', 'blackjack', 'holdem-best-five']) {
+    for (const guide of ['jacks-or-better', 'blackjack', 'holdem-best-five', 'baccarat']) {
     const guideUrl = liveUrl
       ? new URL(`/guides/${guide}/?smoke=${Date.now()}`, liveUrl).href
       : `http://127.0.0.1:18997/guides/${guide}/`;
@@ -101,7 +101,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     await guideEval('document.querySelector("summary").click()');
     assert.equal(await guideEval('document.querySelector("details").open'), true, 'Native answer disclosure works');
     assert.equal(await guideEval('document.querySelector(".cta").pathname'), '/web/', 'Guide links to playable demo');
-    const targetGame = { blackjack: 'blackjack', 'jacks-or-better': 'videopoker', 'holdem-best-five': 'holdem' }[guide];
+    const targetGame = { baccarat: 'baccarat', blackjack: 'blackjack', 'jacks-or-better': 'videopoker', 'holdem-best-five': 'holdem' }[guide];
     assert.equal(await guideEval('new URL(document.querySelector(".cta").href).searchParams.get("practice")'), targetGame);
     await guideEval('localStorage.clear(); document.querySelector(".cta").click()');
     for (let i = 0; i < 100; i++) {
@@ -111,7 +111,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     assert.equal(await guideEval('document.getElementById("practiceInvitation").hidden'), false, 'Selected training is explained before starting');
     await guideEval('document.getElementById("btnNew").click(); document.querySelector(".class-card").click(); document.getElementById("btnBecome").click()');
     assert.equal(await guideEval('document.getElementById("scr-lesson").hidden'), false, 'Guide starts its own lesson after trainer selection');
-    const expectedGym = { blackjack: 'countyfair', videopoker: 'pokergym', holdem: 'riverstone' }[targetGame];
+    const expectedGym = { baccarat: 'villaoak', blackjack: 'countyfair', videopoker: 'pokergym', holdem: 'riverstone' }[targetGame];
     const started = await guideEval('JSON.parse(localStorage.getItem("pokergym:save:v1"))');
     assert.equal(started.activeSession.gymId, expectedGym);
     assert.equal(started.activeSession.played, 0);
