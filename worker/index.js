@@ -1,11 +1,19 @@
 // Poker Gym edge worker: an aggregate, privacy-friendly visit counter in front
 // of the static assets. Runs only for the paths listed in wrangler.jsonc
 // assets.run_worker_first; every other request goes straight to assets.
-// It always returns env.ASSETS.fetch(request), even if counting fails.
+// Counting failures never prevent serving assets.
 import { countBucket, dataPoint } from './count.js';
 
 export default {
   async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+    // Keep new homepage visitors on one save/install origin. Existing www
+    // game URLs stay accessible so their browser-local saves can be exported.
+    if (url.hostname === 'www.playpokergym.com' && url.pathname === '/') {
+      url.hostname = 'playpokergym.com';
+      url.protocol = 'https:';
+      return Response.redirect(url.href, 307);
+    }
     let bucket = null;
     try { bucket = countBucket(request); } catch { bucket = null; }
     const response = await env.ASSETS.fetch(request);
