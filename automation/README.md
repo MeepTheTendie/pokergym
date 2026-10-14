@@ -1,6 +1,6 @@
 # Daily Linux work session
 
-The user timer starts at 09:00 America/Chicago daily. GPT-6.1 Sol uses low reasoning through the existing ChatGPT-signed-in Codex CLI. No desktop app is required. Each session has a maximum two-hour wall-clock window and makes successive checkpointed work iterations; it stops early on CLI failure, a documented full blocker, or verified target revenue. The runtime cap is not a token or subscription-usage cap. Usage limits can stop a run.
+The user timer starts at 09:00 America/Chicago daily. GPT-6.1 Sol uses low reasoning through the existing ChatGPT-signed-in Codex CLI. No desktop app is required. Each scheduled session starts exactly one Codex run, capped at 20 minutes. The runner does not relaunch Codex when that iteration completes or fails. Its four expired Cloudflare MCP connections are disabled for this job only, avoiding repeated OAuth refresh failures; other Codex sessions retain their normal configuration. The runtime cap is not a token or subscription-usage cap. Usage limits can stop a run.
 
 Keep the machine powered on, awake, online and your user session running. This is a local user timer, not a cloud task. Persistent scheduling catches a missed timer when the user manager next runs; it cannot wake a powered-off computer. No lingering, sleep policy or privileged configuration was changed.
 
