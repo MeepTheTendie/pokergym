@@ -51,13 +51,14 @@ try {
       if (await evaluate(expression)) return;
       await sleep(100);
     }
-    throw new Error(`Timed out: ${expression}`);
+    throw new Error(`Timed out: ${expression}; page=${await evaluate('JSON.stringify({url:location.href,title:document.title,text:document.body?.innerText.slice(0,400)})')}; errors=${JSON.stringify(errors)}`);
   };
   await send('Page.enable'); await send('Runtime.enable'); await send('Network.enable');
   await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   const navigate = async () => {
+    await evaluate('window.__packPreviousDocument = true');
     await send('Page.navigate', { url });
-    await waitFor('Boolean(document.querySelector("article button"))');
+    await waitFor('!window.__packPreviousDocument && Boolean(document.querySelector("article button"))');
   };
   const finish = async () => {
     await evaluate(`document.querySelectorAll('article').forEach(card => card.querySelector('button[data-move="' + card.dataset.answer + '"]').click())`);
