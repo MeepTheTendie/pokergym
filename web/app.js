@@ -410,6 +410,7 @@ el('feedbackForm').onsubmit = event => {
     clarity: el('feedbackClarity').value,
     returnInterest: el('feedbackReturn').value,
     priceInterest: el('feedbackPrice').value,
+    recurringInterest: el('feedbackRecurring').value,
     note: el('feedbackNote').value,
   });
   el('feedbackPreview').value = draft.body;

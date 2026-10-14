@@ -16,11 +16,22 @@ test('voluntary feedback safely encodes text and records intent without implying
   assert.deepEqual([...github.searchParams.keys()], ['title', 'body']);
   assert.match(draft.body, /not a purchase or subscription/);
   assert.ok(draft.body.includes('Possible one-time US$4.99 unlock'));
-  assert.ok(!draft.body.includes('US$5/month'));
+  assert.ok(draft.body.includes('Possible US$5/month fresh weekly drills and mistake review: not answered'));
   assert.ok(draft.body.endsWith(note));
   assert.equal([...url.searchParams.keys()].join(','), 'subject,body');
   assert.throws(() => feedbackDraft({ clarity: '', returnInterest: 'yes', priceInterest: 'interested' }));
   const bounded = feedbackDraft({ clarity: 'clear', returnInterest: 'yes', priceInterest: 'interested', note: 'x'.repeat(500) });
   assert.ok(bounded.body.endsWith('x'.repeat(400)));
   assert.ok(!bounded.body.endsWith('x'.repeat(401)));
+});
+
+test('recurring interest remains distinct from one-time interest and unanswered feedback', () => {
+  for (const recurringInterest of ['', 'interested', 'unsure', 'free-only']) {
+    const draft = feedbackDraft({ clarity: 'clear', returnInterest: 'yes', priceInterest: 'free-only', recurringInterest });
+    assert.ok(draft.body.includes('Possible one-time US$4.99 unlock: free-only'));
+    assert.ok(draft.body.includes(`Possible US$5/month fresh weekly drills and mistake review: ${recurringInterest || 'not answered'}`));
+    assert.equal(new URL(draft.githubHref).searchParams.get('body'), draft.body);
+    assert.equal(new URL(draft.href).searchParams.get('body'), draft.body);
+  }
+  assert.throws(() => feedbackDraft({ clarity: 'clear', returnInterest: 'yes', priceInterest: 'interested', recurringInterest: 'paid' }));
 });
