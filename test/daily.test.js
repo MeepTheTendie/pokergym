@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  dailyKey, seededRng, dailyPlan, dailyNumber, dayGap, DAILY_HANDS, DAILY_GAMES, dailySummary,
+  dailyKey, seededRng, dailyPlan, dailyNumber, dayGap, DAILY_HANDS, DAILY_GAMES, dailySummary, dailySession, dailyPlanV1,
 } from '../src/rpg/daily.js';
 import { createProfile, completeDaily, dailyCompleted, setDailyProgress } from '../src/rpg/state.js';
 import { readBackup, writeBackup } from '../src/rpg/backup.js';
@@ -174,5 +174,33 @@ test('captured daily games survive backup and override reconstructed attribution
     assert.throws(() => readBackup(JSON.stringify(broken)), /Invalid backup/);
     assert.equal(dailySummary(broken.daily.history, key).recent.hands, 0);
     assert.equal(completeDaily(createProfile('scholar'), key, Array(5).fill(true), invalid).daily.history.length, 0);
+  }
+});
+
+
+test('unfinished daily plans survive changes, mutation and backup restore', () => {
+  const key = '2026-10-14';
+  const plan = Array.from({ length: 5 }, (_, i) => ({ game: 'blackjack', seed: `saved-${i}` }));
+  const progress = { key, plan, index: 2, results: [true, false] };
+  const profile = setDailyProgress(createProfile('scholar'), progress);
+  progress.plan[2].game = 'holdem';
+  progress.results[0] = false;
+  const restored = readBackup(writeBackup(profile));
+  const resumed = dailySession(key, restored.daily.progress);
+  assert.equal(resumed.plan[2].game, 'blackjack');
+  assert.equal(resumed.plan[2].seed, 'saved-2');
+  assert.deepEqual(resumed.results, [true, false]);
+  resumed.plan[2].seed = 'changed';
+  resumed.results[0] = false;
+  assert.equal(restored.daily.progress.plan[2].seed, 'saved-2');
+  assert.equal(restored.daily.progress.results[0], true);
+  assert.deepEqual(dailySession(key, { key, index: 2, results: [true, false] }).plan, dailyPlanV1(key));
+  assert.equal(dailySession('2026-10-15', restored.daily.progress).index, 0);
+  for (const invalid of [null, [], Array(5).fill({ game: 'unknown', seed: 'x' }),
+    Array(5).fill({ game: 'blackjack', seed: '' }), Array(5).fill({ game: 'blackjack', seed: 1 })]) {
+    const broken = structuredClone(restored);
+    broken.daily.progress.plan = invalid;
+    assert.throws(() => readBackup(JSON.stringify(broken)), /Invalid backup/);
+    assert.equal(dailySession(key, broken.daily.progress).index, 0);
   }
 });

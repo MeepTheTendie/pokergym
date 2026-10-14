@@ -675,6 +675,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   const midProgress = await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).daily.progress');
   assert.equal(midProgress.key, key);
   assert.equal(midProgress.index, 2);
+  assert.deepEqual(midProgress.plan, plan, "Unfinished drill preserves actual game IDs and seeds");
   assert.ok(midProgress.results.length === 2 && midProgress.results.every(v => typeof v === 'boolean'), 'Two hands of results persist on quit');
   // Resume and complete today's five hands.
   await evaluate('[...document.querySelectorAll("#todayActions button")].find(b => b.textContent === "RESUME DAILY DRILL").click()');

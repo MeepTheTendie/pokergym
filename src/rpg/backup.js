@@ -1,6 +1,6 @@
 import { deserialize, serialize, validMistakeQuiz, validMistakeBox, validMistakeDue } from './state.js';
 import { GYMS, GYM_BY_ID } from './gyms.js';
-import { validDailyGames } from './daily.js';
+import { validDailyGames, validDailyPlan } from './daily.js';
 
 const count = n => Number.isSafeInteger(n) && n >= 0;
 const text = (s, max) => typeof s === 'string' && s.length <= max;
@@ -18,7 +18,8 @@ const daily = d => d && typeof d === 'object' && !Array.isArray(d) &&
   (d.progress == null || (typeof d.progress === 'object' && !Array.isArray(d.progress) &&
     dayKey(d.progress.key) && count(d.progress.index) && d.progress.index <= 5 &&
     Array.isArray(d.progress.results) && d.progress.results.every(v => typeof v === 'boolean') &&
-    d.progress.results.length === d.progress.index));
+    d.progress.results.length === d.progress.index &&
+    (d.progress.plan === undefined || validDailyPlan(d.progress.plan))));
 
 // External backups require stronger validation than legacy local saves.
 export function readBackup(raw) {

@@ -25,7 +25,7 @@ import {
 } from '../src/rpg/state.js';
 import {
   dailyKey, dailyPlan, dailyNumber, seededRng as dailySeedRng, DAILY_HANDS,
-  DAILY_GAME_LABEL, dailySummary,
+  DAILY_GAME_LABEL, dailySummary, dailySession,
 } from '../src/rpg/daily.js';
 import { parseEntryParams, isSharedDayCurrent, cleanEntrySearch, buildDailyShareText } from '../src/rpg/links.js';
 import { keyAction, shouldIgnoreKey } from '../src/rpg/keys.js';
@@ -888,17 +888,13 @@ function renderReviewEntry(container, row, scoredDue) {
 function startDaily() {
   if (!profile || dailyMode) return;
   const key = dailyKey();
-  const plan = dailyPlan(key);
   const number = dailyNumber(key);
   const daily = dailyOf(profile);
-  let index = 0;
-  let results = [];
-  if (daily.progress && daily.progress.key === key && daily.progress.index < DAILY_HANDS) {
-    index = daily.progress.index;
-    results = daily.progress.results.slice(0, index);
-  }
+  const { plan, index, results } = dailySession(key, daily.progress);
   const completed = dailyCompleted(profile, key);
   dailyRun = { key, plan, number, index, results, scored: !completed, finished: false };
+  profile = setDailyProgress(profile, { key, plan, index, results });
+  save();
   dailyMode = true;
   shortSession = false;
   tutorialTips = [];
@@ -1593,7 +1589,7 @@ function settleDailyHand({ optimal, difficulty, line, review }) {
   run.index = run.results.length;
   if (run.index < DAILY_HANDS) {
     // Persist after every hand so a closed tab resumes from the last completed hand.
-    profile = setDailyProgress(profile, { key: run.key, index: run.index, results: run.results });
+    profile = setDailyProgress(profile, { key: run.key, plan: run.plan, index: run.index, results: run.results });
   } else {
     profile = completeDaily(profile, run.key, run.results, run.plan.map(hand => hand.game));
     run.finished = true;
