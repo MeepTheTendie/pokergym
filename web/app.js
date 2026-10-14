@@ -1595,7 +1595,7 @@ function settleDailyHand({ optimal, difficulty, line, review }) {
     // Persist after every hand so a closed tab resumes from the last completed hand.
     profile = setDailyProgress(profile, { key: run.key, index: run.index, results: run.results });
   } else {
-    profile = completeDaily(profile, run.key, run.results);
+    profile = completeDaily(profile, run.key, run.results, run.plan.map(hand => hand.game));
     run.finished = true;
   }
   save();

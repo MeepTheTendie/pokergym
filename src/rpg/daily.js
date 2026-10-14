@@ -49,7 +49,8 @@ export function dailyNumber(key) {
 // Five hand descriptors. A Fisher-Yates shuffle of all four games, then one
 // game repeated and the whole list reshuffled, so every drill includes each of
 // the four games at least once and the duplicate is not always in last place.
-export function dailyPlan(key) {
+// Preserve this algorithm for old history entries without captured game IDs.
+export function dailyPlanV1(key) {
   const rng = seededRng(`plan:${key}`);
   const games = DAILY_GAMES.slice();
   for (let i = games.length - 1; i > 0; i--) {
@@ -63,6 +64,15 @@ export function dailyPlan(key) {
     [games[i], games[j]] = [games[j], games[i]];
   }
   return games.map((game, i) => ({ game, seed: `${key}#${i}` }));
+}
+
+export function dailyPlan(key) {
+  return dailyPlanV1(key);
+}
+
+export function validDailyGames(games) {
+  return Array.isArray(games) && games.length === DAILY_HANDS &&
+    games.every(game => DAILY_GAMES.includes(game));
 }
 
 export const DAILY_GAME_LABEL = {
@@ -79,7 +89,8 @@ export function dailySummary(history = [], today = dailyKey()) {
   const entries = (Array.isArray(history) ? history : []).filter(entry => {
     if (!entry || !/^\d{4}-\d{2}-\d{2}$/.test(entry.key) || seen.has(entry.key) ||
         !Array.isArray(entry.results) || entry.results.length !== DAILY_HANDS ||
-        !entry.results.every(value => typeof value === 'boolean')) return false;
+        !entry.results.every(value => typeof value === 'boolean') ||
+        (entry.games !== undefined && !validDailyGames(entry.games))) return false;
     const gap = dayGap(today, entry.key);
     if (!Number.isFinite(gap) || gap < 0 || gap >= 14) return false;
     if (new Date(keyToDay(entry.key) * DAY_MS).toISOString().slice(0, 10) !== entry.key) return false;
@@ -92,8 +103,9 @@ export function dailySummary(history = [], today = dailyKey()) {
   const previous = entries.filter(entry => dayGap(today, entry.key) >= 7);
   const games = DAILY_GAMES.map(game => ({ game, correct: 0, hands: 0 }));
   for (const entry of recent) {
-    dailyPlan(entry.key).forEach((hand, i) => {
-      const game = games.find(row => row.game === hand.game);
+    const playedGames = entry.games ?? dailyPlanV1(entry.key).map(hand => hand.game);
+    playedGames.forEach((gameId, i) => {
+      const game = games.find(row => row.game === gameId);
       game.hands++;
       if (entry.results[i]) game.correct++;
     });

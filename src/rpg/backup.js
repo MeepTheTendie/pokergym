@@ -1,5 +1,6 @@
 import { deserialize, serialize, validMistakeQuiz, validMistakeBox, validMistakeDue } from './state.js';
 import { GYMS, GYM_BY_ID } from './gyms.js';
+import { validDailyGames } from './daily.js';
 
 const count = n => Number.isSafeInteger(n) && n >= 0;
 const text = (s, max) => typeof s === 'string' && s.length <= max;
@@ -12,7 +13,8 @@ const daily = d => d && typeof d === 'object' && !Array.isArray(d) &&
   (d.lastKey == null || dayKey(d.lastKey)) &&
   count(d.streak) && count(d.best) && d.best >= d.streak &&
   (d.restKey == null || dayKey(d.restKey)) &&
-  list(d.history, 60, e => e && typeof e === 'object' && dayKey(e.key) && dayResults(e.results)) &&
+  list(d.history, 60, e => e && typeof e === 'object' && dayKey(e.key) && dayResults(e.results) &&
+    (e.games === undefined || validDailyGames(e.games))) &&
   (d.progress == null || (typeof d.progress === 'object' && !Array.isArray(d.progress) &&
     dayKey(d.progress.key) && count(d.progress.index) && d.progress.index <= 5 &&
     Array.isArray(d.progress.results) && d.progress.results.every(v => typeof v === 'boolean') &&

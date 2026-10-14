@@ -1,6 +1,6 @@
 import { CLASS_BY_ID, startingStats } from './classes.js';
 import { GYMS, GYM_BY_ID, gymForClass, isUnlocked } from './gyms.js';
-import { dayGap } from './daily.js';
+import { dayGap, dailyPlan, validDailyGames } from './daily.js';
 
 export const SAVE_VERSION = 2;
 
@@ -87,7 +87,7 @@ export function setDailyProgress(profile, progress) {
   return { ...profile, daily: { ...dailyOf(profile), progress } };
 }
 
-export function completeDaily(profile, key, results) {
+export function completeDaily(profile, key, results, games = dailyPlan(key).map(hand => hand.game)) {
   if (!profile) return profile;
   const daily = dailyOf(profile);
   const scored = dailyResults(results);
@@ -112,7 +112,8 @@ export function completeDaily(profile, key, results) {
     streak = 1;
   }
 
-  const history = [{ key, results: scored }, ...daily.history].slice(0, DAILY_HISTORY_CAP);
+  if (!validDailyGames(games)) return profile;
+  const history = [{ key, results: scored, games: [...games] }, ...daily.history].slice(0, DAILY_HISTORY_CAP);
   return { ...profile, daily: {
     lastKey: key,
     streak,

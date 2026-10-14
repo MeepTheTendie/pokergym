@@ -150,3 +150,29 @@ test('backups carry the daily field and reject malformed daily records', () => {
   delete legacy.daily;
   assert.doesNotThrow(() => readBackup(writeBackup(legacy)));
 });
+
+
+test('captured daily games survive backup and override reconstructed attribution', () => {
+  const key = '2026-10-14';
+  const games = ['blackjack', 'blackjack', 'blackjack', 'blackjack', 'holdem'];
+  let profile = completeDaily(createProfile('scholar'), key, [true, false, true, false, true], games);
+  games[0] = 'baccarat'; // caller changes cannot relabel the saved record
+  profile = readBackup(writeBackup(profile));
+  assert.deepEqual(dailySummary(profile.daily.history, key).games, [
+    { game: 'videopoker', correct: 0, hands: 0 },
+    { game: 'blackjack', correct: 2, hands: 4 },
+    { game: 'baccarat', correct: 0, hands: 0 },
+    { game: 'holdem', correct: 1, hands: 1 },
+  ]);
+  const old = structuredClone(profile);
+  delete old.daily.history[0].games;
+  assert.doesNotThrow(() => readBackup(writeBackup(old)));
+  assert.equal(dailySummary(old.daily.history, key).recent.hands, 5);
+  for (const invalid of [null, [], ['blackjack'], Array(5).fill('unknown')]) {
+    const broken = structuredClone(profile);
+    broken.daily.history[0].games = invalid;
+    assert.throws(() => readBackup(JSON.stringify(broken)), /Invalid backup/);
+    assert.equal(dailySummary(broken.daily.history, key).recent.hands, 0);
+    assert.equal(completeDaily(createProfile('scholar'), key, Array(5).fill(true), invalid).daily.history.length, 0);
+  }
+});

@@ -686,6 +686,11 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   assert.equal(await evaluate('document.getElementById("btnNext").textContent'), 'RETURN TO MAP');
   assert.match(await evaluate('document.getElementById("masterLine")._dataset.full'), /DAILY DRILL #\d+ COMPLETE: \d\/5 CORRECT/);
   assert.equal(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).daily.progress'), null, 'Finished drill retires its resume progress');
+  assert.equal(await evaluate(`(async () => {
+    const daily = await import('../src/rpg/daily.js');
+    const entry = JSON.parse(localStorage.getItem('pokergym:save:v1')).daily.history[0];
+    return JSON.stringify(entry.games) === JSON.stringify(daily.dailyPlan(entry.key).map(hand => hand.game));
+  })()`), true, 'Completed daily record captures the actual ordered game IDs');
   const beforeReplay = await evaluate(`(() => {
     const profile = JSON.parse(localStorage.getItem('pokergym:save:v1'));
     const tally = profile.daily.history[0].results.filter(Boolean).length;
