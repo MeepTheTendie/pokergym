@@ -116,5 +116,37 @@
     render();
     cards[0].querySelector('button').focus();
   };
+  const feedback = document.getElementById('pack-feedback');
+  // Older cached HTML can load the updated asset during a deployment.
+  if (!feedback) { render(); return; }
+  const draft = document.getElementById('pack-feedback-draft');
+  const review = document.getElementById('pack-feedback-review');
+  function updateDraftLinks() {
+    const body = encodeURIComponent(draft.value.slice(0, 1800));
+    const subject = encodeURIComponent('Poker Gym drill pack 01 feedback');
+    document.getElementById('pack-feedback-email').href =
+      `mailto:wesleympennock@gmail.com?subject=${subject}&body=${body}`;
+    document.getElementById('pack-feedback-github').href =
+      `https://github.com/MeepTheTendie/pokergym/issues/new?title=${subject}&body=${body}`;
+  }
+  feedback.hidden = false;
+  feedback.addEventListener('submit', event => {
+    event.preventDefault();
+    const interest = document.getElementById('pack-interest').value;
+    if (!['interested', 'unsure', 'free-only'].includes(interest)) return;
+    draft.value = [
+      'Poker Gym voluntary drill pack 01 feedback',
+      saved ? `First completed score: ${saved.first.correct}/5 (${saved.first.revealed} revealed before choosing).` : 'No completed score available.',
+      saved ? `Latest completed score: ${saved.latest.correct}/5 (${saved.latest.revealed} revealed before choosing).` : '',
+      `Possible US$5/month fresh weekly packs and mistake review: ${interest}`,
+      'This is feedback on a possible offer, not a signup, purchase or subscription.',
+      '',
+      `Useful or unclear: ${document.getElementById('pack-note').value.slice(0, 400).trim() || '(no comment)'}`,
+    ].filter((line, index) => line || index === 5).join('\n');
+    updateDraftLinks();
+    review.hidden = false;
+    draft.focus();
+  });
+  draft.addEventListener('input', updateDraftLinks);
   render();
 })();

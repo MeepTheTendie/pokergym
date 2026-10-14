@@ -31,7 +31,10 @@ try {
       clearTimeout(request.timeout);
       message.error ? request.reject(new Error(message.error.message)) : request.resolve(message.result);
     }
-    if (message.method === 'Runtime.exceptionThrown') errors.push(message.params.exceptionDetails.text);
+    if (message.method === 'Runtime.exceptionThrown') {
+      const details = message.params.exceptionDetails;
+      errors.push(details.exception?.description ?? details.text);
+    }
   };
   const send = (method, params = {}) => new Promise((resolve, reject) => {
     const next = ++id;
@@ -90,10 +93,37 @@ try {
   await navigate();
   assert.match(await evaluate('document.getElementById("pack-history").textContent'), /First completed attempt: 3\/5.*Latest completed attempt: 5\/5/);
   assert.match(await evaluate('document.getElementById("pack-score").textContent'), /0\/5 completed/);
+  // Offer feedback is voluntary, unselected and unsent until the player acts.
+  assert.equal(await evaluate('document.getElementById("pack-feedback").hidden'), false);
+  assert.equal(await evaluate('document.getElementById("pack-interest").value'), '');
+  await evaluate('document.getElementById("pack-feedback").requestSubmit()');
+  assert.equal(await evaluate('document.getElementById("pack-feedback-review").hidden'), true);
+  const beforeFeedback = await evaluate('JSON.stringify({...localStorage})');
+  await evaluate(`document.getElementById('pack-interest').value = 'free-only'; document.getElementById('pack-note').value = '<script>not markup</script> & soft totals?'; document.getElementById('pack-feedback').requestSubmit()`);
+  const feedbackBody = await evaluate('document.getElementById("pack-feedback-draft").value');
+  assert.match(feedbackBody, /First completed score: 3\/5.*\nLatest completed score: 5\/5/);
+  assert.match(feedbackBody, /review: free-only/);
+  assert.ok(feedbackBody.includes('<script>not markup</script> & soft totals?'));
+  assert.equal(await evaluate('document.querySelectorAll("#pack-feedback-review script").length'), 0);
+  for (const link of ['email', 'github']) {
+    const href = await evaluate(`document.getElementById('pack-feedback-${link}').href`);
+    assert.equal(new URL(href).searchParams.get('body'), feedbackBody);
+  }
+  await evaluate(`document.getElementById('pack-feedback-draft').value = 'Edited: no scores & no comment'; document.getElementById('pack-feedback-draft').dispatchEvent(new Event('input'))`);
+  for (const link of ['email', 'github']) {
+    const href = await evaluate(`document.getElementById('pack-feedback-${link}').href`);
+    assert.equal(new URL(href).searchParams.get('body'), 'Edited: no scores & no comment');
+  }
+  assert.equal(await evaluate('JSON.stringify({...localStorage})'), beforeFeedback);
+  assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
+  await navigate();
+  assert.equal(await evaluate('document.getElementById("pack-feedback-review").hidden'), true);
   // A corrupted stored record must not become a score or execute markup.
   await evaluate(`localStorage.setItem('pokergym:weekly-01:scores:v1', JSON.stringify({ first: { correct: 999, revealed: 0 }, latest: { correct: 5, revealed: 0 } }))`);
   await navigate();
   assert.equal(await evaluate('document.getElementById("pack-history").textContent'), 'No completed score saved yet.');
+  await evaluate(`document.getElementById('pack-interest').value = 'unsure'; document.getElementById('pack-feedback').requestSubmit()`);
+  assert.match(await evaluate('document.getElementById("pack-feedback-draft").value'), /No completed score available/);
   // Malformed and already-completed attempts cannot be resumed or alter history.
   for (const attempt of [[true, false, 'revealed', null, '<script>'], [true, true, true, true, true], [true]]) {
     await evaluate(`localStorage.setItem('pokergym:weekly-01:attempt:v1', ${JSON.stringify(JSON.stringify(attempt))})`);
@@ -101,6 +131,18 @@ try {
     assert.match(await evaluate('document.getElementById("pack-score").textContent'), /0\/5 completed/);
   }
   await evaluate("localStorage.removeItem('pokergym:weekly-01:attempt:v1')");
+  // An older cached page has no feedback form; new JS must preserve its drill.
+  const oldHtml = await send('Page.addScriptToEvaluateOnNewDocument', { source: `
+    const observer = new MutationObserver(() => {
+      document.getElementById('pack-feedback')?.remove();
+    });
+    observer.observe(document, { childList: true, subtree: true });
+  ` });
+  await navigate();
+  assert.equal(await evaluate('document.getElementById("pack-feedback")'), null);
+  await finish();
+  assert.match(await evaluate('document.getElementById("pack-score").textContent'), /5\/5 correct/);
+  await send('Page.removeScriptToEvaluateOnNewDocument', { identifier: oldHtml.identifier });
   // Denied reads and quota failures both allow the full drill to finish.
   for (const blocked of ['getItem', 'setItem']) {
     const injected = await send('Page.addScriptToEvaluateOnNewDocument', { source: `Storage.prototype.${blocked} = () => { throw new DOMException('test storage unavailable'); };` });
@@ -111,7 +153,7 @@ try {
     await send('Page.removeScriptToEvaluateOnNewDocument', { identifier: injected.identifier });
   }
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ url, firstScore: 3, retryScore: 5, reload: 'passed', revealBeforeChoice: 'passed', interruptedResume: 'passed', invalidAttempt: 'passed', corruptSave: 'passed', deniedAndQuotaStorage: 'passed', phoneOverflow: false, runtimeErrors: 0 }));
+  console.log(JSON.stringify({ url, firstScore: 3, retryScore: 5, reload: 'passed', revealBeforeChoice: 'passed', interruptedResume: 'passed', invalidAttempt: 'passed', corruptSave: 'passed', deniedAndQuotaStorage: 'passed', unsentEditableFeedback: 'passed', phoneOverflow: false, runtimeErrors: 0 }));
 } finally {
   ws?.close(); browser.kill('SIGTERM');
   await new Promise(resolve => browser.exitCode !== null ? resolve() : browser.once('exit', resolve));
