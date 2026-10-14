@@ -9,11 +9,26 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const staging = await mkdtemp(path.join(tmpdir(), 'pokergym-itch-'));
 try {
   await build(staging);
-  // Ship a self-contained weekly sample alongside the game; other guides stay online.
+  // Ship the complete recall-to-practice routine without requiring the cloud host.
   await rm(path.join(staging, 'guides'), { recursive: true, force: true });
   await rm(path.join(staging, 'sitemap.xml'), { force: true });
+  const guides = ['jacks-or-better', 'blackjack', 'holdem-best-five', 'baccarat'];
+  const localLinks = html => html
+    .replace(/href="\/guides\/weekly-01\/"/g, 'href="weekly-sample.html"')
+    .replace(/href="\/guides\/([a-z-]+)\/"/g, (_, guide) => {
+      if (!guides.includes(guide)) throw new Error(`Unbundled guide: ${guide}`);
+      return `href="guide-${guide}.html"`;
+    })
+    .replace(/href="\/web\/\?practice=([a-z]+)"/g, 'href="index.html?practice=$1"')
+    .replace(/href="\/web\/privacy(?:\.html)?"/g, 'href="privacy.html"')
+    .replace(/href="\/web\/icon.svg"/g, 'href="icon.svg"')
+    .replace(/href="\/"/g, 'href="index.html"');
+  for (const guide of guides) {
+    const html = await readFile(path.join(root, `public/guides/${guide}/index.html`), 'utf8');
+    await writeFile(path.join(staging, `web/guide-${guide}.html`), localLinks(html));
+  }
   const sample = await readFile(path.join(root, 'public/guides/weekly-01/index.html'), 'utf8');
-  const portableSample = sample
+  const portableSample = localLinks(sample)
     .replace(/<link rel="manifest"[^>]+>/, '')
     .replace(/<p><button id="pack-download"[\s\S]*?<section aria-label="Pack score">/, '<p class="note">This sample is included in the download. Serve the extracted folder in a browser to practice without contacting Poker Gym. Feedback links need a connection. Scores stay on this host, separately from the live site.</p><section aria-label="Pack score">')
     .replace(/href="\/web\/\?practice=blackjack"/g, 'href="index.html?practice=blackjack"')
@@ -27,7 +42,7 @@ try {
     await readFile(path.join(root, 'public/guides/weekly-01/score.js')));
   const game = await readFile(path.join(staging, 'web/index.html'), 'utf8');
   const portableGame = game.replace('<p class="hint" id="offlineStatus"',
-    '<p class="hint" style="text-align:center;"><a id="portableWeeklySample" href="weekly-sample.html" target="_blank" rel="noopener">TRY THE FIVE-DECISION WEEKLY SAMPLE</a></p><p class="hint" id="offlineStatus"');
+    '<p class="hint" style="text-align:center;"><a id="portableWeeklySample" href="weekly-sample.html" target="_blank" rel="noopener">TRY THE FIVE-DECISION WEEKLY SAMPLE</a></p><details id="portableGuides"><summary>THREE-DECISION LEARNING GUIDES</summary>' + guides.map(guide => `<p><a href="guide-${guide}.html" target="_blank" rel="noopener">${{blackjack: 'Blackjack', baccarat: 'Baccarat', 'jacks-or-better': 'Jacks or Better', 'holdem-best-five': 'Hold’em best five'}[guide]}</a></p>`).join('') + '</details><p class="hint" id="offlineStatus"');
   await writeFile(path.join(staging, 'web/index.html'), portableGame.replace('<link rel="manifest" href="manifest.webmanifest">', ''));
   // Keep module-relative assets intact; the entry point must be at the ZIP root.
   // An embedded demo should not advertise installation of the cloud PWA.

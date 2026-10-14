@@ -237,6 +237,32 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   console.log('PASS: video-poker cache preserves hold positions for reordered cards.');
   await checkPrivacy();
   if (!topLevel) {
+    for (const guide of ['jacks-or-better', 'blackjack', 'holdem-best-five', 'baccarat']) {
+      await evaluate(`(() => {
+        const frame = document.createElement('iframe'); frame.id = 'guideCheck';
+        frame.src = document.querySelector('#portableGuides a[href="guide-${guide}.html"]').href;
+        frame.style.cssText = 'position:fixed;inset:0;width:390px;height:600px;border:0;z-index:9999';
+        document.body.append(frame);
+      })()`);
+      await waitFor('document.getElementById("guideCheck").contentDocument?.querySelectorAll("details").length === 3');
+      const targetGame = {blackjack: 'blackjack', baccarat: 'baccarat', 'jacks-or-better': 'videopoker', 'holdem-best-five': 'holdem'}[guide];
+      const result = await evaluate(`(() => {
+        const frame = document.getElementById('guideCheck'), doc = frame.contentDocument;
+        const hidden = doc.querySelectorAll('details[open]').length === 0;
+        doc.querySelector('summary').click();
+        return {hidden, revealed: doc.querySelector('details').open,
+          fits: doc.documentElement.scrollWidth <= frame.clientWidth,
+          practice: new URL(doc.querySelector('.cta').href).pathname,
+          game: new URL(doc.querySelector('.cta').href).searchParams.get('practice'),
+          localLinks: [...doc.querySelectorAll('a[href],link[rel="icon"]')].every(el =>
+            !el.href.startsWith('https://playpokergym.com') &&
+            (!el.href.startsWith(location.origin) || new URL(el.href).pathname.startsWith('/uploads/demo/web/'))) };
+      })()`);
+      assert.deepEqual(result, {hidden: true, revealed: true, fits: true,
+        practice: '/uploads/demo/web/index.html', game: targetGame, localLinks: true});
+      await evaluate('document.getElementById("guideCheck").remove()');
+    }
+    console.log('PASS: four bundled phone guides reveal answers and link local practice, privacy and related guides.');
     assert.equal(await evaluate('document.getElementById("portableWeeklySample").target'), '_blank', 'Sample preserves running game');
     await evaluate(`(() => {
       const frame = document.createElement('iframe'); frame.id = 'sampleCheck';
