@@ -145,6 +145,25 @@ try {
     assert.match(await evaluate('document.getElementById("pack-score").textContent'), /0\/5 completed/);
   }
   await evaluate("localStorage.removeItem('pokergym:weekly-01:attempt:v1')");
+  // Explicit download must preserve an interrupted attempt without networking.
+  await evaluate('localStorage.clear()');
+  await navigate();
+  await evaluate('document.getElementById("pack-download").click()');
+  await waitFor('document.getElementById("pack-offline").textContent.startsWith("Offline pack ready.")');
+  await evaluate('document.querySelector("article button[data-move=hit]").click()');
+  await send('Network.setCacheDisabled', { cacheDisabled: true });
+  await send('Network.emulateNetworkConditions', { offline: true, latency: 0, downloadThroughput: 0, uploadThroughput: 0 });
+  await navigate();
+  assert.match(await evaluate('document.getElementById("pack-score").textContent'), /1\/5 correct.*1\/5 completed/);
+  await finish();
+  assert.match(await evaluate('document.getElementById("pack-score").textContent'), /5\/5 correct.*5\/5 completed/);
+  for (const suffix of ['', '/', '/index.html?ref=share']) {
+    await evaluate('window.__packPreviousDocument = true');
+    await send('Page.navigate', { url: new URL('/guides/weekly-01' + suffix, url).href });
+    await waitFor('!window.__packPreviousDocument && Boolean(document.querySelector("article button"))');
+    assert.match(await evaluate('document.getElementById("pack-history").textContent'), /Latest completed attempt: 5\/5/);
+  }
+  await send('Network.emulateNetworkConditions', { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
   // An older cached page has no feedback form; new JS must preserve its drill.
   const oldHtml = await send('Page.addScriptToEvaluateOnNewDocument', { source: `
     const observer = new MutationObserver(() => {
@@ -168,7 +187,7 @@ try {
     await send('Page.removeScriptToEvaluateOnNewDocument', { identifier: injected.identifier });
   }
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ url, firstScore: 3, retryScore: 5, reload: 'passed', revealBeforeChoice: 'passed', interruptedResume: 'passed', invalidAttempt: 'passed', corruptSave: 'passed', deniedAndQuotaStorage: 'passed', unsentEditableFeedback: 'passed', phoneOverflow: false, runtimeErrors: 0 }));
+  console.log(JSON.stringify({ url, firstScore: 3, retryScore: 5, reload: 'passed', revealBeforeChoice: 'passed', interruptedResume: 'passed', offlineResumeAndUrlVariants: 'passed', invalidAttempt: 'passed', corruptSave: 'passed', deniedAndQuotaStorage: 'passed', unsentEditableFeedback: 'passed', phoneOverflow: false, runtimeErrors: 0 }));
 } finally {
   ws?.close(); browser.kill('SIGTERM');
   await new Promise(resolve => browser.exitCode !== null ? resolve() : browser.once('exit', resolve));

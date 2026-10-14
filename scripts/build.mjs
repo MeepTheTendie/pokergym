@@ -42,6 +42,7 @@ async function collect(folder) {
 }
 await collect('web');
 await collect('src');
+await collect('guides/weekly-01');
 assets.sort();
 const hash = createHash('sha256');
 const template = await readFile(path.join(root, 'scripts/offline-worker.js'), 'utf8');

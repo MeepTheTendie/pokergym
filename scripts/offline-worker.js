@@ -30,7 +30,10 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   if (event.request.method !== 'GET' || url.origin !== self.location.origin) return;
-  const asset = event.request.mode === 'navigate' &&
+  const packPath = '/guides/weekly-01';
+  const packNavigation = event.request.mode === 'navigate' &&
+    [packPath, `${packPath}/`, `${packPath}/index.html`].includes(url.pathname);
+  const asset = packNavigation ? `${packPath}/index.html` : event.request.mode === 'navigate' &&
     (url.pathname === '/web/' || url.pathname === '/web/index.html')
     ? '/web/index.html'
     : url.pathname === '/web/privacy' ? '/web/privacy.html' : url.pathname;

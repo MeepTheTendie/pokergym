@@ -33,10 +33,10 @@ test('public build contains its module graph without repository or diagnostic fi
   assert.match(worker, /pokergym-offline-[a-f0-9]{20}/);
   const assets = JSON.parse(worker.match(/const ASSETS = (\[[^\n]+\]);/)[1]);
   for (const asset of assets) {
-    assert.match(asset, /^\/(?:web|src)\//, 'Only public game files are cached');
+    assert.match(asset, /^\/(?:web|src|guides\/weekly-01)\//, 'Only public game files are cached');
     await access(path.join(root, asset.slice(1)));
   }
-  for (const asset of ['/web/index.html', '/web/offline.js', '/web/icon-192.png', '/src/rpg/state.js', '/src/coach/videopoker.js']) {
+  for (const asset of ['/web/index.html', '/web/offline.js', '/web/icon-192.png', '/src/rpg/state.js', '/src/coach/videopoker.js', '/guides/weekly-01/index.html', '/guides/weekly-01/score.js', '/guides/weekly-01/offline.js']) {
     assert.ok(assets.includes(asset), `${asset} is available before going offline`);
   }
   assert.ok(!assets.includes('/sw.js'), 'Worker does not cache itself');
