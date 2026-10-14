@@ -76,7 +76,22 @@ try {
   }
   const installability = await send('Page.getInstallabilityErrors');
   assert.deepEqual(installability.installabilityErrors, [], 'Chromium reports no installability errors');
-  await evaluate('document.getElementById("btnNew").click(); document.querySelector(".class-card").click(); document.getElementById("btnBecome").click()');
+  const firstDecisionStarted = Date.now();
+  assert.equal(await evaluate('localStorage.getItem("pokergym:save:v1")'), null, 'Fresh visitor has no profile');
+  await evaluate('document.getElementById("btnStart").click()');
+  assert.equal(await evaluate('document.getElementById("scr-lesson").hidden'), false, 'Primary button reaches introduction in one tap');
+  await evaluate('document.getElementById("btnSkip").click()');
+  await waitFor('!document.getElementById("scr-battle").hidden && !document.getElementById("btnHit").disabled && document.getElementById("battleEndRow").hidden');
+  assert.match(await evaluate('document.querySelector(".battle-label").textContent'), /FIRST PRACTICE.*HARD NINE AGAINST A TWO/, 'First hand is explicitly authored practice');
+  const firstDecisionMs = Date.now() - firstDecisionStarted;
+  assert.ok(firstDecisionMs < 15000, 'First actionable decision reached within fifteen seconds using two taps (intro skipped)');
+  await evaluate('document.getElementById("btnStand").click()');
+  const firstHand = await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1"))');
+  assert.equal(firstHand.activeSession.gymId, 'countyfair');
+  assert.equal(firstHand.activeSession.played, 1, 'Actual first decision advances the five-hand session');
+  assert.equal(firstHand.handsPlayed, 1);
+  assert.equal(firstHand.handsOptimal, 0, 'Standing on nine is graded as a mistake by the real coach');
+  assert.ok(firstHand.mistakes.some(m => m.game === 'blackjack' && m.quiz), 'First decision captures a scored review key');
   const save = await evaluate('localStorage.getItem("pokergym:save:v1")');
   assert.ok(save, 'Trainer save exists');
   // Navigate to the exact manifest entry offline; this does not install an app.
@@ -88,9 +103,13 @@ try {
   assert.equal(await evaluate('document.getElementById("btnContinue").disabled'), false);
   await evaluate('document.getElementById("btnContinue").click()');
   assert.equal(await evaluate('document.getElementById("scr-map").hidden'), false, 'Offline manifest entry reaches map');
+  await evaluate('document.querySelector("#todayActions button").click()');
+  assert.equal(await evaluate('document.getElementById("scr-battle").hidden'), false, 'Today action resumes unfinished training offline');
+  assert.equal(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).activeSession.played'), 1, 'Resume retains the completed first hand');
+  assert.doesNotMatch(await evaluate('document.querySelector(".battle-label").textContent'), /FIRST PRACTICE/, 'Later hands use ordinary practice');
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Start screen fits phone width');
   assert.deepEqual(errors, [], 'No browser runtime errors');
-  console.log(JSON.stringify({ checkedAt: new Date().toISOString(), url, chromium: execFileSync('chromium', ['--version'], { encoding: 'utf8' }).trim(), manifestUrl: manifest.url, startUrl: start.href, icons: data.icons.length, installabilityErrors: [], offlineStartUrlSaveResume: 'passed', physicalAndroidInstallation: 'unverified' }, null, 2));
+  console.log(JSON.stringify({ checkedAt: new Date().toISOString(), url, chromium: execFileSync('chromium', ['--version'], { encoding: 'utf8' }).trim(), manifestUrl: manifest.url, startUrl: start.href, icons: data.icons.length, installabilityErrors: [], firstDecisionTaps: 2, firstDecisionMs, firstDecisionGradingAndReview: 'passed', offlineStartUrlSaveResume: 'passed', physicalAndroidInstallation: 'unverified' }, null, 2));
 } finally {
   ws?.close(); browser.kill('SIGTERM');
   await new Promise(resolve => browser.exitCode !== null ? resolve() : browser.once('exit', resolve));

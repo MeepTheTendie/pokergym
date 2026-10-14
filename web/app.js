@@ -29,7 +29,7 @@ import {
 } from '../src/rpg/daily.js';
 import { parseEntryParams, isSharedDayCurrent, cleanEntrySearch, buildDailyShareText } from '../src/rpg/links.js';
 import { keyAction, shouldIgnoreKey } from '../src/rpg/keys.js';
-import { drillSequence, DRILL_HANDS, DRILL_GAMES } from '../src/rpg/drills.js';
+import { drillSequence, BLACKJACK_DRILLS, DRILL_HANDS, DRILL_GAMES } from '../src/rpg/drills.js';
 import { drawArt, drawTrainerBack } from './characters.js';
 import audio from './audio.js?v=20261006-audio3';
 import haptics from './haptics.js';
@@ -1371,8 +1371,12 @@ function startHand() {
   const rng = dailyMode && dailyRun ? dailySeedRng(dailyRun.plan[dailyRun.index].seed) : null;
   // A drill session deals from a fixed bank of instructive situations instead
   // of a random deal. The coach still grades the hand exactly as always.
-  const drilled = drillMode ? drillHands[drillIndex % drillHands.length] : null;
-  if (drilled) drillIndex++;
+  // A new player's first practice hand must offer a decision, rather than
+  // randomly ending on a natural. Daily and authored drills keep their deals.
+  const introductory = shortSession && !dailyMode && !drillMode && gameId === 'blackjack'
+    && profile.handsPlayed === 0 ? BLACKJACK_DRILLS.find(hand => hand.type === 'hard') : null;
+  const drilled = drillMode ? drillHands[drillIndex % drillHands.length] : introductory;
+  if (drillMode && drilled) drillIndex++;
   drillLabel = drilled?.label ?? '';
   if (gameId === 'videopoker') {
     round = newVpRound(rng ?? Math.random, drilled?.hand ? { hand: drilled.hand } : undefined);
@@ -1402,6 +1406,7 @@ function startHand() {
     ? `DAILY DRILL #${dailyRun.number} · HAND ${dailyRun.index + 1}/${DAILY_HANDS}`
     : drillMode
       ? `${drillMode === 'weak' ? 'WEAK-SPOT DRILL' : 'MASTER DRILL'} · ${drillLabel || TRAINING_LABEL[gameId]} · ${profile.activeSession?.played ?? 0}/${SESSION_HANDS}`
+      : introductory ? `FIRST PRACTICE · ${introductory.label}`
       : shortSession ? `FIVE HANDS · ${profile.activeSession.played}/${SESSION_HANDS} DONE` : `${canPractice(profile, gymId) ? 'PRACTICE' : 'GYM CHALLENGE'} · ${handsWon}/${HANDS_TO_WIN} GOOD PLAYS`;
 
   // A natural settles before anybody gets to touch anything.
