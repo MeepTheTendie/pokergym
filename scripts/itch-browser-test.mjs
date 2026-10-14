@@ -552,7 +552,20 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   assert.equal(await evaluate('window.sharedInvitation'), invitation);
 
 
-  await evaluate(`document.getElementById('feedbackClarity').value = 'confusing'; document.getElementById('feedbackReturn').value = 'maybe'; document.getElementById('feedbackPrice').value = 'unsure'; document.getElementById('feedbackNote').value = 'More drills & clearer hints?'; document.getElementById('feedbackForm').requestSubmit();`);
+  await evaluate(`document.getElementById('feedbackClarity').value = 'confusing'; document.getElementById('feedbackReturn').value = 'maybe'; document.getElementById('feedbackNote').value = 'More drills & clearer hints?';`);
+  // Exercise the visible choice-to-draft contract: FREE ONLY once saved as
+  // "unsure", making demand evidence ambiguous despite valid draft helpers.
+  for (const [label, value] of [['INTERESTED', 'interested'], ['UNSURE', 'unsure'], ['FREE ONLY', 'free-only']]) {
+    assert.equal(await evaluate(`(() => {
+      const select = document.getElementById('feedbackPrice');
+      const option = [...select.options].find(item => item.textContent === ${JSON.stringify(label)});
+      if (!option) return null;
+      select.value = option.value;
+      document.getElementById('feedbackForm').requestSubmit();
+      return select.value;
+    })()`), value);
+    assert.match(await evaluate('document.getElementById("feedbackPreview").value'), new RegExp(`Possible one-time US\\$4\\.99 unlock: ${value}`));
+  }
   assert.equal(await evaluate('document.getElementById("feedbackDraft").hidden'), false);
   assert.match(await evaluate('document.getElementById("feedbackDraft").textContent'), /NOT SENT/);
   const feedback = await evaluate(`({ href: document.getElementById('feedbackEmail').href, body: document.getElementById('feedbackPreview').value })`);
