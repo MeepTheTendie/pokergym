@@ -29,7 +29,7 @@ import {
 } from '../src/rpg/daily.js';
 import { parseEntryParams, isSharedDayCurrent, cleanEntrySearch, buildDailyShareText } from '../src/rpg/links.js';
 import { keyAction, shouldIgnoreKey } from '../src/rpg/keys.js';
-import { drillSequence, BLACKJACK_DRILLS, DRILL_HANDS, DRILL_GAMES } from '../src/rpg/drills.js';
+import { captureDrillPlan, restoreDrillPlan, BLACKJACK_DRILLS, DRILL_HANDS, DRILL_GAMES } from '../src/rpg/drills.js';
 import { drawArt, drawTrainerBack } from './characters.js';
 import audio from './audio.js?v=20261006-audio3';
 import haptics from './haptics.js';
@@ -88,7 +88,6 @@ let coachedHand = false; // the coach was opened this hand, so it cannot score o
 let dailyMode = false;
 let dailyRun = null; // { key, plan, number, index, results, scored, finished }
 let drillMode = null; // 'master' | 'weak' | null — a rigged five-hand drill session
-let drillIndex = 0;
 let drillHands = [];
 let drillLabel = ''; // the situation name for the current drill hand
 const entryParams = parseEntryParams(location.search);
@@ -926,9 +925,16 @@ function startGym(gym, sprint = false, mode = null) {
     if (!canTrain(profile, gym.id) || profile.activeSession?.gymId !== gym.id) return;
   } else if (!canBattle(profile, gym.id) && !canPractice(profile, gym.id)) return;
   shortSession = sprint;
-  drillMode = sprint && mode ? mode : null;
-  drillIndex = 0;
-  drillHands = drillMode ? drillSequence(profile, gym.game, drillMode) : [];
+  if (sprint && mode && !profile.activeSession.drill) {
+    const drill = captureDrillPlan(profile, gym.game, mode);
+    if (drill) {
+      profile = { ...profile, activeSession: { ...profile.activeSession, drill } };
+      save();
+    }
+  }
+  const plan = sprint ? profile.activeSession.drill : null;
+  drillHands = restoreDrillPlan(plan, gym.game);
+  drillMode = drillHands.length ? plan.mode : null;
   gymId = gym.id;
   gameId = gym.game;
   handsWon = 0;
@@ -1375,8 +1381,7 @@ function startHand() {
   // randomly ending on a natural. Daily and authored drills keep their deals.
   const introductory = shortSession && !dailyMode && !drillMode && gameId === 'blackjack'
     && profile.handsPlayed === 0 ? BLACKJACK_DRILLS.find(hand => hand.type === 'hard') : null;
-  const drilled = drillMode ? drillHands[drillIndex % drillHands.length] : introductory;
-  if (drillMode && drilled) drillIndex++;
+  const drilled = drillMode ? drillHands[profile.activeSession?.played ?? 0] : introductory;
   drillLabel = drilled?.label ?? '';
   if (gameId === 'videopoker') {
     round = newVpRound(rng ?? Math.random, drilled?.hand ? { hand: drilled.hand } : undefined);

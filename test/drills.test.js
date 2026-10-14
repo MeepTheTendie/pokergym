@@ -144,3 +144,42 @@ test('a rigged card that is not in the shoe is rejected', async () => {
     player: [{ r: 15, s: 0 }, { r: 2, s: 0 }], dealer: [{ r: 3, s: 0 }, { r: 4, s: 0 }],
   }));
 });
+
+
+test('captured master and weak plans survive save/backup and resume after the last scored hand', async () => {
+  const { captureDrillPlan, restoreDrillPlan } = await import('../src/rpg/drills.js');
+  const { createProfile, beginSession, scoreSession, sanitizeProfile } = await import('../src/rpg/state.js');
+  const { writeBackup, readBackup } = await import('../src/rpg/backup.js');
+  for (const mode of ['master', 'weak']) {
+    for (const [game, gymId] of [['blackjack', 'countyfair'], ['videopoker', 'pokergym']]) {
+      let p = beginSession(createProfile('scholar'), gymId);
+      const drill = captureDrillPlan(p, game, mode);
+      p = { ...p, activeSession: { ...p.activeSession, drill } };
+      const original = restoreDrillPlan(drill, game);
+      p = scoreSession(p, true);
+      p.mistakes = [{ game: 'blackjack', type: 'hard', situation: 'S', chosen: 'C', correction: 'X' }];
+      p.practice = { [game]: { played: 50, optimal: 1 } };
+      p = sanitizeProfile(readBackup(writeBackup(p)));
+      assert.deepEqual(restoreDrillPlan(p.activeSession.drill, game), original);
+      assert.equal(restoreDrillPlan(p.activeSession.drill, game)[p.activeSession.played], original[1]);
+      for (let i = 1; i < 5; i++) p = scoreSession(p, false);
+      assert.equal(p.activeSession, null);
+      assert.equal(p.sessions[0].played, 5);
+      assert.equal(p.sessions[0].optimal, 1);
+    }
+  }
+});
+
+test('invalid drill plans are rejected in backups and removed safely from local saves', async () => {
+  const { createProfile, beginSession, serialize, sanitizeProfile } = await import('../src/rpg/state.js');
+  const { readBackup } = await import('../src/rpg/backup.js');
+  for (const drill of [{ mode: 'fake', indices: [0, 1, 2, 3, 4] },
+    { mode: 'weak', indices: [0, 0, 1, 2, 3] }, { mode: 'master', indices: [0, 1, 2, 3, 99] },
+    { mode: 'master', indices: [0, 1] }]) {
+    const p = beginSession(createProfile('scholar'), 'countyfair');
+    p.activeSession.drill = drill;
+    assert.throws(() => readBackup(serialize(p)), /Invalid backup/);
+    assert.equal(sanitizeProfile(p).activeSession.drill, undefined);
+    assert.equal(sanitizeProfile(p).activeSession.played, 0);
+  }
+});

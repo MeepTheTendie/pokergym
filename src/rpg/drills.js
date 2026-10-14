@@ -1,5 +1,3 @@
-import { validMistakeType } from './state.js';
-
 /*
  * Drill banks: fixed, hand-picked situations the coach already grades exactly.
  * The banks never store an "answer" of their own — the existing blackjack and
@@ -57,7 +55,7 @@ export function drillBank(game) {
 function missedTypes(profile) {
   const missed = { soft: 0, pair: 0, hard: 0 };
   for (const mistake of profile?.mistakes ?? []) {
-    if (mistake.game === 'blackjack' && validMistakeType(mistake.type)) missed[mistake.type]++;
+    if (mistake.game === 'blackjack' && Object.hasOwn(missed, mistake.type)) missed[mistake.type]++;
   }
   return missed;
 }
@@ -83,7 +81,7 @@ export function drillScenario(profile, game, index, mode) {
 
 // Capture once at session start: recording a new mistake must not reshuffle
 // the remaining hands. Existing local practice totals provide the rotation;
-// no new tracking or save format is required.
+// the captured plan can also preserve this order across reloads.
 export function drillSequence(profile, game, mode) {
   const bank = mode === 'weak' ? orderDrills(profile, game) : drillBank(game);
   if (!bank.length) return [];
@@ -105,4 +103,23 @@ export function drillSequence(profile, game, mode) {
     ordered = [...bank.slice(start), ...bank.slice(0, start)];
   }
   return ordered.slice(0, DRILL_HANDS);
+}
+
+// Persist bank indices, never caller-supplied cards or answer keys.
+export function validDrillPlan(plan, game) {
+  const bank = drillBank(game);
+  return Boolean(plan && (plan.mode === 'master' || plan.mode === 'weak') &&
+    bank.length && Array.isArray(plan.indices) && plan.indices.length === DRILL_HANDS &&
+    new Set(plan.indices).size === DRILL_HANDS &&
+    plan.indices.every(i => Number.isSafeInteger(i) && i >= 0 && i < bank.length));
+}
+
+export function captureDrillPlan(profile, game, mode) {
+  const bank = drillBank(game);
+  const plan = { mode, indices: drillSequence(profile, game, mode).map(hand => bank.indexOf(hand)) };
+  return validDrillPlan(plan, game) ? plan : null;
+}
+
+export function restoreDrillPlan(plan, game) {
+  return validDrillPlan(plan, game) ? plan.indices.map(i => drillBank(game)[i]) : [];
 }

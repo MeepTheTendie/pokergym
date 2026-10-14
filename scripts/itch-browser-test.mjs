@@ -411,6 +411,48 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   assert.equal(JSON.parse(boxBackup).mistakes[0].box, 2, 'Box travels in backup');
   assert.equal(JSON.parse(boxBackup).mistakes[0].due, afterCorrect.mistakes[0].due, 'Due date travels in backup');
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Retry choices fit phone');
+  // A real weak drill must retain its authored sequence through phone reload.
+  const beforeDrill = await evaluate('localStorage.getItem("pokergym:save:v1")');
+  await evaluate(`(() => {
+    const key = 'pokergym:save:v1';
+    const p = JSON.parse(localStorage.getItem(key));
+    p.lessonsDone = [...new Set([...p.lessonsDone, 'blackjack'])];
+    p.mistakes[0].type = 'soft';
+    localStorage.setItem(key, JSON.stringify(p));
+  })()`);
+  await send('Page.reload');
+  await sleep(400); contextId = await gameContext(`${contextId.sessionId || ''}:${contextId.id}`);
+  for (let i = 0; i < 60; i++) {
+    if (await evaluate('Boolean(document.getElementById("btnContinue")?.onclick)')) break;
+    await sleep(100);
+  }
+  await evaluate('document.getElementById("btnContinue").click(); document.querySelector("[data-drill-mode=weak]").click()');
+  const capturedDrill = await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).activeSession.drill');
+  assert.equal(capturedDrill.mode, 'weak');
+  await evaluate('document.getElementById("btnStand").click()');
+  assert.equal(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).activeSession.played'), 1);
+  await send('Page.reload');
+  await sleep(400); contextId = await gameContext(`${contextId.sessionId || ''}:${contextId.id}`);
+  for (let i = 0; i < 60; i++) {
+    if (await evaluate('Boolean(document.getElementById("btnContinue")?.onclick)')) break;
+    await sleep(100);
+  }
+  await evaluate('document.getElementById("btnContinue").click(); document.querySelector("#todayActions button").click()');
+  assert.deepEqual(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).activeSession.drill'), capturedDrill);
+  const nextDrillLabel = await evaluate(`(async () => {
+    const { BLACKJACK_DRILLS } = await import('../src/rpg/drills.js');
+    return BLACKJACK_DRILLS[${capturedDrill.indices[1]}].label;
+  })()`);
+  assert.ok((await evaluate('document.querySelector(".battle-label").textContent')).includes(`WEAK-SPOT DRILL · ${nextDrillLabel}`));
+  await evaluate(`localStorage.setItem('pokergym:save:v1', ${JSON.stringify(beforeDrill)})`);
+  await send('Page.reload');
+  await sleep(400); contextId = await gameContext(`${contextId.sessionId || ''}:${contextId.id}`);
+  for (let i = 0; i < 60; i++) {
+    if (await evaluate('Boolean(document.getElementById("btnContinue")?.onclick)')) break;
+    await sleep(100);
+  }
+  await evaluate('document.getElementById("btnContinue").click()');
+  console.log('PASS: weak drill mode and next authored hand persist through phone reload and TODAY resume.');
   await evaluate('document.querySelector("[data-session-gym=pokergym]").click()');
   // Lesson may already be complete in this test save.
   await evaluate('if (!document.getElementById("scr-lesson").hidden) document.getElementById("btnSkip").click()');
