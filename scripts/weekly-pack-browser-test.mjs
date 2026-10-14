@@ -73,7 +73,12 @@ try {
   await evaluate('document.querySelector("article button[data-move=hit]").click()');
   // Opening and immediately closing an explanation still forfeits the point.
   await evaluate('document.querySelectorAll("summary")[1].click(); document.querySelectorAll("summary")[1].click(); document.querySelectorAll("article")[1].querySelector("button[data-move=stand]").click()');
+  await navigate();
+  assert.match(await evaluate('document.getElementById("pack-score").textContent'), /0\/5 correct.*2\/5 completed/);
+  assert.equal(await evaluate('document.querySelectorAll("article")[0].querySelector("button").disabled'), true);
+  assert.equal(await evaluate('document.querySelectorAll("article")[1].querySelector("button").disabled'), true);
   await finish();
+  assert.equal(await evaluate("localStorage.getItem('pokergym:weekly-01:attempt:v1')"), null);
   assert.match(await evaluate('document.getElementById("pack-score").textContent'), /3\/5 correct.*5\/5 completed/);
   assert.match(await evaluate('document.getElementById("pack-history").textContent'), /First completed attempt: 3\/5 \(1 revealed/);
   assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
@@ -89,6 +94,13 @@ try {
   await evaluate(`localStorage.setItem('pokergym:weekly-01:scores:v1', JSON.stringify({ first: { correct: 999, revealed: 0 }, latest: { correct: 5, revealed: 0 } }))`);
   await navigate();
   assert.equal(await evaluate('document.getElementById("pack-history").textContent'), 'No completed score saved yet.');
+  // Malformed and already-completed attempts cannot be resumed or alter history.
+  for (const attempt of [[true, false, 'revealed', null, '<script>'], [true, true, true, true, true], [true]]) {
+    await evaluate(`localStorage.setItem('pokergym:weekly-01:attempt:v1', ${JSON.stringify(JSON.stringify(attempt))})`);
+    await navigate();
+    assert.match(await evaluate('document.getElementById("pack-score").textContent'), /0\/5 completed/);
+  }
+  await evaluate("localStorage.removeItem('pokergym:weekly-01:attempt:v1')");
   // Denied reads and quota failures both allow the full drill to finish.
   for (const blocked of ['getItem', 'setItem']) {
     const injected = await send('Page.addScriptToEvaluateOnNewDocument', { source: `Storage.prototype.${blocked} = () => { throw new DOMException('test storage unavailable'); };` });
@@ -99,7 +111,7 @@ try {
     await send('Page.removeScriptToEvaluateOnNewDocument', { identifier: injected.identifier });
   }
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ url, firstScore: 3, retryScore: 5, reload: 'passed', revealBeforeChoice: 'passed', corruptSave: 'passed', deniedAndQuotaStorage: 'passed', phoneOverflow: false, runtimeErrors: 0 }));
+  console.log(JSON.stringify({ url, firstScore: 3, retryScore: 5, reload: 'passed', revealBeforeChoice: 'passed', interruptedResume: 'passed', invalidAttempt: 'passed', corruptSave: 'passed', deniedAndQuotaStorage: 'passed', phoneOverflow: false, runtimeErrors: 0 }));
 } finally {
   ws?.close(); browser.kill('SIGTERM');
   await new Promise(resolve => browser.exitCode !== null ? resolve() : browser.once('exit', resolve));
