@@ -6,7 +6,7 @@ Playable demo: https://playpokergym.com/web/
 Landing: https://playpokergym.com/
 No social posts, player responses, paid subscribers or recurring revenue verified yet. No daily marketing schedule configured.
 
-Publishing integration discovery found Metricool available but not connected. It supports connected-brand inspection, post creation/scheduling and analytics. A connection alone would not establish authorized social accounts or a working daily agent schedule; inspect those after connection.
+Authenticated check on 2026-10-14 verified a connected YouTube channel in Metricool. One original blackjack quiz Short is queued for 2026-10-14 at 16:00 America/Chicago (post 395923480); read-back status PENDING, not verified published. This is one post, not a new recurring automation. See the checkpoint below.
 
 ## Initial feedback post — unsent
 
@@ -125,3 +125,83 @@ The completed-five-hand form now preserves clarity, return-interest and hypothet
 https://github.com/MeepTheTendie/pokergym/releases/tag/daily-drill-demo-2026-10-12
 
 Latest public download now includes the live five-hand daily mix, persisted mid-drill resume, replay reward limits, optional haptics and reviewed feedback drafts. Published through authenticated owner GitHub with explicit AI involvement and device-local/date limitations. All 205 unit tests and actual cross-site 390px ZIP checks passed; unauthenticated public ZIP/checksum matched tested bytes. Existing latest-download links reach this release. No social post, real player feedback or recurring revenue verified. Evidence: automation/PROGRESS.md.
+
+
+## Original blackjack quiz video — 2026-10-14
+
+Published media: https://github.com/MeepTheTendie/pokergym/releases/tag/blackjack-quiz-2026-10-14
+Metricool planner: https://app.metricool.com/planner/calendar?blogId=7282227&openWithPostUuid=6708244008917944429
+
+Created a 44-second original silent, caption-first quiz comparing hard 16 against dealer six and ten. Both answers checked against the simulator coach under the stated fresh-six-deck/S17/no-surrender rules; includes the house-edge sentence and AI-assistance disclosure. Public MP4 download matches the tested local file. One YouTube Short accepted and independently read back as PENDING for October 14, 16:00 America/Chicago, autoPublish true, public, not made for kids, AI-generated-content flag true, subscriber notifications false. Not yet a verified YouTube publication; no public video URL, real player response or recurring payment verified. Existing stable game release remains latest.
+
+The description links five-hand blackjack practice, the fuller rules/explanation guide and the voluntary public feedback thread. The practice link uses ref=youtube; the October 14 attribution fix now buckets youtube separately for future aggregate page-like requests. Counts include crawlers and are not verified players; no measured YouTube audience is established. Next run: verify publication after its due time, capture the actual YouTube URL and any real feedback; do not duplicate the pending post. Details and exact tool corrections are in automation/PROGRESS.md.
+
+## Published baccarat recall-first guide — 2026-10-14
+
+https://playpokergym.com/guides/baccarat/ now offers three hidden-answer questions about house edge, Banker commission and an 8:1 Tie payout, checked against the actual simulator coach. Links directly into free baccarat practice, with public/email opt-in feedback and honest expected-loss/model limits. Landing and sitemap link it; all four game tiles now have learning guides. AI assistance disclosed. Live byte matches and 390px guide-to-lesson/saved-session checks passed; Worker version 9efe9d75-2a45-4ad7-a4a1-ab10a1d9a6cf. No new social post, indexing, player response or revenue verified. Existing queued YouTube Short was still future and was neither polled nor duplicated. See automation/PROGRESS.md.
+
+
+## Published daily-record portable release — 2026-10-14
+
+https://github.com/MeepTheTendie/pokergym/releases/tag/daily-record-demo-2026-10-14
+
+Published latest portable demo through the authenticated owner GitHub account, bringing downloads up to the live daily practice record and canonical playpokergym.com link. All 247 unit tests and actual cross-site 390px ZIP checks passed. Unauthenticated public ZIP/checksum downloads matched tested local bytes; production landing already follows releases/latest. AI assistance and simulator/data limits disclosed, voluntary public feedback invited. Earlier releases preserved. No new social post, player demand or recurring revenue verified. See automation/PROGRESS.md.
+
+
+## Current portable daily-resume release — 2026-10-14
+
+https://github.com/MeepTheTendie/pokergym/releases/tag/daily-resume-demo-2026-10-14
+
+Published latest non-draft download from current source 1331d5b. Includes preserved unfinished daily plans and accurate new completed-game attribution, with honest return-practice guidance, browser-local backup limits and voluntary feedback invitation. Owner/AI-assistant involvement disclosed. All 250 tests and actual 390px cross-site ZIP checks passed; unauthenticated public assets matched tested bytes. Existing releases/latest entry points reach this update. No new social post, player feedback or recurring payment verified. Checkpoint: automation/PROGRESS.md.
+
+
+## Original Hold’em best-five clip — 2026-10-14
+
+Public original media: https://github.com/MeepTheTendie/pokergym/releases/tag/holdem-quiz-2026-10-14
+Metricool planner: https://app.metricool.com/planner/calendar?blogId=7282227&openWithPostUuid=-1244525086496305710
+
+Created a 45-second original silent quiz: A–Q versus A–J on K–K–7–7–2. Ace-kicker selection, queen exclusion and tie checked against the actual evaluator/coach. AI assistance and hand-evaluation limits disclosed. One distinct YouTube Short queued for October 15 at 16:00 America/Chicago (post 395958003). Independent readback confirms PENDING, public, EDUCATION, not made for kids, AI-generated-content flag true, autoPublish true, subscriber notifications false. Not verified published; no public watch URL or real player response. Today’s already queued blackjack clip was not changed or duplicated.
+
+Description links free five-hand Hold’em practice with ref=youtube, the full puzzle guide and voluntary public feedback. Public GitHub and Metricool-hosted MP4 both match the tested artifact byte-for-byte. Latest portable demo remains daily-resume-demo-2026-10-14. No recurring payments verified. Checkpoint: automation/PROGRESS.md.
+
+
+## Current authored-drill download — 2026-10-14
+
+https://github.com/MeepTheTendie/pokergym/releases/tag/authored-resume-demo-2026-10-14 is now the latest non-draft portable release. Includes current master/weak rotation, authored-drill save/backup resume and distinct purchase-intent choices. 257 tests and actual cross-site 390px ZIP suite passed; public downloads match tested bytes. Existing landing latest-download entry reaches this release. AI assistance disclosed, voluntary feedback thread retained. No new social post, player demand or recurring revenue verified. Details: automation/PROGRESS.md.
+
+## Free weekly-training sample — 2026-10-14
+
+Published https://playpokergym.com/guides/weekly-01/ through authenticated Cloudflare; source commit b942906, Worker version 8146d0f5-16db-432f-8445-1d72adb5fb86. Five coach-checked blackjack decisions with hidden explanations and a next-day recall routine. Landing, blackjack introduction and sitemap link the sample. Optional feedback asks whether hypothetical US$5/month fresh weekly packs and mistake review would help, after trying concrete content. No weekly schedule promised, paid offer launched, social post sent, real player feedback or recurring payment verified. Local/production 390px checks and live source byte equality passed; evidence in automation/PROGRESS.md.
+
+
+## Weekly sample linked from existing queued blackjack Short — 2026-10-14
+
+Existing blackjack Short description now links https://playpokergym.com/guides/weekly-01/?ref=youtube and asks for voluntary feedback on hypothetical US$5/month fresh weekly packs/mistake review after trying concrete content. Explicit no-sale/no-subscription wording retained. Updated post ID 395977962, unchanged UUID 6708244008917944429 and October 14 16:00 America/Chicago time; independent readback PENDING with original video/title/YouTube settings preserved. No new post or verified public YouTube URL. Sample with query matched live source; public feedback thread still has zero comments. Guide visits are not counted by existing worker analytics. No actual demand or recurring revenue verified. See automation/PROGRESS.md.
+
+## Published recurring-offer feedback entry points — 2026-10-14
+
+https://github.com/MeepTheTendie/pokergym/issues/1 now invites players to try https://playpokergym.com/guides/weekly-01/ and report actual first scores, unclear explanations, return interest and interested/unsure/free-only responses to a possible US$5/month weekly-pack/mistake-review offer. Earlier one-time-US$4.99 question preserved in a collapsed superseded-history section. No player replies existed at update/read-back. AI-assistant involvement and public/email privacy limits explicit; no signup, sale or release-schedule promise.
+
+README now features the sample and same research question; README-only commit 47945bf pushed to main through authenticated owner GitHub with AI-assistant commit identity. Authenticated contents and unauthenticated raw README matched local bytes, issue body matched intended text and all seven README links returned HTTP 200. No new social post/message, real player demand or recurring payment verified. Existing queued Shorts untouched. Details/access blockers in automation/PROGRESS.md.
+
+
+## Portable weekly sample available — 2026-10-14
+
+https://github.com/MeepTheTendie/pokergym/releases/tag/weekly-sample-demo-2026-10-14 is the latest free download. It now includes the five-decision weekly-training sample with bundled scoring, completed-review persistence, local-game practice links and reviewed voluntary US$5/month offer feedback. No sale or release schedule promised. 259 tests and actual cross-site 390px ZIP checks passed; public ZIP/checksum matched local bytes. Source e719c6d published with AI-assistant identity. No new social post, real player response or recurring revenue verified. Existing queued Shorts untouched. Checkpoint: automation/PROGRESS.md.
+
+Correction to the earlier queued-Short checkpoint: current worker/count.js and wrangler.jsonc already whitelist the weekly guide and published guide variants for aggregate page-like request attribution. These requests include crawlers and do not establish players or demand. Analytics read access remains unverified/unavailable per prior evidence.
+
+
+## Portable learning routine release — 2026-10-14
+
+https://github.com/MeepTheTendie/pokergym/releases/tag/offline-guides-demo-2026-10-14 is the latest free portable release. All four recall guides now accompany local five-hand practice and the weekly sample. Published with AI-assistance disclosure; unauthenticated assets matched tested ZIP/checksum bytes. 259 unit tests and full 390px cross-site ZIP checks passed. GitHub feedback issue still has zero comments. No new social post, player demand or recurring payment verified. Details/access blockers: automation/PROGRESS.md.
+
+
+## Original baccarat odds clip — 2026-10-14
+
+Public original media: https://github.com/MeepTheTendie/pokergym/releases/tag/baccarat-quiz-2026-10-14
+Metricool planner: https://app.metricool.com/planner/calendar?blogId=7282227&openWithPostUuid=7894233004572166573
+
+Created a 46-second silent, caption-first quiz on lowest house edge and 5% Banker commission. Both answers verified against the actual eight-deck coach/payouts; full-shoe averages, expected losses and AI-assistance disclosure explicit. One new YouTube Short queued for October 16 at 16:00 America/Chicago, ID 396021471. Independent readback confirms PENDING, public EDUCATION Short, madeForKids=false, isAiGeneratedContent=true, notifySubscribers=false and autoPublish=true. Existing October 14/15 clips untouched. Not verified published; no public watch URL, real player response or recurring payment verified.
+
+Description links baccarat practice/guide and the actual blackjack weekly sample with voluntary US$5/month recurring-offer research feedback. Clearly no sale, membership or weekly schedule today. GitHub/public checksum and Metricool MP4 match the tested artifact byte-for-byte; latest portable release remains offline-guides-demo-2026-10-14. Source-only commit 8a49bbc pushed with AI-assistant identity. See automation/PROGRESS.md for verification and remaining access gaps.
