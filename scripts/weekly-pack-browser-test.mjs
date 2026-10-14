@@ -82,10 +82,16 @@ try {
   assert.equal(await evaluate('document.querySelectorAll("article")[0].querySelector("button").disabled'), true);
   assert.equal(await evaluate('document.querySelectorAll("article")[1].querySelector("button").disabled'), true);
   await finish();
-  assert.equal(await evaluate("localStorage.getItem('pokergym:weekly-01:attempt:v1')"), null);
+  assert.deepEqual(await evaluate("JSON.parse(localStorage.getItem('pokergym:weekly-01:attempt:v1'))"), [false, 'revealed', true, true, true]);
   assert.match(await evaluate('document.getElementById("pack-score").textContent'), /3\/5 correct.*5\/5 completed/);
   assert.match(await evaluate('document.getElementById("pack-history").textContent'), /First completed attempt: 3\/5 \(1 revealed/);
   const beforeShare = await evaluate('JSON.stringify({...localStorage})');
+  await navigate();
+  assert.match(await evaluate('document.getElementById("pack-score").textContent'), /3\/5 correct.*5\/5 completed/);
+  assert.equal(await evaluate('document.querySelectorAll("details[open]").length'), 5);
+  assert.equal(await evaluate('document.querySelectorAll("article button:not(:disabled)").length'), 0);
+  assert.equal(await evaluate('document.getElementById("pack-share").hidden'), false);
+  assert.equal(await evaluate('JSON.stringify({...localStorage})'), beforeShare, 'Reviewing a completed attempt cannot alter scores');
   await evaluate(`Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async text => { window.__copiedPack = text; } } }); document.getElementById('pack-share').click()`);
   await waitFor('document.getElementById("pack-share-status").textContent.startsWith("Copied.")');
   const shared = await evaluate('window.__copiedPack');
@@ -106,7 +112,7 @@ try {
   assert.match(await evaluate('document.getElementById("pack-history").textContent'), /First completed attempt: 3\/5.*Latest completed attempt: 5\/5/);
   await navigate();
   assert.match(await evaluate('document.getElementById("pack-history").textContent'), /First completed attempt: 3\/5.*Latest completed attempt: 5\/5/);
-  assert.match(await evaluate('document.getElementById("pack-score").textContent'), /0\/5 completed/);
+  assert.match(await evaluate('document.getElementById("pack-score").textContent'), /5\/5 correct.*5\/5 completed/);
   // Offer feedback is voluntary, unselected and unsent until the player acts.
   assert.equal(await evaluate('document.getElementById("pack-feedback").hidden'), false);
   assert.equal(await evaluate('document.getElementById("pack-interest").value'), '');
@@ -138,8 +144,8 @@ try {
   assert.equal(await evaluate('document.getElementById("pack-history").textContent'), 'No completed score saved yet.');
   await evaluate(`document.getElementById('pack-interest').value = 'unsure'; document.getElementById('pack-feedback').requestSubmit()`);
   assert.match(await evaluate('document.getElementById("pack-feedback-draft").value'), /No completed score available/);
-  // Malformed and already-completed attempts cannot be resumed or alter history.
-  for (const attempt of [[true, false, 'revealed', null, '<script>'], [true, true, true, true, true], [true]]) {
+  // Malformed and empty attempts cannot be resumed or alter history.
+  for (const attempt of [[true, false, 'revealed', null, '<script>'], [null, null, null, null, null], [true]]) {
     await evaluate(`localStorage.setItem('pokergym:weekly-01:attempt:v1', ${JSON.stringify(JSON.stringify(attempt))})`);
     await navigate();
     assert.match(await evaluate('document.getElementById("pack-score").textContent'), /0\/5 completed/);
@@ -162,7 +168,17 @@ try {
     await send('Page.navigate', { url: new URL('/guides/weekly-01' + suffix, url).href });
     await waitFor('!window.__packPreviousDocument && Boolean(document.querySelector("article button"))');
     assert.match(await evaluate('document.getElementById("pack-history").textContent'), /Latest completed attempt: 5\/5/);
+    assert.match(await evaluate('document.getElementById("pack-score").textContent'), /5\/5 correct.*5\/5 completed/);
+    assert.equal(await evaluate('document.querySelectorAll("details[open]").length'), 5);
+    assert.equal(await evaluate('document.getElementById("pack-share").hidden'), false);
   }
+  await evaluate('document.getElementById("pack-retry").click()');
+  await sleep(100);
+  assert.equal(await evaluate("localStorage.getItem('pokergym:weekly-01:attempt:v1')"), null);
+  await navigate();
+  assert.match(await evaluate('document.getElementById("pack-score").textContent'), /0\/5 completed/);
+  assert.equal(await evaluate('document.querySelectorAll("details[open]").length'), 0);
+  assert.match(await evaluate('document.getElementById("pack-history").textContent'), /Latest completed attempt: 5\/5/);
   await send('Network.emulateNetworkConditions', { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
   // An older cached page has no feedback form; new JS must preserve its drill.
   const oldHtml = await send('Page.addScriptToEvaluateOnNewDocument', { source: `
@@ -181,13 +197,15 @@ try {
   for (const blocked of ['getItem', 'setItem']) {
     const injected = await send('Page.addScriptToEvaluateOnNewDocument', { source: `Storage.prototype.${blocked} = () => { throw new DOMException('test storage unavailable'); };` });
     await navigate();
+    await evaluate('if (!document.getElementById("pack-retry").hidden) document.getElementById("pack-retry").click()');
+    await sleep(100);
     await finish();
     assert.match(await evaluate('document.getElementById("pack-score").textContent'), /5\/5 correct/);
     assert.match(await evaluate('document.getElementById("pack-storage").textContent'), /Saving unavailable/);
     await send('Page.removeScriptToEvaluateOnNewDocument', { identifier: injected.identifier });
   }
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ url, firstScore: 3, retryScore: 5, reload: 'passed', revealBeforeChoice: 'passed', interruptedResume: 'passed', offlineResumeAndUrlVariants: 'passed', invalidAttempt: 'passed', corruptSave: 'passed', deniedAndQuotaStorage: 'passed', unsentEditableFeedback: 'passed', phoneOverflow: false, runtimeErrors: 0 }));
+  console.log(JSON.stringify({ url, firstScore: 3, retryScore: 5, reload: 'passed', completedReviewAndSharing: 'passed', explicitOfflineRetry: 'passed', revealBeforeChoice: 'passed', interruptedResume: 'passed', offlineResumeAndUrlVariants: 'passed', invalidAttempt: 'passed', corruptSave: 'passed', deniedAndQuotaStorage: 'passed', unsentEditableFeedback: 'passed', phoneOverflow: false, runtimeErrors: 0 }));
 } finally {
   ws?.close(); browser.kill('SIGTERM');
   await new Promise(resolve => browser.exitCode !== null ? resolve() : browser.once('exit', resolve));

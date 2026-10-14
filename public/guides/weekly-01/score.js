@@ -23,15 +23,14 @@
     const attempt = JSON.parse(localStorage.getItem(attemptKey));
     if (Array.isArray(attempt) && attempt.length === cards.length &&
       attempt.every(value => [null, true, false, 'revealed'].includes(value)) &&
-      attempt.some(value => value !== null) && attempt.some(value => value === null)) {
+      attempt.some(value => value !== null)) {
       results = attempt.map(value => value === null ? undefined : value);
     }
   } catch { saving = false; }
   function saveAttempt() {
-    const incomplete = results.some(value => value !== undefined) &&
-      results.filter(value => value !== undefined).length < cards.length;
+    const started = results.some(value => value !== undefined);
     try {
-      if (incomplete) localStorage.setItem(attemptKey,
+      if (started) localStorage.setItem(attemptKey,
         JSON.stringify(Array.from({ length: cards.length }, (_, index) => results[index] ?? null)));
       else localStorage.removeItem(attemptKey);
     } catch { saving = false; }
@@ -43,7 +42,7 @@
     history.textContent = saved
       ? `First completed attempt: ${saved.first.correct}/${cards.length} (${saved.first.revealed} revealed before choosing). Latest completed attempt: ${saved.latest.correct}/${cards.length} (${saved.latest.revealed} revealed before choosing).`
       : 'No completed score saved yet.';
-    storage.textContent = saving ? 'Your current attempt and completed scores stay in this browser. No score is sent to Poker Gym.'
+    storage.textContent = saving ? 'Your current attempt, completed answers and scores stay in this browser. Choose Retry to start again. No score is sent to Poker Gym.'
       : 'Saving unavailable. Keep a note of your scores before closing this page.';
     retry.hidden = done !== cards.length;
     if (share) {
