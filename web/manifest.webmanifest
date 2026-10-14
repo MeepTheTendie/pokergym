@@ -4,11 +4,27 @@
   "description": "Learn casino card games from the ground up.",
   "id": "/web/",
   "start_url": "./index.html",
-  "scope": "./",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#14121c",
   "theme_color": "#14121c",
+  "shortcuts": [
+    {
+      "name": "Five-hand blackjack practice",
+      "short_name": "Blackjack",
+      "description": "Practice five decisions with the simulator coach.",
+      "url": "/web/?practice=blackjack",
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Weekly training sample",
+      "short_name": "Weekly sample",
+      "description": "Try the free five-decision blackjack sample and recall routine.",
+      "url": "/guides/weekly-01/",
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
   "icons": [
     { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },

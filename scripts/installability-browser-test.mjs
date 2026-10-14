@@ -62,6 +62,14 @@ try {
   assert.deepEqual(manifest.errors, [], 'Chromium parses manifest without warnings');
   const data = JSON.parse(manifest.data);
   assert.equal(data.display, 'standalone');
+  assert.equal(data.id, '/web/', 'Existing app identity is preserved');
+  assert.equal(data.scope, '/', 'Published training guides belong to the installed app');
+  assert.equal(data.shortcuts.length, 2);
+  for (const shortcut of data.shortcuts) {
+    const target = new URL(shortcut.url, manifest.url);
+    assert.equal(target.origin, new URL(url).origin);
+    assert.ok(target.pathname.startsWith(new URL(data.scope, manifest.url).pathname));
+  }
   const start = new URL(data.start_url, manifest.url);
   assert.equal(start.origin, new URL(url).origin);
   assert.ok(start.pathname.startsWith(new URL(data.scope, manifest.url).pathname));
@@ -107,9 +115,25 @@ try {
   assert.equal(await evaluate('document.getElementById("scr-battle").hidden'), false, 'Today action resumes unfinished training offline');
   assert.equal(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).activeSession.played'), 1, 'Resume retains the completed first hand');
   assert.doesNotMatch(await evaluate('document.querySelector(".battle-label").textContent'), /FIRST PRACTICE/, 'Later hands use ordinary practice');
+  const packShortcut = data.shortcuts.find(shortcut => shortcut.url === '/guides/weekly-01/');
+  assert.ok(packShortcut, 'Weekly sample has an app shortcut');
+  await send('Network.setCacheDisabled', { cacheDisabled: true });
+  await send('Page.navigate', { url: new URL(packShortcut.url, manifest.url).href });
+  await waitFor('Boolean(document.querySelector("[data-drill-index] .choices button"))');
+  assert.equal(await evaluate('document.querySelector("link[rel=manifest]").href'), manifest.url, 'Sample advertises the same app');
+  await evaluate('document.querySelector("[data-drill-index] .choices button").click()');
+  const packScore = await evaluate('document.getElementById("pack-score").textContent');
+  await send('Page.reload', { ignoreCache: true });
+  await waitFor('Boolean(document.querySelector("[data-drill-index] .choices button:disabled"))');
+  assert.equal(await evaluate('document.getElementById("pack-score").textContent'), packScore, 'Offline shortcut retains unfinished sample decision');
+  const practiceShortcut = data.shortcuts.find(shortcut => shortcut.url === '/web/?practice=blackjack');
+  assert.ok(practiceShortcut, 'Five-hand practice has an app shortcut');
+  await send('Page.navigate', { url: new URL(practiceShortcut.url, manifest.url).href });
+  await waitFor('Boolean(document.getElementById("btnContinue")?.onclick)');
+  assert.equal(await evaluate('localStorage.getItem("pokergym:save:v1")'), save, 'Practice shortcut retains existing game save');
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Start screen fits phone width');
   assert.deepEqual(errors, [], 'No browser runtime errors');
-  console.log(JSON.stringify({ checkedAt: new Date().toISOString(), url, chromium: execFileSync('chromium', ['--version'], { encoding: 'utf8' }).trim(), manifestUrl: manifest.url, startUrl: start.href, icons: data.icons.length, installabilityErrors: [], firstDecisionTaps: 2, firstDecisionMs, firstDecisionGradingAndReview: 'passed', offlineStartUrlSaveResume: 'passed', physicalAndroidInstallation: 'unverified' }, null, 2));
+  console.log(JSON.stringify({ checkedAt: new Date().toISOString(), url, chromium: execFileSync('chromium', ['--version'], { encoding: 'utf8' }).trim(), manifestUrl: manifest.url, startUrl: start.href, icons: data.icons.length, installabilityErrors: [], firstDecisionTaps: 2, firstDecisionMs, firstDecisionGradingAndReview: 'passed', offlineStartUrlSaveResume: 'passed', offlineShortcutDestinations: 'passed', physicalAndroidInstallation: 'unverified' }, null, 2));
 } finally {
   ws?.close(); browser.kill('SIGTERM');
   await new Promise(resolve => browser.exitCode !== null ? resolve() : browser.once('exit', resolve));
