@@ -75,3 +75,26 @@ export function drillScenario(profile, game, index, mode) {
   if (!bank.length) return null;
   return bank[index % bank.length];
 }
+
+// Capture once at session start: recording a new mistake must not reshuffle
+// the remaining hands. Existing local practice totals provide the rotation;
+// no new tracking or save format is required.
+export function drillSequence(profile, game, mode) {
+  const bank = mode === 'weak' ? orderDrills(profile, game) : drillBank(game);
+  if (!bank.length) return [];
+  const played = profile?.practice?.[game]?.played;
+  const offset = Number.isSafeInteger(played) && played >= 0 ? played : 0;
+  let ordered;
+  if (mode === 'weak' && game === 'blackjack') {
+    const types = [...new Set(bank.map(drill => drill.type))];
+    ordered = types.flatMap(type => {
+      const group = bank.filter(drill => drill.type === type);
+      const start = offset % group.length;
+      return [...group.slice(start), ...group.slice(0, start)];
+    });
+  } else {
+    const start = offset % bank.length;
+    ordered = [...bank.slice(start), ...bank.slice(0, start)];
+  }
+  return ordered.slice(0, DRILL_HANDS);
+}

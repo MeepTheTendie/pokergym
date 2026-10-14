@@ -29,7 +29,7 @@ import {
 } from '../src/rpg/daily.js';
 import { parseEntryParams, isSharedDayCurrent, cleanEntrySearch, buildDailyShareText } from '../src/rpg/links.js';
 import { keyAction, shouldIgnoreKey } from '../src/rpg/keys.js';
-import { drillScenario, DRILL_HANDS, DRILL_GAMES } from '../src/rpg/drills.js';
+import { drillSequence, DRILL_HANDS, DRILL_GAMES } from '../src/rpg/drills.js';
 import { drawArt, drawTrainerBack } from './characters.js';
 import audio from './audio.js?v=20261006-audio3';
 import haptics from './haptics.js';
@@ -89,6 +89,7 @@ let dailyMode = false;
 let dailyRun = null; // { key, plan, number, index, results, scored, finished }
 let drillMode = null; // 'master' | 'weak' | null — a rigged five-hand drill session
 let drillIndex = 0;
+let drillHands = [];
 let drillLabel = ''; // the situation name for the current drill hand
 const entryParams = parseEntryParams(location.search);
 let requestedGym = GYMS.find(gym => gym.game === entryParams.practice) ?? null;
@@ -927,6 +928,7 @@ function startGym(gym, sprint = false, mode = null) {
   shortSession = sprint;
   drillMode = sprint && mode ? mode : null;
   drillIndex = 0;
+  drillHands = drillMode ? drillSequence(profile, gym.game, drillMode) : [];
   gymId = gym.id;
   gameId = gym.game;
   handsWon = 0;
@@ -1369,7 +1371,7 @@ function startHand() {
   const rng = dailyMode && dailyRun ? dailySeedRng(dailyRun.plan[dailyRun.index].seed) : null;
   // A drill session deals from a fixed bank of instructive situations instead
   // of a random deal. The coach still grades the hand exactly as always.
-  const drilled = drillMode ? drillScenario(profile, gameId, drillIndex, drillMode) : null;
+  const drilled = drillMode ? drillHands[drillIndex % drillHands.length] : null;
   if (drilled) drillIndex++;
   drillLabel = drilled?.label ?? '';
   if (gameId === 'videopoker') {

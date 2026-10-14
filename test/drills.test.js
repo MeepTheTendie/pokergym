@@ -1,5 +1,37 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { drillSequence, drillBank } from '../src/rpg/drills.js';
+
+test('repeat master sessions cover the full authored banks without repeating within a session', () => {
+  for (const game of ['blackjack', 'videopoker']) {
+    const seen = new Set();
+    for (let session = 0; session < drillBank(game).length; session++) {
+      const sequence = drillSequence({ practice: { [game]: { played: session * 5 } } }, game, 'master');
+      assert.equal(sequence.length, 5);
+      assert.equal(new Set(sequence).size, 5);
+      sequence.forEach(drill => seen.add(drill));
+    }
+    assert.equal(seen.size, drillBank(game).length);
+  }
+});
+
+test('weak sessions retain missed-type priority and their captured order as mistakes change', () => {
+  const profile = { practice: { blackjack: { played: 5 } }, mistakes: [{ game: 'blackjack', type: 'soft' }] };
+  const sequence = drillSequence(profile, 'blackjack', 'weak');
+  const labels = sequence.map(drill => drill.label);
+  assert.ok(sequence.slice(0, 4).every(drill => drill.type === 'soft'));
+  assert.notEqual(sequence[0], drillBank('blackjack')[0]);
+  profile.mistakes.push(...Array.from({ length: 3 }, () => ({ game: 'blackjack', type: 'pair' })));
+  assert.deepEqual(sequence.map(drill => drill.label), labels);
+  assert.equal(drillSequence(profile, 'blackjack', 'weak')[0].type, 'pair');
+});
+
+test('drill sequence accepts legacy profiles and rejects invalid rotation totals', () => {
+  const initial = drillSequence(null, 'videopoker', 'master');
+  assert.deepEqual(initial, drillBank('videopoker').slice(0, 5));
+  assert.deepEqual(drillSequence({ practice: { videopoker: { played: -1 } } }, 'videopoker', 'master'), initial);
+  assert.deepEqual(drillSequence(null, 'unknown', 'master'), []);
+});
 
 test('coached hands earn XP and practice history but never score, streak, or rank credit', async () => {
   const { createProfile, applyResult, masteryRank } = await import('../src/rpg/state.js');
