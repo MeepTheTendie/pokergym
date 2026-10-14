@@ -6,6 +6,9 @@
   const history = document.getElementById('pack-history');
   const storage = document.getElementById('pack-storage');
   const retry = document.getElementById('pack-retry');
+  const share = document.getElementById('pack-share');
+  const shareText = document.getElementById('pack-share-text');
+  const shareStatus = document.getElementById('pack-share-status');
   let saved = null;
   let results = [];
   let saving = true;
@@ -43,7 +46,31 @@
     storage.textContent = saving ? 'Your current attempt and completed scores stay in this browser. No score is sent to Poker Gym.'
       : 'Saving unavailable. Keep a note of your scores before closing this page.';
     retry.hidden = done !== cards.length;
+    if (share) {
+      share.hidden = done !== cards.length;
+      if (done !== cards.length) {
+        shareText.hidden = true;
+        shareStatus.textContent = '';
+      }
+    }
   }
+  if (share) share.onclick = async () => {
+    if (results.filter(value => value !== undefined).length !== cards.length) return;
+    const correct = results.filter(value => value === true).length;
+    const revealed = results.filter(value => value === 'revealed').length;
+    const text = `Poker Gym blackjack pack 01: ${correct}/5 correct (${revealed} revealed before choosing).\nFree five-decision practice, no signup or real-money wagering. Try the same drill:\nhttps://playpokergym.com/guides/weekly-01/?ref=share`;
+    shareText.value = text;
+    shareText.hidden = false;
+    shareStatus.textContent = 'Review the text below. Nothing is posted automatically.';
+    try {
+      await navigator.clipboard.writeText(text);
+      shareStatus.textContent = 'Copied. Paste only where sharing is welcome. Nothing was posted.';
+    } catch {
+      shareStatus.textContent = 'Copy unavailable. Select and copy the text below to share it yourself.';
+      shareText.focus();
+      shareText.select();
+    }
+  };
   function record(index, value) {
     if (results[index] !== undefined) return;
     results[index] = value;

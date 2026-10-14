@@ -71,6 +71,7 @@ try {
   await evaluate('localStorage.clear()');
   await navigate();
   assert.equal(await evaluate('document.querySelectorAll("details[open]").length'), 0);
+  assert.equal(await evaluate('document.getElementById("pack-share").hidden'), true);
   // Wrong choice cannot be replaced with a revealed answer.
   await evaluate('document.querySelector("article button[data-move=stand]").click()');
   await evaluate('document.querySelector("article button[data-move=hit]").click()');
@@ -84,9 +85,22 @@ try {
   assert.equal(await evaluate("localStorage.getItem('pokergym:weekly-01:attempt:v1')"), null);
   assert.match(await evaluate('document.getElementById("pack-score").textContent'), /3\/5 correct.*5\/5 completed/);
   assert.match(await evaluate('document.getElementById("pack-history").textContent'), /First completed attempt: 3\/5 \(1 revealed/);
+  const beforeShare = await evaluate('JSON.stringify({...localStorage})');
+  await evaluate(`Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async text => { window.__copiedPack = text; } } }); document.getElementById('pack-share').click()`);
+  await waitFor('document.getElementById("pack-share-status").textContent.startsWith("Copied.")');
+  const shared = await evaluate('window.__copiedPack');
+  assert.match(shared, /3\/5 correct \(1 revealed before choosing\)/);
+  assert.ok(shared.endsWith('https://playpokergym.com/guides/weekly-01/?ref=share'));
+  assert.equal(await evaluate('document.getElementById("pack-share-text").value'), shared);
+  await evaluate(`Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async () => { throw new Error('clipboard denied'); } } }); document.getElementById('pack-share').click()`);
+  await waitFor('document.getElementById("pack-share-status").textContent.startsWith("Copy unavailable.")');
+  assert.equal(await evaluate('document.getElementById("pack-share-text").hidden'), false);
+  assert.equal(await evaluate('JSON.stringify({...localStorage})'), beforeShare);
   assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
   await evaluate('document.getElementById("pack-retry").click()');
   await sleep(100);
+  assert.equal(await evaluate('document.getElementById("pack-share").hidden'), true);
+  assert.equal(await evaluate('document.getElementById("pack-share-text").hidden'), true);
   assert.equal(await evaluate('document.querySelectorAll("details[open]").length'), 0);
   await finish();
   assert.match(await evaluate('document.getElementById("pack-history").textContent'), /First completed attempt: 3\/5.*Latest completed attempt: 5\/5/);
@@ -135,6 +149,7 @@ try {
   const oldHtml = await send('Page.addScriptToEvaluateOnNewDocument', { source: `
     const observer = new MutationObserver(() => {
       document.getElementById('pack-feedback')?.remove();
+      document.getElementById('pack-share')?.remove();
     });
     observer.observe(document, { childList: true, subtree: true });
   ` });
