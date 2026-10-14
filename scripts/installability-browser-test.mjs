@@ -54,9 +54,14 @@ try {
     }
     throw new Error(`Timed out: ${expression}`);
   };
+  const navigate = async target => {
+    await evaluate('window.__installTestPreviousDocument = true');
+    await send('Page.navigate', { url: target });
+    await waitFor('!window.__installTestPreviousDocument && document.readyState === "complete"');
+  };
   await send('Page.enable'); await send('Runtime.enable'); await send('Network.enable');
   await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
-  await send('Page.navigate', { url });
+  await navigate(url);
   await waitFor('Boolean(document.getElementById("btnNew")?.onclick) && Boolean(navigator.serviceWorker.controller)');
   const manifest = await send('Page.getAppManifest');
   assert.deepEqual(manifest.errors, [], 'Chromium parses manifest without warnings');
@@ -104,8 +109,8 @@ try {
   assert.ok(save, 'Trainer save exists');
   // Navigate to the exact manifest entry offline; this does not install an app.
   await send('Network.emulateNetworkConditions', { offline: true, latency: 0, downloadThroughput: 0, uploadThroughput: 0 });
-  await send('Page.navigate', { url: 'about:blank' });
-  await send('Page.navigate', { url: start.href });
+  await navigate('about:blank');
+  await navigate(start.href);
   await waitFor('Boolean(document.getElementById("btnContinue")?.onclick)');
   assert.equal(await evaluate('localStorage.getItem("pokergym:save:v1")'), save, 'Offline launch preserves save');
   assert.equal(await evaluate('document.getElementById("btnContinue").disabled'), false);
@@ -118,17 +123,19 @@ try {
   const packShortcut = data.shortcuts.find(shortcut => shortcut.url === '/guides/weekly-01/');
   assert.ok(packShortcut, 'Weekly sample has an app shortcut');
   await send('Network.setCacheDisabled', { cacheDisabled: true });
-  await send('Page.navigate', { url: new URL(packShortcut.url, manifest.url).href });
+  await navigate(new URL(packShortcut.url, manifest.url).href);
   await waitFor('Boolean(document.querySelector("[data-drill-index] .choices button"))');
   assert.equal(await evaluate('document.querySelector("link[rel=manifest]").href'), manifest.url, 'Sample advertises the same app');
   await evaluate('document.querySelector("[data-drill-index] .choices button").click()');
   const packScore = await evaluate('document.getElementById("pack-score").textContent');
+  await evaluate('window.__installTestPreviousDocument = true');
   await send('Page.reload', { ignoreCache: true });
+  await waitFor('!window.__installTestPreviousDocument && document.readyState === "complete"');
   await waitFor('Boolean(document.querySelector("[data-drill-index] .choices button:disabled"))');
   assert.equal(await evaluate('document.getElementById("pack-score").textContent'), packScore, 'Offline shortcut retains unfinished sample decision');
   const practiceShortcut = data.shortcuts.find(shortcut => shortcut.url === '/web/?practice=blackjack');
   assert.ok(practiceShortcut, 'Five-hand practice has an app shortcut');
-  await send('Page.navigate', { url: new URL(practiceShortcut.url, manifest.url).href });
+  await navigate(new URL(practiceShortcut.url, manifest.url).href);
   await waitFor('Boolean(document.getElementById("btnContinue")?.onclick)');
   assert.equal(await evaluate('localStorage.getItem("pokergym:save:v1")'), save, 'Practice shortcut retains existing game save');
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Start screen fits phone width');
