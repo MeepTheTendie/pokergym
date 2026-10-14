@@ -236,6 +236,34 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   assert.deepEqual(reorderedHolds, { first: [true,true,false,false,false], second: [false,true,false,true,false], ev: true }, 'Cached coach holds follow reordered cards');
   console.log('PASS: video-poker cache preserves hold positions for reordered cards.');
   await checkPrivacy();
+  if (!topLevel) {
+    assert.equal(await evaluate('document.getElementById("portableWeeklySample").target'), '_blank', 'Sample preserves running game');
+    await evaluate(`(() => {
+      const frame = document.createElement('iframe'); frame.id = 'sampleCheck';
+      frame.src = document.getElementById('portableWeeklySample').href;
+      frame.style.cssText = 'position:fixed;inset:0;width:390px;height:600px;border:0;z-index:9999';
+      document.body.append(frame);
+    })()`);
+    await waitFor('Boolean(document.getElementById("sampleCheck").contentDocument?.querySelector("article button"))');
+    const sample = await evaluate(`(() => {
+      const frame = document.getElementById('sampleCheck'), doc = frame.contentDocument;
+      const localAssets = [...doc.querySelectorAll('script[src],link[rel="icon"]')].every(el =>
+        new URL(el.src || el.href).pathname.startsWith('/uploads/demo/web/'));
+      doc.querySelectorAll('article').forEach(card => card.querySelector('button[data-move="' + card.dataset.answer + '"]').click());
+      return { localAssets, score: doc.getElementById('pack-score').textContent,
+        fits: doc.documentElement.scrollWidth <= frame.clientWidth,
+        install: Boolean(doc.querySelector('link[rel="manifest"],#pack-download')),
+        practice: new URL(doc.querySelector('.cta').href).pathname,
+        feedback: !doc.getElementById('pack-feedback').hidden };
+    })()`);
+    assert.deepEqual(sample, { localAssets: true, score: 'This attempt: 5/5 correct · 5/5 completed.',
+      fits: true, install: false, practice: '/uploads/demo/web/index.html', feedback: true });
+    await evaluate('document.getElementById("sampleCheck").contentWindow.__previousSample = true; document.getElementById("sampleCheck").contentWindow.location.reload()');
+    await waitFor('!document.getElementById("sampleCheck").contentWindow.__previousSample && document.getElementById("sampleCheck").contentDocument?.getElementById("pack-score")?.textContent.includes("5/5 correct")');
+    assert.equal(await evaluate('document.getElementById("sampleCheck").contentDocument.querySelectorAll("article button:not(:disabled)").length'), 0, 'Portable completed review persists');
+    await evaluate('document.getElementById("sampleCheck").remove()');
+    console.log('PASS: nested portable weekly sample loads local assets, scores five choices, resumes completed review and links local practice; no cloud install advertised.');
+  }
   assert.ok(await evaluate('Boolean(document.getElementById("btnNew").onclick)'), `Modules loaded; runtime=${JSON.stringify(errors)}; failed requests=${JSON.stringify(failed)}`);
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), '390px embed has no horizontal overflow');
   await evaluate('document.getElementById("btnNew").click(); document.querySelector(".class-card").click(); document.getElementById("btnBecome").click()');
