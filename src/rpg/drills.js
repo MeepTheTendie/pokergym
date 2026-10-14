@@ -54,13 +54,18 @@ export function drillBank(game) {
 // Weak-spot drills reorder the blackjack bank so the hand types the player has
 // actually missed come first. Video poker has no situation tags, so its bank
 // keeps its authored order; the coach still grades every hold exactly.
-export function orderDrills(profile, game) {
-  const bank = drillBank(game);
-  if (game !== 'blackjack') return bank.slice();
+function missedTypes(profile) {
   const missed = { soft: 0, pair: 0, hard: 0 };
   for (const mistake of profile?.mistakes ?? []) {
     if (mistake.game === 'blackjack' && validMistakeType(mistake.type)) missed[mistake.type]++;
   }
+  return missed;
+}
+
+export function orderDrills(profile, game) {
+  const bank = drillBank(game);
+  if (game !== 'blackjack') return bank.slice();
+  const missed = missedTypes(profile);
   return bank
     .map((drill, index) => ({ drill, index }))
     .sort((a, b) => (missed[b.drill.type] - missed[a.drill.type]) || a.index - b.index)
@@ -86,9 +91,12 @@ export function drillSequence(profile, game, mode) {
   const offset = Number.isSafeInteger(played) && played >= 0 ? played : 0;
   let ordered;
   if (mode === 'weak' && game === 'blackjack') {
-    const types = [...new Set(bank.map(drill => drill.type))];
-    ordered = types.flatMap(type => {
-      const group = bank.filter(drill => drill.type === type);
+    // Rotate each equal-priority tier as a whole. Rotating within each type
+    // alone leaves later tied types permanently outside a five-hand session.
+    const missed = missedTypes(profile);
+    const priorities = [...new Set(bank.map(drill => missed[drill.type]))];
+    ordered = priorities.flatMap(priority => {
+      const group = bank.filter(drill => missed[drill.type] === priority);
       const start = offset % group.length;
       return [...group.slice(start), ...group.slice(0, start)];
     });

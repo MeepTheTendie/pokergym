@@ -33,6 +33,29 @@ test('drill sequence accepts legacy profiles and rejects invalid rotation totals
   assert.deepEqual(drillSequence(null, 'unknown', 'master'), []);
 });
 
+test('weak sessions cover every equally prioritized hand including hard hands', () => {
+  for (const mistakes of [[], ['soft', 'pair', 'hard'].map(type => ({ game: 'blackjack', type }))]) {
+    const seen = new Set();
+    for (let session = 0; session < drillBank('blackjack').length; session++) {
+      const sequence = drillSequence({ mistakes, practice: { blackjack: { played: session * 5 } } }, 'blackjack', 'weak');
+      assert.equal(new Set(sequence).size, 5);
+      sequence.forEach(drill => seen.add(drill));
+    }
+    assert.equal(seen.size, drillBank('blackjack').length);
+  }
+});
+
+test('weak sessions keep the highest missed priority first while covering lower tied types', () => {
+  const mistakes = [{ game: 'blackjack', type: 'soft' }];
+  const seen = new Set();
+  for (let session = 0; session < 14; session++) {
+    const sequence = drillSequence({ mistakes, practice: { blackjack: { played: session * 5 } } }, 'blackjack', 'weak');
+    assert.ok(sequence.slice(0, 4).every(drill => drill.type === 'soft'));
+    sequence.forEach(drill => seen.add(drill));
+  }
+  assert.equal(seen.size, drillBank('blackjack').length);
+});
+
 test('coached hands earn XP and practice history but never score, streak, or rank credit', async () => {
   const { createProfile, applyResult, masteryRank } = await import('../src/rpg/state.js');
   const base = { ...createProfile('scholar'), streak: 5 };
