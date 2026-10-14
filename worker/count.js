@@ -3,13 +3,26 @@
 // from src/rpg/links.js, shared with the app's share links.
 import { classifyRef } from '../src/rpg/links.js';
 
-// "/" is the landing; "/web/", "/web" and "/web/index.html" are the app.
+// Explicit published pages only; variants share a canonical bucket.
+// Arbitrary URLs and query values must never become analytics dimensions.
 const PATH_BUCKETS = new Map([
   ['/', '/'],
   ['/web/', '/web/'],
   ['/web', '/web/'],
   ['/web/index.html', '/web/'],
 ]);
+export const GUIDE_PATHS = Object.freeze([
+  '/guides/jacks-or-better/',
+  '/guides/blackjack/',
+  '/guides/baccarat/',
+  '/guides/holdem-best-five/',
+  '/guides/weekly-01/',
+]);
+for (const path of GUIDE_PATHS) {
+  PATH_BUCKETS.set(path, path);
+  PATH_BUCKETS.set(path.slice(0, -1), path);
+  PATH_BUCKETS.set(`${path}index.html`, path);
+}
 
 export function pathBucket(pathname) {
   return PATH_BUCKETS.get(pathname) ?? null;

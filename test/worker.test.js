@@ -2,16 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { PUBLISHED_REFS } from '../src/rpg/links.js';
-import { pathBucket, isPageLike, countBucket, dataPoint } from '../worker/count.js';
+import { GUIDE_PATHS, pathBucket, isPageLike, countBucket, dataPoint } from '../worker/count.js';
 import worker from '../worker/index.js';
 import { buildQuery, formatTable } from '../scripts/stats.mjs';
 
 const nav = (url, extra = {}) => new Request(url, { headers: { 'sec-fetch-mode': 'navigate', ...extra } });
 
-test('path buckets: landing and app only, /web variants normalised', () => {
+test('path buckets: published pages only, URL variants normalised', () => {
   assert.equal(pathBucket('/'), '/');
   for (const p of ['/web/', '/web', '/web/index.html']) assert.equal(pathBucket(p), '/web/');
-  for (const p of ['/guides/blackjack/', '/web/privacy.html', '/sitemap.xml', '/og.png', '/robots.txt', '/web/app.js', '/src/rpg/links.js', '/sw.js', '/web/index.htm', '/WEB/']) assert.equal(pathBucket(p), null, p);
+  for (const p of ['/guides/unknown/', '/guides/weekly-01/style.css', '/web/privacy.html', '/sitemap.xml', '/og.png', '/robots.txt', '/web/app.js', '/src/rpg/links.js', '/sw.js', '/web/index.htm', '/WEB/']) assert.equal(pathBucket(p), null, p);
 });
 
 test('page-like predicate: navigations and HTML requests only', () => {
@@ -28,7 +28,7 @@ test('countBucket uses the shared PUBLISHED_REFS whitelist', () => {
   assert.deepEqual(countBucket(nav('https://playpokergym.com/')), { path: '/', ref: 'none' });
   assert.deepEqual(countBucket(nav('https://playpokergym.com/?ref=SHARE')), { path: '/', ref: 'other' });
   assert.deepEqual(countBucket(nav('https://playpokergym.com/web?ref=' + 'x'.repeat(500))), { path: '/web/', ref: 'other' });
-  assert.equal(countBucket(nav('https://playpokergym.com/guides/blackjack/?ref=hn')), null);
+  assert.deepEqual(countBucket(nav('https://playpokergym.com/guides/blackjack/?ref=hn')), { path: '/guides/blackjack/', ref: 'hn' });
   assert.equal(countBucket(new Request('https://playpokergym.com/web/', { method: 'POST', headers: { 'sec-fetch-mode': 'navigate' } })), null);
   assert.equal(countBucket(new Request('https://playpokergym.com/web/', { headers: { 'sec-fetch-mode': 'cors' } })), null);
 });
@@ -93,8 +93,8 @@ test('wrangler config: worker + assets binding, array run_worker_first, AE datas
   assert.equal(cfg.main, 'worker/index.js');
   assert.equal(cfg.assets.binding, 'ASSETS');
   assert.ok(Array.isArray(cfg.assets.run_worker_first));
-  assert.deepEqual(cfg.assets.run_worker_first, ['/', '/web/', '/web', '/web/index.html']);
-  for (const p of cfg.assets.run_worker_first) assert.ok(pathBucket(p), `${p} is a counted path`);
+  assert.deepEqual(cfg.assets.run_worker_first, ['/', '/web/', '/web', '/web/index.html', '/guides/*']);
+  for (const p of cfg.assets.run_worker_first.filter(p => !p.includes('*'))) assert.ok(pathBucket(p), `${p} is a counted path`);
   assert.deepEqual(cfg.analytics_engine_datasets, [{ binding: 'VISITS', dataset: 'pokergym_visits' }]);
   assert.ok(cfg.routes.some(r => r.pattern === 'playpokergym.com' && r.custom_domain));
   assert.equal(cfg.workers_dev, true);
@@ -107,4 +107,30 @@ test('stats query and table label', () => {
   assert.match(table, /page-like requests, not people/);
   assert.match(table, /2026-10-14\s+\/web\/\s+share\s+3/);
   assert.match(formatTable([]), /no counted requests/);
+});
+
+
+test('guide campaign attribution excludes private queries, assets, cache fills and failed pages', async () => {
+  for (const path of GUIDE_PATHS) {
+    for (const variant of [path, path.slice(0, -1), `${path}index.html`]) {
+      assert.equal(pathBucket(variant), path);
+    }
+  }
+  const e = env(); const c = ctx();
+  const url = 'https://playpokergym.com/guides/weekly-01/?ref=youtube&email=private@example.invalid';
+  assert.equal((await worker.fetch(nav(url), e, c)).status, 200);
+  await Promise.all(c.waits);
+  assert.deepEqual(e.points, [{ indexes: ['v1'], blobs: ['/guides/weekly-01/', 'youtube'], doubles: [1] }]);
+  for (const request of [
+    new Request(url, { headers: { 'sec-fetch-mode': 'cors', accept: 'text/html' } }),
+    new Request(url, { method: 'HEAD', headers: { accept: 'text/html' } }),
+    nav('https://playpokergym.com/guides/weekly-01/style.css'),
+    nav('https://playpokergym.com/guides/unknown/'),
+  ]) assert.equal(countBucket(request), null);
+  for (const status of [307, 404, 500]) {
+    const failed = env({ status }); const failedCtx = ctx();
+    assert.equal((await worker.fetch(nav(url), failed, failedCtx)).status, status);
+    assert.deepEqual(failed.points, []);
+    assert.equal(failedCtx.waits.length, 0);
+  }
 });

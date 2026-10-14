@@ -17,9 +17,9 @@
   "assets": {
     "directory": "dist",
     "binding": "ASSETS",
-    // Array form: the worker runs only for these page paths. Assets, guides,
-    // sitemap, og.png and /src/ modules are served directly and never counted.
-    "run_worker_first": ["/", "/web/", "/web", "/web/index.html"]
+    // Array form: run for entry pages and published guides only.
+    // Guide assets and unknown paths are rejected by the counting whitelist.
+    "run_worker_first": ["/", "/web/", "/web", "/web/index.html", "/guides/*"]
   },
   "analytics_engine_datasets": [
     { "binding": "VISITS", "dataset": "pokergym_visits" }
