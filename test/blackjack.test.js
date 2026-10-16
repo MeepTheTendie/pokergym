@@ -336,8 +336,26 @@ test('dealer bust rates match the published six deck S17 table', () => {
     7: 0.2619, 8: 0.2437, 9: 0.2292, 10: 0.2125, 14: 0.1155,
   };
   for (const [rank, want] of Object.entries(expected)) {
-    const dist = dealerDistribution(counts, cardIndex(Number(rank)));
-    near(dist[0], want, 0.004, `dealer bust for upcard ${rank}`);
+    const up = Number(rank);
+    const dist = dealerDistribution(counts, cardIndex(up));
+    // The published table is unconditional. Under a 10 or an ace the coach
+    // knows the dealer has no natural (the game settles one before you act),
+    // so the bust rate is the published one divided by P(no natural).
+    let scale = 1;
+    if (up === 10 || up === 14) {
+      const n = countsSize(counts);
+      const completes = up === 10 ? counts[ACE] : counts[TEN];
+      scale = 1 / (1 - completes / n);
+    }
+    near(dist[0], want * scale, 0.004, `dealer bust for upcard ${rank}`);
+  }
+});
+
+test('under a 10 or an ace the dealer distribution excludes a natural', () => {
+  const counts = shoeCounts(sixDeckShoe());
+  for (const up of [10, 14]) {
+    const dist = dealerDistribution(counts, cardIndex(up));
+    near(dist.reduce((a, b) => a + b, 0), 1, 1e-12, `upcard ${up} sums to one`);
   }
 });
 
@@ -380,10 +398,12 @@ test('doubling is twice the value of taking one card and standing', () => {
 /* ---- coach behaviour ------------------------------------------------------ */
 
 // GOLDEN: each row was chosen by an independent Monte Carlo over real shoes.
+// Rows against a 10 or an ace are conditioned on the dealer not holding a
+// natural, because the game settles a dealer natural before you can act.
 const GOLDEN = [
   { hand: [9, 9], up: 7, action: 'stand', ev: 0.3996 },
   { hand: [9, 9], up: 8, action: 'split', ev: 0.2301 },
-  { hand: [9, 9], up: 10, action: 'stand', ev: -0.2355 },
+  { hand: [9, 9], up: 10, action: 'stand', ev: -0.1711 },
   { hand: [5, 5], up: 2, action: 'double', ev: 0.3715 },
   { hand: [5, 5], up: 3, action: 'double', ev: 0.4240 },
   { hand: [2, 7], up: 3, action: 'double', ev: 0.1314 },
@@ -392,7 +412,7 @@ const GOLDEN = [
   { hand: [7, 7], up: 2, action: 'split', ev: -0.1202 },
   { hand: [6, 6], up: 7, action: 'hit', ev: -0.2205 },
   { hand: [10, 10], up: 2, action: 'stand', ev: 0.6379 },
-  { hand: [4, 5], up: 10, action: 'hit', ev: -0.2132 },
+  { hand: [4, 5], up: 10, action: 'hit', ev: -0.1514 },
   { hand: [14, 7], up: 7, action: 'stand', ev: 0.4019 },
   { hand: [14, 7], up: 8, action: 'stand', ev: 0.1081 },
   { hand: [14, 7], up: 9, action: 'hit', ev: -0.0992 },
@@ -406,6 +426,36 @@ for (const row of GOLDEN) {
     const res = bestAction(roundWith(row.hand, row.up));
     assert.equal(res.action, row.action);
     near(res.ev, row.ev, 0.01, `${row.hand} vs ${row.up}`);
+  });
+}
+
+/*
+ * Pair chart: standard six-deck, dealer stands on soft 17, double after split
+ * allowed (GAME.doubleAfterSplit), no surrender. P = split, S = stand, H = hit,
+ * D = double. Upcards in order 2..9, 10, A.
+ */
+const PAIR_CHART = {
+  2: 'PPPPPPHHHH', 3: 'PPPPPPHHHH', 4: 'HHHPPHHHHH', 5: 'DDDDDDDDHH',
+  6: 'PPPPPHHHHH', 7: 'PPPPPPHHHH', 8: 'PPPPPPPPPP', 9: 'PPPPPSPPSS',
+  10: 'SSSSSSSSSS', 14: 'PPPPPPPPPP',
+};
+const CHART_ACTION = { P: 'split', S: 'stand', H: 'hit', D: 'double' };
+const UPCARDS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 14];
+
+test('8,8 splits against a 10 and against an ace', () => {
+  for (const up of [10, 14]) {
+    clearCache();
+    assert.equal(bestAction(roundWith([8, 8], up)).action, 'split', `8,8 vs ${up}`);
+  }
+});
+
+for (const [pair, row] of Object.entries(PAIR_CHART)) {
+  test(`pair ${pair},${pair} follows the six deck S17 DAS chart`, () => {
+    UPCARDS.forEach((up, k) => {
+      clearCache();
+      const r = Number(pair);
+      assert.equal(bestAction(roundWith([r, r], up)).action, CHART_ACTION[row[k]], `${pair},${pair} vs ${up}`);
+    });
   });
 }
 

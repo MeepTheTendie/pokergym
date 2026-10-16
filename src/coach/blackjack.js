@@ -152,9 +152,37 @@ function dealerDist(counts, total, aces, key) {
   return dist;
 }
 
+/*
+ * The game settles a dealer natural before the player is offered any choice
+ * (newRound ends the round on the spot). So whenever the coach is asked, the
+ * dealer is known NOT to hold blackjack, and the hole card under a ten or an
+ * ace cannot be the card that would complete one. The first (hole) draw skips
+ * that rank and renormalises; everything after it is unconditioned. Without
+ * this, splits and doubles against a 10 or an ace were charged for losing two
+ * bets to a dealer natural that can never happen once you are acting, which
+ * is what made the coach hit 8-8 against a 10 or an ace.
+ */
 export function dealerDistribution(counts, upIndex) {
   const start = addCard(0, 0, upIndex);
-  return dealerDist(counts, start.total, start.aces, signature(counts));
+  const blocked = upIndex === ACE ? TEN : upIndex === TEN ? ACE : -1;
+  if (blocked < 0) return dealerDist(counts, start.total, start.aces, signature(counts));
+  const n = countsSize(counts) - counts[blocked];
+  const dist = new Float64Array(DIST_SIZE);
+  if (n <= 0) {
+    dist[0] = 1;
+    return dist;
+  }
+  for (let i = 0; i < RANKS; i++) {
+    const c = counts[i];
+    if (!c || i === blocked) continue;
+    const probe = copyCounts(counts);
+    probe[i]--;
+    const next = addCard(start.total, start.aces, i);
+    const sub = dealerDist(probe, next.total, next.aces, signature(probe));
+    const w = c / n;
+    for (let k = 0; k < DIST_SIZE; k++) dist[k] += w * sub[k];
+  }
+  return dist;
 }
 
 export function standAgainst(dist, total) {
