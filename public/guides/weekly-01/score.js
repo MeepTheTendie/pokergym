@@ -188,17 +188,13 @@
   feedback.hidden = false;
   feedback.addEventListener('submit', event => {
     event.preventDefault();
-    const interest = document.getElementById('pack-interest').value;
-    if (!['interested', 'unsure', 'free-only'].includes(interest)) return;
     draft.value = [
       'Poker Gym voluntary drill pack 01 feedback',
       saved ? `First completed score: ${saved.first.correct}/5 (${saved.first.revealed} revealed before choosing).` : 'No completed score available.',
       saved ? `Latest completed score: ${saved.latest.correct}/5 (${saved.latest.revealed} revealed before choosing).` : '',
-      `Possible US$5/month fresh weekly packs and mistake review: ${interest}`,
-      'This is feedback on a possible offer, not a signup, purchase or subscription.',
       '',
       `Useful or unclear: ${document.getElementById('pack-note').value.slice(0, 400).trim() || '(no comment)'}`,
-    ].filter((line, index) => line || index === 5).join('\n');
+    ].filter((line, index) => line || index === 3).join('\n');
     updateDraftLinks();
     if (copyStatus) copyStatus.textContent = '';
     review.hidden = false;

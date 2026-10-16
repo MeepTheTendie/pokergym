@@ -1,5 +1,5 @@
 import { readBackup, writeBackup } from '../src/rpg/backup.js';
-import { feedbackDraft } from './feedback.js?v=recurring-research-1';
+import { feedbackDraft } from './feedback.js?v=no-pricing-1';
 import { SUIT_GLYPH, SUIT_NAME, rankLabel, cardLabel } from '../src/cards.js';
 import { CATEGORY_LABEL, evaluate5 } from '../src/evaluate.js';
 import {
@@ -409,8 +409,6 @@ el('feedbackForm').onsubmit = event => {
   const draft = feedbackDraft({
     clarity: el('feedbackClarity').value,
     returnInterest: el('feedbackReturn').value,
-    priceInterest: el('feedbackPrice').value,
-    recurringInterest: el('feedbackRecurring').value,
     note: el('feedbackNote').value,
   });
   el('feedbackPreview').value = draft.body;

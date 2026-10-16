@@ -24,7 +24,7 @@ The free demo includes badges, replay practice and per-game accuracy. Progress s
 Feedback prompt: Where did you hesitate during your first lesson on a phone, and was the next action clear?
 
 Documentation checked 2026-10-07: https://itch.io/docs/creators/html5
-This artifact is prepared locally, not uploaded or published. itch.io HTML5 donation payments are not recurring subscription checkout or evidence of recurring revenue.
+This artifact is prepared locally, not uploaded or published. itch.io HTML5 donation payments are optional tips, not evidence of revenue goals.
 
 Cross-site verification: the actual ZIP passed a 390px localhost parent / 127.0.0.1 iframe test in separate Chromium targets, including isolated game storage, reload, backup/restore and five-hand sessions. This is local default Chromium behavior, not hosted itch.io, restricted-storage browsers or physical Android evidence.
 

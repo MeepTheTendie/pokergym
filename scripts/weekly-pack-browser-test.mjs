@@ -118,14 +118,13 @@ try {
   assert.match(await evaluate('document.getElementById("pack-score").textContent'), /5\/5 correct.*5\/5 completed/);
   // Offer feedback is voluntary, unselected and unsent until the player acts.
   assert.equal(await evaluate('document.getElementById("pack-feedback").hidden'), false);
-  assert.equal(await evaluate('document.getElementById("pack-interest").value'), '');
-  await evaluate('document.getElementById("pack-feedback").requestSubmit()');
   assert.equal(await evaluate('document.getElementById("pack-feedback-review").hidden'), true);
+  assert.equal(await evaluate('document.getElementById("pack-interest")'), null, 'No pricing question is asked');
   const beforeFeedback = await evaluate('JSON.stringify({...localStorage})');
-  await evaluate(`document.getElementById('pack-interest').value = 'free-only'; document.getElementById('pack-note').value = '<script>not markup</script> & soft totals?'; document.getElementById('pack-feedback').requestSubmit()`);
+  await evaluate(`document.getElementById('pack-note').value = '<script>not markup</script> & soft totals?'; document.getElementById('pack-feedback').requestSubmit()`);
   const feedbackBody = await evaluate('document.getElementById("pack-feedback-draft").value');
   assert.match(feedbackBody, /First completed score: 3\/5.*\nLatest completed score: 5\/5/);
-  assert.match(feedbackBody, /review: free-only/);
+  assert.doesNotMatch(feedbackBody, /US\$|subscri|month|price/i);
   assert.ok(feedbackBody.includes('<script>not markup</script> & soft totals?'));
   assert.equal(await evaluate('document.querySelectorAll("#pack-feedback-review script").length'), 0);
   for (const link of ['email', 'github']) {
@@ -166,7 +165,7 @@ try {
   await evaluate(`localStorage.setItem('pokergym:weekly-01:scores:v1', JSON.stringify({ first: { correct: 999, revealed: 0 }, latest: { correct: 5, revealed: 0 } }))`);
   await navigate();
   assert.equal(await evaluate('document.getElementById("pack-history").textContent'), 'No completed score saved yet.');
-  await evaluate(`document.getElementById('pack-interest').value = 'unsure'; document.getElementById('pack-feedback').requestSubmit()`);
+  await evaluate(`document.getElementById('pack-feedback').requestSubmit()`);
   assert.match(await evaluate('document.getElementById("pack-feedback-draft").value'), /No completed score available/);
   // Malformed and empty attempts cannot be resumed or alter history.
   for (const attempt of [[true, false, 'revealed', null, '<script>'], [null, null, null, null, null], [true]]) {

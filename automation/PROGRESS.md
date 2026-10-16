@@ -1,5 +1,7 @@
 # Poker Gym autonomous iteration checkpoint
 
+> Historic log. Superseded 2026-10-15: references below to a US$200/month recurring-revenue goal, subscriptions, a US$5/month offer or pricing research no longer apply. See the monetization rule in LAUNCH.md: no subscriptions, Ko-fi tips only, and a one-time unlock considered only on unprompted demand after day 30.
+
 ## 2026-10-07 — portable player-acquisition demo
 
 Outcome: completed a reproducible itch.io HTML5 ZIP and a browser verification command. No publication, customer feedback, payment or recurring revenue occurred in this iteration. Verified recurring revenue remains unestablished; the US$200/month objective is not achieved.

@@ -607,32 +607,9 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
 
 
   await evaluate(`document.getElementById('feedbackClarity').value = 'confusing'; document.getElementById('feedbackReturn').value = 'maybe'; document.getElementById('feedbackNote').value = 'More drills & clearer hints?';`);
-  // Exercise the visible choice-to-draft contract: FREE ONLY once saved as
-  // "unsure", making demand evidence ambiguous despite valid draft helpers.
-  for (const [label, value] of [['INTERESTED', 'interested'], ['UNSURE', 'unsure'], ['FREE ONLY', 'free-only']]) {
-    assert.equal(await evaluate(`(() => {
-      const select = document.getElementById('feedbackPrice');
-      const option = [...select.options].find(item => item.textContent === ${JSON.stringify(label)});
-      if (!option) return null;
-      select.value = option.value;
-      document.getElementById('feedbackForm').requestSubmit();
-      return select.value;
-    })()`), value);
-    assert.match(await evaluate('document.getElementById("feedbackPreview").value'), new RegExp(`Possible one-time US\\$4\\.99 unlock: ${value}`));
-  }
-  for (const [label, value] of [['SKIP', ''], ['INTERESTED', 'interested'], ['UNSURE', 'unsure'], ['FREE ONLY', 'free-only']]) {
-    assert.equal(await evaluate(`(() => {
-      const select = document.getElementById('feedbackRecurring');
-      const option = [...select.options].find(item => item.textContent === ${JSON.stringify(label)});
-      if (!option) return null;
-      select.value = option.value;
-      document.getElementById('feedbackForm').requestSubmit();
-      return select.value;
-    })()`), value);
-    const body = await evaluate('document.getElementById("feedbackPreview").value');
-    assert.ok(body.includes(`Possible US$5/month fresh weekly drills and mistake review: ${value || 'not answered'}`));
-    assert.ok(body.includes('Possible one-time US$4.99 unlock: free-only'));
-  }
+  assert.equal(await evaluate("document.getElementById('feedbackPrice') || document.getElementById('feedbackRecurring')"), null, 'No pricing question is asked');
+  await evaluate("document.getElementById('feedbackForm').requestSubmit()");
+  assert.doesNotMatch(await evaluate('document.getElementById("feedbackPreview").value'), /US\$|subscri|month|unlock/i);
   assert.equal(await evaluate('document.getElementById("feedbackDraft").hidden'), false);
   assert.match(await evaluate('document.getElementById("feedbackDraft").textContent'), /NOT SENT/);
   const feedback = await evaluate(`({ href: document.getElementById('feedbackEmail').href, body: document.getElementById('feedbackPreview').value })`);

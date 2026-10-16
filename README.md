@@ -19,7 +19,7 @@ Prefer a quick lesson first? Try the [three-hand video-poker guide](https://play
 
 Try the [free five-decision blackjack sample](https://playpokergym.com/guides/weekly-01/), choose before revealing each explanation, then retry on a later day. It saves your unfinished attempt and first/latest completed scores in the same browser. An explicit download button enables offline practice.
 
-After trying it, [leave voluntary feedback](https://github.com/MeepTheTendie/pokergym/issues/1): what was your first score, which explanation was unclear, and would fresh weekly drill packs and mistake review be worth US$5/month to you (interested, unsure or free-only)? What would make you return next week? This is a possible recurring offer for research, with no promised release schedule, signup or purchase. Nothing is for sale today and the free demo stays free.
+After trying it, [leave voluntary feedback](https://github.com/MeepTheTendie/pokergym/issues/1): what was your first score, which explanation was unclear, and what would make you return next week? Poker Gym is free, with no subscriptions. If it helps you, an optional [Ko-fi tip](https://ko-fi.com/playpokergym) is welcome.
 
 GitHub feedback is public and requires an account. Omit personal details and save backups. The demo also provides an email-draft alternative that you review and send yourself.
 
@@ -37,7 +37,6 @@ Poker Gym is independent, with original artwork and music. Built by Wes Pennock 
 
 Releases and their tags are point-in-time source snapshots. The [spaced-recall-demo-2026-10-10 release](https://github.com/MeepTheTendie/pokergym/releases/tag/spaced-recall-demo-2026-10-10) contains scored original-decision retries in all four games and persistent spaced recall, alongside practice, backups, offline play and mistake review. Older notebook entries without an original answer key support self-review only. The download link above follows the latest published release. Use that release tag to inspect the downloadable demo source; the default branch may differ from the live build.
 
-No recurring customer revenue is verified.
 
 
 ## Visit stats (owner only)
