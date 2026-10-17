@@ -515,7 +515,7 @@ function renderToday() {
     el('dailySharePreview').value = text;
     const fb = document.createElement('p');
     fb.className = 'hint';
-    fb.innerHTML = 'Feedback? <a href="mailto:wesleympennock@gmail.com?subject=Poker%20Gym%20feedback">Email</a> · <a href="https://github.com/MeepTheTendie/pokergym/issues/1" target="_blank" rel="noopener noreferrer">GitHub</a>';
+    fb.innerHTML = 'Feedback? <a href="mailto:meep@mail.grokbot.com?subject=Poker%20Gym%20feedback">Email</a> · <a href="https://github.com/MeepTheTendie/pokergym/issues/1" target="_blank" rel="noopener noreferrer">GitHub</a>';
     actions.appendChild(fb);
     const tip = document.createElement('p');
     tip.className = 'hint tip-link';
@@ -1627,7 +1627,7 @@ function renderSessionSummary(session) {
   box.appendChild(dismiss);
   const fb = document.createElement('p');
   fb.className = 'hint';
-  fb.innerHTML = 'Feedback? <a href="mailto:wesleympennock@gmail.com?subject=Poker%20Gym%20feedback">Email</a> · <a href="https://github.com/MeepTheTendie/pokergym/issues/1" target="_blank" rel="noopener noreferrer">GitHub</a>';
+  fb.innerHTML = 'Feedback? <a href="mailto:meep@mail.grokbot.com?subject=Poker%20Gym%20feedback">Email</a> · <a href="https://github.com/MeepTheTendie/pokergym/issues/1" target="_blank" rel="noopener noreferrer">GitHub</a>';
   box.appendChild(fb);
   const tip = document.createElement('p');
   tip.className = 'hint tip-link';

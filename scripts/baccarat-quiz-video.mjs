@@ -12,7 +12,7 @@ export const slides = [
   { seconds: 7, label: 'TRY THE COMMISSION QUESTION', title: 'A 20-unit Banker win.', answer: '19, 20 OR 21 UNITS?', body: 'After the 5% commission,\nhow much profit remains?\nExclude the returned original stake.\nChoose before the answer appears.' },
   { seconds: 8, label: 'ANSWER 2 / 2', title: '19 units of profit.', answer: '20 × 0.95 = 19', body: 'Commission takes one unit.\nYour original 20-unit stake returns\nseparately: 39 units in total.\nOne win does not change the house edge.' },
   { seconds: 7, label: 'UNDERSTAND ODDS, NOT STREAKS', title: 'The next hand is not promised.', answer: 'RULES AND PAYOUTS MATTER', body: 'Full-shoe averages do not predict\na short session. Different rules\nchange the math. These answers use\nPoker Gym’s enumerated-outcome coach.' },
-  { seconds: 9, label: 'POKER GYM • FREE BROWSER TRAINER', title: 'Try five questions. Review one mistake.', answer: 'playpokergym.com', body: 'No signup. No real-money wagering.\nTry our weekly sample, then tell us\nwhat would make you return.\nPractice and feedback in the description.', footer: 'No gambling profits are guaranteed.\nBuilt by Wes Pennock with AI assistance.' },
+  { seconds: 9, label: 'POKER GYM • FREE BROWSER TRAINER', title: 'Try five questions. Review one mistake.', answer: 'playpokergym.com', body: 'No signup. No real-money wagering.\nTry our weekly sample, then tell us\nwhat would make you return.\nPractice and feedback in the description.', footer: 'No gambling profits are guaranteed.\nBuilt by Poker Gym with AI assistance.' },
 ];
 
 const out = path.resolve('artifacts/baccarat-quiz');

@@ -12,7 +12,7 @@ export const slides = [
   { seconds: 7, label: 'TRY THE TIE QUESTION', title: 'Their private cards: A♥ J♣', answer: 'WHO HAS THE BETTER HAND?', body: 'Same board: K♠ K♥ 7♦ 7♣ 2♦\nYou hold A♠ Q♥. They hold A♥ J♣.\nDoes your queen beat their jack?' },
   { seconds: 8, label: 'ANSWER', title: 'You tie.', answer: 'SAME PAIRS. SAME ACE KICKER.', body: 'Both best hands are kings and sevens\nwith an ace. The sixth card never\nbreaks a five-card tie.\nSuits do not break this tie either.' },
   { seconds: 6, label: 'HAND READING, NOT BETTING ADVICE', title: 'Count exactly five cards.', answer: 'EVALUATION PRACTICE', body: 'Poker Gym checks your best-five pick.\nIt does not teach full betting strategy\nor simulate opponents.\nThis example uses the actual evaluator.' },
-  { seconds: 9, label: 'POKER GYM • FREE BROWSER TRAINER', title: 'Try five hands. Review one mistake.', answer: 'playpokergym.com', body: 'No signup. No real-money wagering.\nWhich explanation needs more clarity?\nPractice and feedback in the description.', footer: 'Learning hand rankings cannot guarantee profits.\nBuilt by Wes Pennock with AI assistance.' },
+  { seconds: 9, label: 'POKER GYM • FREE BROWSER TRAINER', title: 'Try five hands. Review one mistake.', answer: 'playpokergym.com', body: 'No signup. No real-money wagering.\nWhich explanation needs more clarity?\nPractice and feedback in the description.', footer: 'Learning hand rankings cannot guarantee profits.\nBuilt by Poker Gym with AI assistance.' },
 ];
 
 const out = path.resolve('artifacts/holdem-quiz');

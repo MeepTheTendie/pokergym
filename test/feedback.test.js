@@ -6,7 +6,7 @@ test('voluntary feedback safely encodes text and records intent without implying
   const note = 'Missing: A&B?\n日本語 #cards';
   const draft = feedbackDraft({ clarity: 'confusing', returnInterest: 'maybe', note });
   const url = new URL(draft.href);
-  assert.equal(url.pathname, 'wesleympennock@gmail.com');
+  assert.equal(url.pathname, 'meep@mail.grokbot.com');
   assert.equal(url.searchParams.get('body'), draft.body);
   const github = new URL(draft.githubHref);
   assert.equal(github.origin, 'https://github.com');

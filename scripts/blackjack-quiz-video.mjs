@@ -12,7 +12,7 @@ export const slides = [
   { seconds: 6, label: 'CHANGE ONE CARD', title: 'Now the dealer has 10.', dealer: '10♦', answer: 'HIT OR STAND?', body: 'Your hand is still 10♠ + 6♥.\nWould you make the same move?' },
   { seconds: 8, label: 'ANSWER 2 / 2', title: 'Against 10: hit.', dealer: '10♦', answer: 'HIT', body: 'Standing loses to any dealer 17–21.\nHitting risks a bust, but has a slightly\nbetter average result in this example.\nBoth choices lose on average.' },
   { seconds: 7, label: 'DECISIONS, NOT PREDICTIONS', title: 'A good move can still lose.', answer: 'RULES MATTER', body: 'Fresh six-deck shoe. Dealer stands on\nall 17s. Surrender unavailable.\nExamples checked against Poker Gym’s\nsimulator coach; not a certified chart.' },
-  { seconds: 10, label: 'POKER GYM • FREE BROWSER TRAINER', title: 'Try five hands. Review one mistake.', answer: 'playpokergym.com', body: 'No signup. No real-money wagering.\nWhich explanation needs more clarity?\nFeedback link in the description.', footer: 'Learning the best play lowers the house edge;\nit never beats it.\nBuilt by Wes Pennock with AI assistance.' },
+  { seconds: 10, label: 'POKER GYM • FREE BROWSER TRAINER', title: 'Try five hands. Review one mistake.', answer: 'playpokergym.com', body: 'No signup. No real-money wagering.\nWhich explanation needs more clarity?\nFeedback link in the description.', footer: 'Learning the best play lowers the house edge;\nit never beats it.\nBuilt by Poker Gym with AI assistance.' },
 ];
 
 const out = path.resolve('artifacts/blackjack-quiz');

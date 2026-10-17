@@ -33,7 +33,7 @@ The release ZIP is an HTML5 browser game for hosting or local serving, not an An
 
 ## Project and source status
 
-Poker Gym is independent, with original artwork and music. Built by Wes Pennock with AI assistance. Publication and documentation may be performed by an AI development assistant for the owner. No affiliation with Nintendo or Pokémon is claimed.
+Poker Gym is independent, with original artwork and music. Built by Poker Gym with AI assistance. Publication and documentation may be performed by an AI development assistant for the owner. No affiliation with Nintendo or Pokémon is claimed.
 
 Releases and their tags are point-in-time source snapshots. The [spaced-recall-demo-2026-10-10 release](https://github.com/MeepTheTendie/pokergym/releases/tag/spaced-recall-demo-2026-10-10) contains scored original-decision retries in all four games and persistent spaced recall, alongside practice, backups, offline play and mistake review. Older notebook entries without an original answer key support self-review only. The download link above follows the latest published release. Use that release tag to inspect the downloadable demo source; the default branch may differ from the live build.
 

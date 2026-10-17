@@ -182,7 +182,7 @@
     const body = encodeURIComponent(draft.value.slice(0, 1800));
     const subject = encodeURIComponent('Poker Gym drill pack 01 feedback');
     document.getElementById('pack-feedback-email').href =
-      `mailto:wesleympennock@gmail.com?subject=${subject}&body=${body}`;
+      `mailto:meep@mail.grokbot.com?subject=${subject}&body=${body}`;
     document.getElementById('pack-feedback-github').href =
       `https://github.com/MeepTheTendie/pokergym/issues/new?title=${subject}&body=${body}`;
   }
