@@ -47,6 +47,22 @@
     }
   };
 
+  // Snapshot the entry parameters synchronously, before the SDK starts loading.
+  // The trainer strips ref/d from the address bar as soon as its modules run
+  // (web/app.js), which happens before the SDK finishes loading and calls the
+  // onload handler below. Reading the URL there would lose the source of every
+  // trainer event, so read it here instead.
+  var ATTRIBUTION = {};
+  try {
+    var params = new URLSearchParams(window.location.search);
+    ['ref', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'd', 'practice'].forEach(function (key) {
+      var value = params.get(key);
+      if (value) ATTRIBUTION[key] = String(value).slice(0, 100);
+    });
+  } catch (error) {
+    // Analytics must never break the page.
+  }
+
   // Any element can be marked data-track="event_name"; the event fires with the
   // path, the element's other data-* attributes, and its own text. Capture
   // phase so the click is recorded before the link navigates away.
@@ -75,13 +91,7 @@
       window.__pgAnalyticsReady = true;
       // Attribution travels with every event on this page and onward while the
       // identifier lasts, so source -> guide -> play is one funnel.
-      var params = new URLSearchParams(window.location.search);
-      var attribution = {};
-      ['ref', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'd', 'practice'].forEach(function (key) {
-        var value = params.get(key);
-        if (value) attribution[key] = String(value).slice(0, 100);
-      });
-      window.posthog.register(attribution);
+      window.posthog.register(ATTRIBUTION);
       for (var i = 0; i < queue.length; i++) window.posthog.capture(queue[i][0], queue[i][1]);
       queue.length = 0;
     } catch (error) {

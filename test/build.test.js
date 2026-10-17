@@ -38,6 +38,12 @@ test('public build contains its module graph without repository or diagnostic fi
   const loader = await readFile(path.join(root, 'web/posthog-loader.js'), 'utf8');
   assert.match(loader, /PROD_HOSTS/, 'analytics must be limited to the production host');
   assert.match(loader, /playpokergym\.com/);
+  // The trainer strips ref/d from the address bar before the SDK finishes
+  // loading, so the snapshot has to be taken synchronously, before the SDK
+  // script element is created. Reading the URL in onload loses attribution.
+  assert.ok(loader.indexOf('var ATTRIBUTION') < loader.indexOf("API_HOST + '/static/array.js'"), 'attribution is snapshotted before the SDK starts loading');
+  assert.match(loader, /posthog\.register\(ATTRIBUTION\)/);
+  assert.doesNotMatch(loader, /register\(attribution\)/);
   for (const guide of ['weekly-01', 'blackjack', 'jacks-or-better', 'baccarat', 'holdem-best-five']) {
     const html = await readFile(path.join(root, `guides/${guide}/index.html`), 'utf8');
     assert.match(html, /<script src="\/web\/posthog-loader\.js"><\/script>/, `${guide} loads analytics`);
