@@ -1,6 +1,6 @@
 import { CLASS_BY_ID, startingStats } from './classes.js';
 import { GYMS, GYM_BY_ID, gymForClass, isUnlocked } from './gyms.js';
-import { dayGap, dailyPlan, validDailyGames } from './daily.js';
+import { dayGap, dailyPlan, validDailyGames, validDailyPlan, DAILY_HANDS } from './daily.js';
 
 import { validDrillPlan } from './drills.js';
 
@@ -69,13 +69,27 @@ export function dailyOf(profile) {
     best: Number.isSafeInteger(d.best) && d.best > 0 ? d.best : 0,
     restKey: typeof d.restKey === 'string' ? d.restKey : null,
     history: Array.isArray(d.history) ? d.history : [],
-    progress: d.progress ?? null,
+    progress: sanitizeDailyProgress(d.progress),
   };
 }
 
+// A locally saved day-in-progress must not survive as a shape the resumer or the
+// external backup validator would reject; keep the parts that are valid.
+function sanitizeDailyProgress(progress) {
+  if (!progress || typeof progress !== 'object' || Array.isArray(progress)) return null;
+  if (!validDayKey(progress.key)) return null;
+  if (!Number.isSafeInteger(progress.index) || progress.index < 0 || progress.index >= DAILY_HANDS) return null;
+  if (!Array.isArray(progress.results) || progress.results.length !== progress.index) return null;
+  const out = { key: progress.key, index: progress.index, results: progress.results.map(Boolean) };
+  if (progress.plan !== undefined && validDailyPlan(progress.plan)) {
+    out.plan = progress.plan.map(hand => ({ game: hand.game, seed: hand.seed }));
+  }
+  return out;
+}
+
 export function dailyResults(results) {
-  const out = Array.isArray(results) ? results.slice(0, 5).map(Boolean) : [];
-  while (out.length < 5) out.push(false);
+  const out = Array.isArray(results) ? results.slice(0, DAILY_HANDS).map(Boolean) : [];
+  while (out.length < DAILY_HANDS) out.push(false);
   return out;
 }
 
@@ -95,6 +109,8 @@ export function setDailyProgress(profile, progress) {
 
 export function completeDaily(profile, key, results, games = dailyPlan(key).map(hand => hand.game)) {
   if (!profile) return profile;
+  if (!validDailyGames(games)) return profile;
+  if (!validDayKey(key)) return profile;
   const daily = dailyOf(profile);
   const scored = dailyResults(results);
 
@@ -105,6 +121,8 @@ export function completeDaily(profile, key, results, games = dailyPlan(key).map(
   }
 
   const gap = daily.lastKey ? dayGap(key, daily.lastKey) : null;
+  // A past or out-of-order day must never regress the streak or rewrite history.
+  if (gap !== null && gap <= 0) return profile;
   let streak;
   let restKey = daily.restKey;
   if (gap === null) {
@@ -118,7 +136,6 @@ export function completeDaily(profile, key, results, games = dailyPlan(key).map(
     streak = 1;
   }
 
-  if (!validDailyGames(games)) return profile;
   const history = [{ key, results: scored, games: [...games] }, ...daily.history].slice(0, DAILY_HISTORY_CAP);
   return { ...profile, daily: {
     lastKey: key,
@@ -169,9 +186,9 @@ export function applyResult(state, { optimal, difficulty = 1, game = null, coach
     next.xp += gained;
     const before = levelFromXp(next.xp - gained).level;
     const after = levelFromXp(next.xp).level;
-    const leveled = after > before;
-    if (leveled) for (const key of Object.keys(next.stats)) next.stats[key]++;
-    return { profile: next, gained, points: 0, leveled, level: after };
+    const levels = after - before;
+    if (levels > 0) for (const key of Object.keys(next.stats)) next.stats[key] += levels;
+    return { profile: next, gained, points: 0, leveled: levels > 0, level: after };
   }
   if (!optimal) {
     next.streak = 0;
@@ -190,10 +207,9 @@ export function applyResult(state, { optimal, difficulty = 1, game = null, coach
 
   const before = levelFromXp(next.xp - gained).level;
   const after = levelFromXp(next.xp).level;
-  if (after > before) {
-    for (const key of Object.keys(next.stats)) next.stats[key]++;
-  }
-  return { profile: next, gained, points, leveled: after > before, level: after };
+  const levels = after - before;
+  if (levels > 0) for (const key of Object.keys(next.stats)) next.stats[key] += levels;
+  return { profile: next, gained, points, leveled: levels > 0, level: after };
 }
 
 export function practiceSummary(profile) {
@@ -488,6 +504,7 @@ export function answerMistakeQuiz(profile, index, action, today = localDayKey())
   if (!Number.isInteger(index)) return profile;
   const entry = profile.mistakes?.[index];
   if (!entry || !validMistakeQuiz(entry.quiz, entry.game)) return profile;
+  if (entry.mastered) return profile;
   if (!entry.quiz.choices.includes(action) || !validDayKey(today)) return profile;
   const previous = entry.retries ?? { attempted: 0, correct: 0 };
   const correct = entry.quiz.optimal.includes(action);

@@ -259,3 +259,74 @@ test('difficulty scales XP payout', () => {
   const hard = applyResult(base, { optimal: true, difficulty: 3 });
   assert.ok(hard.gained > easy.gained);
 });
+
+test('crossing several levels at once awards one stat point per level', () => {
+  const base = createProfile('scholar');
+  const result = applyResult(base, { optimal: true, difficulty: 50 });
+  const levels = result.level - levelFromXp(result.profile.xp - result.gained).level;
+  assert.ok(levels > 1, 'this difficulty must cross more than one level');
+  for (const key of ['focus', 'nerve', 'read']) {
+    assert.equal(result.profile.stats[key], base.stats[key] + levels, `${key} gains one per level`);
+  }
+});
+
+test('a mastered mistake is retired and can never be answered again', async () => {
+  const { recordMistake, answerMistakeQuiz } = await import('../src/rpg/state.js');
+  const quiz = { choices: ['hit', 'stand'], optimal: ['hit'] };
+  const seed = recordMistake(createProfile('scholar'), {
+    game: 'blackjack', situation: 'SOFT 18 AGAINST A TEN', chosen: 'stand', correction: 'hit', quiz,
+  });
+  assert.equal(seed.mistakes[0].mastered, false);
+
+  // Climb every spaced-repetition box to earn mastery.
+  let mastered = seed;
+  for (let i = 0; i < 5; i++) mastered = answerMistakeQuiz(mastered, 0, 'hit', '2026-01-01');
+  assert.equal(mastered.mistakes[0].mastered, true);
+  assert.equal(mastered.mistakes[0].due, null);
+
+  const snapshot = JSON.stringify(mastered.mistakes[0]);
+  const score = mastered.score;
+  const repeated = answerMistakeQuiz(mastered, 0, 'hit', '2026-01-01');
+  assert.equal(repeated, mastered, 'a mastered entry is returned unchanged');
+  assert.equal(repeated.score, score, 'no bonus can be farmed from a mastered entry');
+
+  const wrong = answerMistakeQuiz(mastered, 0, 'stand', '2026-01-01');
+  assert.equal(wrong.score, score, 'a wrong retry cannot un-master or re-score it');
+  assert.equal(JSON.stringify(wrong.mistakes[0]), snapshot);
+});
+
+test('completeDaily refuses an invalid games list without touching the profile', async () => {
+  const { completeDaily } = await import('../src/rpg/state.js');
+  const base = createProfile('scholar');
+  for (const games of [null, [], ['blackjack'], Array(5).fill('unknown')]) {
+    assert.equal(completeDaily(base, '2026-01-01', [true, true, true, true, true], games), base);
+  }
+});
+
+test('sanitizeProfile drops a malformed daily progress but keeps a valid one', async () => {
+  const { sanitizeProfile } = await import('../src/rpg/state.js');
+  const withDaily = progress => ({ ...createProfile('scholar'), daily: { ...createProfile('scholar').daily, progress } });
+  assert.equal(sanitizeProfile(withDaily({ key: '2026-01-01', index: 3, results: [true, false] })).daily.progress, null);
+  assert.equal(sanitizeProfile(withDaily({ key: 'nope', index: 1, results: [true] })).daily.progress, null);
+  assert.equal(sanitizeProfile(withDaily({ key: '2026-01-01', index: 5, results: [true, true, true, true, true] })).daily.progress, null);
+  assert.equal(sanitizeProfile(withDaily('oops')).daily.progress, null);
+  const good = { key: '2026-01-01', index: 2, results: [true, false] };
+  assert.deepEqual(sanitizeProfile(withDaily(good)).daily.progress, good);
+});
+
+test('completing a past day is ignored instead of regressing the streak', async () => {
+  const { completeDaily } = await import('../src/rpg/state.js');
+  let profile = createProfile('scholar');
+  profile = completeDaily(profile, '2026-01-02', [true, true, true, true, true]);
+  profile = completeDaily(profile, '2026-01-03', [true, true, true, true, true]);
+  assert.equal(profile.daily.streak, 2);
+  assert.equal(profile.daily.lastKey, '2026-01-03');
+
+  const past = completeDaily(profile, '2026-01-01', [true, true, true, true, true]);
+  assert.equal(past, profile, 'a past day is returned unchanged');
+  assert.equal(past.daily.streak, 2);
+  assert.equal(past.daily.lastKey, '2026-01-03');
+  assert.equal(past.daily.history.length, 2, 'no duplicate or rewritten history entry');
+
+  assert.equal(completeDaily(profile, 'nope', [true, true, true, true, true]), profile, 'a malformed key is ignored');
+});

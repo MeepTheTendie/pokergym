@@ -58,8 +58,9 @@
     history.textContent = saved
       ? `First completed attempt: ${saved.first.correct}/${cards.length} (${saved.first.revealed} revealed before choosing). Latest completed attempt: ${saved.latest.correct}/${cards.length} (${saved.latest.revealed} revealed before choosing).`
       : 'No completed score saved yet.';
-    storage.textContent = saving ? 'Your current attempt, completed answers and scores stay in this browser. Choose Retry to start again. No score is sent to Poker Gym.'
+    const storageText = saving ? 'Your current attempt, completed answers and scores stay in this browser. Choose Retry to start again. No score is sent to Poker Gym.'
       : 'Saving unavailable. Keep a note of your scores before closing this page.';
+    if (storage.textContent !== storageText) storage.textContent = storageText;
     retry.hidden = done !== cards.length;
     if (share) {
       share.hidden = done !== cards.length;

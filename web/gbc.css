@@ -159,6 +159,8 @@ button:focus-visible { outline: 4px solid var(--t02); outline-offset: 2px; }
 #todayActions > p { flex-basis: 100%; margin: 4px 0; }
 #dailyHistory { margin-top: 12px; }
 #dailyHistory > summary { cursor: pointer; min-height: 44px; padding: 8px 0; }
+.skip { position: absolute; left: -9999px; }
+.skip:focus { left: 8px; top: 8px; z-index: 100; background: #ffe3a0; color: #14121c; padding: 8px; }
 
 /* Cards: GBC green tile with a hard 3D edge */
 .hand { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
@@ -464,7 +466,6 @@ button:focus-visible { outline: 3px solid #386a9c; outline-offset: 3px; }
 .title-art > .gym-sw, .title-art > .gym-se { top: 81%; }
 .title-menu { margin-top: 12px; }
 .title-menu h1 { display: inline-block; font-size: 24px !important; color: #263c35 !important; margin: 4px 3px 16px !important; text-shadow: 2px 2px #b6c5a2; }
-.title-menu h1:nth-of-type(2) { color: #9a4d43 !important; }
 .trainer-card { position: relative; padding-left: 80px; min-height: 128px; }
 .trainer-card .sprite { position: absolute; left: 8px; top: 24px; width: 64px; height: 64px; }
 .trainer-card .dlg { gap: 0; }
@@ -516,7 +517,11 @@ button:focus-visible { outline: 3px solid #386a9c; outline-offset: 3px; }
 .card[aria-pressed='true'] { transform: translateY(-3px); }
 .zone-head { font-size: 10px; }
 .payout-panel { padding: 10px 12px; }
-.payout-panel summary { cursor: pointer; min-height: 28px; font-size: 10px; }
+.payout-panel summary { cursor: pointer; min-height: 44px; font-size: 10px; }
+#mapMore > summary, #saveBackup > summary { cursor: pointer; min-height: 44px; padding: 10px 0; }
+summary:focus-visible { outline: 3px solid #386a9c; outline-offset: 2px; }
+.card:focus-visible:not(:disabled) { outline: 3px solid #386a9c; outline-offset: 2px; }
+.card:disabled { opacity: 1; }
 .payout-panel .paytable { margin-top: 8px; }
 #scr-battle { padding-bottom: 4px; }
 #scr-battle .battle-side > .row { position: sticky; bottom: calc(env(safe-area-inset-bottom) + 8px); z-index: 3; padding: 6px; background: #d8dfc6; border: 1px solid #a1b18a; }

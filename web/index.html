@@ -24,6 +24,7 @@
 <link rel="stylesheet" href="gbc.css">
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="shell">
 
 <div class="topbar">
@@ -36,12 +37,13 @@
 
 <p class="window hint" id="saveStatus" role="status" hidden></p>
 
+<main id="main">
+
 <!-- ============ TITLE ============ -->
 <section id="scr-title" class="screen">
   <div class="title-art"><canvas id="titleWorld" width="240" height="176" aria-hidden="true"></canvas><span>YOUR JOURNEY STARTS HERE</span><canvas id="titleTrainer" class="title-trainer" width="96" height="96" aria-hidden="true"></canvas><span class="title-gym gym-nw">GYM</span><span class="title-gym gym-ne">GYM</span><span class="title-gym gym-sw">GYM</span><span class="title-gym gym-se">GYM</span><span class="title-league">THE CARD ACADEMY</span></div>
   <div class="window title-menu" style="text-align:center; padding:20px 12px;">
-    <h1 style="font-size:20px; margin:0 0 4px; color:var(--gbc-1);">POKER</h1>
-    <h1 style="font-size:20px; margin:0 0 14px; color:var(--r01);">GYM</h1>
+    <h1 style="font-size:20px; margin:0 0 14px;"><span style="color:#263c35;">POKER</span> <span style="color:#9a4d43;">GYM</span></h1>
     <p class="hint" style="font-size:10px; margin:0 0 16px;">TRAIN. LEVEL UP.<br>BEAT THE MASTERS.</p>
     <p id="practiceInvitation" class="hint" hidden></p>
     <div class="row" style="flex-direction:column; gap:10px;">
@@ -164,8 +166,8 @@
       <div id="feedbackDraft" hidden>
         <p class="hint">NOT SENT. REVIEW THE DRAFT BELOW, THEN CHOOSE GITHUB OR EMAIL. NO GAME SAVE OR PLAYER PROFILE IS INCLUDED.</p>
         <textarea id="feedbackPreview" readonly rows="8" aria-label="Feedback draft"></textarea>
-        <p><a id="feedbackGithub" target="_blank" rel="noopener noreferrer">OPEN GITHUB DRAFT</a> — PUBLIC; GITHUB ACCOUNT REQUIRED. OPENING SHARES THESE ANSWERS WITH GITHUB IN THE LINK. REVIEW THERE AND SUBMIT YOURSELF. OMIT PERSONAL DETAILS.</p>
-        <a id="feedbackEmail">OPEN EMAIL DRAFT</a>
+        <p><a id="feedbackGithub" href="#" target="_blank" rel="noopener noreferrer">OPEN GITHUB DRAFT</a> — PUBLIC; GITHUB ACCOUNT REQUIRED. OPENING SHARES THESE ANSWERS WITH GITHUB IN THE LINK. REVIEW THERE AND SUBMIT YOURSELF. OMIT PERSONAL DETAILS.</p>
+        <a id="feedbackEmail" href="#">OPEN EMAIL DRAFT</a>
         <p class="hint">EMAIL REVEALS YOUR EMAIL ADDRESS TO THE OWNER. YOU CAN ALSO COPY THE DRAFT TO THE EXISTING GITHUB THREAD OR EMAIL WESLEYMPENNOCK@GMAIL.COM. PREPARING THIS FORM DOES NOT UPLOAD ANYTHING.</p>
       </div>
     </div>
@@ -203,7 +205,7 @@
       <div class="row1"><span>PAGE</span><span id="lessonPage">1/14</span></div>
       <div class="gauge"><i id="lessonGauge" style="width:7%"></i></div>
     </div>
-    <div class="dialogue" id="lessonBox" role="button" tabindex="0">
+    <div class="dialogue" id="lessonBox" role="button" tabindex="0" aria-labelledby="lessonWho lessonText">
       <span class="nameplate" id="lessonWho">MASTER</span>
       <canvas class="dealer" id="lessonDealer" width="48" height="48" aria-hidden="true"></canvas>
       <p id="lessonText">&nbsp;</p>
@@ -234,7 +236,7 @@
 
   </div>
   <div class="battle-talk">
-  <div class="dialogue" id="masterBox" role="button" tabindex="0">
+  <div class="dialogue" id="masterBox" role="button" tabindex="0" aria-labelledby="masterName masterLine">
     <span class="nameplate" id="masterName">MASTER ROYALE</span>
     <p id="masterLine">&nbsp;</p>
     <span class="prompt" id="masterPrompt">▼</span>
@@ -305,6 +307,7 @@
 </section>
 
 <p class="hint" style="text-align:center"><a href="privacy.html" target="_blank" rel="noopener">PRIVACY / YOUR DATA</a></p>
+</main>
 </div>
 <script type="module" src="sound-controls.js?v=20261006-audio3"></script>
 <script type="module" src="app.js?v=20261006-audio3"></script>

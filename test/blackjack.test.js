@@ -161,6 +161,23 @@ test('the dealer draws until seventeen or more and can bust', () => {
   assert.equal(round.payout, BET);
 });
 
+test('the dealer does not draw when every hand is already dead', () => {
+  // A table of busted hands is decided before the dealer turns a card.
+  const busted = scenario([c(10), c(10), c(5)], [c(9), c(2)], [c(3), c(4)]);
+  busted.hands[0].status = 'bust';
+  finish(busted);
+  assert.equal(busted.hands[0].result, 'lose');
+  assert.equal(busted.dealerHand.length, 2, 'dealer never draws against a dead table');
+  assert.equal(busted.deck.length, 2, 'the shoe is untouched');
+
+  // A player natural wins immediately; the dealer has nothing to chase.
+  const natural = scenario([c(14), c(10)], [c(5), c(6)], [c(2), c(2)]);
+  finish(natural);
+  assert.equal(natural.hands[0].result, 'blackjack');
+  assert.equal(natural.dealerHand.length, 2, 'a natural settles without the dealer drawing');
+  assert.equal(natural.deck.length, 2, 'the shoe is untouched');
+});
+
 test('doubling takes exactly one card and then stands', () => {
   const round = roundWith([5, 6], 6);
   assert.ok(legalActions(round).includes('double'));

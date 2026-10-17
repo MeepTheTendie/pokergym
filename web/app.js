@@ -124,7 +124,7 @@ el('btnRestore').onclick = () => {
   pendingRestore = null;
   el('btnConfirmRestore').hidden = true;
   try {
-    pendingRestore = readBackup(el('backupText').value);
+    pendingRestore = sanitizeProfile(readBackup(el('backupText').value));
     el('backupStatus').textContent = `VALID BACKUP: ${CLASS_BY_ID[pendingRestore.classId].name}, ${pendingRestore.handsPlayed} HANDS, ${pendingRestore.badges.length} BADGES. CONFIRM TO REPLACE LOCAL PROGRESS.`;
     el('btnConfirmRestore').hidden = false;
   } catch { el('backupStatus').textContent = 'INVALID OR UNSUPPORTED BACKUP. YOUR PROGRESS IS UNCHANGED.'; }
@@ -328,6 +328,7 @@ function renderClassSelect() {
     const portrait = document.createElement('canvas');
     portrait.width = portrait.height = 48;
     portrait.className = 'class-portrait';
+    portrait.setAttribute('aria-hidden', 'true');
     drawArt(portrait, cls.id);
     card.prepend(portrait);
     card.onclick = () => { pendingClass = cls.id; applyPalette(cls.id); renderClassSelect(); showClassDetail(cls); };
@@ -670,6 +671,8 @@ function renderMap() {
     const d = document.createElement('div');
     const owned = profile.badges.includes(gym.id);
     d.className = `badge${owned ? '' : ' locked'}`;
+    d.setAttribute('role', 'img');
+    d.setAttribute('aria-label', owned ? gym.badge : `${gym.badge} (locked)`);
     d.textContent = gym.badgeGlyph;
     d.title = owned ? gym.badge : 'LOCKED';
     badges.appendChild(d);
@@ -830,7 +833,7 @@ function renderReviewEntry(container, row, scoredDue) {
           pattern[position] = pattern[position] === '1' ? '0' : '1';
           holdPattern = pattern.join('');
           toggle.setAttribute('aria-pressed', pattern[position] === '1' ? 'true' : 'false');
-          toggle.textContent = `${position + 1}: ${label}${pattern[position] === '1' ? ' · HELD' : ''}`;
+          toggle.textContent = `${position + 1}: ${label}${pattern[position] === '1' ? (bestFive ? ' · PICKED' : ' · HELD') : ''}`;
         };
         choices.append(toggle);
       });
@@ -1112,12 +1115,15 @@ function cardNode(card, zone, i) {
     const held = Boolean(zone.holds[i]);
     node.dataset.held = String(held);
     node.disabled = Boolean(zone.disabled);
+    node.setAttribute('aria-pressed', String(held));
     node.setAttribute('aria-label', `${name}, ${held ? 'held' : 'to be redrawn'}`);
     node.onclick = () => { audio.sfx('chip'); zone.onCard(i); };
   } else if (zone.indices) {
-    node.dataset.picked = String(picked.has(zone.indices[i]));
+    const isPicked = picked.has(zone.indices[i]);
+    node.dataset.picked = String(isPicked);
     node.disabled = Boolean(zone.disabled);
-    node.setAttribute('aria-label', `${name}, ${picked.has(zone.indices[i]) ? 'picked' : 'not picked'}`);
+    node.setAttribute('aria-pressed', String(isPicked));
+    node.setAttribute('aria-label', `${name}, ${isPicked ? 'picked' : 'not picked'}`);
     node.onclick = () => { audio.sfx('chip'); zone.onCard(zone.indices[i]); };
   } else {
     node.setAttribute('aria-label', name);

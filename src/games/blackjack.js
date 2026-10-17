@@ -248,11 +248,16 @@ export function dealerPlay(round) {
   if (round.holeRevealed) return round;
   round.holeRevealed = true;
   round.log.push('THE DEALER TURNS THE HOLE CARD OVER.');
-  while (true) {
-    const { total } = sumHand(round.dealerHand);
-    if (total >= DEALER_STANDS) break;
-    round.dealerHand.push(round.deck.shift());
-    round.log.push(`DEALER HITS. NOW ${sumHand(round.dealerHand).total}.`);
+  // The dealer only draws against a live hand: if every player hand is busted
+  // or already a natural, the round is decided and the shoe stays untouched.
+  const live = round.hands.some((h) => !h.natural && h.status !== 'bust');
+  if (live) {
+    while (true) {
+      const { total } = sumHand(round.dealerHand);
+      if (total >= DEALER_STANDS) break;
+      round.dealerHand.push(round.deck.shift());
+      round.log.push(`DEALER HITS. NOW ${sumHand(round.dealerHand).total}.`);
+    }
   }
   const { total, soft } = sumHand(round.dealerHand);
   round.log.push(

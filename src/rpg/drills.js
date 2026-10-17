@@ -92,7 +92,7 @@ export function drillSequence(profile, game, mode) {
     // Rotate each equal-priority tier as a whole. Rotating within each type
     // alone leaves later tied types permanently outside a five-hand session.
     const missed = missedTypes(profile);
-    const priorities = [...new Set(bank.map(drill => missed[drill.type]))];
+    const priorities = [...new Set(bank.map(drill => missed[drill.type]))].sort((a, b) => b - a);
     ordered = priorities.flatMap(priority => {
       const group = bank.filter(drill => missed[drill.type] === priority);
       const start = offset % group.length;
