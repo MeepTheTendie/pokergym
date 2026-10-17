@@ -3,6 +3,15 @@
 // assets.run_worker_first; every other request goes straight to assets.
 // Counting failures never prevent serving assets.
 import { countBucket, dataPoint } from './count.js';
+import { SECURITY_HEADERS } from './security.js';
+
+// Re-emit the asset response with the shared security headers. The worker runs
+// first for the HTML entry pages, where Cloudflare does not apply _headers.
+function secure(response) {
+  const headers = new Headers(response.headers);
+  for (const [name, value] of Object.entries(SECURITY_HEADERS)) headers.set(name, value);
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
 
 export default {
   async fetch(request, env, ctx) {
@@ -26,6 +35,6 @@ export default {
         // Counting must never delay or break a page view.
       }
     }
-    return response;
+    return secure(response);
   },
 };

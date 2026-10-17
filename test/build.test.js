@@ -25,6 +25,10 @@ test('public build contains its module graph without repository or diagnostic fi
   await check(root);
   await access(path.join(root, 'web/assets/characters-v2.png'));
   await access(path.join(root, 'web/index.html'));
+  const headers = await readFile(path.join(root, '_headers'), 'utf8');
+  assert.match(headers, /content-security-policy: default-src 'self'; script-src 'self'/);
+  assert.match(headers, /x-frame-options: SAMEORIGIN/i);
+  assert.match(headers, /x-content-type-options: nosniff/i);
   const landing = await readFile(path.join(root, 'index.html'), 'utf8');
   assert.match(landing, /Start training free/);
   assert.match(landing, /href="\/web\/"/);

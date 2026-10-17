@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { PUBLISHED_REFS } from '../src/rpg/links.js';
 import { GUIDE_PATHS, pathBucket, isPageLike, countBucket, dataPoint } from '../worker/count.js';
 import worker from '../worker/index.js';
+import { SECURITY_HEADERS, headersFileText } from '../worker/security.js';
 import { buildQuery, formatTable } from '../scripts/stats.mjs';
 
 const nav = (url, extra = {}) => new Request(url, { headers: { 'sec-fetch-mode': 'navigate', ...extra } });
@@ -85,6 +86,19 @@ test('worker still serves when counting fails or is unbound', async () => {
   const r = await worker.fetch(nav('https://playpokergym.com/web'), redirect, c3);
   assert.equal(r.status, 307);
   assert.equal(c3.waits.length, 0);
+});
+
+test('every served response carries the shared security headers', async () => {
+  const e = env(); const c = ctx();
+  const res = await worker.fetch(nav('https://playpokergym.com/web/'), e, c);
+  for (const [name, value] of Object.entries(SECURITY_HEADERS)) assert.equal(res.headers.get(name), value, name);
+  // Scripts may not run inline, so any future inline <script> must be hashed.
+  assert.doesNotMatch(SECURITY_HEADERS['content-security-policy'], /script-src[^;]*'unsafe-inline'/);
+  // Status (and body) survive the header rewrite, including 304s and redirects.
+  assert.equal(await res.text(), 'ok');
+  assert.equal((await worker.fetch(nav('https://playpokergym.com/web/'), env({ status: 304 }), ctx())).status, 304);
+  assert.match(headersFileText(), /^\/\*[\s\S]*\n$/);
+  assert.match(headersFileText(), /\n {2}content-security-policy: default-src 'self'; script-src 'self';/);
 });
 
 test('wrangler config: worker + assets binding, array run_worker_first, AE dataset, custom domain', async () => {

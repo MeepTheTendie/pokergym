@@ -2,6 +2,7 @@ import { cp, mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { headersFileText } from '../worker/security.js';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 export async function build(output = path.join(root, 'dist')) {
@@ -61,5 +62,8 @@ await writeFile(path.join(output, 'sw.js'), template
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   await build();
+  // Written only for the deployed build; the itch ZIP and test builds reuse the
+  // same module graph without shipping a _headers file.
+  await writeFile(path.join(root, 'dist', '_headers'), headersFileText());
   console.log('Built public demo in dist: game assets and strategy modules only.');
 }
