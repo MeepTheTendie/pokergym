@@ -8,7 +8,14 @@
 export const SITE_ORIGIN = 'https://playpokergym.com';
 export const APP_URL = `${SITE_ORIGIN}/web/`;
 
-export const PUBLISHED_REFS = Object.freeze(['share', 'invite', 'webgames', 'sideproject', 'hn', 'videopoker', 'youtube']);
+// Player-to-player shares, then the channels the marketing plan publishes to
+// (see the tagging convention in MARKETING.md), then older entry points.
+export const PUBLISHED_REFS = Object.freeze([
+  'share', 'invite',
+  'youtube', 'tiktok', 'reels', 'x',
+  'reddit', 'playmygame', 'webgames',
+  'sideproject', 'hn', 'videopoker',
+]);
 
 // A ref in the list maps to itself; missing/blank maps to 'none'; everything
 // else (case variants, junk, prototype keys) maps to 'other'.

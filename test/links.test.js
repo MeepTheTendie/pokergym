@@ -6,7 +6,7 @@ import {
 } from '../src/rpg/links.js';
 
 test('PUBLISHED_REFS is exactly the published list', () => {
-  assert.deepEqual([...PUBLISHED_REFS], ['share', 'invite', 'webgames', 'sideproject', 'hn', 'videopoker', 'youtube']);
+  assert.deepEqual([...PUBLISHED_REFS], ['share', 'invite', 'youtube', 'tiktok', 'reels', 'x', 'reddit', 'playmygame', 'webgames', 'sideproject', 'hn', 'videopoker']);
   assert.ok(Object.isFrozen(PUBLISHED_REFS));
 });
 

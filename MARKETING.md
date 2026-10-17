@@ -1,6 +1,6 @@
 # Poker Gym player acquisition
 
-## Monetization rule (Wes, 2026-10-15)
+## Monetization rule (owner, 2026-10-15)
 
 No subscriptions, ever, and no recurring prices. Monetization is the optional Ko-fi tip jar (https://ko-fi.com/playpokergym). The only other path left open is a possible one-time US$4.99 Pro unlock, considered only if at least five people ask for something like it unprompted after day 30. Prompted answers do not count as demand, so public copy asks no pricing or willingness-to-pay question. Older log entries below that mention a monthly offer or pricing research are superseded; that research was removed.
 
@@ -45,6 +45,25 @@ Source: https://itch.io/docs/creators/html5
 Read `npm run stats` first each run. It reports the bot-inclusive visit counter (page-like requests: crawlers and link unfurls included) and, separately, the PostHog real-player report: unique people per day, how many reached each journey stage (saw a page → opened the trainer → started a session → finished five hands → finished the daily drill) and the top events; reference labels arrive as the `ref` event property. Only the PostHog numbers are people. With near-zero real players, expect zeros and do not read noise into them.
 
 Record a published URL, time, channel and specific player feedback for every actual post. Do not count drafted posts as outreach. Separate visits, first-session completion, repeat play, unprompted requests for paid extras and tips. Use genuine feedback and the stage counts to choose the next onboarding or return-practice improvement. No mass unsolicited email, fabricated reviews, guaranteed winnings or paid ads without a budget.
+
+## Link tagging convention
+
+Every published link carries `?ref=<channel>` so the source is attributable in both the visit counter and PostHog. Append `&utm_content=<video-or-hook>` to compare hooks. PostHog records the raw `ref`; the visit counter recognises only the refs in `src/rpg/links.js`.
+
+| Where it is posted | ref |
+| --- | --- |
+| YouTube Shorts description | `youtube` |
+| TikTok | `tiktok` |
+| Instagram Reels | `reels` |
+| X / Twitter | `x` |
+| r/playmygame launch post | `playmygame` |
+| r/WebGames launch post | `webgames` |
+| Helpful answers in other subreddits | `reddit` |
+| Hacker News | `hn` |
+| Player's own shared daily result | `share` |
+| Owner's copyable invite | `invite` |
+
+Example: `https://playpokergym.com/web/?ref=youtube&utm_content=holdem-quiz`. With no `ref`, visits land in `other`/`none` and cannot be attributed, so a video with 500 views and no tag teaches nothing about which channel works.
 
 ## Published GitHub demo — 2026-10-07
 
