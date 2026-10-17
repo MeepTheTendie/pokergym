@@ -1,15 +1,23 @@
-// First-party PostHog loader. Loaded as a classic same-origin script (see
-// web/index.html) so the content policy stays script-src 'self' — no inline
-// snippet and no third-party host in the policy. The SDK bundle is fetched
-// through /ingest/static/array.js and all event data is sent through /ingest/*,
-// both proxied to PostHog by the edge worker (worker/proxy.js). That keeps the
-// requests first-party, so ad-blockers that target *.posthog.com do not drop
-// them.
+// First-party PostHog loader for the landing page, learning guides and the
+// trainer. Loaded as a classic same-origin script so the content policy stays
+// script-src 'self' — no inline snippet and no third-party host in the policy.
+// The SDK bundle is fetched through /ingest/static/array.js and all event data
+// is sent through /ingest/*, both proxied to PostHog by the edge worker
+// (worker/proxy.js). That keeps requests first-party, so filters that target
+// *.posthog.com do not drop them.
 //
 // Product analytics + session replay. Events fired before the SDK finishes
-// loading are queued and replayed on load. Nothing here may ever break the
-// game: every step is guarded and failures are swallowed.
+// loading are queued and replayed on load. Nothing here may ever break a page:
+// every step is guarded and failures are swallowed.
 (function () {
+  // Report only from the real site. The itch.io build, local previews and the
+  // offline bundle load this file too, and must never send analytics.
+  var PROD_HOSTS = ['playpokergym.com', 'www.playpokergym.com'];
+  if (PROD_HOSTS.indexOf(window.location.hostname) === -1) {
+    window.trackEvent = function () {};
+    return;
+  }
+
   // Project API key (public — it ships in client code). Empty disables analytics.
   var KEY = 'phc_wLPfBDNvoMeS7rSD8goD293GphD5aWjwznZbAz2yf6sc';
   var API_HOST = '/ingest';
@@ -39,6 +47,25 @@
     }
   };
 
+  // Any element can be marked data-track="event_name"; the event fires with the
+  // path, the element's other data-* attributes, and its own text. Capture
+  // phase so the click is recorded before the link navigates away.
+  document.addEventListener('click', function (event) {
+    var node = event.target;
+    while (node && node !== document && !(node.getAttribute && node.getAttribute('data-track'))) node = node.parentNode;
+    if (!node || node === document) return;
+    var payload = { path: window.location.pathname };
+    var attrs = node.attributes || [];
+    for (var i = 0; i < attrs.length; i++) {
+      var name = attrs[i].name;
+      if (name.indexOf('data-') === 0 && name !== 'data-track') {
+        payload[name.slice(5).replace(/-/g, '_')] = attrs[i].value;
+      }
+    }
+    payload.text = (node.textContent || '').trim().slice(0, 80);
+    window.trackEvent(node.getAttribute('data-track'), payload);
+  }, true);
+
   var script = document.createElement('script');
   script.async = true;
   script.src = API_HOST + '/static/array.js';
@@ -46,13 +73,22 @@
     try {
       window.posthog.init(KEY, CONFIG);
       window.__pgAnalyticsReady = true;
+      // Attribution travels with every event on this page and onward while the
+      // identifier lasts, so source -> guide -> play is one funnel.
+      var params = new URLSearchParams(window.location.search);
+      var attribution = {};
+      ['ref', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'd', 'practice'].forEach(function (key) {
+        var value = params.get(key);
+        if (value) attribution[key] = String(value).slice(0, 100);
+      });
+      window.posthog.register(attribution);
       for (var i = 0; i < queue.length; i++) window.posthog.capture(queue[i][0], queue[i][1]);
       queue.length = 0;
     } catch (error) {
-      // Analytics must never break the game.
+      // Analytics must never break the page.
     }
   };
-  // Offline or blocked: the game keeps working with no analytics.
+  // Offline or blocked: the page keeps working with no analytics.
   script.onerror = function () {};
   document.head.appendChild(script);
 })();

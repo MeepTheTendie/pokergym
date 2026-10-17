@@ -33,6 +33,16 @@ test('public build contains its module graph without repository or diagnostic fi
   assert.match(landing, /Start training free/);
   assert.match(landing, /href="\/web\/"/);
   assert.doesNotMatch(landing, /http-equiv="refresh"/);
+  assert.match(landing, /<script src="\/web\/posthog-loader\.js"><\/script>/);
+  assert.match(landing, /data-track="start_training"/);
+  const loader = await readFile(path.join(root, 'web/posthog-loader.js'), 'utf8');
+  assert.match(loader, /PROD_HOSTS/, 'analytics must be limited to the production host');
+  assert.match(loader, /playpokergym\.com/);
+  for (const guide of ['weekly-01', 'blackjack', 'jacks-or-better', 'baccarat', 'holdem-best-five']) {
+    const html = await readFile(path.join(root, `guides/${guide}/index.html`), 'utf8');
+    assert.match(html, /<script src="\/web\/posthog-loader\.js"><\/script>/, `${guide} loads analytics`);
+    assert.match(html, /data-track="guide_cta_play"/, `${guide} tracks its play call to action`);
+  }
   const worker = await readFile(path.join(root, 'sw.js'), 'utf8');
   assert.match(worker, /pokergym-offline-[a-f0-9]{20}/);
   const assets = JSON.parse(worker.match(/const ASSETS = (\[[^\n]+\]);/)[1]);

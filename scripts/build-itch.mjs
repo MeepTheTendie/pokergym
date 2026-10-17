@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { build } from './build.mjs';
+import { GUIDES, localLinks } from './portable-links.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const staging = await mkdtemp(path.join(tmpdir(), 'pokergym-itch-'));
@@ -12,17 +13,7 @@ try {
   // Ship the complete recall-to-practice routine without requiring the cloud host.
   await rm(path.join(staging, 'guides'), { recursive: true, force: true });
   await rm(path.join(staging, 'sitemap.xml'), { force: true });
-  const guides = ['jacks-or-better', 'blackjack', 'holdem-best-five', 'baccarat'];
-  const localLinks = html => html
-    .replace(/href="\/guides\/weekly-01\/"/g, 'href="weekly-sample.html"')
-    .replace(/href="\/guides\/([a-z-]+)\/"/g, (_, guide) => {
-      if (!guides.includes(guide)) throw new Error(`Unbundled guide: ${guide}`);
-      return `href="guide-${guide}.html"`;
-    })
-    .replace(/href="\/web\/\?practice=([a-z]+)"/g, 'href="index.html?practice=$1"')
-    .replace(/href="\/web\/privacy(?:\.html)?"/g, 'href="privacy.html"')
-    .replace(/href="\/web\/icon.svg"/g, 'href="icon.svg"')
-    .replace(/href="\/"/g, 'href="index.html"');
+  const guides = GUIDES;
   for (const guide of guides) {
     const html = await readFile(path.join(root, `public/guides/${guide}/index.html`), 'utf8');
     await writeFile(path.join(staging, `web/guide-${guide}.html`), localLinks(html));

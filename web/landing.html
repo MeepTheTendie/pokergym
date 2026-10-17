@@ -68,7 +68,7 @@ footer{font-size:14px;color:#b2a8cb;border-top:1px solid #4a4468}footer a{margin
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<header><nav class="hnav" aria-label="Primary"><a class="logo" href="/">♠ POKER GYM</a><a href="/web/">Open the trainer →</a></nav></header>
+<header><nav class="hnav" aria-label="Primary"><a class="logo" href="/">♠ POKER GYM</a><a href="/web/" data-track="open_trainer" data-location="header">Open the trainer →</a></nav></header>
 <main id="main" tabindex="-1">
 <section class="hero" aria-labelledby="hero-heading">
 <div class="hero-lead">
@@ -78,7 +78,7 @@ footer{font-size:14px;color:#b2a8cb;border-top:1px solid #4a4468}footer a{margin
 <h1 id="hero-heading">Learn the right play.<br><span>One hand at a time.</span></h1>
 <div class="hero-copy">
 <p class="sub">Practice blackjack, video poker, baccarat and Hold’em hand reading. Play five hands and the coach tells you, after every decision, what the best play was and why.</p>
-<a class="cta" href="/web/">Start training free →</a>
+<a class="cta" href="/web/" data-track="start_training" data-location="hero">Start training free →</a>
 <ul class="trust" aria-label="What to expect">
 <li>✓ 100% free</li><li>✓ No signup</li><li>✓ No real-money gambling</li><li>✓ No ads</li><li>✓ Works offline</li>
 </ul>
@@ -94,7 +94,7 @@ footer{font-size:14px;color:#b2a8cb;border-top:1px solid #4a4468}footer a{margin
 
 <section class="details drill" aria-labelledby="daily">
 <figure class="drillcard"><div class="squares" role="img" aria-label="Sample result: four green squares and one red"><span aria-hidden="true">🟩🟩🟥🟩🟩</span></div><figcaption><span class="note">Illustrative result</span><br><strong>4/5 correct — can you get 5/5?</strong></figcaption></figure>
-<div><h2 id="daily" class="section-title">The Daily Drill</h2><p>Same five hands for everyone. New challenge every day. Finish, then share your green-and-red grid — no spoilers, just your score.</p><a class="cta alt" href="/web/?daily=1">Try today’s drill →</a></div></section>
+<div><h2 id="daily" class="section-title">The Daily Drill</h2><p>Same five hands for everyone. New challenge every day. Finish, then share your green-and-red grid — no spoilers, just your score.</p><a class="cta alt" href="/web/?daily=1" data-track="start_daily" data-location="daily">Try today’s drill →</a></div></section>
 
 <section class="details shot" aria-labelledby="see"><h2 id="see" class="section-title">See the coach in action</h2>
 <figure class="shotfig"><img src="/coach-shot.webp" width="960" height="560" loading="lazy" decoding="async" alt="Blackjack trainer: you hold 12 against a dealer 6, and the coach panel recommends stand."><figcaption>You hold queen + two (12) versus dealer 6. The coach recommends <strong>stand</strong> — average result per hand: stand −0.15, hit −0.17, double −0.34.</figcaption></figure>
@@ -102,10 +102,10 @@ footer{font-size:14px;color:#b2a8cb;border-top:1px solid #4a4468}footer a{margin
 
 <section aria-labelledby="games"><h2 id="games" class="section-title">Four games to learn</h2>
 <div class="grid games">
-<article class="tile"><h3>BLACKJACK</h3><p>Learn when to hit, stand, double and split against every dealer card.</p><a href="/guides/blackjack/">Hit or stand? Try three blackjack decisions →</a><a href="/guides/weekly-01/">Free drill pack: five decisions to revisit →</a></article>
-<article class="tile"><h3>JACKS OR BETTER</h3><p>Learn which cards to hold in video poker, from royal draws to low pairs.</p><a href="/guides/jacks-or-better/">Read the free three-hand practice guide →</a></article>
-<article class="tile"><h3>BACCARAT</h3><p>Understand the third-card rules and why each bet has the edge it does.</p><a href="/guides/baccarat/">Test your baccarat odds in three questions →</a></article>
-<article class="tile"><h3>HOLD’EM HAND READING</h3><p>Pick the best five cards when the board plays, a kicker matters or the ace is low.</p><a href="/guides/holdem-best-five/">Which five cards count? Try three Hold’em puzzles →</a></article>
+<article class="tile"><h3>BLACKJACK</h3><p>Learn when to hit, stand, double and split against every dealer card.</p><a href="/guides/blackjack/" data-track="open_guide" data-guide="blackjack">Hit or stand? Try three blackjack decisions →</a><a href="/guides/weekly-01/" data-track="open_guide" data-guide="weekly-01">Free drill pack: five decisions to revisit →</a></article>
+<article class="tile"><h3>JACKS OR BETTER</h3><p>Learn which cards to hold in video poker, from royal draws to low pairs.</p><a href="/guides/jacks-or-better/" data-track="open_guide" data-guide="jacks-or-better">Read the free three-hand practice guide →</a></article>
+<article class="tile"><h3>BACCARAT</h3><p>Understand the third-card rules and why each bet has the edge it does.</p><a href="/guides/baccarat/" data-track="open_guide" data-guide="baccarat">Test your baccarat odds in three questions →</a></article>
+<article class="tile"><h3>HOLD’EM HAND READING</h3><p>Pick the best five cards when the board plays, a kicker matters or the ace is low.</p><a href="/guides/holdem-best-five/" data-track="open_guide" data-guide="holdem-best-five">Which five cards count? Try three Hold’em puzzles →</a></article>
 </div></section>
 
 <section aria-labelledby="how-it-works"><h2 id="how-it-works" class="section-title">How a session works</h2><div class="grid">
@@ -121,7 +121,7 @@ footer{font-size:14px;color:#b2a8cb;border-top:1px solid #4a4468}footer a{margin
 <dt>Do I need an account or app?</dt><dd>No. It runs in your browser on desktop, tablet and phone, and keeps working offline once loaded. There’s no app-store release yet.</dd>
 <dt>Where is my progress saved?</dt><dd>Locally in your browser, not in a cloud account. Clearing browser data can remove your save, so use the in-app backup.</dd>
 <dt>Does it teach full poker strategy?</dt><dd>Hold’em practice covers hand reading — which five cards count — not betting or bluffing.</dd>
-<dt>What do you track?</dt><dd>No ads and no third-party trackers. The host keeps anonymous daily page-visit counts. <a href="/web/privacy.html">Privacy details</a>.</dd>
+<dt>What do you track?</dt><dd>No ads and no advertising trackers. We use first-party product analytics and anonymised session replays (PostHog) to see how the game is used and improve it; text fields are masked. The host also keeps daily page-visit counts. <a href="/web/privacy.html">Privacy details</a>.</dd>
 </dl></section>
 
 
@@ -129,4 +129,5 @@ footer{font-size:14px;color:#b2a8cb;border-top:1px solid #4a4468}footer a{margin
 <section class="final" aria-labelledby="final-heading"><h2 id="final-heading" class="section-title">Ready for five hands?</h2><p class="note">Free, no signup, no real money. Questions or ideas? <a href="mailto:meep@mail.grokbot.com?subject=Poker%20Gym%20feedback">Email feedback</a>.</p><a class="cta" href="/web/">Start training free →</a></section>
 </main>
 <footer><p class="flinks"><a href="https://github.com/MeepTheTendie/pokergym/issues/1">Feedback</a> · <a href="https://github.com/MeepTheTendie/pokergym/releases/latest">Download ZIP</a> · <a href="https://github.com/MeepTheTendie/pokergym">GitHub</a> · <a href="mailto:meep@mail.grokbot.com?subject=Poker%20Gym%20feedback">Email feedback</a></p><p>Poker Gym is an independent training game with original artwork and music. No real-money gambling. Built by Poker Gym with AI assistance.</p><a href="/web/privacy.html">Privacy / your data</a><a href="/sitemap.xml">Site map</a><a href="https://ko-fi.com/playpokergym" target="_blank" rel="noopener">Support Poker Gym ☕</a><p>Poker Gym is free. If it helped, you can tip on Ko-fi. Tips are optional and unlock nothing.</p></footer>
+<script src="/web/posthog-loader.js"></script>
 </body></html>
