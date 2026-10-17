@@ -8,7 +8,10 @@ No subscriptions, ever, and no recurring prices. Monetization is the optional Ko
 
 Playable demo: https://playpokergym.com/web/
 Landing: https://playpokergym.com/
+Dashboard (plain English, start here): https://us.posthog.com/project/670990/dashboard/2224048
 No social posts, player responses or tips verified yet. No daily marketing schedule configured.
+
+First-party analytics is live (2026-10-17). PostHog is proxied through playpokergym.com, so events are same-origin; its bot filter drops headless clients, so counts are real people rather than crawler-inflated page requests. `npm run stats` now prints both the bot-inclusive visit counter and the honest PostHog report (unique people per day, journey stages, top events). Read it before choosing a daily action: if few people reach "finished five hands", the next improvement is onboarding or the game, not more posting.
 
 Authenticated check on 2026-10-14 verified a connected YouTube channel in Metricool. One original blackjack quiz Short is queued for 2026-10-14 at 16:00 America/Chicago (post 395923480); read-back status PENDING, not verified published. This is one post, not a new recurring automation. See the checkpoint below.
 
@@ -39,7 +42,9 @@ Source: https://itch.io/docs/creators/html5
 
 ## Measurement
 
-Record a published URL, time, channel and specific player feedback for every actual post. Do not count drafted posts as outreach. Separate visits, first-session completion, repeat play, unprompted requests for paid extras and tips. Use genuine feedback to choose the next onboarding or return-practice improvement. No mass unsolicited email, fabricated reviews, guaranteed winnings or paid ads without a budget.
+Read `npm run stats` first each run. It reports the bot-inclusive visit counter (page-like requests: crawlers and link unfurls included) and, separately, the PostHog real-player report: unique people per day, how many reached each journey stage (saw a page → opened the trainer → started a session → finished five hands → finished the daily drill) and the top events; reference labels arrive as the `ref` event property. Only the PostHog numbers are people. With near-zero real players, expect zeros and do not read noise into them.
+
+Record a published URL, time, channel and specific player feedback for every actual post. Do not count drafted posts as outreach. Separate visits, first-session completion, repeat play, unprompted requests for paid extras and tips. Use genuine feedback and the stage counts to choose the next onboarding or return-practice improvement. No mass unsolicited email, fabricated reviews, guaranteed winnings or paid ads without a budget.
 
 ## Published GitHub demo — 2026-10-07
 

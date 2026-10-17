@@ -5,7 +5,7 @@ import { PUBLISHED_REFS } from '../src/rpg/links.js';
 import { GUIDE_PATHS, pathBucket, isPageLike, countBucket, dataPoint } from '../worker/count.js';
 import worker from '../worker/index.js';
 import { SECURITY_HEADERS, headersFileText } from '../worker/security.js';
-import { buildQuery, formatTable } from '../scripts/stats.mjs';
+import { buildQuery, formatTable, playersByDayQuery, stageReachQuery, eventTotalsQuery, formatPlayers, formatStages, formatEvents } from '../scripts/stats.mjs';
 
 const nav = (url, extra = {}) => new Request(url, { headers: { 'sec-fetch-mode': 'navigate', ...extra } });
 
@@ -121,6 +121,28 @@ test('stats query and table label', () => {
   assert.match(table, /page-like requests, not people/);
   assert.match(table, /2026-10-14\s+\/web\/\s+share\s+3/);
   assert.match(formatTable([]), /no counted requests/);
+});
+
+test('stats: real-player report counts people, not requests', () => {
+  assert.match(playersByDayQuery(14), /count\(DISTINCT person_id\)/);
+  assert.match(playersByDayQuery(14), /INTERVAL 14 DAY/);
+  assert.match(stageReachQuery(30), /finished_the_daily_drill/);
+  assert.match(stageReachQuery(30), /properties\.\$pathname = '\/web\/'/);
+  assert.match(eventTotalsQuery(30), /event NOT IN \(/);
+
+  const stages = formatStages({ saw_a_page: 10, opened_the_trainer: 6, started_a_session: 5, finished_five_hands: 3, finished_the_daily_drill: 1 });
+  assert.match(stages, /people who reached each stage/);
+  assert.match(stages, /saw a page\s+10/);
+  assert.match(stages, /finished the daily drill\s+1/);
+  assert.match(formatStages({}), /saw a page\s+0/);
+
+  const players = formatPlayers([{ day: '2026-10-17', people: 4 }]);
+  assert.match(players, /REAL PEOPLE/);
+  assert.match(players, /2026-10-17\s+4/);
+  assert.match(formatPlayers([]), /nobody yet/);
+
+  assert.match(formatEvents([{ event: 'game_start', times: 9, people: 3 }]), /game_start\s+9\s+3/);
+  assert.match(formatEvents([]), /nothing yet/);
 });
 
 

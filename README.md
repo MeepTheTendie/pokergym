@@ -41,14 +41,20 @@ Releases and their tags are point-in-time source snapshots. The [spaced-recall-d
 
 ## Visit stats (owner only)
 
-The site counts page-like requests to `/`, `/web/` and the five published learning guides per UTC day and by link label (`ref`, from the fixed list in `src/rpg/links.js`), in Workers Analytics Engine. No IPs, user agents or cookies are stored. These are page-like requests, not people: link-preview bots and crawlers count too.
+`npm run stats` prints two independent reports.
 
-One-time setup for `npm run stats`:
+**1. Visit counter (Analytics Engine).** Counts page-like requests to `/`, `/web/` and the five published learning guides per UTC day and by link label (`ref`, from the fixed list in `src/rpg/links.js`). No IPs, user agents or cookies are stored. These are page-like requests, not people: link-preview bots and crawlers count too, so treat this as an upper bound.
 
-1. Cloudflare dashboard → My Profile → API Tokens → Create Token → Custom token with **Account · Account Analytics · Read** for this account only.
-2. Store it in the desktop keyring (never in the repo):
+**2. Real people (PostHog).** Unique people per day, the journey stages they reach, and the events they fire. PostHog is first-party (proxied through `playpokergym.com`) and its bot filter drops headless/automated clients, so these are the honest human numbers. The same data drives the "Poker Gym — Start Here" dashboard at <https://us.posthog.com/project/670990/dashboard/2224048>.
+
+Either section is skipped, not fatal, if its credential is missing.
+
+One-time setup:
+
+1. **Cloudflare:** dashboard → My Profile → API Tokens → Create Token → Custom token with **Account · Account Analytics · Read** for this account only. Store it in the desktop keyring (never in the repo):
    `secret-tool store --label='Cloudflare Analytics (pokergym stats)' service cloudflare-analytics account pokergym`
    (paste the token when prompted). Alternatively export `CLOUDFLARE_API_TOKEN` for one run.
+2. **PostHog:** dashboard → Settings → Personal API keys → Create, with read access to insights and query. Store it:
+   `secret-tool store --label='PostHog (pokergym stats)' service posthog-personal-api-key account pokergym`
+   Alternatively export `POSTHOG_PERSONAL_API_KEY` for one run. Set `POSTHOG_PROJECT_ID` only if the project is not `670990`.
 3. The account id is read from `.wrangler/cache/wrangler-account.json` (created by any wrangler command) or `CLOUDFLARE_ACCOUNT_ID`.
-
-Then `npm run stats` prints the last 30 days as date / path / ref / count.
