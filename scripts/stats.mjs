@@ -55,11 +55,30 @@ export function projectId() {
   return Number(process.env.POSTHOG_PROJECT_ID ?? 670990);
 }
 
+// Traffic this project generated itself while testing (probe scripts, browser
+// checks). No real player shares these markers, so excluding them keeps the
+// launch numbers honest. A new probe must carry one of these markers, or a
+// distinct_id listed below, so that it stays excluded.
+const TEST_EVENT_NAMES = ['iso_probe', 'pg_probe_batch', 'pg_proxy_probe', 'pg_proxy_probe2',
+  'attrib_probe', 'diag_manual_probe', 'manual_probe'];
+const TEST_REFS = ['attribcheck', 'funnel-check'];
+// Two probe visits hit a bare URL with no marker, so no property can catch them.
+const TEST_DISTINCT_IDS = ['01a14b73-6c7f-7169-99d2-5ce023d03e89', '01a14ba3-de9e-731c-ba49-9c24fe4b762e'];
+
+// SQL fragment (HogQL) that drops this project's own test traffic.
+export function notTestClause() {
+  const quoted = list => list.map(v => `'${v}'`).join(', ');
+  return `event NOT IN (${quoted(TEST_EVENT_NAMES)})
+    AND distinct_id NOT IN (${quoted(TEST_DISTINCT_IDS)})
+    AND (properties.ref IS NULL OR properties.ref NOT IN (${quoted(TEST_REFS)}))`;
+}
+
 // Unique people per day, the number the dashboard shows as DAU.
 export function playersByDayQuery(days = 14) {
   return `SELECT toDate(timestamp) AS day, count(DISTINCT person_id) AS people
 FROM events
 WHERE timestamp > now() - INTERVAL ${Number(days)} DAY
+  AND ${notTestClause()}
 GROUP BY day
 ORDER BY day`;
 }
@@ -73,7 +92,8 @@ export function stageReachQuery(days = 30) {
   count(DISTINCT if(event = 'session_complete', person_id, NULL)) AS finished_five_hands,
   count(DISTINCT if(event = 'daily_complete', person_id, NULL)) AS finished_the_daily_drill
 FROM events
-WHERE timestamp > now() - INTERVAL ${Number(days)} DAY`;
+WHERE timestamp > now() - INTERVAL ${Number(days)} DAY
+  AND ${notTestClause()}`;
 }
 
 // Everything except the high-volume automatic events.
@@ -82,6 +102,7 @@ export function eventTotalsQuery(days = 30) {
 FROM events
 WHERE timestamp > now() - INTERVAL ${Number(days)} DAY
   AND event NOT IN ('$pageview', '$pageview_meta', '$autocapture', '$pageleave', '$feature_flag_called', '$web_vitals', '$snapshot', '$rageclick', '$dead_click', '$copy_autocapture', '$set', '$identify', '$create_alias', '$groupidentify')
+  AND ${notTestClause()}
 GROUP BY event
 ORDER BY times DESC
 LIMIT 25`;
@@ -150,7 +171,9 @@ function posthogKey() {
   }
 }
 
-async function hogql(key, query) {
+export { posthogKey };
+
+export async function hogql(key, query) {
   const res = await fetch(`${POSTHOG_HOST}/api/projects/${projectId()}/query/`, {
     method: 'POST',
     headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },

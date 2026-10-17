@@ -49,6 +49,8 @@ Releases and their tags are point-in-time source snapshots. The [spaced-recall-d
 
 Either section is skipped, not fatal, if its credential is missing.
 
+`npm run scorecard` prints the launch scorecard instead: the Oct 16–29 targets (real site visits, people who came back on a second day) and people per channel, with this project's own test traffic excluded. See `SCORECARD.md` for the tracking table and the decision rule.
+
 One-time setup:
 
 1. **Cloudflare:** dashboard → My Profile → API Tokens → Create Token → Custom token with **Account · Account Analytics · Read** for this account only. Store it in the desktop keyring (never in the repo):
