@@ -98,7 +98,7 @@ test('every served response carries the shared security headers', async () => {
   assert.equal(await res.text(), 'ok');
   assert.equal((await worker.fetch(nav('https://playpokergym.com/web/'), env({ status: 304 }), ctx())).status, 304);
   assert.match(headersFileText(), /^\/\*[\s\S]*\n$/);
-  assert.match(headersFileText(), /\n {2}content-security-policy: default-src 'self'; script-src 'self';/);
+  assert.match(headersFileText(), /\n {2}content-security-policy: default-src 'self'; script-src 'self' https:\/\/static\.cloudflareinsights\.com;/);
 });
 
 test('wrangler config: worker + assets binding, array run_worker_first, AE dataset, custom domain', async () => {

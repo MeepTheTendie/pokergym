@@ -3,10 +3,12 @@
 // and Cloudflare does NOT apply _headers rules to worker-generated responses, so
 // both places attach the same set and every response is covered.
 //
-// The content policy is intentionally strict: the app is a self-contained,
-// same-origin static bundle with no inline scripts, no third-party requests and
-// no network calls at all. 'unsafe-inline' is only allowed for styles because
-// the markup uses style="" attributes.
+// The content policy is strict: the app is a self-contained, same-origin static
+// bundle with no inline scripts and no network calls of its own. The one
+// exception is Cloudflare's own Real User Monitoring beacon
+// (static.cloudflareinsights.com), which the zone injects into HTML at the edge;
+// it is allowed here so the CSP does not break that pre-existing analytics.
+// 'unsafe-inline' is allowed only for styles because the markup uses style="".
 export const SECURITY_HEADERS = {
   'x-content-type-options': 'nosniff',
   // Modern guidance: disable the buggy legacy XSS auditor; CSP supersedes it.
@@ -16,8 +18,9 @@ export const SECURITY_HEADERS = {
   'permissions-policy':
     'geolocation=(), camera=(), microphone=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()',
   'content-security-policy':
-    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; " +
-    "img-src 'self' data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; " +
+    "default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; " +
+    "style-src 'self' 'unsafe-inline'; img-src 'self' data:; " +
+    "connect-src 'self' https://cloudflareinsights.com; worker-src 'self'; manifest-src 'self'; " +
     "base-uri 'none'; object-src 'none'; form-action 'self'; frame-ancestors 'self'",
 };
 
