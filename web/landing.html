@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="A free card-game trainer that coaches every decision in video poker, blackjack, baccarat and Hold’em hand evaluation. Short lessons, a daily drill and mistake review. No signup, no real-money gambling.">
+<meta name="description" content="Free card-game trainer that coaches every decision: video poker, blackjack, baccarat and Hold’em hand reading. Daily drill, mistake review, no signup.">
 <link rel="canonical" href="https://playpokergym.com/">
 <meta property="og:title" content="Poker Gym — free card-game practice">
 <meta property="og:description" content="Practice five hands, review mistakes, and learn card decisions in a free retro browser game.">
 <meta property="og:url" content="https://playpokergym.com/">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="Poker Gym">
 <meta property="og:image" content="https://playpokergym.com/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -16,22 +17,26 @@
 <meta name="twitter:title" content="Poker Gym — free card-game practice">
 <meta name="twitter:description" content="A free card-game trainer that coaches every decision: blackjack, video poker, baccarat and Hold’em. Daily Drill, mistake review, no signup.">
 <meta name="twitter:image" content="https://playpokergym.com/og.png">
-<meta name="theme-color" content="#14121c"><title>Poker Gym — learn blackjack, video poker, baccarat &amp; Hold’em free</title>
+<meta name="twitter:image:alt" content="Poker Gym: free card-game trainer. A five-card hand and a green and red Daily Drill result grid.">
+<meta name="theme-color" content="#14121c"><title>Poker Gym — free blackjack, video poker &amp; baccarat trainer</title>
 <link rel="icon" href="/web/icon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="192x192" href="/web/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/web/icon-512.png">
+<link rel="apple-touch-icon" href="/web/icon-192.png">
 <link rel="preload" href="/web/fonts/PressStart2P-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Poker Gym","url":"https://playpokergym.com/","applicationCategory":"EducationalApplication","operatingSystem":"Any (web browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Free card-game trainer for blackjack, Jacks or Better video poker, baccarat and Hold’em hand reading. No real-money gambling."}</script>
 <style>
 @font-face{font-family:Pixel;src:url('/web/fonts/PressStart2P-Regular.woff2') format('woff2');font-display:swap}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#14121c;color:#eee9fa;font:18px/1.6 system-ui,sans-serif}
 main,header,footer{max-width:1080px;margin:auto;padding:24px}
-header{display:flex;justify-content:space-between;align-items:center;gap:16px}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px}.hnav{display:flex;justify-content:space-between;align-items:center;gap:16px;flex:1}
 .logo,h1,.tag,.tile h3,.scene h2,.game h3{font-family:Pixel,monospace}
-.logo{font-size:13px;color:#c9bfe8;text-decoration:none}header a{display:inline-flex;align-items:center;min-height:44px}.tag{font-size:11px;color:#a9e9bc;margin:0}
+.logo{font-size:14px;color:#c9bfe8;text-decoration:none}header a{display:inline-flex;align-items:center;min-height:44px}.tag{font-size:14px;color:#a9e9bc;margin:0}
 a{color:#bde7ff}a:focus-visible{outline:3px solid #ffe3a0;outline-offset:5px}
-.skip{position:absolute;left:-999px}.skip:focus{left:8px;top:8px;z-index:100;background:#ffe3a0;color:#14121c;padding:8px}
-.hero{padding:36px 0 40px;display:grid;grid-template-columns:1.15fr 1fr;gap:40px;align-items:center}
+.skip{position:absolute;left:-999px}.skip:focus{left:8px;top:8px;z-index:100;background:#ffe3a0;color:#14121c;padding:8px}#main:focus{outline:none}
+.hero{padding:36px 0 40px;display:grid;grid-template-columns:1.15fr 1fr;column-gap:40px;row-gap:16px;align-items:center}.hero-lead,.hero>h1{grid-column:1/-1}.hero-copy{grid-column:1}.scene{grid-column:2}
 .brand{display:flex;align-items:center;gap:14px}.brand img{width:72px;height:72px;image-rendering:auto}
-.eyebrow{margin:18px 0 0;font-weight:700;color:#ffe3a0;font-size:16px}h1{font-size:clamp(24px,3.8vw,40px);line-height:1.5;letter-spacing:-1px;margin:8px 0 18px}h1 span{color:#a9e9bc}
+.eyebrow{margin:18px 0 0;font-weight:700;color:#ffe3a0;font-size:16px}h1{font-size:clamp(24px,3.8vw,40px);text-wrap:balance;line-height:1.5;letter-spacing:-1px;margin:8px 0 18px}h1 span{color:#a9e9bc}
 .sub{color:#d6cdf0;max-width:540px;margin:0 0 22px}
 .cta{display:inline-flex;align-items:center;justify-content:center;min-height:54px;padding:12px 24px;background:#a9e9bc;color:#14121c;text-decoration:none;font-weight:800;font-size:19px;border:3px solid #e3ffe8;box-shadow:5px 5px 0 #42684e}
 .cta:hover{background:#c4f3d2}.cta:active{transform:translate(3px,3px);box-shadow:2px 2px 0 #42684e}
@@ -39,7 +44,7 @@ a{color:#bde7ff}a:focus-visible{outline:3px solid #ffe3a0;outline-offset:5px}
 .trust li{font-size:14px;padding:4px 10px;border:1px solid #4a4468;background:#201c2b;color:#d6cdf0}
 .note{font-size:14px;color:#b2a8cb}
 .scene{border:4px solid #c9bfe8;background:#ece9f4;color:#14121c;padding:24px;box-shadow:10px 10px 0 #4a4468}
-.scene h2{font-size:14px;line-height:1.8;margin:8px 0}
+.scene h2{font-size:16px;line-height:1.8;margin:8px 0}
 .cards{display:flex;gap:9px;margin:22px 0}.card{background:#fff;border:2px solid #4a4468;border-radius:5px;flex:1;padding:15px 4px;text-align:center;font-size:22px;font-weight:800}
 .card.held{background:#263c35;color:#e3ffe8;border-color:#263c35;outline:3px solid #264c32;outline-offset:2px}.red{color:#983448}
 .feedback{border-left:4px solid #42684e;padding-left:14px;font-size:16px;margin:0}
@@ -49,34 +54,36 @@ section{scroll-margin-top:16px}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:22px 0 48px}
 .games{grid-template-columns:repeat(2,1fr)}
 .tile{padding:22px;border:2px solid #4a4468;background:#201c2b}
-.tile h3{font-size:12px;line-height:1.9;color:#a9e9bc;margin:0 0 6px}.tile p{font-size:16px;color:#d6cdf0;margin:0}
+.tile h3{font-size:16px;line-height:1.9;color:#a9e9bc;margin:0 0 6px}.tile p{font-size:16px;color:#d6cdf0;margin:0}
 .tile a{display:flex;align-items:center;min-height:44px;margin-top:6px;font-size:15px}
 .details{border-top:2px solid #4a4468;padding:28px 0}.details p{max-width:760px;color:#d6cdf0}
 .drill{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center}
 .squares{font-size:26px;line-height:1.2;letter-spacing:2px;background:#201c2b;border:2px solid #4a4468;padding:14px 18px;white-space:pre}
 .faq dt{font-weight:700;margin-top:16px}.faq dd{margin:4px 0 0;color:#d6cdf0;max-width:760px}
-.cta.alt{margin-top:6px}.drillcard{margin:0;text-align:center}.drillcard figcaption{margin-top:10px;font-size:16px}.shot img{width:100%;height:auto;border:3px solid #4a4468;margin-top:12px}.flinks a{margin-right:6px}.final{text-align:center;padding:40px 0}
+.cta.alt{margin-top:6px}.drillcard{margin:0;text-align:center}.drillcard figcaption{margin-top:10px;font-size:16px}.shotfig{margin:0}.shotfig figcaption{margin-top:10px;font-size:15px;color:#d6cdf0}.shot img{width:100%;height:auto;border:3px solid #4a4468;margin-top:12px}.flinks a{margin-right:6px}.final{text-align:center;padding:40px 0}
 footer{font-size:14px;color:#b2a8cb;border-top:1px solid #4a4468}footer a{margin-right:18px;display:inline-flex;align-items:center;min-height:44px}
-@media(max-width:760px){header,main,footer{padding:18px}.hero{grid-template-columns:1fr;padding-top:12px;gap:32px}.grid,.games{grid-template-columns:1fr}.scene{padding:16px;box-shadow:6px 6px 0 #4a4468}.cards{gap:6px}.card{font-size:18px;padding:12px 2px;white-space:nowrap}.logo{font-size:10px}header a{font-size:15px}.brand img{width:56px;height:56px}.cta{width:100%}.drill{grid-template-columns:1fr}.section-title{font-size:23px}}
+@media(max-width:760px){header,main,footer{padding:18px}.hero{grid-template-columns:1fr;padding-top:12px;gap:32px}.grid,.games{grid-template-columns:1fr}.scene{padding:16px;box-shadow:6px 6px 0 #4a4468;grid-column:auto}.cards{gap:6px}.card{font-size:18px;padding:12px 2px;white-space:nowrap}.logo{font-size:12px}header a{font-size:15px}.brand img{width:56px;height:56px}.cta{width:100%}.drill{grid-template-columns:1fr}.section-title{font-size:23px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.cta:active{transform:none}}
 </style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<header><a class="logo" href="/">♠ POKER GYM</a><a href="/web/">Open the trainer →</a></header>
-<main id="main">
+<header><nav class="hnav" aria-label="Primary"><a class="logo" href="/">♠ POKER GYM</a><a href="/web/">Open the trainer →</a></nav></header>
+<main id="main" tabindex="-1">
 <section class="hero" aria-labelledby="hero-heading">
-<div>
+<div class="hero-lead">
 <div class="brand"><img src="/mascot.webp" width="72" height="72" alt="" decoding="async"><span class="logo">POKER GYM</span></div>
 <p class="eyebrow">Free blackjack, poker &amp; baccarat trainer</p>
+</div>
 <h1 id="hero-heading">Learn the right play.<br><span>One hand at a time.</span></h1>
+<div class="hero-copy">
 <p class="sub">Practice blackjack, video poker, baccarat and Hold’em hand reading. Play five hands and the coach tells you, after every decision, what the best play was and why.</p>
 <a class="cta" href="/web/">Start training free →</a>
 <ul class="trust" aria-label="What to expect">
 <li>✓ 100% free</li><li>✓ No signup</li><li>✓ No real-money gambling</li><li>✓ No ads</li><li>✓ Works offline</li>
 </ul>
 </div>
-<aside class="scene" aria-label="Example coaching tip from the video poker trainer"><p class="tag" style="color:#244b30">EXAMPLE TIP</p><h2>Keep the pair.<br>Build the habit.</h2><div class="cards" role="img" aria-label="Jack of spades and jack of hearts held, with two of clubs, five of diamonds and nine of clubs"><span class="card held" aria-hidden="true">J♠</span><span class="card red held" aria-hidden="true">J♥</span><span class="card" aria-hidden="true">2♣</span><span class="card red" aria-hidden="true">5♦</span><span class="card" aria-hidden="true">9♣</span></div><p class="feedback">In Jacks or Better, a pair of jacks already pays. Hold both jacks and draw three.</p><p class="note">Illustration — the real lessons are inside the trainer.</p></aside>
+<div class="scene"><p class="tag" style="color:#244b30">EXAMPLE TIP</p><h2>Keep the pair.<br>Build the habit.</h2><div class="cards" role="img" aria-label="Jack of spades and jack of hearts held, with two of clubs, five of diamonds and nine of clubs"><span class="card held" aria-hidden="true">J♠&#xFE0E;</span><span class="card red held" aria-hidden="true">J♥&#xFE0E;</span><span class="card" aria-hidden="true">2♣&#xFE0E;</span><span class="card red" aria-hidden="true">5♦&#xFE0E;</span><span class="card" aria-hidden="true">9♣&#xFE0E;</span></div><p class="feedback">In Jacks or Better, a pair of jacks already pays. Hold both jacks and draw three.</p><p class="note">Illustration — the real lessons are inside the trainer.</p></div>
 </section>
 
 
@@ -90,7 +97,7 @@ footer{font-size:14px;color:#b2a8cb;border-top:1px solid #4a4468}footer a{margin
 <div><h2 id="daily" class="section-title">The Daily Drill</h2><p>Same five hands for everyone. New challenge every day. Finish, then share your green-and-red grid — no spoilers, just your score.</p><a class="cta alt" href="/web/?daily=1">Try today’s drill →</a></div></section>
 
 <section class="details shot" aria-labelledby="see"><h2 id="see" class="section-title">See the coach in action</h2>
-<img src="/coach-shot.webp" width="960" height="560" loading="lazy" decoding="async" alt="Poker Gym blackjack trainer: you hold queen and two (12) against a dealer 6. The coach panel says stand, with average results for stand −0.15, hit −0.17 and double −0.34 per hand.">
+<figure class="shotfig"><img src="/coach-shot.webp" width="960" height="560" loading="lazy" decoding="async" alt="Blackjack trainer: you hold 12 against a dealer 6, and the coach panel recommends stand."><figcaption>You hold queen + two (12) versus dealer 6. The coach recommends <strong>stand</strong> — average result per hand: stand −0.15, hit −0.17, double −0.34.</figcaption></figure>
 </section>
 
 <section aria-labelledby="games"><h2 id="games" class="section-title">Four games to learn</h2>
@@ -109,7 +116,7 @@ footer{font-size:14px;color:#b2a8cb;border-top:1px solid #4a4468}footer a{margin
 
 <section class="details" aria-labelledby="faq"><h2 id="faq" class="section-title">Good to know</h2>
 <dl class="faq">
-<dt>Is this gambling?</dt><dd>No. There is no real money, no betting and no prizes. It teaches the rules and the best decisions. Learning the best play lowers the house edge in casino games; it never beats it.</dd>
+<dt>Is this gambling?</dt><dd>No. There is no real money, no betting and no prizes. It teaches the rules and the best decisions. Learning the best play lowers the house edge in casino games; it doesn’t guarantee a win.</dd>
 <dt>Is it really free?</dt><dd>Yes. No signup, no ads, no purchases. If it helps you, there’s an optional Ko-fi tip link below — tips unlock nothing.</dd>
 <dt>Do I need an account or app?</dt><dd>No. It runs in your browser on desktop, tablet and phone, and keeps working offline once loaded. There’s no app-store release yet.</dd>
 <dt>Where is my progress saved?</dt><dd>Locally in your browser, not in a cloud account. Clearing browser data can remove your save, so use the in-app backup.</dd>

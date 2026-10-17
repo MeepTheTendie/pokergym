@@ -160,6 +160,7 @@ button:focus-visible { outline: 4px solid var(--t02); outline-offset: 2px; }
 #dailyHistory { margin-top: 12px; }
 #dailyHistory > summary { cursor: pointer; min-height: 44px; padding: 8px 0; }
 .skip { position: absolute; left: -9999px; }
+#main:focus { outline: none; }
 .skip:focus { left: 8px; top: 8px; z-index: 100; background: #ffe3a0; color: #14121c; padding: 8px; }
 
 /* Cards: GBC green tile with a hard 3D edge */
