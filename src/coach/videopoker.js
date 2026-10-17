@@ -28,6 +28,85 @@ export const MIN_PAIR_RANK = 11;
 // around the enumeration; nothing else changes it.
 let ACTIVE = DEFAULT_VARIANT;
 
+// Windows a natural rank set must sit inside to make a straight. Rank indices run
+// 0 = two through 12 = ace, so 0-8 are the ordinary five-card windows and the last
+// entry is the ace-low wheel (A,2,3,4,5).
+const ROYAL_MASK = (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11) | (1 << 12);
+const WINDOW_MASKS = (() => {
+  const masks = [];
+  for (let s = 0; s <= 8; s++) masks.push(((1 << (s + 5)) - 1) & ~((1 << s) - 1));
+  masks.push((1 << 12) | 1 | (1 << 1) | (1 << 2) | (1 << 3));
+  return masks;
+})();
+
+function naturalsFitWindow(mask) {
+  for (const window of WINDOW_MASKS) {
+    if ((mask & ~window) === 0) return true;
+  }
+  return false;
+}
+
+// Deuces Wild, analytic. With d wilds the five-card hand is the naturals plus d
+// cards we choose freely, so each winning shape is a feasibility question rather
+// than an enumeration. Checked top-down by payout, which matches how the hand is
+// scored: no pair pays here, so a lone pair is simply no win.
+function deucesWin(variant) {
+  RANK_COUNTS.fill(0);
+  pairRank = -1;
+  quadRank = -1;
+  kickerRank = -1;
+  for (let i = 0; i < 5; i++) RANK_COUNTS[HAND[i] >> 2]++;
+  const d = RANK_COUNTS[0];
+  if (d === 0) {
+    categoryOfHand();
+    return winOfHand(variant);
+  }
+  if (d === 4) return WIN.FOUR_DEUCES;
+
+  const n = 5 - d;
+  let firstSuit = -1;
+  let sameSuit = true;
+  let mask = 0;
+  let distinct = 0;
+  let maxCount = 0;
+  for (let i = 0; i < 5; i++) {
+    const rank = HAND[i] >> 2;
+    if (rank === 0) continue; // the wild itself
+    const suit = HAND[i] & 3;
+    if (firstSuit === -1) firstSuit = suit;
+    else if (suit !== firstSuit) sameSuit = false;
+    if (!(mask & (1 << rank))) {
+      mask |= 1 << rank;
+      distinct++;
+    }
+    if (RANK_COUNTS[rank] > maxCount) maxCount = RANK_COUNTS[rank];
+  }
+
+  // A wild royal is a flush whose naturals are all in {T..A}; a natural royal
+  // needs no wilds and is handled above.
+  if (sameSuit && distinct === n && (mask & ~ROYAL_MASK) === 0) return WIN.WILD_ROYAL;
+  // Five of a kind: every natural is the same rank and the wilds copy it.
+  if (distinct === 1) return WIN.FIVE_KIND;
+  if (sameSuit && distinct === n && naturalsFitWindow(mask)) return WIN.STRAIGHT_FLUSH;
+  // Quads need three naturals of one rank plus a wild, etc.
+  if (maxCount + d >= 4) return WIN.FOUR_KIND;
+  // Any hand with exactly two natural ranks makes a full house once wilds fill
+  // the trips and the pair.
+  if (distinct === 2) return WIN.FULL_HOUSE;
+  if (sameSuit) return WIN.FLUSH;
+  if (distinct === n && naturalsFitWindow(mask)) return WIN.STRAIGHT;
+  if (maxCount + d >= 3) return WIN.THREE;
+  return WIN.NONE;
+}
+
+// One entry point for "what did the active hand win", dispatching to the wild
+// evaluator only when the pay table actually has wilds.
+function classifyActive(variant) {
+  if (variant.wild) return deucesWin(variant);
+  categoryOfHand();
+  return winOfHand(variant);
+}
+
 function categoryOfHand() {
   RANK_COUNTS.fill(0);
   pairRank = -1;
@@ -120,8 +199,7 @@ function winOfHand(variant) {
 }
 
 export function payoutOfHand() {
-  categoryOfHand();
-  return ACTIVE.pay[winOfHand(ACTIVE)];
+  return ACTIVE.pay[classifyActive(ACTIVE)];
 }
 
 export function categoryOf(cards) {
@@ -136,8 +214,7 @@ export function winCodeOfHand(cards, variant = DEFAULT_VARIANT) {
   for (let i = 0; i < 5; i++) HAND[i] = pack(cards[i]);
   const prev = ACTIVE;
   ACTIVE = v;
-  categoryOfHand();
-  const win = winOfHand(v);
+  const win = classifyActive(v);
   ACTIVE = prev;
   return win;
 }

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { makeDeck, shuffle, seededRng, suitIndex } from '../src/cards.js';
 import { evaluate5 } from '../src/evaluate.js';
 import {
-  VARIANTS, DEFAULT_VARIANT, variantById, WIN, winCodeFor, payFor, payLabelFor,
+  VARIANTS, DEFAULT_VARIANT, variantById, WIN, winCodeOf, payFor, payLabelFor,
   payoutForWin, rowForWin, newRound, draw, setHolds,
 } from '../src/games/videopoker.js';
 import { bestHold, winCodeOfHand, clearCache } from '../src/coach/videopoker.js';
@@ -38,7 +38,7 @@ test('every variant pays 250 for a royal flush', () => {
   const royal = evaluate5([c(10, 's'), c(11, 's'), c(12, 's'), c(13, 's'), c(14, 's')]);
   for (const v of VARIANTS) {
     assert.equal(payFor(royal, v), 250, v.id);
-    assert.equal(payLabelFor(royal, v), 'Royal Flush', v.id);
+    assert.match(payLabelFor(royal, v), /Royal Flush/, v.id);
   }
 });
 
@@ -46,7 +46,7 @@ test('the fast evaluator agrees with the reference on every variant', () => {
   for (const v of VARIANTS) {
     for (let i = 0; i < 3000; i++) {
       const hand = shuffle(makeDeck(), seededRng(i * 7 + 1)).slice(0, 5);
-      assert.equal(winCodeOfHand(hand, v), winCodeFor(evaluate5(hand), v), `${v.id} hand ${i}`);
+      assert.equal(winCodeOfHand(hand, v), winCodeOf(hand, v), `${v.id} hand ${i}`);
     }
   }
 });
@@ -91,11 +91,13 @@ test('Double Double Bonus teaches the kicker discard on four aces', () => {
   assert.ok(job.optimal.some(p => p.filter(Boolean).length === 5), 'holding all five is still optimal');
 });
 
-test('a lower quad outranks a higher pair the same way under every variant', () => {
-  // Two pair stays two pair and a pair of kings stays a win everywhere.
+test('pair pays stay the same under every pair-paying variant, and nothing under Deuces', () => {
+  // A lone pair of kings is a win on a Jacks-or-better table and no win at all
+  // on Deuces Wild, where only three of a kind or better pays.
   const kings = evaluate5([c(13, 's'), c(13, 'h'), c(7, 'd'), c(4, 'c'), c(2, 's')]);
   for (const v of VARIANTS) {
-    assert.equal(payFor(kings, v), v.pay[WIN.JACKS], v.id);
+    if (v.minPairRank > 14) assert.equal(payFor(kings, v), 0, v.id);
+    else assert.equal(payFor(kings, v), v.pay[WIN.JACKS], v.id);
   }
 });
 
@@ -109,4 +111,68 @@ test('a rigged draw pays the active variant table', () => {
   assert.equal(payoutForWin(round.win, variantById('double-double-bonus')), 400);
   assert.ok(round.winLabel.toLowerCase().includes('four aces'));
   assert.equal(rowForWin(variantById('double-double-bonus'), round.win).amount, 400);
+});
+
+// ---- Deuces Wild -----------------------------------------------------------
+
+const deuces = () => variantById('deuces-wild');
+const winOf = (cards, v = deuces()) => winCodeOf(cards, v);
+const payOf = (cards, v = deuces()) => payoutForWin(winOf(cards, v), v);
+
+test('Deuces Wild pays nothing for a pair and reports every wild-only hand', () => {
+  const v = deuces();
+  assert.ok(v.minPairRank > 14, 'no pair pays');
+  // Four deuces sits just under a natural royal.
+  assert.equal(winOf([c(2, 's'), c(2, 'h'), c(2, 'd'), c(2, 'c'), c(13, 's')], v), WIN.FOUR_DEUCES);
+  assert.equal(payOf([c(2, 's'), c(2, 'h'), c(2, 'd'), c(2, 'c'), c(13, 's')], v), 200);
+  // One deuce filling a royal is only a wild royal.
+  assert.equal(winOf([c(2, 'h'), c(10, 's'), c(11, 's'), c(12, 's'), c(13, 's')], v), WIN.WILD_ROYAL);
+  assert.equal(payOf([c(2, 'h'), c(10, 's'), c(11, 's'), c(12, 's'), c(13, 's')], v), 25);
+  // Three deuces copy a natural pair into five of a kind.
+  assert.equal(winOf([c(9, 's'), c(9, 'h'), c(2, 's'), c(2, 'h'), c(2, 'd')], v), WIN.FIVE_KIND);
+  assert.equal(payOf([c(9, 's'), c(9, 'h'), c(2, 's'), c(2, 'h'), c(2, 'd')], v), 15);
+});
+
+test('a natural royal out-pays a wild royal, and a lone pair pays nothing', () => {
+  const v = deuces();
+  const natural = [c(10, 's'), c(11, 's'), c(12, 's'), c(13, 's'), c(14, 's')];
+  assert.equal(winOf(natural, v), WIN.ROYAL);
+  assert.equal(payOf(natural, v), 250);
+  const pair = [c(13, 's'), c(13, 'h'), c(7, 'd'), c(4, 'c'), c(11, 's')];
+  assert.equal(winOf(pair, v), WIN.LOW_PAIR);
+  assert.equal(payOf(pair, v), 0);
+});
+
+test('a deuce completes the ace-low straight A-2-3-4-5', () => {
+  assert.equal(winOf([c(14, 's'), c(3, 's'), c(4, 'h'), c(5, 'd'), c(2, 'c')]), WIN.STRAIGHT);
+});
+
+test('the fast Deuces evaluator agrees with the reference over many hands', () => {
+  for (let i = 0; i < 20000; i++) {
+    const hand = shuffle(makeDeck(), seededRng(i * 13 + 5)).slice(0, 5);
+    assert.equal(winCodeOfHand(hand, 'deuces-wild'), winCodeOf(hand, deuces()), `deuces hand ${i}`);
+  }
+});
+
+test('Deuces Wild keeps a deuce that Jacks or Better throws away', () => {
+  clearCache();
+  // Two deuces plus three spades is a made straight flush under Deuces, but Jacks
+  // or Better reads the deuces as dead twos and keeps the four-card flush draw.
+  const hand = [c(2, 's'), c(2, 'h'), c(5, 's'), c(6, 's'), c(7, 's')];
+  const wild = bestHold(hand, { variant: 'deuces-wild' });
+  assert.ok(wild.holds.every(Boolean), 'Deuces holds all five');
+  assert.equal(wild.ev, 9);
+  const job = bestHold(hand);
+  assert.equal(job.holds[1], false, 'JoB discards the off-suit deuce');
+  assert.ok(job.holds[0] && job.holds[2] && job.holds[3] && job.holds[4], 'JoB keeps four to a flush');
+});
+
+test('a rigged Deuces draw pays the Deuces table', () => {
+  const hand = [c(2, 's'), c(2, 'h'), c(2, 'd'), c(2, 'c'), c(13, 's')];
+  const round = newRound(seededRng(1), { hand, variantId: 'deuces-wild' });
+  setHolds(round, [true, true, true, true, true]);
+  draw(round);
+  assert.equal(round.win, WIN.FOUR_DEUCES);
+  assert.equal(round.payout, 200);
+  assert.equal(round.winLabel, 'Four Deuces');
 });

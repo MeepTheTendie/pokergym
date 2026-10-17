@@ -22,8 +22,9 @@ export const GAME = {
  * The coach grades holds against the active variant, so the same deal can have a
  * different best hold here than under Jacks or Better.
  *
- * Deuces Wild (wild twos, five of a kind, four deuces) is a different evaluator
- * and is intentionally not part of this set.
+ * Deuces Wild (wild twos) adds hands the other tables never see — five of a kind,
+ * four deuces, and a wild royal — so it is graded by a wild-aware evaluator rather
+ * than by evaluate5.
  */
 export const WIN = {
   NONE: 0,
@@ -42,6 +43,9 @@ export const WIN = {
   FOUR_ACES_KICKER: 13,
   STRAIGHT_FLUSH: 14,
   ROYAL: 15,
+  FIVE_KIND: 16,
+  WILD_ROYAL: 17,
+  FOUR_DEUCES: 18,
 };
 
 export const WIN_LABEL = {
@@ -61,12 +65,18 @@ export const WIN_LABEL = {
   [WIN.FOUR_ACES_KICKER]: 'Four of a Kind',
   [WIN.STRAIGHT_FLUSH]: 'Straight Flush',
   [WIN.ROYAL]: 'Royal Flush',
+  [WIN.FIVE_KIND]: 'Five of a Kind',
+  [WIN.WILD_ROYAL]: 'Wild Royal Flush',
+  [WIN.FOUR_DEUCES]: 'Four Deuces',
 };
 
 // Pay per hand, indexed by WIN code.
-const JOB_PAY = [0, 0, 1, 2, 3, 4, 6, 9, 25, 0, 0, 0, 0, 0, 50, 250];
-const BONUS_PAY = [0, 0, 1, 2, 3, 4, 5, 8, 0, 25, 40, 80, 40, 80, 50, 250];
-const DDB_PAY = [0, 0, 1, 2, 3, 4, 6, 9, 0, 50, 80, 160, 160, 400, 50, 250];
+const JOB_PAY = [0, 0, 1, 2, 3, 4, 6, 9, 25, 0, 0, 0, 0, 0, 50, 250, 0, 0, 0];
+const BONUS_PAY = [0, 0, 1, 2, 3, 4, 5, 8, 0, 25, 40, 80, 40, 80, 50, 250, 0, 0, 0];
+const DDB_PAY = [0, 0, 1, 2, 3, 4, 6, 9, 0, 50, 80, 160, 160, 400, 50, 250, 0, 0, 0];
+// Full-pay Deuces Wild: no pair pays, a wild royal is not a natural royal, and
+// four deuces out-pays a straight flush.
+const DEUCES_PAY = [0, 0, 0, 0, 1, 2, 2, 3, 5, 0, 0, 0, 0, 0, 9, 250, 15, 25, 200];
 
 export const VARIANTS = [
   {
@@ -136,6 +146,30 @@ export const VARIANTS = [
       { wins: [WIN.THREE], label: 'Three of a Kind' },
       { wins: [WIN.TWO_PAIR], label: 'Two Pair' },
       { wins: [WIN.JACKS], label: 'Jacks or Better' },
+    ],
+  },
+  {
+    id: 'deuces-wild',
+    name: 'Deuces Wild',
+    short: 'DEUCES',
+    ratio: 'full pay',
+    expectedReturn: 1.0076,
+    // No pair pays, so minPairRank sits above any real rank.
+    minPairRank: 99,
+    quadTiers: false,
+    wild: 2,
+    pay: DEUCES_PAY,
+    rows: [
+      { wins: [WIN.ROYAL], label: 'Natural Royal Flush' },
+      { wins: [WIN.FOUR_DEUCES], label: 'Four Deuces' },
+      { wins: [WIN.WILD_ROYAL], label: 'Wild Royal Flush' },
+      { wins: [WIN.FIVE_KIND], label: 'Five of a Kind' },
+      { wins: [WIN.STRAIGHT_FLUSH], label: 'Straight Flush' },
+      { wins: [WIN.FOUR_KIND], label: 'Four of a Kind' },
+      { wins: [WIN.FULL_HOUSE], label: 'Full House' },
+      { wins: [WIN.FLUSH], label: 'Flush' },
+      { wins: [WIN.STRAIGHT], label: 'Straight' },
+      { wins: [WIN.THREE], label: 'Three of a Kind' },
     ],
   },
 ];
@@ -210,6 +244,72 @@ export function winCodeFor(result, variant = DEFAULT_VARIANT) {
   }
 }
 
+// ---- Deuces Wild reference evaluator -------------------------------------
+//
+// With wilds on the table we cannot lean on evaluate5: a deuce stands for
+// whatever card makes the best hand, so the ranking depends on the substitution.
+// The reference enumerates every rank each wild could take (13 choices each, and
+// a wild never needs to become another deuce) and keeps the highest-paying
+// result. Suits only matter for flushes, so that is decided once the final ranks
+// are known. The coach grades with a faster analytic evaluator; this one is the
+// independent check it is graded against.
+
+const ROYAL_RANKS = [10, 11, 12, 13, 14];
+
+function straightHigh(ranks) {
+  const uniq = [...new Set(ranks)].sort((a, b) => a - b);
+  if (uniq.length !== 5) return 0;
+  if (uniq[4] - uniq[0] === 4) return uniq[4];
+  if (uniq.join(',') === '2,3,4,5,14') return 5; // ace-low wheel
+  return 0;
+}
+
+function rankWin(ranks, flushPossible) {
+  const counts = new Map();
+  for (const r of ranks) counts.set(r, (counts.get(r) ?? 0) + 1);
+  const groups = [...counts.values()].sort((a, b) => b - a);
+  if (groups[0] === 5) return WIN.FIVE_KIND;
+  const straight = straightHigh(ranks);
+  if (straight && flushPossible) {
+    const royal = [...new Set(ranks)].sort((a, b) => a - b).every((r, i) => r === ROYAL_RANKS[i]);
+    return royal ? WIN.WILD_ROYAL : WIN.STRAIGHT_FLUSH;
+  }
+  if (groups[0] === 4) return WIN.FOUR_KIND;
+  if (groups[0] === 3 && groups[1] === 2) return WIN.FULL_HOUSE;
+  if (flushPossible && groups.length === 5) return WIN.FLUSH;
+  if (straight) return WIN.STRAIGHT;
+  if (groups[0] === 3) return WIN.THREE;
+  return WIN.NONE;
+}
+
+export function winCodeOf(cards, variant = DEFAULT_VARIANT) {
+  if (!variant.wild) return winCodeFor(evaluate5(cards), variant);
+  const deuces = cards.filter(c => c.r === variant.wild).length;
+  if (deuces === 0) return winCodeFor(evaluate5(cards), variant);
+  if (deuces === 4) return WIN.FOUR_DEUCES;
+  const naturals = cards.filter(c => c.r !== variant.wild);
+  const flushPossible = naturals.every(c => c.s === naturals[0].s);
+  const base = naturals.map(c => c.r);
+  const assign = new Array(deuces).fill(3);
+  let best = WIN.NONE;
+  const choose = (i) => {
+    if (i === deuces) {
+      const win = rankWin([...base, ...assign], flushPossible);
+      const pay = DEUCES_PAY[win];
+      const bestPay = DEUCES_PAY[best];
+      if (pay > bestPay || (pay === bestPay && win > best)) best = win;
+      return;
+    }
+    // A wild may also stand in as a natural two to complete the ace-low wheel.
+    for (let r = 2; r <= 14; r++) {
+      assign[i] = r;
+      choose(i + 1);
+    }
+  };
+  choose(0);
+  return best;
+}
+
 export function payoutForWin(win, variant = DEFAULT_VARIANT) {
   return variant.pay[win] ?? 0;
 }
@@ -279,7 +379,7 @@ export function draw(round) {
   const variant = variantById(round.variantId);
   round.variantId = variant.id;
   round.result = evaluate5(round.hand);
-  round.win = winCodeFor(round.result, variant);
+  round.win = variant.wild ? winCodeOf(round.hand, variant) : winCodeFor(round.result, variant);
   round.payout = variant.pay[round.win];
   round.winLabel = rowForWin(variant, round.win)?.label ?? WIN_LABEL[round.win] ?? WIN_LABEL[WIN.NONE];
   round.drawn = true;

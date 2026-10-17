@@ -35,11 +35,11 @@ You will not run out, because the raw material is not "how many games" — it is
 | --- | --- |
 | Blackjack decisions | ~370 graded spots (hard 5–21, soft A2–A9, 10 pairs, vs 10 dealer upcards) |
 | Video poker decisions | **134,459** distinct 5-card deals (the canonical equivalence-class count) |
-| Video poker paytables in the app | **3** (Jacks or Better 9/6, Bonus Poker 8/5, Double Double Bonus 9/6) |
+| Video poker paytables in the app | **4** (Jacks or Better 9/6, Bonus Poker 8/5, Double Double Bonus 9/6, Deuces Wild full-pay) |
 | Baccarat / Hold'em | 3 bets / best-five-of-seven spots |
 | Fractions of each decision worth a video | hand types, near-ties, mistakes people actually make, "old chart vs new paytable" |
 
-Blackjack alone: ~370 spots. Video poker: 134,459 deals × 3 paytables ≈ **400,000
+Blackjack alone: ~370 spots. Video poker: 134,459 deals × 4 paytables ≈ **500,000
 distinct decisions**, and the correct answer *changes* when the paytable changes
 (section 5). That is years of Shorts before a single repeat.
 
@@ -50,7 +50,7 @@ look identical = the best video (that's a turn).
 
 ## 2. The games and paytables (so scripts are accurate)
 
-The app trains four games. Video poker now ships **three selectable paytables**:
+The app trains four games. Video poker now ships **four selectable paytables**:
 
 | Game | Table | What it changes |
 | --- | --- | --- |
@@ -58,10 +58,11 @@ The app trains four games. Video poker now ships **three selectable paytables**:
 | **Jacks or Better** | 9/6 | the classic; every four of a kind pays 25 |
 | **Bonus Poker** | 8/5 | four of a kind pays by rank: Aces 80, 2s–4s 40, 5s–Ks 25 |
 | **Double Double Bonus** | 9/6 | four of a kind pays by rank **and the kicker**; Aces+2/3/4 pays 400 |
+| **Deuces Wild** | full-pay | twos are wild; adds five of a kind, four deuces, and a wild royal; **no pair pays** |
 | **Baccarat** | 8:1 tie | the neutral game; the bet with no decisions |
 | **Hold'em** | best five of seven | reading the board, not betting |
 
-The three video poker tables are the **content multiplier**: same deal, different
+The four video poker tables are the **content multiplier**: same deal, different
 right answer. See section 5.
 
 ---
@@ -117,7 +118,7 @@ wrong. **[verified — the app's coach grades each of these hits/stands/doubles/
 
 ## 5. Video poker seeds — *the multiplier*
 
-The same five cards, **three paytables, three different right answers.** This is
+The same five cards, **four paytables, four different right answers.** This is
 the richest vein in the app. All EVs below are **[verified]** by the coach.
 
 ### 5a. The famous one: break four aces to chase a kicker
@@ -132,7 +133,7 @@ Under **Jacks or Better** the exact same cards: hold all five, **25**.
 Under **Bonus Poker**: hold all five, **80**.
 
 > **Hook:** "You have four aces. The app tells you to throw one away. Here's why."
-> **Turn:** the difference between the three paytables on one deal.
+> **Turn:** the difference between the four paytables on one deal.
 > **Payoff:** the app has a paytable selector; flip it and watch the answer change.
 
 ### 5b. The kicker rule applied to low quads
@@ -143,7 +144,7 @@ Under **Bonus Poker**: hold all five, **80**.
 - **Correct play: break it, chase an A/3/4 kicker** → average **100.43**
 - Bonus Poker, same hand: hold all five → **40**. Jacks or Better: **25**.
 
-> **Hook:** "Four of a kind. Two of the three tables say throw it away."
+> **Hook:** "Four of a kind. Two of the three quads tables say throw it away."
 
 ### 5c. JoB classic: the low pair vs three to a royal
 
@@ -165,8 +166,42 @@ step changes under DDB/Bonus.
 
 ### 5f. Series seed (recurring)
 
-> **"SAME HAND, THREE PAYTABLES"** — deal one hand, show all three answers, let
+> **"SAME HAND, FOUR PAYTABLES"** — deal one hand, show all four answers, let
 > the comment section pick before the reveal. Repeat weekly with a new deal.
+
+### 5g. Deuces Wild: the table where "a pair" is worth nothing
+
+**Hand:** K♠ K♥ 7♦ 4♣ 9♠ (Deuces Wild, full-pay)
+
+- A pair of Kings is a **paying hand** under Jacks or Better — the coach plays it
+  for **EV 1.54**. Under Deuces Wild the same pair pays **0**, and the best hold
+  is only worth **EV 0.56**. Nothing you can hold here wins.
+
+> **Hook:** "Same pair. One table pays. The other says throw it in."
+> **Turn:** Deuces Wild pays **three of a kind or better only** — the whole
+> lower half of the paytable is gone.
+
+### 5h. Deuces Wild's own hands (never seen on the other three)
+
+All **EV [verified]** on the full-pay Deuces table:
+
+- **Four deuces + K♠** → hold the **four deuces**, EV **200**. It out-pays every
+  straight flush and sits just behind a *natural* royal (250).
+- **One deuce + T♠ J♠ Q♠ K♠** → the deuce fills an Ace for a **wild royal**, 25 —
+  not 250. Only a **natural** royal pays the top prize.
+- **Two deuces + 5♠ 6♠ 7♠** → hold all five for a made **straight flush**, 9.
+  Jacks or Better breaks this into a four-card flush draw (EV 1.15).
+- **A deuce + A♠ 3♠ 4♥ 5♦** → the deuce plays as the **two** for a wheel
+  straight, A-2-3-4-5, 2.
+- **Three deuces + 9♠ 9♥** → the deuces copy the nines for **five of a kind**, 15.
+
+> **Hook:** "The wild card can be anything — including the two you threw away."
+> **Payoff:** flip the app to Deuces Wild and the *same deal* grades differently.
+
+### 5i. Series seed (recurring, Deuces)
+
+> **"THE WILD CARD"** — one deal under Deuces Wild, one answer, one wild-card
+> hand (five of a kind / four deuces / wild royal) that no other table can make.
 
 ---
 
@@ -200,7 +235,7 @@ Baccarat is the app's reminder that **sometimes the best move is not to think**.
 | Series | Format | One episode = |
 | --- | --- | --- |
 | **THE CHART HURTS** | blackjack cell, cold open on the wrong play | one counterintuitive chart cell |
-| **SAME HAND, THREE PAYTABLES** | video poker, flip the variant live | one deal across JoB/Bonus/DDB |
+| **SAME HAND, FOUR PAYTABLES** | video poker, flip the variant live | one deal across JoB/Bonus/DDB/Deuces |
 | **BREAK THE QUAD** | DDB kicker drama | one four-of-a-kind decision |
 | **COUNT THE OUTS** | draw/straight/flush math | one "how many cards help" count |
 | **THE DAILY FIVE** | share the app's daily drill result grid | today's five hands |
@@ -214,7 +249,7 @@ Baccarat is the app's reminder that **sometimes the best move is not to think**.
 - "Everyone does X. X is wrong."
 - "You have four aces. Throw one away."
 - "The chart says *stand*. Watch."
-- "This hand has three right answers."
+- "This hand has four right answers."
 - "You're not bad at this. You're guessing. Here's the math."
 
 **Structure:** wrong answer → sit in it → reveal → the one number that decides it
@@ -239,14 +274,14 @@ Baccarat is the app's reminder that **sometimes the best move is not to think**.
 | Day | Series | Seed idea |
 | --- | --- | --- |
 | Mon | THE CHART HURTS | 16 vs 10 (the most-refused hit) |
-| Tue | SAME HAND, THREE PAYTABLES | four aces + King across all three tables |
+| Tue | SAME HAND, FOUR PAYTABLES | four aces + King across all four tables |
 | Wed | COUNT THE OUTS | four to a flush vs a low pair |
 | Thu | THE CHART HURTS | 9,9 vs 7 (don't split) |
 | Fri | BREAK THE QUAD | four 2s + King |
 | Sat | THE DAILY FIVE | today's Daily Drill grid |
 | Sun | THE HONEST GAME | the Tie bet trap |
 
-Then swap in new cells next week — you have ~370 blackjack cells and ~400,000
+Then swap in new cells next week — you have ~370 blackjack cells and ~500,000
 video poker decisions to draw from.
 
 ---

@@ -1823,13 +1823,15 @@ function heConfirm() {
 }
 
 /* ---------------- coach ---------------- */
-function reasonFor(kept) {
+function reasonFor(kept, variant = vpVariant()) {
+  const pairPays = variant.minPairRank <= 14;
   const counts = {};
   for (const c of kept) counts[c.r] = (counts[c.r] ?? 0) + 1;
   const groups = Object.values(counts).sort((a, b) => b - a);
   const pairs = groups.filter((n) => n === 2).length;
   if (groups.includes(4)) return 'FOUR OF A KIND PAYS. HOLD IT ALL.';
   if (groups.includes(3)) return 'THREE OF A KIND. HOLD THE TRIPS, DRAW TWO.';
+  if (!pairPays && pairs > 0) return 'NO PAIR PAYS. HOLDING FOR THE DRAW.';
   if (pairs === 2) return 'TWO PAIR. HOLD BOTH FOR FOUR SHOTS AT TRIPS.';
   if (pairs === 1) {
     const r = Number(Object.keys(counts).find((k) => counts[k] === 2));
@@ -1851,7 +1853,7 @@ function buildAdvice() {
     const kept = round.hand.filter((_, i) => best.holds[i]);
     return {
       holds: best.holds,
-      text: `HOLD ${kept.length}. ${reasonFor(kept)} AVERAGE RETURN ${best.ev.toFixed(3)} PER HAND.`,
+      text: `HOLD ${kept.length}. ${reasonFor(kept, variantById(round.variantId))} AVERAGE RETURN ${best.ev.toFixed(3)} PER HAND.`,
       why: `ALL 32 HOLDS: ${best.options.slice(0, 3)
         .map((o) => `${o.keptCount}HELD ${o.ev.toFixed(2)}`).join('  ')}`,
       apply: () => { setHolds(round, best.holds); renderBattle(); },

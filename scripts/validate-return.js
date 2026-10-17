@@ -38,7 +38,11 @@ console.log('Pay table (per credit wagered):');
 for (const row of variant.rows) {
   console.log(`  ${String(row.amount).padStart(3)}  ${row.label}`);
 }
-console.log(`  minimum paying pair rank: ${variant.minPairRank} (Jack)`);
+console.log(
+  variant.minPairRank > 14
+    ? '  (no pair pays on this table)'
+    : `  minimum paying pair rank: ${variant.minPairRank} (Jack)`,
+);
 clearCache();
 
 console.log('');
