@@ -394,6 +394,7 @@ el('btnShare').hidden = typeof navigator.share !== 'function';
 el('btnShare').onclick = async () => {
   try {
     await navigator.share({ title: 'Poker Gym — free training demo', text: el('sharePreview').value });
+    window.trackEvent?.('share', { channel: 'native' });
     el('shareStatus').textContent = 'Share options closed. Delivery is handled by your chosen app.';
   } catch (error) {
     el('shareStatus').textContent = error.name === 'AbortError'
@@ -404,6 +405,7 @@ el('btnShare').onclick = async () => {
 el('btnCopyShare').onclick = async () => {
   try {
     await navigator.clipboard.writeText(el('sharePreview').value);
+    window.trackEvent?.('share', { channel: 'copy' });
     el('shareStatus').textContent = 'Invitation copied. Nothing sent; paste it where you choose.';
   } catch {
     el('sharePreview').focus();
@@ -423,6 +425,7 @@ el('feedbackForm').onsubmit = event => {
   el('feedbackEmail').href = draft.href;
   el('feedbackGithub').href = draft.githubHref;
   el('feedbackDraft').hidden = false;
+  window.trackEvent?.('feedback_submit', { clarity: el('feedbackClarity').value, returnInterest: el('feedbackReturn').value });
 };
 
 /* ---------------- map ---------------- */
@@ -945,6 +948,7 @@ function startGym(gym, sprint = false, mode = null) {
   drillHands = restoreDrillPlan(plan, gym.game);
   drillMode = drillHands.length ? plan.mode : null;
   gymId = gym.id;
+  window.trackEvent?.('game_start', { game: gym.game });
   gameId = gym.game;
   handsWon = 0;
   handsAtGym = 0;
@@ -1613,6 +1617,7 @@ function renderSessionSummary(session) {
   score.className = 'hint';
   score.textContent = `${session.optimal}/${SESSION_HANDS} CORRECT · BEST STREAK ${sessionBest}`;
   box.appendChild(score);
+  window.trackEvent?.('session_complete', { game: GYM_BY_ID[gymId]?.game, correct: session.optimal });
   const miss = sessionMistakes[0];
   if (miss) {
     const detail = document.createElement('p');
@@ -1661,6 +1666,7 @@ function settleDailyHand({ optimal, difficulty, line, review }) {
   el('battleEndRow').hidden = false;
 
   const tally = run.results.filter(Boolean).length;
+  if (run.finished) window.trackEvent?.('daily_complete', { correct: tally });
   const say = optimal
     ? 'GOOD READ. THAT IS THE PLAY.'
     : 'NO. THE BETTER MOVE WAS DIFFERENT.';

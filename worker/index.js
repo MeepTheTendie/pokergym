@@ -3,6 +3,7 @@
 // assets.run_worker_first; every other request goes straight to assets.
 // Counting failures never prevent serving assets.
 import { countBucket, dataPoint } from './count.js';
+import { isIngestPath, proxyPostHog } from './proxy.js';
 import { SECURITY_HEADERS } from './security.js';
 
 // Re-emit the asset response with the shared security headers. The worker runs
@@ -16,6 +17,15 @@ function secure(response) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    // PostHog is proxied through our own origin (see worker/proxy.js). This is
+    // never counted and never wrapped in the page security headers.
+    if (isIngestPath(url.pathname)) {
+      try {
+        return await proxyPostHog(request);
+      } catch {
+        return new Response('analytics proxy unavailable', { status: 502 });
+      }
+    }
     // Keep new homepage visitors on one save/install origin. Existing www
     // game URLs stay accessible so their browser-local saves can be exported.
     if (url.hostname === 'www.playpokergym.com' && url.pathname === '/') {
