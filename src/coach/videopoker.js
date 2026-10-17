@@ -1,6 +1,6 @@
 import { makeDeck } from '../cards.js';
 import { CATEGORY } from '../evaluate.js';
-import { PAY_TABLE } from '../games/videopoker.js';
+import { WIN, DEFAULT_VARIANT, variantById } from '../games/videopoker.js';
 
 export function pack(card) {
   return (card.r - 2) * 4 + card.s;
@@ -13,16 +13,26 @@ export function unpack(value) {
 const RANK_COUNTS = new Int8Array(13);
 const HAND = new Int8Array(5);
 
+// Rank indices (0 = two) captured by the last categoryOfHand call, so a win code
+// can be read without re-walking the hand.
 let pairRank = -1;
+let quadRank = -1;
+let kickerRank = -1;
+let lastCategory = -1;
 
 const isRoyal = (high) => high === 12;
 
 export const MIN_PAIR_RANK = 11;
-const MIN_PAIR_INDEX = MIN_PAIR_RANK - 2;
+
+// The active variant drives payoutOfHand during a hold search. bestHold sets it
+// around the enumeration; nothing else changes it.
+let ACTIVE = DEFAULT_VARIANT;
 
 function categoryOfHand() {
   RANK_COUNTS.fill(0);
   pairRank = -1;
+  quadRank = -1;
+  kickerRank = -1;
   const firstSuit = HAND[0] & 3;
   let flush = true;
   for (let i = 0; i < 5; i++) {
@@ -44,11 +54,15 @@ function categoryOfHand() {
     distinct++;
     if (r > max) max = r;
     if (r < min) min = r;
-    if (n === 4) quads++;
-    else if (n === 3) trips++;
+    if (n === 4) {
+      quads++;
+      quadRank = r;
+    } else if (n === 3) trips++;
     else if (n === 2) {
       pairs++;
       if (r > topPair) topPair = r;
+    } else if (n === 1) {
+      kickerRank = r;
     }
   }
 
@@ -60,31 +74,72 @@ function categoryOfHand() {
     }
   }
 
+  let category;
   if (straightHigh && flush) {
-    return isRoyal(straightHigh) ? CATEGORY.ROYAL_FLUSH : CATEGORY.STRAIGHT_FLUSH;
-  }
-  if (quads) return CATEGORY.FOUR_OF_A_KIND;
-  if (trips && pairs) return CATEGORY.FULL_HOUSE;
-  if (flush) return CATEGORY.FLUSH;
-  if (straightHigh) return CATEGORY.STRAIGHT;
-  if (trips) return CATEGORY.THREE_OF_A_KIND;
-  if (pairs === 2) return CATEGORY.TWO_PAIR;
-  if (pairs === 1) {
+    category = isRoyal(straightHigh) ? CATEGORY.ROYAL_FLUSH : CATEGORY.STRAIGHT_FLUSH;
+  } else if (quads) category = CATEGORY.FOUR_OF_A_KIND;
+  else if (trips && pairs) category = CATEGORY.FULL_HOUSE;
+  else if (flush) category = CATEGORY.FLUSH;
+  else if (straightHigh) category = CATEGORY.STRAIGHT;
+  else if (trips) category = CATEGORY.THREE_OF_A_KIND;
+  else if (pairs === 2) category = CATEGORY.TWO_PAIR;
+  else if (pairs === 1) {
     pairRank = topPair;
-    return CATEGORY.ONE_PAIR;
+    category = CATEGORY.ONE_PAIR;
+  } else category = CATEGORY.HIGH_CARD;
+
+  lastCategory = category;
+  return category;
+}
+
+// Mirrors the win-code mapping in games/videopoker.js, but reads the rank indices
+// the fast evaluator already holds (values are +2 from the index).
+function winOfHand(variant) {
+  switch (lastCategory) {
+    case CATEGORY.HIGH_CARD: return WIN.NONE;
+    case CATEGORY.ONE_PAIR:
+      return (pairRank + 2) >= variant.minPairRank ? WIN.JACKS : WIN.LOW_PAIR;
+    case CATEGORY.TWO_PAIR: return WIN.TWO_PAIR;
+    case CATEGORY.THREE_OF_A_KIND: return WIN.THREE;
+    case CATEGORY.STRAIGHT: return WIN.STRAIGHT;
+    case CATEGORY.FLUSH: return WIN.FLUSH;
+    case CATEGORY.FULL_HOUSE: return WIN.FULL_HOUSE;
+    case CATEGORY.FOUR_OF_A_KIND: {
+      if (!variant.quadTiers) return WIN.FOUR_KIND;
+      const q = quadRank + 2;
+      const k = kickerRank + 2;
+      const lowKicker = k >= 2 && k <= 4;
+      if (q === 14) return lowKicker ? WIN.FOUR_ACES_KICKER : WIN.FOUR_ACES;
+      if (q <= 4) return (k === 14 || lowKicker) ? WIN.FOUR_234_KICKER : WIN.FOUR_234;
+      return WIN.FOUR_5K;
+    }
+    case CATEGORY.STRAIGHT_FLUSH: return WIN.STRAIGHT_FLUSH;
+    case CATEGORY.ROYAL_FLUSH: return WIN.ROYAL;
+    default: return WIN.NONE;
   }
-  return CATEGORY.HIGH_CARD;
 }
 
 export function payoutOfHand() {
-  const category = categoryOfHand();
-  if (category === CATEGORY.ONE_PAIR && pairRank < MIN_PAIR_INDEX) return 0;
-  return PAY_TABLE[category];
+  categoryOfHand();
+  return ACTIVE.pay[winOfHand(ACTIVE)];
 }
 
 export function categoryOf(cards) {
   for (let i = 0; i < 5; i++) HAND[i] = pack(cards[i]);
   return categoryOfHand();
+}
+
+// Win code for a concrete five-card hand under a variant: the bridge the game
+// layer and tests use to check the fast evaluator against evaluate5.
+export function winCodeOfHand(cards, variant = DEFAULT_VARIANT) {
+  const v = typeof variant === 'string' ? variantById(variant) : variant;
+  for (let i = 0; i < 5; i++) HAND[i] = pack(cards[i]);
+  const prev = ACTIVE;
+  ACTIVE = v;
+  categoryOfHand();
+  const win = winOfHand(v);
+  ACTIVE = prev;
+  return win;
 }
 
 const BINOM = (() => {
@@ -142,27 +197,37 @@ export function holdPatterns(size = 5) {
   return out;
 }
 
-export function bestHold(hand, { deck = makeDeck(), cache = STRATEGY_CACHE } = {}) {
-  const key = orderedKey(hand);
+export function bestHold(hand, { deck = makeDeck(), cache = STRATEGY_CACHE, variant = DEFAULT_VARIANT } = {}) {
+  const v = typeof variant === 'string' ? variantById(variant) : variant;
+  const key = `${v.id}|${orderedKey(hand)}`;
   if (cache.has(key)) return cache.get(key);
 
   const packedHand = hand.map(pack);
   const inHand = new Set(packedHand);
-  const pool = deck.map(pack).filter((v) => !inHand.has(v));
+  const pool = deck.map(pack).filter((value) => !inHand.has(value));
   const poolLength = pool.length;
 
-  const options = [];
-  for (const pattern of holdPatterns(5)) {
-    let heldLength = 0;
-    for (let i = 0; i < 5; i++) {
-      if (pattern[i]) HAND[heldLength++] = packedHand[i];
+  // The enumeration pays the active variant, so pin it for the whole search and
+  // put the previous variant back even if a pay table is malformed.
+  const previous = ACTIVE;
+  ACTIVE = v;
+  let options;
+  try {
+    options = [];
+    for (const pattern of holdPatterns(5)) {
+      let heldLength = 0;
+      for (let i = 0; i < 5; i++) {
+        if (pattern[i]) HAND[heldLength++] = packedHand[i];
+      }
+      const need = 5 - heldLength;
+      const ways = binomial(poolLength, need);
+      const ev = need === 0
+        ? payoutOfHand()
+        : payoutSum(pool, poolLength, need, heldLength, 0, 0) / ways;
+      options.push({ holds: pattern, ev, keptCount: heldLength, ways });
     }
-    const need = 5 - heldLength;
-    const ways = binomial(poolLength, need);
-    const ev = need === 0
-      ? payoutOfHand()
-      : payoutSum(pool, poolLength, need, heldLength, 0, 0) / ways;
-    options.push({ holds: pattern, ev, keptCount: heldLength, ways });
+  } finally {
+    ACTIVE = previous;
   }
 
   options.sort((a, b) => b.ev - a.ev);

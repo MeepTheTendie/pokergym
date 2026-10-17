@@ -154,6 +154,15 @@ button:focus-visible { outline: 4px solid var(--t02); outline-offset: 2px; }
 
 .row { display: flex; gap: 8px; margin-top: 8px; }
 .row > button { flex: 1; }
+/* Video poker pay-table picker: a label beside the table selector. */
+#rowVariant { align-items: center; }
+#rowVariant > .variant-label { flex: 0 0 auto; }
+#rowVariant > select {
+  flex: 1 1 auto; min-width: 0; min-height: 44px; padding: 10px 8px;
+  font: inherit; color: var(--gbc-3); background: var(--gbc-0);
+  border: 2px solid var(--gbc-2); cursor: pointer;
+}
+#rowVariant > select:focus-visible { outline: 4px solid var(--t02); outline-offset: 2px; }
 #todayActions { flex-wrap: wrap; }
 #todayActions > button { flex: 1 1 140px; min-width: 0; }
 #todayActions > p { flex-basis: 100%; margin: 4px 0; }

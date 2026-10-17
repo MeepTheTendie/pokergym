@@ -3,7 +3,8 @@ import { feedbackDraft } from './feedback.js?v=no-pricing-1';
 import { SUIT_GLYPH, SUIT_NAME, rankLabel, cardLabel } from '../src/cards.js';
 import { CATEGORY_LABEL, evaluate5 } from '../src/evaluate.js';
 import {
-  newRound as newVpRound, toggleHold, setHolds, draw as drawRound, PAY_TABLE,
+  newRound as newVpRound, toggleHold, setHolds, draw as drawRound,
+  VARIANTS, variantById, DEFAULT_VARIANT, rowForWin,
 } from '../src/games/videopoker.js';
 import { bestHold } from '../src/coach/videopoker.js';
 import {
@@ -72,6 +73,12 @@ let becomeArmed = false; // BECOME asks for a second tap before replacing an exi
 let round = null;
 let advice = null;
 let gameId = 'videopoker';
+let vpVariantId = DEFAULT_VARIANT.id; // pay table the video poker trainer grades against
+const vpVariant = () => variantById(vpVariantId);
+// The table the paytable panel shows: a hand already drawn keeps the table it was
+// dealt under, so the highlighted row always matches the payout it actually paid.
+const activePaytable = () =>
+  (round && round.game === 'videopoker' && round.drawn ? variantById(round.variantId) : vpVariant());
 let handDone = false;
 let decisions = [];   // blackjack: one entry per action taken this round
 let picked = new Set(); // hold'em: indices into round.hand7
@@ -1066,6 +1073,7 @@ el('btnSkip').onclick = () => {
   lesson = null;
   onDone?.();
 };
+el('variantSelect').onchange = (e) => chooseVariant(e.target.value);
 
 /* ---------------- hand potential gauge (video poker) ---------------- */
 function gradeFor(ev) {
@@ -1081,7 +1089,7 @@ function setGauge(pct, cls) {
 }
 
 function renderPotential() {
-  const best = bestHold(round.hand);
+  const best = bestHold(round.hand, { variant: round.variantId });
   const pct = Math.max(0, Math.min(100, (best.ev / 3) * 100));
   const g = gradeFor(best.ev);
   setGauge(pct, g.cls);
@@ -1158,7 +1166,7 @@ function renderPlay() {
   if (gameId === 'videopoker') {
     renderZones([{ cards: round.hand, holds: round.holds, disabled: round.drawn, onCard: toggleVpHold }]);
     el('pays').textContent = round.drawn
-      ? `RESULT: ${round.result.label.toUpperCase()}. YOUR HOLD WAS ${round.holdBest ? 'BEST' : 'NOT BEST'}.`
+      ? `RESULT: ${round.winLabel.toUpperCase()}. YOUR HOLD WAS ${round.holdBest ? 'BEST' : 'NOT BEST'}.`
       : `HOLDING ${round.holds.filter(Boolean).length} OF 5`;
     return;
   }
@@ -1220,11 +1228,11 @@ function renderStatus() {
       renderPotential();
       return;
     }
-    const cat = round.result.category;
-    el('handGrade').textContent = round.result.label.toUpperCase();
-    setGauge((cat / 9) * 100, cat >= 5 ? 'high' : cat >= 3 ? 'mid' : 'low');
-    el('potentialText').textContent = cat > 0
-      ? `${round.result.label.toUpperCase()} IS A PAYING HAND ON THIS PAY TABLE.`
+    el('handGrade').textContent = round.winLabel.toUpperCase();
+    setGauge(Math.min(100, round.payout > 0 ? 25 + round.payout : 0),
+      round.payout >= 25 ? 'high' : round.payout > 0 ? 'mid' : 'low');
+    el('potentialText').textContent = round.payout > 0
+      ? `${round.winLabel.toUpperCase()} PAYS ${round.payout} ON THIS PAY TABLE.`
       : 'THE DRAW MADE NO PAYING HAND. THE HOLD WAS STILL THE PLAY.';
     return;
   }
@@ -1273,6 +1281,30 @@ function renderStatus() {
   el('potentialText').textContent = 'THE BEST FIVE CARD HAND THESE SEVEN CARDS MAKE.';
 }
 
+/* ---------------- video poker pay tables ---------------- */
+// Each variant reruns the same exact-EV search under a different pay table, so
+// switching one changes both the paytable panel and the coach's best hold.
+function renderVariantSelect() {
+  const select = el('variantSelect');
+  if (select.options.length !== VARIANTS.length) {
+    select.innerHTML = VARIANTS
+      .map(v => `<option value="${v.id}">${v.name}${v.ratio ? ` (${v.ratio})` : ''}</option>`)
+      .join('');
+  }
+  select.value = vpVariantId;
+}
+
+function chooseVariant(id) {
+  vpVariantId = variantById(id).id;
+  // A hand not yet drawn is regraded under the new table; a finished hand keeps
+  // the payout it was dealt.
+  if (round && round.game === 'videopoker' && !round.drawn) round.variantId = vpVariantId;
+  advice = null;
+  el('coachPanel').hidden = true;
+  renderBattle();
+  audio.sfx('chip');
+}
+
 function payRow(label, amt, on) {
   const cls = on ? ' class="won"' : '';
   return `<div${cls}>${on ? '>' : ''}${label}</div><div class="amt${on ? ' won' : ''}">${amt}</div>`;
@@ -1280,14 +1312,19 @@ function payRow(label, amt, on) {
 
 function renderPaytable() {
   el('paytableTitle').textContent =
-    gameId === 'baccarat' ? 'ODDS' : gameId === 'holdem' ? 'RANKINGS' : 'PAY TABLE';
+    gameId === 'baccarat' ? 'ODDS'
+      : gameId === 'holdem' ? 'RANKINGS'
+        : gameId === 'videopoker' ? `PAY TABLE · ${activePaytable().name.toUpperCase()}`
+          : 'PAY TABLE';
   const rows = [];
 
   if (gameId === 'videopoker') {
-    const result = handDone ? round.result : null;
-    for (let cat = 9; cat >= 1; cat--) {
-      const on = result?.category === cat;
-      rows.push(payRow(CATEGORY_LABEL[cat], fmt(PAY_TABLE[cat]), on));
+    // A finished hand keeps the table it was dealt under; before the draw the
+    // panel follows the player's current selection.
+    const variant = activePaytable();
+    const wonRow = handDone && round ? rowForWin(variant, round.win) : null;
+    for (const row of variant.rows) {
+      rows.push(payRow(row.label, fmt(row.amount), row === wonRow));
     }
     rows.push(payRow('NOTHING', '0', false));
   } else if (gameId === 'blackjack') {
@@ -1321,6 +1358,8 @@ function setControls() {
   const vp = gameId === 'videopoker';
   el('btnDeal').hidden = !vp;
   el('btnDraw').hidden = !vp;
+  el('rowVariant').hidden = !vp;
+  if (vp) renderVariantSelect();
   el('rowActions').hidden = gameId !== 'blackjack';
   el('rowBet').hidden = gameId !== 'baccarat';
   el('rowPick').hidden = gameId !== 'holdem';
@@ -1389,7 +1428,12 @@ function startHand() {
   const drilled = drillMode ? drillHands[profile.activeSession?.played ?? 0] : introductory;
   drillLabel = drilled?.label ?? '';
   if (gameId === 'videopoker') {
-    round = newVpRound(rng ?? Math.random, drilled?.hand ? { hand: drilled.hand } : undefined);
+    // The daily drill is the same for every trainer, so it always uses the
+    // default pay table no matter which variant the player has selected.
+    round = newVpRound(rng ?? Math.random, {
+      hand: drilled?.hand ?? null,
+      variantId: dailyMode ? DEFAULT_VARIANT.id : vpVariantId,
+    });
   } else if (gameId === 'blackjack') {
     round = newBjRound(rng ?? Math.random,
       drilled?.player ? { player: drilled.player, dealer: [drilled.dealer, drilled.hole] } : undefined);
@@ -1654,7 +1698,7 @@ function doDraw() {
   // Grade the hold against the coach's answer rather than against whatever
   // advice happens to be on screen: a hold played correctly without opening
   // the panel is still the correct hold.
-  const best = bestHold(round.hand);
+  const best = bestHold(round.hand, { variant: round.variantId });
   const optimal = best.optimal.some((pattern) => pattern.join('') === round.holds.join(''));
   const review = {
     situation: round.hand.map(cardLabel).join(' '),
@@ -1671,7 +1715,7 @@ function doDraw() {
     optimal,
     difficulty: handDifficulty(round.result),
     review,
-    line: `RESULT: ${round.result.label.toUpperCase()}. YOUR HOLD WAS ${optimal ? 'BEST' : 'NOT BEST'}.`,
+    line: `RESULT: ${round.winLabel.toUpperCase()}. YOUR HOLD WAS ${optimal ? 'BEST' : 'NOT BEST'}.`,
   });
 }
 
@@ -1803,7 +1847,7 @@ function buildAdvice() {
   if (handDone) return null;
 
   if (gameId === 'videopoker') {
-    const best = bestHold(round.hand);
+    const best = bestHold(round.hand, { variant: round.variantId });
     const kept = round.hand.filter((_, i) => best.holds[i]);
     return {
       holds: best.holds,

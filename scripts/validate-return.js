@@ -1,9 +1,10 @@
 import { makeDeck, shuffle, seededRng } from '../src/cards.js';
 import { bestHold, clearCache } from '../src/coach/videopoker.js';
-import { GAME, PAY_TABLE, MIN_PAIR_RANK } from '../src/games/videopoker.js';
+import { DEFAULT_VARIANT, variantById } from '../src/games/videopoker.js';
 
 const hands = Number(process.argv[2] ?? 400);
-const EXPECTED_RETURN = 0.9954;
+const variant = variantById(process.argv[3] ?? DEFAULT_VARIANT.id);
+const EXPECTED_RETURN = variant.expectedReturn;
 
 const evs = [];
 let start = Date.now();
@@ -13,7 +14,7 @@ for (let i = 0; i < hands; i++) {
     process.stdout.write(`  ${i}/${hands} (${((Date.now() - start) / 1000).toFixed(0)}s)\n`);
   }
   const hand = shuffle(makeDeck(), seededRng(i + 1)).slice(0, 5);
-  evs.push(bestHold(hand).ev);
+  evs.push(bestHold(hand, { variant }).ev);
 }
 
 const n = evs.length;
@@ -22,7 +23,7 @@ const variance = evs.reduce((a, b) => a + (b - meanEv) ** 2, 0) / (n - 1);
 const stderr = Math.sqrt(variance / n);
 
 console.log('');
-console.log(`${GAME.name} optimal-play simulation`);
+console.log(`${variant.name} (${variant.ratio}) optimal-play simulation`);
 console.log(`  hands simulated  : ${n}`);
 console.log(`  mean EV / credit : ${meanEv.toFixed(5)}`);
 console.log(`  standard error   : ${stderr.toFixed(5)}`);
@@ -34,10 +35,10 @@ const resolvable = 1.96 * stderr;
 
 console.log('');
 console.log('Pay table (per credit wagered):');
-for (const key of Object.keys(PAY_TABLE).map(Number).sort((a, b) => b - a)) {
-  console.log(`  ${String(key).padStart(2)}  ${String(PAY_TABLE[key]).padStart(3)}`);
+for (const row of variant.rows) {
+  console.log(`  ${String(row.amount).padStart(3)}  ${row.label}`);
 }
-console.log(`  minimum paying pair rank: ${MIN_PAIR_RANK} (Jack)`);
+console.log(`  minimum paying pair rank: ${variant.minPairRank} (Jack)`);
 clearCache();
 
 console.log('');
