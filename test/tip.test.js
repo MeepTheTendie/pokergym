@@ -8,16 +8,14 @@ function URL_(f) { return new globalThis.URL(`../${f}`, import.meta.url); }
 
 test('optional Ko-fi tip link is present with the exact URL, new tab, noopener', () => {
   const index = read('web/index.html');
-  const landing = read('web/landing.html');
   const app = read('web/app.js');
-  for (const html of [index, landing]) {
-    assert.ok(html.includes(`<a href="${URL}" target="_blank" rel="noopener">Support Poker Gym ☕</a>`));
-  }
+  // The landing footer line was removed in fe6c6a3 (landing footer cleanup);
+  // the trainer menu and summaries still carry the tip link.
+  assert.ok(index.includes(`<a href="${URL}" target="_blank" rel="noopener">Support Poker Gym ☕</a>`));
   assert.ok(app.includes(`const TIP_URL = '${URL}'`));
   assert.ok(app.includes('href="${TIP_URL}" target="_blank" rel="noopener">Support Poker Gym ☕</a>'));
   assert.equal((app.match(/tip\.innerHTML = TIP_HTML/g) || []).length, 2, 'session summary + daily drill');
   assert.match(index, /Poker Gym is free\. If it helped, you can tip on Ko-fi/);
-  assert.match(landing, /Poker Gym is free\. If it helped, you can tip on Ko-fi/);
 });
 
 test('tip link is never precached by the service worker', () => {
