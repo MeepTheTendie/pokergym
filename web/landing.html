@@ -88,9 +88,16 @@ h1 span{color:var(--gold)}
 .final{text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px 24px;margin-bottom:32px}
 .final h2{font-size:28px;margin:0 0 8px}
 .final p{margin:0 0 20px;color:var(--dim)}
-footer{border-top:1px solid var(--border);color:var(--dim);font-size:12px;padding-top:20px;padding-bottom:80px}
-footer a{color:var(--dim);text-decoration:none;margin-right:16px;display:inline-flex;align-items:center;min-height:44px}
-footer a:hover{color:var(--gold)}
+footer{border-top:1px solid var(--border);color:var(--dim);font-size:13px;padding-top:24px;padding-bottom:40px}
+.foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 32px}
+.foot-brand{font-weight:900;color:var(--gold);letter-spacing:.4px;text-decoration:none}
+.foot-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;align-items:center;gap:0 22px}
+.foot-nav a{color:var(--dim);text-decoration:none;display:inline-flex;align-items:center;min-height:44px}
+.foot-nav a:hover,.foot-nav a:focus-visible{color:var(--gold)}
+.foot-nav .tip a{color:var(--gold);border:1px solid var(--border);border-radius:999px;padding:0 14px;min-height:36px;margin:4px 0}
+.foot-nav .tip a:hover,.foot-nav .tip a:focus-visible{border-color:var(--gold)}
+.fine span{white-space:nowrap}
+.fine{margin:14px 0 0;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--dim)}
 .sticky-cta{display:none}
 @media(max-width:760px){
   main,header,footer{padding:16px}
@@ -106,7 +113,11 @@ footer a:hover{color:var(--gold)}
   .sticky-cta{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;padding:10px 14px;background:var(--bg);border-top:1px solid var(--border);box-shadow:0 -8px 24px rgba(0,0,0,.4)}
   .sticky-cta .cta{width:100%;margin:0;min-height:50px;font-size:16px}
   body{padding-bottom:76px}
-  footer a{margin-right:12px}
+  footer{padding-bottom:24px}
+  .foot{flex-direction:column;align-items:flex-start;gap:4px}
+  .foot-nav ul{display:grid;grid-template-columns:repeat(3,1fr);gap:0 12px;width:100%}
+  .foot-nav .tip{grid-column:1/-1}
+  .foot-nav .tip a{justify-content:center;min-height:44px;margin-top:8px}
 }
 @media(max-width:420px){.games{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.cta:active{transform:none}}
@@ -186,7 +197,21 @@ footer a:hover{color:var(--gold)}
 </section>
 </main>
 <footer>
-<p><a href="https://github.com/MeepTheTendie/pokergym/issues/1">Feedback</a><a href="https://github.com/MeepTheTendie/pokergym">GitHub</a><a href="/web/privacy.html">Privacy</a></p>
+<div class="foot">
+<a class="foot-brand" href="/">♠ Poker Gym</a>
+<nav class="foot-nav" aria-label="Footer">
+<ul>
+<li><a href="/web/">Play</a></li>
+<li><a href="/web/?daily=1">Daily Drill</a></li>
+<li><a href="#games-heading">Guides</a></li>
+<li><a href="mailto:meep@mail.grokbot.com?subject=Poker%20Gym%20feedback">Feedback</a></li>
+<li><a href="/web/privacy.html">Privacy</a></li>
+<li><a href="https://github.com/MeepTheTendie/pokergym">GitHub</a></li>
+<li class="tip"><a href="https://ko-fi.com/playpokergym" target="_blank" rel="noopener">Support Poker Gym ☕</a></li>
+</ul>
+</nav>
+</div>
+<p class="fine"><span>Free, education only.</span> <span>No real-money gambling.</span> <span>Built with AI assistance.</span></p>
 </footer>
 <div class="sticky-cta"><a class="cta" href="/web/" data-track="cta_click" data-cta="start_training" data-location="sticky_mobile">Start training free →</a></div>
 <script src="/web/posthog-loader.js"></script>

@@ -8,10 +8,11 @@ function URL_(f) { return new globalThis.URL(`../${f}`, import.meta.url); }
 
 test('optional Ko-fi tip link is present with the exact URL, new tab, noopener', () => {
   const index = read('web/index.html');
+  const landing = read('web/landing.html');
   const app = read('web/app.js');
-  // The landing footer line was removed in fe6c6a3 (landing footer cleanup);
-  // the trainer menu and summaries still carry the tip link.
-  assert.ok(index.includes(`<a href="${URL}" target="_blank" rel="noopener">Support Poker Gym ☕</a>`));
+  for (const html of [index, landing]) {
+    assert.ok(html.includes(`<a href="${URL}" target="_blank" rel="noopener">Support Poker Gym ☕</a>`));
+  }
   assert.ok(app.includes(`const TIP_URL = '${URL}'`));
   assert.ok(app.includes('href="${TIP_URL}" target="_blank" rel="noopener">Support Poker Gym ☕</a>'));
   assert.equal((app.match(/tip\.innerHTML = TIP_HTML/g) || []).length, 2, 'session summary + daily drill');
@@ -21,4 +22,14 @@ test('optional Ko-fi tip link is present with the exact URL, new tab, noopener',
 test('tip link is never precached by the service worker', () => {
   const sw = [read('scripts/build.mjs')].join('\n');
   assert.ok(!sw.includes('ko-fi'));
+});
+
+test('landing footer: grouped links, fine print, no personal name or pricing', () => {
+  const landing = read('web/landing.html');
+  const footer = landing.slice(landing.indexOf('<footer>'), landing.indexOf('</footer>'));
+  for (const href of ['/web/', '/web/?daily=1', '#games-heading', 'mailto:meep@mail.grokbot.com', '/web/privacy.html', URL]) {
+    assert.ok(footer.includes(`href="${href}`), `footer links ${href}`);
+  }
+  assert.match(footer.replace(/<[^>]+>/g, ''), /Free, education only\. No real-money gambling\. Built with AI assistance\./);
+  assert.doesNotMatch(footer, /wes|pennock|\$\d|subscri|per month|\/mo\b|pricing/i);
 });
