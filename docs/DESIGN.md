@@ -79,7 +79,7 @@
 - **Cards (playing):** White background, 8px radius, subtle shadow. Red suits in `--red`, black suits in `--text`. Held state: gold border + "HELD" badge + slight lift.
 - **Panels:** `--surface` background, 12px radius, 1px `--border` border. No hard shadows.
 - **Progress bar:** 8px height, rounded, `--surface-2` track, `--gold` fill.
-- **Belts/badges:** Small colored circles (not squares) with the suit glyph inside. 32px. Gold ring when earned, gray when locked.
+- **Badges:** Circular medallions (image asset) with the suit symbol, accent color per gym. Gold ring when earned, dimmed when locked. Rendered at 40px.
 - **Trainer card:** Compact card with avatar (left), name/level (center), stats (right). Subtle border, no heavy shadow.
 
 ### 2.5 Motion
@@ -158,34 +158,35 @@
 
 ## 5. Sprites & Characters
 
+> **Authoritative art spec:** `docs/ART-BRIEF.md`. It contains the exact prompts,
+> palette, filenames, and integration steps for Gemini. This section is the summary.
+
 ### Keep (conceptually)
 - 4 player classes: Scholar, Dealer, Countess, Grinder
 - 4 gym masters: Royale (videopoker), Bust (blackjack), Neutral (baccarat), River (holdem)
 - Game-to-character mapping
-- 48×48 canvas rendering system
 
 ### Change
-- Redo art as clean, flat, modern illustrations (Duolingo-style: simple shapes, 2-3 colors, readable at any size)
-- Use SVG where possible (trainer sprite, map icons)
-- Replace overworld with CSS grid map (4 gym cards)
-- Card suits as SVG icons, not Unicode glyphs
+- Redo art as clean, flat, modern illustrations (simple shapes, 2–3 tones, readable at any size)
+- One image per character instead of a 4×3 pixel atlas
+- Overworld already replaced with a CSS grid map (done)
+- Card suits stay Unicode glyphs (♠♥♦♣) styled with CSS, not separate icon files
 
-### Asset list
+### Asset list (matches ART-BRIEF.md)
 
 | Asset | Size | Count | Format | Notes |
 |---|---|---|---|---|
-| Trainer portraits | 128×128 | 4 | SVG or PNG | Flat, 2-3 colors |
-| Master portraits | 128×128 | 4 | SVG or PNG | Distinct silhouettes |
-| Belt icons | 32×32 | 4 | SVG | Colored belt per gym color |
-| Card suit icons | 24×24 | 4 | SVG | ♠♥♦♣ as proper icons |
-| Map background | 480×320 | 1 | PNG/SVG | Simple, clean |
-| Landing hero | 960×560 | 1 | PNG/WebP | Optional |
-| OG image | 1200×630 | 1 | PNG | Already exists |
+| Trainer portraits | 512×512 | 4 | PNG (transparent) | `trainer-<id>.png`, flat, one accent each |
+| Master portraits | 512×512 | 4 | PNG (transparent) | `master-<name>.png`, distinct silhouettes |
+| Badge medallions | 512×512 | 4 | PNG (transparent) | `badge-<suit>.png`, gold ring + suit symbol |
+| Mascot | 512×512 | 1 | PNG (transparent) | Card character with dumbbell |
+| OG image | 1200×630 | 1 | PNG | Optional refresh (`og-v3.png`) |
 
 ### Phase plan for art
-- Phase 1 (now): Keep existing pixel sprites as placeholders. Focus on UI chrome.
-- Phase 2 (later): Redo character art as modern flat illustrations.
-- Phase 3 (polish): Replace overworld with CSS grid map.
+- Phase 1 (done): Modern UI chrome and CSS grid map shipped.
+- Phase 2 (next): Generate the 12 PNGs with Gemini per `docs/ART-BRIEF.md`.
+- Phase 3: Coding agent rewrites `web/characters.js` and the badge renderer to use
+  the individual images; `npm test` and `npm run test:itch` must stay green.
 
 ---
 
@@ -299,6 +300,7 @@
 ## 11. Where to find this
 
 - Repo: `docs/DESIGN.md` (this file, v3)
+- **Art handoff for Gemini:** `docs/ART-BRIEF.md` (authoritative for images)
 - Previous plan: `.opencode/plan/pokergym-1-3-plan.md`
 - Previous design: `.opencode/plan/pokergym-design.md` (v1, dojo theme — superseded)
 - Marketing: `MARKETING.md`
