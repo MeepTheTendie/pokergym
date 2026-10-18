@@ -24,6 +24,8 @@
   --gbc-1: #4a4468;
   --gbc-2: #8f7fd0;
   --gbc-3: #c9bfe8;
+  --wood: #8b5a2b;
+  --wood-2: #6b4420;
 
   --p00: #4a1c5c;
   --p01: #7b3b8f;
@@ -254,7 +256,7 @@ button { touch-action: manipulation; -webkit-user-select: none; user-select: non
 .paytable .amt { text-align: right; }
 .paytable .won { background: var(--gbc-0); color: var(--gbc-3); font-weight: 700; }
 
-.hint { color: var(--gbc-1); font-size: 10px; }
+.hint { color: var(--gbc-1); font-size: 11px; }
 .stat-label { font-size: 7px; }
 .badge-list { display: flex; gap: 8px; flex-wrap: wrap; }
 .badge {
@@ -497,7 +499,7 @@ button:focus-visible { outline: 3px solid #386a9c; outline-offset: 3px; }
 .badge-case h2 { margin: 0; }
 .badge { width: 32px; height: 32px; border: 1px solid var(--ink); box-shadow: none; background: #e3e7cc; }
 .badge.locked { opacity: .4; }
-.world-panel { border: 2px solid var(--ink); background: var(--panel); }
+.world-panel { border: 3px solid var(--wood); background: var(--panel); border-radius: 4px; }
 .world-heading { padding: 10px 12px; }
 .world-heading h2 { font-size: 9px; margin: 0 0 3px; }
 .world-heading span { font-size: 9px; color: #526451; }
