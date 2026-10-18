@@ -34,7 +34,6 @@ import { captureDrillPlan, restoreDrillPlan, BLACKJACK_DRILLS, DRILL_HANDS, DRIL
 import { drawArt, drawTrainerBack } from './characters.js';
 import audio from './audio.js?v=20261017-vegas1';
 import haptics from './haptics.js';
-import { drawWorld } from './world.js';
 
 const SAVE_KEY = 'pokergym:save:v1';
 const HANDS_TO_WIN = 10;
@@ -220,7 +219,7 @@ function applyPalette(classId) {
   const root = document.documentElement;
   if (classId) root.dataset.class = classId;
   else delete root.dataset.class;
-  const hex = getComputedStyle(root).getPropertyValue('--gbc-0').trim();
+  const hex = getComputedStyle(root).getPropertyValue('--bg').trim();
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta && hex) meta.setAttribute('content', hex);
 }
@@ -231,8 +230,6 @@ function applyPalette(classId) {
  * asked for begins then. The switch itself is persisted next to the save.
  */
 // Sound controls initialize in sound-controls.js, before the atlas is ready.
-drawWorld(el('titleWorld'), true);
-drawWorld(el('mapWorld'));
 el('btnMap').onclick = () => { dailyMode = false; dailyRun = null; renderMap(); show('scr-map'); };
 el('btnTitle').onclick = () => { dailyMode = false; dailyRun = null; initTitle(); };
 
@@ -625,7 +622,6 @@ async function shareDaily(text, useShare) {
 function renderMap() {
   renderToday();
   const cls = CLASS_BY_ID[profile.classId];
-  drawArt(el('mapTrainer'), profile.classId);
   const lvl = levelFromXp(profile.xp);
   renderSprite(profile);
 
@@ -741,7 +737,7 @@ function renderMap() {
     btn.className = open ? 'primary' : '';
     btn.dataset.gym = gym.id;
     btn.disabled = !open;
-    btn.innerHTML = `<span>${gym.name.replace(' GYM', '')}</span><small>${
+    btn.innerHTML = `<span>${gym.name.replace(' GYM', '')}</span><small>${TRAINING_LABEL[gym.game]}</small><small>${
       cleared ? '✓ BADGE EARNED · PRACTICE' : open ? '▶ ENTER GYM' : 'LOCKED'
     }</small>`;
     btn.onclick = () => startGym(gym);
@@ -2123,4 +2119,7 @@ document.addEventListener('keydown', (e) => {
   if (button) { e.preventDefault(); button.click(); }
 });
 
-initTitle();
+// Returning trainers land on their home screen; first-time visitors get the
+// title screen with one-tap training. The title is always reachable from HOME.
+if (profile) { renderMap(); show('scr-map'); }
+else initTitle();

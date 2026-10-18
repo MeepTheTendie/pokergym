@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#14121c">
+<meta name="theme-color" content="#0a1a14">
 <meta name="description" content="A free card-game trainer that coaches every decision in blackjack, video poker, baccarat and Hold’em. Daily Drill, mistake review, works offline, no signup.">
 <title>Poker Gym — free card-game trainer</title>
 <link rel="canonical" href="https://playpokergym.com/web/">
@@ -28,11 +28,11 @@
 <div class="shell">
 
 <div class="topbar">
-  <span class="brand">♠ POKER GYM <small>PLAYER JOURNEY</small></span>
-  <button id="btnMap" type="button" hidden>MAP</button>
-  <button id="btnTitle" type="button" hidden>TITLE</button>
-  <button id="btnSound" class="sound-toggle" type="button" aria-pressed="true">SND ON</button>
-  <button id="btnHaptics" class="sound-toggle" type="button" aria-pressed="true">HAPTICS ON</button>
+  <span class="brand">♠ POKER GYM <small>CARD TRAINER</small></span>
+  <button id="btnMap" type="button" hidden>HOME</button>
+  <button id="btnTitle" type="button" hidden>START</button>
+  <button id="btnSound" class="sound-toggle" type="button" aria-pressed="true">SOUND</button>
+  <button id="btnHaptics" class="sound-toggle" type="button" aria-pressed="true">HAPTICS</button>
 </div>
 
 <p class="window hint" id="saveStatus" role="status" hidden></p>
@@ -41,37 +41,37 @@
 
 <!-- ============ TITLE ============ -->
 <section id="scr-title" class="screen">
-  <div class="title-art"><canvas id="titleWorld" width="240" height="176" aria-hidden="true"></canvas><span>YOUR JOURNEY STARTS HERE</span><canvas id="titleTrainer" class="title-trainer" width="96" height="96" aria-hidden="true"></canvas><span class="title-gym gym-nw">GYM</span><span class="title-gym gym-ne">GYM</span><span class="title-gym gym-sw">GYM</span><span class="title-gym gym-se">GYM</span><span class="title-league">THE CARD ACADEMY</span></div>
-  <div class="window title-menu" style="text-align:center; padding:20px 12px;">
-    <h1 style="font-size:20px; margin:0 0 14px;"><span style="color:#263c35;">POKER</span> <span style="color:#9a4d43;">GYM</span></h1>
-    <p class="hint" style="font-size:10px; margin:0 0 16px;">TRAIN. LEVEL UP.<br>BEAT THE MASTERS.</p>
+  <div class="title-art"><canvas id="titleTrainer" class="title-trainer" width="96" height="96" aria-hidden="true"></canvas><span class="title-league">TRAIN · PLAY · REVIEW</span></div>
+  <div class="window title-menu">
+    <h1><span>POKER</span> <span>GYM</span></h1>
+    <p class="hint">Train your card sense.<br>One hand at a time.</p>
     <p id="practiceInvitation" class="hint" hidden></p>
     <div id="trainerCard" class="hint" hidden></div>
     <div class="row" style="flex-direction:column; gap:10px;">
       <button id="btnStart" class="primary">START TRAINING</button>
-      <button id="btnNew">CHOOSE STYLE</button>
       <button id="btnContinue">CONTINUE</button>
       <button id="btnDaily" hidden>DAILY DRILL</button>
       <button id="btnPracticeMisses" hidden>PRACTICE MISSES</button>
+      <button id="btnNew">CHOOSE STYLE</button>
     </div>
   </div>
-  <p class="hint" style="text-align:center; font-size:9px;">FOUR GAMES. FOUR MASTERS. ONE SHARP PLAYER.</p>
-  <p class="hint" id="offlineStatus" role="status" style="text-align:center; font-size:9px;"></p>
-  <div style="text-align:center;"><button id="btnInstall" type="button" hidden>INSTALL APP (OPTIONAL)</button></div>
-  <p class="hint" id="installStatus" role="status" style="text-align:center; font-size:9px;"></p>
-  <p class="hint" id="installHelp" hidden style="text-align:center; font-size:9px;">PLAYS IN ANY BROWSER. TO KEEP IT HANDY, USE YOUR BROWSER'S INSTALL OR ADD-TO-HOME-SCREEN OPTION. CLEARING SITE DATA REMOVES YOUR SAVE.</p>
+  <p class="hint" style="text-align:center;">Free. No signup. No real money.</p>
+  <p class="hint" id="offlineStatus" role="status" style="text-align:center;"></p>
+  <div style="text-align:center;"><button id="btnInstall" type="button" hidden>INSTALL APP</button></div>
+  <p class="hint" id="installStatus" role="status" style="text-align:center;"></p>
+  <p class="hint" id="installHelp" hidden style="text-align:center;">Plays in any browser. To keep it handy, use your browser's install or add-to-home-screen option. Clearing site data removes your save.</p>
 </section>
 
 <!-- ============ CLASS SELECT ============ -->
 <section id="scr-class" class="screen" hidden>
   <div class="window">
     <h2>CHOOSE YOUR STYLE</h2>
-    <p class="hint" style="font-size:10px; margin:0 0 10px;">YOUR CLASS DECIDES YOUR FIRST GYM AND YOUR STRONGER STAT.</p>
+    <p class="hint" style="margin:0 0 10px;">Your class decides your first gym and your stronger stat. You can change it later.</p>
     <div class="class-grid" id="classGrid"></div>
   </div>
   <div class="window" id="classDetail" hidden>
     <h2 id="classDetailName">PLAYER</h2>
-    <p class="hint" id="classDetailText" style="font-size:10px; margin:0 0 8px;"></p>
+    <p class="hint" id="classDetailText" style="margin:0 0 8px;"></p>
     <div class="badge-list" id="classDetailStats"></div>
     <div class="row">
       <button id="btnBack">BACK</button>
@@ -83,49 +83,49 @@
 <!-- ============ GYM MAP ============ -->
 <section id="scr-map" class="screen" hidden>
   <div class="window" id="todayCard">
-    <h2>TODAY</h2>
-    <p class="hint" id="todayState">YOUR NEXT STEP.</p>
+    <h2>TODAY'S TRAINING</h2>
+    <p class="hint" id="todayState">Your next step.</p>
     <div class="row" id="todayActions"></div>
     <textarea id="dailySharePreview" readonly rows="4" hidden aria-label="Daily result to copy"></textarea>
     <p id="dailyShareStatus" class="hint" role="status" hidden>Nothing sent. Choose who receives it yourself.</p>
     <details id="dailyHistory">
-      <summary>MY DAILY PRACTICE RECORD</summary>
+      <summary>DAILY RECORD</summary>
       <div id="dailyHistoryContent"></div>
-      <p class="hint">FIRST COMPLETED ATTEMPT PER DAY. REPLAYS DO NOT CHANGE THIS RECORD. SMALL SAMPLES AND DIFFERENT HANDS LIMIT COMPARISONS. SAVED IN THIS BROWSER; INCLUDED IN YOUR BACKUP.</p>
+      <p class="hint">First completed attempt per day. Replays do not change this record. Saved in this browser and included in your backup.</p>
     </details>
   </div>
 
   <div class="world-panel">
-    <div class="world-heading"><h2>THE CARD ACADEMY</h2><span>CHOOSE YOUR GYM</span></div>
-    <div class="overworld"><canvas id="mapWorld" width="240" height="208" aria-hidden="true"></canvas><canvas id="mapTrainer" width="96" height="96" aria-hidden="true"></canvas><div id="gymList"></div></div>
-    <p class="map-caption">Visit a gym. Learn the game. Earn your badge.</p>
+    <div class="world-heading"><h2>TRAIN</h2><span>CHOOSE A GYM</span></div>
+    <div class="overworld"><div id="gymList"></div></div>
+    <p class="map-caption">Pick a game. Play five hands. Earn the badge.</p>
   </div>
 
   <div class="window">
     <h2>FIVE-HAND TRAINING</h2>
-    <p class="hint">CHOOSE ANY OF THE FOUR GAMES NOW — NO BADGES REQUIRED. READ ITS LESSON, FINISH FIVE HANDS, THEN REVIEW MISSED PLAYS. HOLD’EM TEACHES HAND EVALUATION. HINTS AVAILABLE; RESULTS INCLUDE ASSISTED PLAYS. NO BADGE AWARDED. UNFINISHED SESSIONS RESUME FROM THE LAST COMPLETED HAND.</p>
+    <p class="hint">Play any game now. The coach explains every decision. Unfinished sessions resume where you left off.</p>
     <div id="shortSessions" aria-live="polite"></div>
-    <p class="hint">LAST SEVEN RESULTS SHOWN. SAVED ONLY IN THIS BROWSER; NOT CLOUD SYNCED.</p>
+    <p class="hint">Last seven results. Saved in this browser only.</p>
   </div>
 
   <div class="window trainer-card">
-    <h2>PLAYER CARD</h2>
+    <h2>YOUR TRAINER</h2>
     <div class="dlg">
       <canvas class="sprite" id="sprite" width="48" height="48" aria-hidden="true"></canvas>
       <div>
-        <p id="trainerLine" style="margin:0; font-weight:700;"></p>
-        <p class="hint" id="trainerStats" style="margin:2px 0 0; font-size:10px;"></p>
+        <p id="trainerLine" style="margin:0; font-weight:800;"></p>
+        <p class="hint" id="trainerStats" style="margin:2px 0 0;"></p>
       </div>
     </div>
-    <div class="meter" style="margin-top:10px;"><div id="xpBar"></div></div>
-    <p class="hint" id="xpLine" style="margin:4px 0 0; font-size:10px;"></p>
-    <p class="hint" style="margin:6px 0 0; font-size:10px;">SCORE <span id="scoreCount">0</span> · BEST STREAK <span id="bestStreak">0</span></p>
+    <div class="meter" style="margin-top:12px;"><div id="xpBar"></div></div>
+    <p class="hint" id="xpLine" style="margin:6px 0 0;"></p>
+    <p class="hint" style="margin:6px 0 0;">Score <span id="scoreCount">0</span> · Best streak <span id="bestStreak">0</span></p>
   </div>
 
   <div class="window">
-    <h2>YOUR PRACTICE RECORD</h2>
+    <h2>PRACTICE RECORD</h2>
     <div id="practiceSummary" aria-live="polite"></div>
-    <p class="hint">CORRECT DECISIONS, NOT LUCKY WINS. TRACKING STARTS WITH YOUR NEXT HAND. LOCAL SAVING REQUIRES AVAILABLE BROWSER STORAGE.</p>
+    <p class="hint">Correct decisions, not lucky wins. Tracking starts with your next hand.</p>
   </div>
 
   <div class="window badge-case">
@@ -134,10 +134,10 @@
   </div>
 
   <details class="window" id="mapMore">
-    <summary>MORE · REVIEW, SHARE, FEEDBACK, BACKUP, SUPPORT</summary>
+    <summary>MORE · REVIEW, SHARE, BACKUP</summary>
 
-    <h2>REVIEW YOUR MISTAKES</h2>
-    <p class="hint">NEW MISSED DECISIONS IN ALL FOUR GAMES BECOME SCORED RETRIES. ANSWER BEFORE REVEALING; RETRY RECORDS STAY SEPARATE FROM GAME ACCURACY. OLDER ENTRIES WITHOUT AN ANSWER KEY USE SELF REVIEW.</p>
+    <h2>REVIEW MISTAKES</h2>
+    <p class="hint">Missed decisions come back on a spaced schedule. Answer before revealing; retries stay separate from game accuracy.</p>
     <div class="row"><button id="btnReview" type="button">ALL CAUGHT UP</button></div>
     <p id="reviewScheduleSummary" class="hint">SPACED RECALL: A MISS IS DUE TODAY, THEN 2, 4, 8 AND 16 DAYS AFTER CORRECT RETRIES. A MISS SENDS IT BACK TO TOMORROW. CORRECT REVIEWS ADD A SMALL DECISION SCORE BONUS; NO XP. SAVED ONLY IN THIS BROWSER.</p>
 
@@ -191,7 +191,7 @@
 <!-- ============ REVIEW ============ -->
 <section id="scr-review" class="screen" hidden>
   <div class="window">
-    <h2>REVIEW YOUR MISTAKES</h2>
+    <h2>REVIEW MISTAKES</h2>
     <div id="reviewSummary" class="hint" aria-live="polite"></div>
     <div class="row"><button id="btnReviewDone" type="button">BACK TO MAP</button></div>
   </div>
@@ -224,7 +224,7 @@
 <section id="scr-battle" class="screen" hidden>
   <div class="battle-stage">
   <div class="scene">
-    <span class="battle-label">MASTER EXAM</span>
+    <span class="battle-label">GYM CHALLENGE</span>
     <canvas class="sprite master" id="masterSprite" width="48" height="48" aria-hidden="true"></canvas>
     <div class="table-felt" aria-hidden="true"></div>
     <canvas class="sprite player" id="battleSprite" width="48" height="48" aria-hidden="true"></canvas>
@@ -233,7 +233,7 @@
   <div class="statusbox">
     <div class="row1"><span id="masterLabel">MASTER ROYALE</span><span id="handGrade">JUNK</span></div>
     <div class="gauge"><i id="potentialBar" style="width:0%"></i></div>
-    <p class="hint" id="potentialText" style="margin:5px 0 0; font-size:9px; color:#3a4a3a;">HAND POTENTIAL</p>
+    <p class="hint" id="potentialText" style="margin:6px 0 0;">Hand potential</p>
   </div>
 
   </div>
@@ -245,7 +245,7 @@
   </div>
 
   <div class="window" id="tipBox" hidden>
-    <h2>COACH TIP</h2>
+    <h2>TIP</h2>
     <p id="tipText" class="hint" style="margin:0;"></p>
   </div>
 
@@ -254,7 +254,7 @@
   <div class="window hand-panel">
     <h2 id="handTitle">YOUR HAND</h2>
     <div id="zones"></div>
-    <p class="hint" id="holdHint" hidden style="margin:6px 0 0; text-align:center; font-size:10px;">TAP CARDS TO HOLD THEM, THEN PRESS DRAW.</p>
+    <p class="hint" id="holdHint" hidden style="margin:8px 0 0; text-align:center;">Tap cards to hold them, then press DRAW.</p>
     <p class="hint" id="pays" style="margin:8px 0 0; text-align:center;"></p>
   </div>
 
@@ -269,7 +269,7 @@
       <button id="btnWhy" data-key="W">WHY?</button>
       <button id="btnApply" data-key="A" class="primary">APPLY PLAY</button>
     </div>
-    <p class="hint" id="why" hidden style="margin:8px 0 0; font-size:10px;"></p>
+    <p class="hint" id="why" hidden style="margin:8px 0 0;"></p>
   </div>
 
   <div class="row" id="rowVariant" hidden>
@@ -278,7 +278,7 @@
   </div>
 
   <details class="window payout-panel">
-    <summary id="paytableTitle">PAY TABLE / REFERENCE</summary>
+    <summary id="paytableTitle">PAY TABLE</summary>
     <div class="paytable" id="paytable"></div>
   </details>
 
@@ -314,7 +314,7 @@
   </div>
 </section>
 
-<p class="hint" style="text-align:center"><a href="privacy.html" target="_blank" rel="noopener">PRIVACY / YOUR DATA</a></p>
+<p class="hint" style="text-align:center"><a href="privacy.html" target="_blank" rel="noopener">Privacy</a></p>
 </main>
 </div>
 <script src="posthog-loader.js"></script>

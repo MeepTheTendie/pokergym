@@ -1,99 +1,305 @@
-# Poker Gym — Design Document
+# Poker Gym — Redesign Spec v3 (Ground-Up)
 
-**Version:** 2.0 (implemented)
-**Theme:** The Card Academy & Club Lounge — a handheld-RPG training academy and vintage card club for mastering card decisions
-**Goal:** Turn a first-time visitor into a daily practitioner who returns tomorrow for the Daily Drill.
-
----
-
-## 1. Vision & Theme Evaluation
-
-### Why "The Card Academy & Club Lounge" (and not a Martial-Arts Dojo)
-Poker Gym's actual art, world, mascot, and soundtrack already define a distinct, cohesive world:
-- **Mascot (`web/mascot.webp`):** A playing card in a sweatband curling a dumbbell on green baize felt ("Poker Gym" = working out your card sense).
-- **Character & Master Atlas (`web/assets/characters-v2.png`):** Eight custom 16-bit pixel-art characters — four Academy Trainers (**Scholar**, **Dealer**, **Countess**, **Grinder**) and four Gym Masters (**Master Royale** in a Victorian green tailcoat, **Master Bust** in an orange street jacket, **Master Neutral** with a monocle and cane, and **Master River** in a riverboat gambler's duster and cowboy hat).
-- **Overworld (`web/world.js`):** A handheld-RPG town with pine trees, footpaths, a pond, and four specialty Gym buildings (`POKER GYM`, `COUNTY FAIR GYM`, `VILLA OAK GYM`, `RIVERSTONE GYM`).
-- **Soundtrack (`web/audio.js`):** A late-night Vegas lounge piano trio (`vegas`).
-
-Renaming a riverboat cowboy to "Sensei River" or replacing the four card-suit badges (`♠ ♦ ♥ ♣`) with karate belts clashed with the existing sprites, overworld, and lounge soundtrack. Instead, the unified identity is **The Card Academy & Club Lounge** (inspired by *Pokémon Trading Card Game* for Game Boy Color meets a tactile vintage card room: warm ivory card stock, crimson `♥ ♦` and deep emerald-slate `♠ ♣` suits, brass-trimmed green baize felt, and gold-framed Suit Badges).
-
-### Core Loop
-> Open app → see your trainer status (level, badges, streak) → play today's Daily Drill (5 seeded hands across all 4 games, ~2 minutes) → share or challenge a friend with your `🟩🟥` grid → return tomorrow before the countdown hits zero to build your streak.
-
-### Non-Negotiable Constraints
-- No real money, no betting, no prizes.
-- No subscriptions, no paywalls, no signup.
-- No ads, no advertising trackers.
-- Progress stays local (`localStorage` + manual text backup).
-- First-party analytics only (PostHog via `/ingest`), text inputs masked, session replay enabled.
-- Works 100% offline once loaded (`sw.js`).
+**Status:** Plan (not implemented)
+**Goal:** A modern, mobile-first card decision trainer. Throw out the retro aesthetic. Keep the training content and daily habit loop.
 
 ---
 
-## 2. UX Goals & Success Metrics
+## 1. Identity
 
-| Goal | Metric (PostHog / `npm run scorecard`) |
+**Name:** Poker Gym
+**Tagline:** Train your card sense. One hand at a time.
+**Metaphor:** A gym. You show up, train, track progress, leave. Not a dojo, not a casino, not a retro game.
+**Audience:** Mobile-first. People who want to learn card game strategy in 2-minute sessions. Arriving from Instagram/TikTok/Reddit.
+**Tone:** Encouraging, terse, no guilt. A broken streak "starts again at one."
+
+### What we're throwing out
+- GBC green palette and pixel fonts for body text
+- The 7-screen navigation (title → map → gym → lesson → battle → recap → review)
+- The "choose your style" gate
+- Retro pixel art as the primary visual language
+- "Dojo," "belt," "sensei," "lounge" framing
+- The lesson system as a mandatory first step
+- The overworld map as the primary navigation
+
+### What we're keeping
+- 4 games + coaches (videopoker, blackjack, baccarat, holdem)
+- Daily Drill (5 seeded hands, all games, shareable grid)
+- Streak + forgiveness system
+- Mistake review (spaced repetition)
+- First-party analytics (PostHog)
+- No real money, no signup, no ads, no subscriptions
+- Weak-spot drills
+- Share loop
+
+---
+
+## 2. Visual System
+
+### 2.1 Palette
+
+| Token | Hex | Use |
+|---|---|---|
+| `--bg` | `#0a1a14` | App background (deep felt green) |
+| `--surface` | `#142820` | Cards, panels, windows |
+| `--surface-2` | `#1e3a2e` | Secondary surfaces, inputs |
+| `--border` | `#2a4a3a` | Borders, dividers |
+| `--text` | `#e8f0e8` | Primary text |
+| `--text-dim` | `#8fa89a` | Secondary text, hints |
+| `--gold` | `#d4a843` | CTAs, streaks, milestones, focus rings |
+| `--gold-dim` | `#a07c2e` | Secondary gold |
+| `--red` | `#c0392b` | Hearts, diamonds, wrong answers |
+| `--black` | `#e8f0e8` | Spades, clubs (on dark bg) |
+| `--green` | `#27ae60` | Correct, success |
+| `--danger` | `#e74c3c` | Errors, reset |
+| `--accent-vp` | `#3498db` | Video poker game color |
+| `--accent-bj` | `#e67e22` | Blackjack game color |
+| `--accent-bac` | `#9b59b6` | Baccarat game color |
+| `--accent-he` | `#2ecc71` | Hold'em game color |
+
+### 2.2 Typography
+
+- **Headings:** System font stack (`-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`), 20–28px, bold, letter-spacing -0.5px.
+- **Body:** Same stack, 16px, line-height 1.6. Never below 14px.
+- **Labels/buttons:** Same stack, 14px, semibold, uppercase for short labels only.
+- **Card ranks/suits:** System font, 24–32px, bold. No pixel fonts anywhere.
+- **Daily grid:** Monospace (`ui-monospace`), 20px for the 🟩🟥 characters.
+
+### 2.3 Spacing
+
+- Base unit: 8px. All spacing in multiples of 8.
+- Card padding: 16px.
+- Section gaps: 24px.
+- Tap targets: minimum 48×48px.
+- Max content width: 480px, centered.
+
+### 2.4 Components
+
+- **Buttons:** Rounded (8px radius), 48px min height, 16px horizontal padding. Primary = gold fill, dark text. Secondary = transparent, gold border. Disabled = 40% opacity.
+- **Cards (playing):** White background, 8px radius, subtle shadow. Red suits in `--red`, black suits in `--text`. Held state: gold border + "HELD" badge + slight lift.
+- **Panels:** `--surface` background, 12px radius, 1px `--border` border. No hard shadows.
+- **Progress bar:** 8px height, rounded, `--surface-2` track, `--gold` fill.
+- **Belts/badges:** Small colored circles (not squares) with the suit glyph inside. 32px. Gold ring when earned, gray when locked.
+- **Trainer card:** Compact card with avatar (left), name/level (center), stats (right). Subtle border, no heavy shadow.
+
+### 2.5 Motion
+
+- Card deal: 200ms ease-out, staggered 50ms.
+- Hold toggle: 150ms scale + color transition.
+- Screen transitions: 200ms fade + slide.
+- Streak celebration: scale-up + glow on the streak number.
+- All motion respects `prefers-reduced-motion: reduce`.
+- Haptics: tap (10ms), correct (20ms), wrong ([40, 60, 40]).
+
+---
+
+## 3. Screen Structure (5 screens)
+
+### 3.1 Home (default for returning users)
+
+- Streak badge + level + belts (compact trainer card)
+- Daily Drill hero: 🟩🟩🟥🟩🟩 grid, "Can you get 5/5?", "Try today's drill →", countdown
+- Game grid (2×2): each shows game icon, name, level, "Play →"
+- Weak-spot nudge (if mistakes exist)
+- Review due (if any)
+- "Start 5-hand session" (tertiary)
+
+### 3.2 Play (battle screen)
+
+- Header: back button, game name, coach toggle
+- Hand potential gauge (collapsible)
+- Card hand: large cards, tap to hold/pick
+- Action buttons: DRAW/DEAL (VP), HIT/STAND/DOUBLE/SPLIT (BJ), BANKER/PLAYER/TIE (BAC), CONFIRM 5 (HE)
+- Coach panel (collapsed by default, expands on tap)
+- Pay table (collapsible)
+
+### 3.3 Recap
+
+- Grid, score, best streak, near-miss line
+- Review miss, Play Again, Challenge a Friend, Got It
+- Feedback + tip links
+
+### 3.4 Review (secondary)
+
+- List of due mistakes, one at a time
+- Reveal → Mark Reviewed flow
+- Progress indicator (box 1 → 2 → 4 → 8 → 16)
+
+### 3.5 Settings (secondary)
+
+- Sound toggle, haptics toggle
+- Backup/restore
+- Privacy link
+- Install app
+- About/feedback
+
+---
+
+## 4. Landing Page Flow
+
+### New structure
+
+1. Hero (above fold): headline, sub, CTA, trust strip
+2. Daily Drill preview (above fold on desktop): 🟩🟩🟥🟩🟩 grid, "Can you get 5/5?", CTA
+3. What you'll learn (4 cards, horizontal scroll on mobile): each game + "Play →"
+4. How it works (3 steps, compact): Learn → Play 5 hands → Review mistakes
+5. Final CTA: "Ready for five hands?" + "Start training free →"
+6. Footer: privacy, GitHub, email, Ko-fi (simplified)
+
+### Cut from current
+- "See the coach in action" screenshot → move to "How it works" as thumbnail
+- "Good to know" FAQ → separate `/about` page or collapse to 3 questions
+- Long footer → simplify to 4 links max
+
+### Sticky mobile CTA
+- Context-aware: "Start training" for new visitors, "Continue daily drill" for returning (detected via localStorage)
+
+---
+
+## 5. Sprites & Characters
+
+### Keep (conceptually)
+- 4 player classes: Scholar, Dealer, Countess, Grinder
+- 4 gym masters: Royale (videopoker), Bust (blackjack), Neutral (baccarat), River (holdem)
+- Game-to-character mapping
+- 48×48 canvas rendering system
+
+### Change
+- Redo art as clean, flat, modern illustrations (Duolingo-style: simple shapes, 2-3 colors, readable at any size)
+- Use SVG where possible (trainer sprite, map icons)
+- Replace overworld with CSS grid map (4 gym cards)
+- Card suits as SVG icons, not Unicode glyphs
+
+### Asset list
+
+| Asset | Size | Count | Format | Notes |
+|---|---|---|---|---|
+| Trainer portraits | 128×128 | 4 | SVG or PNG | Flat, 2-3 colors |
+| Master portraits | 128×128 | 4 | SVG or PNG | Distinct silhouettes |
+| Belt icons | 32×32 | 4 | SVG | Colored belt per gym color |
+| Card suit icons | 24×24 | 4 | SVG | ♠♥♦♣ as proper icons |
+| Map background | 480×320 | 1 | PNG/SVG | Simple, clean |
+| Landing hero | 960×560 | 1 | PNG/WebP | Optional |
+| OG image | 1200×630 | 1 | PNG | Already exists |
+
+### Phase plan for art
+- Phase 1 (now): Keep existing pixel sprites as placeholders. Focus on UI chrome.
+- Phase 2 (later): Redo character art as modern flat illustrations.
+- Phase 3 (polish): Replace overworld with CSS grid map.
+
+---
+
+## 6. What to Throw Out
+
+### Code
+- `web/world.js` (pixel-art overworld) → CSS grid map
+- `web/sprites.js` (4-color pixel sprites) → modern illustrations
+- `web/characters.js` (sprite atlas decoder) → `<img>` or inline SVG
+- 7-screen navigation → 5 screens
+- "Choose your style" gate → default to a class
+- Lesson system as mandatory → optional/skippable
+
+### CSS
+- All GBC-specific styling (pixel borders, inset shadows, 4px borders)
+- `PressStart2P` font for body text (keep for short labels only, or drop entirely)
+- `--gbc-0` through `--gbc-3` variable system → new palette tokens
+- `data-class` palette switching → subtle accent color per class
+
+### Copy
+- "Dojo," "belt," "sensei," "lounge" — all gone (already reverted)
+- "Gym" stays (it's in the name)
+- "Master" stays (it's a game term)
+- "Badge" stays
+
+---
+
+## 7. What to Keep
+
+### Code
+- All game logic (`src/games/*`, `src/coach/*`, `src/rpg/*`)
+- Daily drill system (`src/rpg/daily.js`)
+- Streak + forgiveness system
+- Mistake review / spaced repetition
+- Practice summary + recommended practice
+- Share/invite links (`src/rpg/links.js`)
+- Analytics (PostHog loader, attribution)
+- Offline worker (`scripts/offline-worker.js`)
+- Build system (`scripts/build.mjs`)
+
+### CSS
+- Component structure (buttons, panels, cards) — re-skin only
+- Responsive breakpoints (mobile-first, 760px, 1100px)
+- `prefers-reduced-motion` handling
+
+### Copy
+- Trust strip (free, no signup, no real money, no ads, offline)
+- "Earn badges, not bets"
+- Coach explanations
+- FAQ (move to separate page or collapse)
+
+---
+
+## 8. Implementation Plan
+
+### Phase 1: Modern UI frame (CSS/HTML)
+- New palette tokens in `:root`
+- New typography (system font for body, pixel font for labels only)
+- New component styles (buttons, panels, cards, progress bars)
+- Simplified screen structure (5 screens)
+- Landing page restructure (daily drill as hero, sticky CTA)
+- Keep existing sprites as placeholders
+
+### Phase 2: Screen simplification (JS)
+- Home screen: daily drill hero, game grid, trainer card, weak-spot nudge
+- Play screen: single hand view, collapsible coach, collapsible pay table
+- Recap screen: grid, score, share, play again
+- Review screen: card-based mistake review
+- Settings screen: sound, haptics, backup, privacy, install
+- Remove lesson system as mandatory (make it optional/skippable)
+- Remove "choose your style" gate (default to a class)
+- Make map the default home for returning users
+
+### Phase 3: Character art (assets)
+- Redo 4 trainer + 4 master portraits as modern flat illustrations
+- Replace suit glyphs with SVG icons
+- Replace overworld with CSS grid map
+- Update `drawArt` to use `<img>` or inline SVG
+
+### Phase 4: Polish
+- Streak celebration animation
+- Card deal/flip polish
+- Offline banner
+- Accessibility (aria-live, focus management)
+- Performance (font loading, image optimization)
+
+---
+
+## 9. Success Metrics
+
+| Metric | Target |
 |---|---|
-| First-time visitor plays a hand | `opened_the_trainer` → `game_start` conversion |
-| First-time visitor finishes a session | `session_complete` per person |
-| First-time visitor completes the Daily Drill | `daily_complete` per person |
-| Day-2 return | people with `count(DISTINCT toDate(timestamp)) > 1` |
-| Share & challenge loop | `share` events + `ref=share` / `ref=invite` arrivals |
-| Channel attribution | % of sessions with non-null `ref` (explicit `?ref=` or `document.referrer` fallback) |
+| Landing → Play conversion | ≥ 30% |
+| Play → Session complete | ≥ 60% |
+| Session complete → Day-2 return | ≥ 20% |
+| Daily drill completion | ≥ 40% of active users |
+| Share rate | ≥ 10% of sessions |
 
 ---
 
-## 3. Information Architecture & Screen Flow
+## 10. Open Questions
 
-1. **Landing (`/`)** — Hero value prop, clickable 5-card example scene, primary CTA (`Start training free →`), Daily Drill preview (`?daily=1`), per-game `Play <game> →` trainer links + recall guides, "How a session works" with direct play CTA, and a sticky mobile bottom CTA bar.
-2. **Title (`/web/` `#scr-title`)** — Overworld preview with active trainer sprite, Trainer Card summary (`LEVEL · BADGES · STREAK · HANDS`), `START TRAINING` (or `PLAY TODAY'S DAILY DRILL #N` when promoted), `CHOOSE STYLE`, `CONTINUE`, `DAILY DRILL #N` (visible to all visitors, including first-timers), and `PRACTICE MISSES (N)` weak-spot nudge when blackjack mistakes exist.
-3. **Map / The Card Academy (`#scr-map`)** — `TODAY` priority card (resumes unfinished session, launches today's Daily Drill, prompts due spaced-repetition reviews, or recommends the lowest-accuracy game, plus countdown `NEXT IN XH YM` once today's drill is complete), interactive Academy overworld with 4 Gyms, Five-Hand Training launcher (including unlocked Master Drills and Blackjack Weak-Spot Drill), Player Card, Practice Record, and Suit Badge Case (`♠ ♦ ♥ ♣`).
-4. **Lesson (`#scr-lesson`)** — Short intro pages spoken by the Gym Master before a player's first session in each game. Tapping `NEXT` / `PLAY!` advances immediately in one tap (never eating a tap on the typewriter).
-5. **Battle (`#scr-battle`)** — Master & Trainer across a brass-trimmed green baize table, hand potential gauge, dialogue box, card zones with red/black suits and elevated `HELD ✓` / `PICK ✓` states, optional Coach panel (`ASK COACH`, `WHY?`, `APPLY PLAY`), and sticky action bar.
-6. **Session Recap (`#sessionSummary`)** — Appears on completing a 5-hand session: `🟩🟥` per-hand result grid, score & best streak, near-miss prompt on 4/5 runs, first missed decision review, `PLAY AGAIN`, and `CHALLENGE A FRIEND` (`?ref=share&d=<number>`).
-7. **Review (`#scr-review`)** — Spaced-repetition mistake notebook (boxes 1 → 2 → 4 → 8 → 16 days).
+1. Should we keep the pixel font at all, or go fully modern?
+2. Do we need the overworld map, or is a CSS grid of game cards sufficient?
+3. Should the daily drill be the *only* thing on the home screen for returning users?
+4. Do we commission new character art, or use PixelLab/AI generation?
+5. Should we support dark/light mode, or stay dark-only?
 
 ---
 
-## 4. Visual System
+## 11. Where to find this
 
-### 4.1 Palette
-- **Chrome & Felt:** `--gbc-0: #263c35` (deep club green), `--gbc-1: #526451` (muted sage border), `--gbc-2: #a1b18a` (bevel shadow), `--gbc-3: #edf0d5` (light highlight), `--panel: #f6f5e8` (warm parchment), `--panel-2: #e3e7cc` (secondary panel), brass rail `#b5892e` / `#c89d42`.
-- **Playing Cards:** Warm ivory stock (`#fffdf7`), crimson (`#b42336`) for Hearts `♥` and Diamonds `♦`, deep slate-ink (`#1c2e28`) for Spades `♠` and Clubs `♣`.
-- **Held / Picked Cards:** Deep emerald back (`#1c332b`), gold top accent (`#c89d42`), `-5px` upward lift, `HELD ✓` / `PICK ✓` badge, and rose-coral (`#ff8e9e`) pip on held red suits so suit color remains distinguishable while held.
-- **Suit Badges (`#badgeList`):**
-  - Jacks Badge (`♠`, Video Poker): `#2563eb`
-  - County Badge (`♦`, Blackjack): `#d97706`
-  - Oak Badge (`♥`, Baccarat): `#b91c1c`
-  - River Badge (`♣`, Hold'em): `#15803d`
-  - Earned badges display a gold border (`#b5892e`) on warm cream (`#fff9e6`).
-
-### 4.2 Touch, Motion, & Audio
-- All interactive controls maintain `>= 44px` height, `touch-action: manipulation`, and `user-select: none`.
-- Video Poker's `DRAW` button dynamically receives `.primary` while a hand is live (`!handDone`), switching `.primary` to `DEAL` / `NEXT HAND` only after settlement.
-- Haptics fire on card hold toggle (`tap: 8ms`) and hand settlement (`correct`, `wrong`, `level`, `badge`), respecting both the Haptics switch and the Sound mute switch.
-
----
-
-## 5. Implementation Status
-
-### Shipped (Phases 1–3)
-- Referrer attribution fallback (`src/rpg/links.js`, `web/posthog-loader.js`) with drift tests.
-- Daily Drill exposed to first-time visitors on `/web/` without requiring a prior save.
-- Landing page conversion upgrades (clickable hero card scene, per-game `Play →` trainer links, sticky mobile CTA, "Play one hand now →" CTA).
-- Rageclick & mobile UX fixes:
-  - `btnLessonNext` advances immediately on first tap instead of requiring two taps during typewriter playback.
-  - `btnDraw` styled as `.primary` during live Video Poker hands.
-  - High-contrast red (`♥ ♦`) vs black (`♠ ♣`) card suits, `-5px` held card lift, `HELD ✓` / `PICK ✓` labels, and `tap` haptics.
-  - First-hand Video Poker onboarding hint (`#holdHint`).
-- Retention & viral loops:
-  - Title-screen Trainer Card (`#trainerCard`) with accurate `levelFromXp(profile.xp).level`, badge count, streak, and hands played.
-  - Blackjack weak-spot nudge (`#btnPracticeMisses`) on the title screen.
-  - Session recap `🟩🟥` mini-grid, 4/5 near-miss framing, `PLAY AGAIN`, and `CHALLENGE A FRIEND` deep-link (`?ref=share&d=<number>`).
-  - Next Daily Drill countdown (`formatDailyCountdown()`) in the daily completion verdict and on the Map's `TODAY` card.
-  - Streak milestone callouts at 3, 7, and 14 days.
-
-### Held for Phase 4 (Conditional on Oct 18–29 Scorecard Data)
-- Weekly challenge pack expansion (hold until Daily Drill return rate is measured).
-- One-time Pro unlock (only after 3+ unprompted player requests).
-- Korean localization (evaluate if Korean Instagram traffic continues).
+- Repo: `docs/DESIGN.md` (this file, v3)
+- Previous plan: `.opencode/plan/pokergym-1-3-plan.md`
+- Previous design: `.opencode/plan/pokergym-design.md` (v1, dojo theme — superseded)
+- Marketing: `MARKETING.md`
+- Progress: `automation/PROGRESS.md`
