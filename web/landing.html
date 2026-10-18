@@ -81,6 +81,10 @@ h1 span{color:var(--gold)}
 .step{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px}
 .step b{display:block;font-size:12px;letter-spacing:1.2px;color:var(--gold);margin-bottom:6px}
 .step p{margin:0;font-size:13px;color:var(--dim)}
+.retain{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:8px 0 40px}
+.retain-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px}
+.retain-card b{display:block;font-size:14px;color:var(--gold);margin-bottom:6px}
+.retain-card p{margin:0;font-size:13px;color:var(--dim)}
 .final{text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px 24px;margin-bottom:32px}
 .final h2{font-size:28px;margin:0 0 8px}
 .final p{margin:0 0 20px;color:var(--dim)}
@@ -93,6 +97,7 @@ footer a:hover{color:var(--gold)}
   .hero{grid-template-columns:1fr;gap:24px;padding-top:12px;padding-bottom:28px}
   .games{grid-template-columns:1fr 1fr}
   .steps{grid-template-columns:1fr}
+  .retain{grid-template-columns:1fr}
   .drill{grid-template-columns:1fr;gap:16px;padding:20px}
   .squares{text-align:center}
   h1{font-size:34px;letter-spacing:-1px}
@@ -138,8 +143,9 @@ footer a:hover{color:var(--gold)}
 <div>
 <p class="section-title">The Daily Drill</p>
 <h2 id="daily">Can you get 5/5?</h2>
-<p>Same five hands for everyone. New challenge every day. Finish, then share your green-and-red grid — no spoilers, just your score.</p>
+<p>Same five hands for everyone. New challenge every day. Finish, then share your green-and-red grid — no spoilers, just your score. <strong>Today’s drill resets at midnight.</strong></p>
 <a class="cta" href="/web/?daily=1" data-track="start_daily" data-location="daily">Try today’s drill →</a>
+<p style="margin:10px 0 0;font-size:13px;color:var(--dim)">Know someone who’d beat you? <a href="/web/?daily=1" data-track="challenge_friend" data-location="daily">Challenge a friend →</a></p>
 </div>
 </section>
 
@@ -161,6 +167,16 @@ footer a:hover{color:var(--gold)}
 <div class="step"><b>03 · Review</b><p>Hands you missed come back later on a spaced schedule, so the fix sticks.</p></div>
 </div>
 <p style="text-align:center;margin:0 0 40px"><a class="cta alt" href="/web/" data-track="start_training" data-location="how_it_works">Play one hand now →</a></p>
+</section>
+
+<section aria-labelledby="retain-heading">
+<p class="section-title" id="retain-heading">Built to bring you back.</p>
+<div class="retain">
+<div class="retain-card"><b>🔥 Daily streaks</b><p>Play five hands a day and your streak climbs. Miss a day and it resets — come back tomorrow.</p></div>
+<div class="retain-card"><b>💾 Progress saves here</b><p>Stats, badges and review cards live on this device. No account, no signup, nothing to lose.</p></div>
+<div class="retain-card"><b>📣 Challenge a friend</b><p>Share today’s drill. Compare green-and-red grids. No spoilers, just scores.</p></div>
+</div>
+<p style="text-align:center;margin:0 0 40px;font-size:13px;color:var(--dim)">Want one-tap access? Add Poker Gym to your home screen — it works offline.</p>
 </section>
 
 <section class="final" aria-labelledby="final-heading">
