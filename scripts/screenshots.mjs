@@ -90,7 +90,7 @@ const audioCheck = await evaluate(`(async () => {
   const source = await (await fetch('audio.js')).text();
   const probe = source + '\\nexport async function renderProbe() {' +
     'ctx = new OfflineAudioContext(1, 44100 * 15, 44100);' +
-    'const score = SONGS.lounge; const data = compile(score); if(data.error) throw new Error(data.error);' +
+    'const score = SONGS.vegas; const data = compile(score); if(data.error) throw new Error(data.error);' +
     'musicBus = ctx.createGain(); musicBus.gain.value = score.level ?? 0.42; musicBus.connect(ctx.destination); makeNoise();' +
     'const sps = 60 / score.bpm / 4;' +
     'for(const [step, events] of data.at) for(const ev of events) fire(ev, step * sps + swingOffset(score, step, sps), sps, data.gain, score.voices);' +
@@ -102,7 +102,7 @@ const audioCheck = await evaluate(`(async () => {
   finally { URL.revokeObjectURL(url); }
 })()`);
 if (audioCheck.peak >= 1 || audioCheck.rms < 0.005) throw new Error('Audio render failed: ' + JSON.stringify(audioCheck));
-console.log('lounge audio render:', JSON.stringify(audioCheck));
+console.log('vegas audio render:', JSON.stringify(audioCheck));
 for (const width of [320, 360, 393, 440]) {
   await send('Emulation.setDeviceMetricsOverride', { width, height: 820, deviceScaleFactor: 2, mobile: true });
   const overflow = await evaluate('document.documentElement.scrollWidth > innerWidth');

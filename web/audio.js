@@ -90,15 +90,44 @@ function ensure() {
   return ctx;
 }
 
-/** A single voice: oscillator with an amplitude envelope. */
+/* Additive tone colours: relative strength of harmonics 1, 2, 3, ...
+ * "piano" is bright but falls away quickly; "upright" is mostly fundamental
+ * with a little wood in the 2nd and 3rd harmonics. */
+export const HARMONICS = {
+  piano:   [1, 0.55, 0.3, 0.18, 0.11, 0.07, 0.045, 0.03, 0.02],
+  upright: [1, 0.42, 0.14, 0.05, 0.02],
+};
+
+function harmonicWave(name) {
+  const key = 'h:' + name;
+  if (waves.has(key)) return waves.get(key);
+  const amps = HARMONICS[name];
+  const real = new Float32Array(amps.length + 1);
+  const imag = new Float32Array(amps.length + 1);
+  amps.forEach((a, i) => { imag[i + 1] = a; });
+  const w = ctx.createPeriodicWave(real, imag, { disableNormalization: false });
+  waves.set(key, w);
+  return w;
+}
+
+function setWave(o, type, duty) {
+  if (type === 'pulse') o.setPeriodicWave(pulseWave(duty));
+  else if (HARMONICS[type]) o.setPeriodicWave(harmonicWave(type));
+  else o.type = type;
+}
+
+/** A single voice: oscillator with an amplitude envelope.
+ *  `decay` (seconds) switches to a struck-string envelope: fast attack, then
+ *  a natural exponential fade, damped quickly when the note ends.
+ *  `detune` (cents) adds a second, slightly detuned oscillator for chorus. */
 function voice(t, midi, dur, opts) {
   const {
     type = 'square', duty = 0.5, vol = 0.12,
     bus = musicBus, attack = 0.005, hold = 0.6, glide = 0, cutoff = 0, q = 0.7,
+    decay = 0, detune = 0,
   } = opts;
   const o = ctx.createOscillator();
-  if (type === 'pulse') o.setPeriodicWave(pulseWave(duty));
-  else o.type = type;
+  setWave(o, type, duty);
   const f = midiFreq(midi);
   if (glide) {
     o.frequency.setValueAtTime(f, t);
@@ -110,8 +139,24 @@ function voice(t, midi, dur, opts) {
   const a = Math.min(attack, dur * 0.5);
   g.gain.setValueAtTime(0.0001, t);
   g.gain.linearRampToValueAtTime(vol, t + a);
-  g.gain.setValueAtTime(vol, t + Math.max(a, dur * hold));
-  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  let end = t + dur;
+  if (decay) {
+    g.gain.setTargetAtTime(0.0001, t + a, decay);   // the string rings down
+    g.gain.setTargetAtTime(0.0001, t + dur, 0.04);  // damper on release
+    end = t + dur + 0.25;
+  } else {
+    g.gain.setValueAtTime(vol, t + Math.max(a, dur * hold));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  }
+  const oscs = [o];
+  if (detune) {
+    const o2 = ctx.createOscillator();
+    setWave(o2, type, duty);
+    o2.frequency.setValueAtTime(f, t);
+    o2.detune.setValueAtTime(detune, t);
+    o2.connect(g);
+    oscs.push(o2);
+  }
   if (cutoff) {
     // A lowpass rounds off the edges of a tone: the difference between a
     // buzzy chip voice and a soft electric-piano or upright-bass colour.
@@ -123,8 +168,7 @@ function voice(t, midi, dur, opts) {
   } else {
     o.connect(g).connect(bus);
   }
-  o.start(t);
-  o.stop(t + dur + 0.03);
+  for (const x of oscs) { x.start(t); x.stop(end + 0.03); }
   return o;
 }
 
@@ -383,6 +427,107 @@ export const SFX_NAMES = Object.keys(SFX_PLAYS);
  * validateSongs() will tell you when one has drifted.                     */
 
 const SONGS = {
+  /* Vegas: late-night casino lounge, a jazz piano trio. A 24-bar loop of two
+     12-bar jazz-blues choruses in F (the second chorus answers the first):
+       F7 | Bb7 | F7 | Cm7 F7 | Bb7 | Bdim7 | Am7 | D7 | Gm7 | C7 | F7 D7 | Gm7 C7
+     Left hand comps rootless voicings in a Charleston rhythm; the right hand
+     plays a sparse melody with blue-note grace notes (Ab->A); walking upright
+     bass; brushes barely there. Additive "piano" partials with a struck,
+     decaying envelope and a little detune, under a gentle lowpass. */
+  vegas: {
+    bpm: 80, bars: 24, gain: 1, level: 0.25, swing: 0.6,
+    voices: {
+      lead: { type: 'piano', gate: 1, attack: 0.004, decay: 0.55, detune: 4, cutoff: 2600, vol: 0.06 },
+      harm: { type: 'piano', gate: 1, attack: 0.005, decay: 0.7, detune: 5, cutoff: 1700, vol: 0.022 },
+      bass: { type: 'upright', gate: 0.95, attack: 0.006, decay: 0.32, cutoff: 900, vol: 0.17 },
+      drum: { vol: 0.4 },
+    },
+    channels: {
+      lead: [
+        // chorus 1
+        '-:6 Ab4:1 A4:1 C5:2 D5:2 F5:4',
+        'Eb5:4 D5:2 C5:2 Ab4:6 -:2',
+        'F4:2 A4:6 -:8',
+        '-:4 G4:2 Bb4:2 D5:2 C5:2 A4:4',
+        'Ab4:6 F4:2 D5:8',
+        'F5:4 D5:4 B4:4 Ab4:4',
+        'G4:6 A4:2 C5:8',
+        '-:4 #F5:2 Eb5:2 C5:4 A4:4',
+        'Bb4:8 -:4 A4:2 Bb4:2',
+        'D5:6 C5:2 Bb4:4 G4:4',
+        'A4:8 -:4 #F4:4',
+        '-:8 G4:2 Bb4:2 E5:4',
+        // chorus 2
+        'F5:6 Eb5:2 C5:2 Ab4:1 A4:1 C5:4',
+        'D5:8 -:4 F5:2 Eb5:2',
+        'C5:4 A4:4 -:8',
+        '-:4 Eb5:2 D5:2 C5:2 Bb4:2 A4:4',
+        'Bb4:6 -:2 Ab4:2 F4:2 D4:4',
+        '-:8 Ab4:4 B4:4',
+        'C5:6 E5:2 G5:4 E5:4',
+        '#F5:8 -:4 Eb5:2 D5:2',
+        'D5:4 Bb4:4 -:4 A4:2 Bb4:2',
+        'E5:6 D5:2 Bb4:8',
+        'A4:6 F4:2 -:4 #F4:4',
+        'G4:4 -:12',
+      ].join(' '),
+      harm: [
+        '[A3D4Eb4G4]:6 [A3D4Eb4G4]:10',
+        '[Ab3C4D4G4]:6 [Ab3C4D4G4]:10',
+        '-:2 [Eb3G3A3D4]:4 -:4 [Eb3G3A3D4]:6',
+        '[Eb3G3Bb3D4]:6 -:2 [Eb3G3A3D4]:8',
+        '[Ab3C4D4G4]:6 [Ab3C4D4G4]:10',
+        '[Ab3B3D4F4]:6 [Ab3B3D4F4]:10',
+        '[G3B3C4E4]:6 [G3B3C4E4]:10',
+        '-:2 [#F3B3C4Eb4]:4 -:4 [#F3B3C4Eb4]:6',
+        '[F3A3Bb3D4]:6 [F3A3Bb3D4]:10',
+        '[E3A3Bb3D4]:6 [E3A3Bb3D4]:10',
+        '[Eb3G3A3D4]:6 -:2 [#F3B3C4E4]:8',
+        '[F3A3Bb3D4]:6 -:2 [E3A3Bb3D4]:8',
+        '[Eb3G3A3D4]:6 [Eb3G3A3D4]:10',
+        '-:2 [Ab3C4D4G4]:4 -:4 [Ab3C4D4G4]:6',
+        '[A3D4Eb4G4]:6 [A3D4Eb4G4]:10',
+        '[Eb3G3Bb3D4]:6 -:2 [Eb3G3A3D4]:8',
+        '[Ab3C4D4G4]:6 [Ab3C4D4G4]:10',
+        '-:2 [Ab3B3D4F4]:4 -:4 [Ab3B3D4F4]:6',
+        '[G3B3C4E4]:6 [G3B3C4E4]:10',
+        '[#F3B3C4Eb4]:6 [#F3B3C4Eb4]:10',
+        '-:2 [F3A3Bb3D4]:4 -:4 [F3A3Bb3D4]:6',
+        '[E3A3Bb3D4]:6 [E3A3Bb3D4]:10',
+        '[Eb3G3A3D4]:6 -:2 [#F3B3C4E4]:8',
+        '[F3A3Bb3D4]:6 -:2 [E3A3Bb3D4]:8',
+      ].join(' '),
+      bass: [
+        'F2:4 A2:4 C3:4 B2:4',
+        'Bb2:4 Ab2:4 G2:4 #F2:4',
+        'F2:4 A2:4 C3:4 A2:4',
+        'C3:4 Eb3:4 F2:4 A2:4',
+        'Bb2:4 C3:4 D3:4 Bb2:4',
+        'B2:4 D3:4 F2:4 Ab2:4',
+        'A2:4 G2:4 E2:4 #D2:4',
+        'D2:4 #F2:4 A2:4 Ab2:4',
+        'G2:4 Bb2:4 D3:4 #C3:4',
+        'C3:4 E2:4 G2:4 E2:4',
+        'F2:4 A2:4 D2:4 #F2:4',
+        'G2:4 Bb2:4 C3:4 E2:4',
+        'F2:4 C3:4 A2:4 B2:4',
+        'Bb2:4 D2:4 F2:4 E2:4',
+        'F2:4 G2:4 A2:4 B2:4',
+        'C3:4 G2:4 F2:4 A2:4',
+        'Bb2:4 D3:4 Ab2:4 C3:4',
+        'B2:4 D3:4 F3:4 Bb2:4',
+        'A2:4 E2:4 G2:4 #C3:4',
+        'D3:4 C3:4 A2:4 Ab2:4',
+        'G2:4 A2:4 Bb2:4 B2:4',
+        'C3:4 Bb2:4 G2:4 E2:4',
+        'F2:4 C3:4 D3:4 A2:4',
+        'G2:4 D2:4 C2:4 E2:4',
+      ].join(' '),
+      // brushes: a ride-tick swing figure with a soft swish on 2 and 4, no kick
+      drum: Array(24).fill('t:4 [bt]:2 t:2 t:4 [bt]:2 t:2').join(' '),
+    },
+  },
+
   /* Lounge: the soundtrack for every screen. Slow, swung and quiet, so it can
      sit under a study session without nagging. Rootless 7th/9th voicings on a
      filtered triangle "electric piano", a sine melody with plenty of space, a

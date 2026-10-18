@@ -1,4 +1,4 @@
-import audio from './audio.js?v=20261017-lounge1';
+import audio from './audio.js?v=20261017-vegas1';
 import { isHapticsEnabled, toggleHaptics } from './haptics.js';
 
 // Initialize independently of the character atlas. A slow image download must
@@ -40,5 +40,5 @@ document.addEventListener('click', event => {
   if (!target || target.id === 'btnSound' || target.id === 'btnHaptics') return;
   audio.sfx(target.classList.contains('primary') ? 'confirm' : 'blip');
 });
-audio.music('lounge');
+audio.music('vegas');
 render();
