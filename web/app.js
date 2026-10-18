@@ -244,14 +244,34 @@ function initTitle() {
   const key = dailyKey();
   const number = dailyNumber(key);
   const done = profile && dailyCompleted(profile, key);
+  const streak = profile?.daily?.streak ?? 0;
   if (sharedDaily) {
     el('btnDaily').textContent = profile
-      ? `PLAY TODAY'S DAILY DRILL #${number}${done ? ' ✓' : ''}`
+      ? `PLAY TODAY'S DAILY DRILL #${number}${done ? ' ✓' : ''}${streak > 0 ? ` · ${streak}D STREAK` : ''}`
       : `DAILY DRILL #${number}`;
   } else if (profile) {
-    el('btnDaily').textContent = done ? `DAILY DRILL #${number} ✓` : `DAILY DRILL #${number}`;
+    el('btnDaily').textContent = done
+      ? `DAILY DRILL #${number} ✓${streak > 0 ? ` · ${streak}D STREAK` : ''}`
+      : `DAILY DRILL #${number}${streak > 0 ? ` · ${streak}D STREAK` : ''}`;
   } else {
     el('btnDaily').textContent = `DAILY DRILL #${number}`;
+  }
+  // Weak-spot nudge: one tap into the blackjack mistakes you have actually made.
+  const weakBtn = el('btnPracticeMisses');
+  if (weakBtn) {
+    const hasMisses = Boolean(profile?.mistakes?.length);
+    weakBtn.hidden = !hasMisses;
+    if (hasMisses) {
+      const n = profile.mistakes.length;
+      weakBtn.textContent = `PRACTICE MISSES (${n})`;
+      weakBtn.onclick = () => {
+        const gym = GYMS.find(g => g.game === 'blackjack');
+        if (!gym || !profile) return;
+        profile = beginSession(profile, gym.id);
+        save();
+        startGym(gym, true, 'weak');
+      };
+    }
   }
   // Practice wins for routing: with ?practice= the start button stays primary.
   const promoteDaily = sharedDaily && !requestedGym;
@@ -1622,6 +1642,12 @@ function renderSessionSummary(session) {
   score.className = 'hint';
   score.textContent = `${session.optimal}/${SESSION_HANDS} CORRECT · BEST STREAK ${sessionBest}`;
   box.appendChild(score);
+  if (session.optimal === SESSION_HANDS - 1) {
+    const near = document.createElement('p');
+    near.className = 'hint';
+    near.textContent = 'ONE MORE CORRECT WOULD HAVE BEEN A PERFECT RUN. PLAY AGAIN?';
+    box.appendChild(near);
+  }
   window.trackEvent?.('session_complete', { game: GYM_BY_ID[gymId]?.game, correct: session.optimal });
   const miss = sessionMistakes[0];
   if (miss) {
@@ -1630,6 +1656,36 @@ function renderSessionSummary(session) {
     detail.textContent = `REVIEW: ${miss.situation} — ${miss.correction}`;
     box.appendChild(detail);
   }
+  const actions = document.createElement('div');
+  actions.className = 'row';
+  const again = document.createElement('button');
+  again.type = 'button';
+  again.textContent = 'PLAY AGAIN';
+  again.onclick = () => {
+    const gym = gymId ? GYM_BY_ID[gymId] : null;
+    if (!gym || !profile) { box.hidden = true; return; }
+    profile = beginSession(profile, gym.id);
+    save();
+    box.hidden = true;
+    startGym(gym, true);
+  };
+  actions.appendChild(again);
+  const share = document.createElement('button');
+  share.type = 'button';
+  share.textContent = 'SHARE';
+  share.onclick = async () => {
+    const text = `Poker Gym: ${session.optimal}/${SESSION_HANDS} correct in ${GYM_BY_ID[gymId]?.name ?? 'training'}. Free practice, no real money: ${inviteUrl()}`;
+    try {
+      if (typeof navigator.share === 'function') {
+        await navigator.share({ title: 'Poker Gym', text });
+      } else {
+        await navigator.clipboard.writeText(text);
+      }
+      window.trackEvent?.('share', { channel: 'session' });
+    } catch (e) { /* user cancelled */ }
+  };
+  actions.appendChild(share);
+  box.appendChild(actions);
   const dismiss = document.createElement('button');
   dismiss.type = 'button';
   dismiss.textContent = 'GOT IT';
@@ -1677,7 +1733,7 @@ function settleDailyHand({ optimal, difficulty, line, review }) {
     : 'NO. THE BETTER MOVE WAS DIFFERENT.';
   const verdict = run.finished
     ? (run.scored
-        ? `DAILY DRILL #${run.number} COMPLETE: ${tally}/${DAILY_HANDS} CORRECT. COME BACK TOMORROW FOR #${run.number + 1}. THE STREAK IS ${fmt(profile.daily.streak)}.`
+        ? `DAILY DRILL #${run.number} COMPLETE: ${tally}/${DAILY_HANDS} CORRECT. COME BACK TOMORROW FOR #${run.number + 1}. THE STREAK IS ${fmt(profile.daily.streak)}.${[3, 7, 14].includes(profile.daily.streak) ? ' STREAK MILESTONE!' : ''}`
         : `PRACTICE REPLAY DONE: ${tally}/${DAILY_HANDS} CORRECT. NO NEW XP OR SCORE TODAY.`)
     : `DAILY DRILL · HAND ${run.index} OF ${DAILY_HANDS}. ${tally} CORRECT SO FAR.`;
   const full = `${line} ${say} ${verdict}`;
