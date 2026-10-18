@@ -1,9 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { SONGS, SFX_NAMES, compileSong, validateSongs } from '../web/audio.js';
+import { readFileSync } from 'node:fs';
+import { SONGS, SFX_NAMES, DRUM_SOUNDS, compileSong, validateSongs, swingOffset } from '../web/audio.js';
 
 const CHANNELS = ['lead', 'harm', 'bass', 'drum'];
-const TRACKS = ['academy', 'title', 'map', 'battle1', 'battle2', 'battle3', 'battle4'];
+const TRACKS = ['lounge', 'academy', 'title', 'map', 'battle1', 'battle2', 'battle3', 'battle4'];
 
 test('every track compiles without errors', () => {
   assert.deepEqual(validateSongs(), []);
@@ -97,4 +98,62 @@ test('the SFX bank exposes every sound the game asks for', () => {
   for (const name of ['blip', 'confirm', 'deal', 'chip', 'win', 'lose', 'badge']) {
     assert.ok(SFX_NAMES.includes(name), `missing sfx: ${name}`);
   }
+});
+
+test('every drum letter a song can use maps to a real sound', () => {
+  for (const [letter, name] of Object.entries(DRUM_SOUNDS)) {
+    assert.equal(letter.length, 1, letter);
+    assert.ok(typeof name === 'string' && name.length > 1, `${letter} -> ${name}`);
+  }
+  // every letter actually used in a score must resolve
+  for (const [song, s] of Object.entries(SONGS)) {
+    for (const ch of s.channels.drum.replace(/[\[\]\d:\s-]/g, '')) {
+      assert.ok(DRUM_SOUNDS[ch], `${song} uses unmapped drum "${ch}"`);
+    }
+  }
+});
+
+test('the lounge loop is slow, long and quiet', () => {
+  const song = SONGS.lounge;
+  assert.ok(song.bpm >= 80 && song.bpm <= 90, `bpm ${song.bpm}`);
+  assert.ok(song.bars >= 16, `only ${song.bars} bars`);
+  assert.ok(song.level > 0 && song.level <= 0.3, `level ${song.level}`);
+  const loopSeconds = song.bars * 4 * 60 / song.bpm;
+  assert.ok(loopSeconds >= 40, `loop is only ${loopSeconds.toFixed(1)}s`);
+});
+
+test('the lounge loop uses soft timbres, no chip pulse waves', () => {
+  for (const ch of ['lead', 'harm', 'bass']) {
+    const type = SONGS.lounge.voices[ch].type;
+    assert.ok(['sine', 'triangle'].includes(type), `${ch} is ${type}`);
+  }
+  assert.ok(SONGS.lounge.voices.harm.cutoff > 0, 'harm should be lowpassed');
+  assert.ok(!/[sho c]/.test(SONGS.lounge.channels.drum.replace(/[\[\]\d:\s-]/g, '').replace(/[kbt]/g, '')),
+    'lounge drums should stick to kick, brush and ride tick');
+});
+
+test('the lounge comping uses 7th chords (four-note voicings)', () => {
+  const data = compileSong(SONGS.lounge);
+  let fourNote = 0;
+  for (const evs of data.at.values()) if (evs.filter((e) => e.channel === 'harm').length >= 4) fourNote++;
+  assert.ok(fourNote >= 8, `only ${fourNote} four-note chords`);
+});
+
+test('swing delays only the off-beat eighth', () => {
+  const score = { swing: 0.5 };
+  assert.equal(swingOffset(score, 0, 0.2), 0);
+  assert.equal(swingOffset(score, 1, 0.2), 0);
+  assert.equal(swingOffset(score, 2, 0.2), 0.1);
+  assert.equal(swingOffset(score, 6, 0.2), 0.1);
+  assert.equal(swingOffset({}, 2, 0.2), 0);
+});
+
+test('every screen and the first request play the lounge loop', () => {
+  const app = readFileSync(new URL('../web/app.js', import.meta.url), 'utf8');
+  const block = app.slice(app.indexOf('const BATTLE_THEME'), app.indexOf('function show('));
+  const tracks = [...block.matchAll(/:\s*'([a-z0-9]+)'/g)].map((m) => m[1]);
+  assert.ok(tracks.length >= 9, 'screen map not found');
+  assert.deepEqual([...new Set(tracks)], ['lounge']);
+  const controls = readFileSync(new URL('../web/sound-controls.js', import.meta.url), 'utf8');
+  assert.match(controls, /audio\.music\('lounge'\)/);
 });

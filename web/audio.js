@@ -22,6 +22,8 @@ let sfxBus = null;
 let noiseBuf = null;
 const waves = new Map();       // duty -> PeriodicWave
 
+const MUSIC_LEVEL = 0.42;     // music bus level unless a song sets its own `level`
+
 let muted = false;
 if (typeof window !== 'undefined') {          // skip under node, where there is no Storage
   try { muted = localStorage.getItem(STORE_KEY) === 'off'; } catch { muted = false; }
@@ -79,7 +81,7 @@ function ensure() {
   master.gain.value = muted ? 0 : 1;
   master.connect(ctx.destination);
   musicBus = ctx.createGain();
-  musicBus.gain.value = 0.42;
+  musicBus.gain.value = MUSIC_LEVEL;
   musicBus.connect(master);
   sfxBus = ctx.createGain();
   sfxBus.gain.value = 0.62;
@@ -92,7 +94,7 @@ function ensure() {
 function voice(t, midi, dur, opts) {
   const {
     type = 'square', duty = 0.5, vol = 0.12,
-    bus = musicBus, attack = 0.005, hold = 0.6, glide = 0,
+    bus = musicBus, attack = 0.005, hold = 0.6, glide = 0, cutoff = 0, q = 0.7,
   } = opts;
   const o = ctx.createOscillator();
   if (type === 'pulse') o.setPeriodicWave(pulseWave(duty));
@@ -110,7 +112,17 @@ function voice(t, midi, dur, opts) {
   g.gain.linearRampToValueAtTime(vol, t + a);
   g.gain.setValueAtTime(vol, t + Math.max(a, dur * hold));
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  o.connect(g).connect(bus);
+  if (cutoff) {
+    // A lowpass rounds off the edges of a tone: the difference between a
+    // buzzy chip voice and a soft electric-piano or upright-bass colour.
+    const f = ctx.createBiquadFilter();
+    f.type = 'lowpass';
+    f.frequency.setValueAtTime(cutoff, t);
+    f.Q.value = q;
+    o.connect(g).connect(f).connect(bus);
+  } else {
+    o.connect(g).connect(bus);
+  }
   o.start(t);
   o.stop(t + dur + 0.03);
   return o;
@@ -152,9 +164,18 @@ const DRUMS = {
   hat:   { type: 'highpass', freq: 8500, q: 1.0, vol: 0.10, dur: 0.035 },
   open:  { type: 'highpass', freq: 7500, q: 1.0, vol: 0.09, dur: 0.22 },
   crash: { type: 'highpass', freq: 5500, q: 0.6, vol: 0.11, dur: 0.5 },
+  // lounge kit: a brushed snare swish and a quiet ride tick
+  brush: { type: 'bandpass', freq: 2600, q: 0.45, vol: 0.07, dur: 0.2, to: 1400 },
+  tick:  { type: 'highpass', freq: 6800, q: 0.8, vol: 0.035, dur: 0.07 },
 };
 
-function drum(name, t, gain = 1) {
+/* Song strings use one letter per drum. */
+export const DRUM_SOUNDS = {
+  k: 'kick', s: 'snare', h: 'hat', o: 'open', c: 'crash', b: 'brush', t: 'tick',
+};
+
+function drum(letter, t, gain = 1) {
+  const name = DRUM_SOUNDS[letter] ?? letter;
   if (name === 'kick') return kick(t, gain);
   const d = DRUMS[name];
   if (d) hiss(t, d.dur, { ...d, vol: d.vol * gain });
@@ -182,7 +203,7 @@ function splitToken(tok) {
   return [tok.slice(0, i), tok.slice(i + 1)];
 }
 
-const DRUM_KIT = new Set(['k', 's', 'h', 'o', 'c']);
+const DRUM_KIT = new Set(Object.keys(DRUM_SOUNDS));
 
 /** Expand one token head into the notes (or drum hits) it triggers.
  *  Throws on anything that does not parse, so a typo in a song surfaces
@@ -264,7 +285,7 @@ function getCompiled(name) {
 function fire(ev, t, sps, gain, voices = {}) {
   const settings = voices[ev.channel] ?? {};
   const dur = ev.len * sps * (settings.gate ?? 1);
-  if (ev.channel === 'drum') return drum(ev.note, t, gain);
+  if (ev.channel === 'drum') return drum(ev.note, t, gain * (settings.vol ?? 1));
   if (ev.channel === 'bass') {
     return voice(t, ev.note, dur, { type: 'triangle', vol: 0.17 * gain, hold: 0.5, ...settings });
   }
@@ -274,16 +295,24 @@ function fire(ev, t, sps, gain, voices = {}) {
   return voice(t, ev.note, dur, { type: 'pulse', duty: 0.25, vol: 0.13 * gain, hold: 0.7, ...settings });
 }
 
+/** Swing: push the off-beat 8th (step 2 of each beat) late by a fraction of
+ *  a 16th. 0 is straight; about 0.67 is a full triplet shuffle. */
+export function swingOffset(score, step, sps) {
+  return score.swing && step % 4 === 2 ? score.swing * sps : 0;
+}
+
 function tick() {
   if (!song || !ctx || ctx.state !== 'running') return;
-  const sps = 60 / SONGS[song.name].bpm / 4;   // seconds per 16th step
+  const score = SONGS[song.name];
+  const sps = 60 / score.bpm / 4;              // seconds per 16th step
   if (nextTime < ctx.currentTime - 0.05) {
     nextTime = ctx.currentTime + 0.05;          // fell behind: resync, don't burst
   }
   let guard = 0;
   while (nextTime < ctx.currentTime + LOOKAHEAD && guard++ < 64) {
     const events = song.data.at.get(song.step);
-    if (events) for (const ev of events) fire(ev, nextTime, sps, song.data.gain, SONGS[song.name].voices);
+    const t = nextTime + swingOffset(score, song.step, sps);
+    if (events) for (const ev of events) fire(ev, t, sps, song.data.gain, score.voices);
     nextTime += sps;
     song.step = (song.step + 1) % song.data.total;
     scheduledSteps++;
@@ -302,6 +331,7 @@ function startSequencer() {
   const data = getCompiled(desired);
   if (data.error) { console.warn('[audio] ' + desired + ': ' + data.error); return; }
   song = { name: desired, data, step: 0 };
+  if (musicBus) musicBus.gain.setValueAtTime(SONGS[desired].level ?? MUSIC_LEVEL, ctx.currentTime);
   nextTime = ctx.currentTime + 0.06;
   timer = setInterval(tick, TICK_MS);
   tick();
@@ -348,11 +378,85 @@ export const SFX_NAMES = Object.keys(SFX_PLAYS);
 
 /* ---------------------------------- songs -------------------------------- */
 /* Each channel string is a run of NOTE:STEPS tokens on a 16-step bar grid.
- * "-" is a rest, "[CEG]" is a chord, drums take k/s/h/o/c for kick, snare,
- * closed hat, open hat and crash. Keep every channel on bars*16 steps --
+ * "-" is a rest, "[CEG]" is a chord, drums take k/s/h/o/c/b/t for kick,
+ * snare, closed hat, open hat, crash, brush and ride tick. Keep every channel on bars*16 steps --
  * validateSongs() will tell you when one has drifted.                     */
 
 const SONGS = {
+  /* Lounge: the soundtrack for every screen. Slow, swung and quiet, so it can
+     sit under a study session without nagging. Rootless 7th/9th voicings on a
+     filtered triangle "electric piano", a sine melody with plenty of space, a
+     walking upright-style bass and brushes. 16 bars, mostly ii-V-I in C:
+       A: Dm9 | G13 | Cmaj9 | A7b9 | Dm9 | G7 | Em7 A7 | Dm7 G7
+       B: Fmaj7 | Fm7 Bb7 | Em7 | A7b9 | Dm9 | G7sus G7 | Cmaj9 | Cmaj9 A7 */
+  lounge: {
+    bpm: 84, bars: 16, gain: 1, level: 0.25, swing: 0.55,
+    voices: {
+      lead: { type: 'sine', gate: 0.95, attack: 0.03, hold: 0.55, vol: 0.085 },
+      harm: { type: 'triangle', gate: 1, attack: 0.012, hold: 0.18, vol: 0.042, cutoff: 1500 },
+      bass: { type: 'triangle', gate: 0.92, attack: 0.008, hold: 0.45, vol: 0.15, cutoff: 700 },
+      drum: { vol: 0.55 },
+    },
+    channels: {
+      lead: [
+        '-:4 A4:2 C5:2 E5:6 D5:2',
+        '-:2 B4:2 D5:2 F5:2 E5:8',
+        '-:8 D5:2 E5:2 G5:4',
+        'G5:4 F5:2 E5:2 #C5:8',
+        'D5:6 -:2 F4:2 A4:2 C5:4',
+        'B4:8 -:4 G4:2 B4:2',
+        'D5:4 B4:4 #C5:4 E5:4',
+        'F5:6 E5:2 D5:4 B4:4',
+        'C5:8 -:4 A4:2 C5:2',
+        'Eb5:6 C5:2 D5:4 Ab4:4',
+        'B4:4 G4:2 B4:2 D5:8',
+        '-:4 E5:2 #C5:2 Bb4:4 G4:4',
+        'A4:6 C5:2 E5:4 F5:4',
+        'E5:4 D5:4 F5:4 D5:4',
+        'E5:12 -:4',
+        '-:8 G4:2 A4:2 #C5:2 E5:2',
+      ].join(' '),
+      harm: [
+        '[F3A3C4E4]:6 [F3A3C4E4]:10',
+        '[F3B3E4]:6 [F3B3E4]:10',
+        '[E3G3B3D4]:6 [E3G3B3D4]:10',
+        '[G3Bb3#C4E4]:6 [G3Bb3#C4E4]:10',
+        '[F3A3C4E4]:6 [F3A3C4E4]:10',
+        '[F3B3D4]:6 [F3B3D4]:10',
+        '[G3B3D4]:8 [G3#C4E4]:8',
+        '[F3A3C4]:8 [F3B3D4]:8',
+        '[A3C4E4]:6 [A3C4E4]:10',
+        '[Ab3C4Eb4]:8 [Ab3D4F4]:8',
+        '[G3B3D4]:6 [G3B3D4]:10',
+        '[G3Bb3#C4E4]:6 [G3Bb3#C4E4]:10',
+        '[F3A3C4E4]:6 [F3A3C4E4]:10',
+        '[F3C4D4]:8 [F3B3D4]:8',
+        '[E3G3B3D4]:6 [E3G3B3D4]:10',
+        '[E3G3B3D4]:8 [G3#C4E4]:8',
+      ].join(' '),
+      bass: [
+        'D2:4 F2:4 A2:4 C3:4',
+        'G2:4 B2:4 D3:4 #C3:4',
+        'C3:4 G2:4 E2:4 Bb2:4',
+        'A2:4 G2:4 E2:4 #C2:4',
+        'D2:4 F2:4 A2:4 Ab2:4',
+        'G2:4 F2:4 D2:4 #D2:4',
+        'E2:4 G2:4 A2:4 #C3:4',
+        'D3:4 A2:4 G2:4 E2:4',
+        'F2:4 A2:4 C3:4 E3:4',
+        'F2:4 Ab2:4 Bb2:4 D2:4',
+        'E2:4 G2:4 B2:4 D3:4',
+        'A2:4 G2:4 E2:4 #C2:4',
+        'D2:4 F2:4 A2:4 C3:4',
+        'G2:4 F2:4 D2:4 B1:4',
+        'C2:4 E2:4 G2:4 B2:4',
+        'C3:4 G2:4 A2:4 E2:4',
+      ].join(' '),
+      // ride "spang-a-lang" with brushes on 2 and 4, a soft kick on 1
+      drum: Array(16).fill('[kt]:4 [bt]:2 t:2 t:4 [bt]:2 t:2').join(' '),
+    },
+  },
+
   /* Original arcade theme: animated call/response, chromatic pickups and
      bouncing single-note accompaniment instead of sustained synth chords.
      Three pitched voices + restrained noise, in the handheld sound idiom. */
