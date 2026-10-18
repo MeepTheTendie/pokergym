@@ -26,9 +26,9 @@ import {
 } from '../src/rpg/state.js';
 import {
   dailyKey, dailyPlan, dailyNumber, seededRng as dailySeedRng, DAILY_HANDS,
-  DAILY_GAME_LABEL, dailySummary, dailySession,
+  DAILY_GAME_LABEL, dailySummary, dailySession, formatDailyCountdown,
 } from '../src/rpg/daily.js';
-import { parseEntryParams, isSharedDayCurrent, cleanEntrySearch, buildDailyShareText } from '../src/rpg/links.js';
+import { parseEntryParams, isSharedDayCurrent, cleanEntrySearch, buildDailyShareText, shareUrl, inviteUrl } from '../src/rpg/links.js';
 import { keyAction, shouldIgnoreKey } from '../src/rpg/keys.js';
 import { captureDrillPlan, restoreDrillPlan, BLACKJACK_DRILLS, DRILL_HANDS, DRILL_GAMES } from '../src/rpg/drills.js';
 import { drawArt, drawTrainerBack } from './characters.js';
@@ -91,6 +91,7 @@ let newDeal = false;   // cards stagger in on a fresh deal only
 let holeShown = false; // blackjack: the dealer hole card has flipped face up
 let sessionBest = 0;   // best streak reached in the current five-hand session
 let sessionMistakes = []; // misses recorded this session, for the end-of-session summary
+let sessionResults = []; // per-hand boolean results in the current five-hand session
 let coachedHand = false; // the coach was opened this hand, so it cannot score or count
 let dailyMode = false;
 let dailyRun = null; // { key, plan, number, index, results, scored, finished }
@@ -132,8 +133,8 @@ el('btnRestore').onclick = () => {
   pendingRestore = null;
   el('btnConfirmRestore').hidden = true;
   try {
-    pendingRestore = sanitizeProfile(readBackup(el('backupText').value));
-    el('backupStatus').textContent = `VALID BACKUP: ${CLASS_BY_ID[pendingRestore.classId].name}, ${pendingRestore.handsPlayed} HANDS, ${pendingRestore.badges.length} BELTS. CONFIRM TO REPLACE LOCAL PROGRESS.`;
+    pendingRestore = readBackup(el('backupText').value);
+    el('backupStatus').textContent = `VALID BACKUP: ${CLASS_BY_ID[pendingRestore.classId].name}, ${pendingRestore.handsPlayed} HANDS, ${pendingRestore.badges.length} BADGES. CONFIRM TO REPLACE LOCAL PROGRESS.`;
     el('btnConfirmRestore').hidden = false;
   } catch { el('backupStatus').textContent = 'INVALID OR UNSUPPORTED BACKUP. YOUR PROGRESS IS UNCHANGED.'; }
 };
@@ -261,14 +262,17 @@ function initTitle() {
   // Weak-spot nudge: one tap into the blackjack mistakes you have actually made.
   const weakBtn = el('btnPracticeMisses');
   if (weakBtn) {
-    const hasMisses = Boolean(profile?.mistakes?.length);
+    const bjMisses = (profile?.mistakes ?? []).filter(m => m.game === 'blackjack');
+    const hasMisses = bjMisses.length > 0 && !requestedGym;
     weakBtn.hidden = !hasMisses;
     if (hasMisses) {
-      const n = profile.mistakes.length;
-      weakBtn.textContent = `PRACTICE MISSES (${n})`;
+      weakBtn.textContent = `PRACTICE MISSES (${bjMisses.length})`;
       weakBtn.onclick = () => {
         const gym = GYMS.find(g => g.game === 'blackjack');
         if (!gym || !profile) return;
+        if (profile.activeSession && profile.activeSession.gymId !== gym.id) {
+          profile = { ...profile, activeSession: null };
+        }
         profile = beginSession(profile, gym.id);
         save();
         startGym(gym, true, 'weak');
@@ -277,10 +281,10 @@ function initTitle() {
   }
   const card = el('trainerCard');
   if (card && profile) {
-    const belts = profile.badges?.length ?? 0;
+    const badges = profile.badges?.length ?? 0;
     const streak = profile.daily?.streak ?? 0;
-    const level = profile.level ?? 1;
-    card.textContent = `LEVEL ${level} · ${belts}/4 BELTS${streak > 0 ? ` · ${streak}D STREAK` : ''} · ${profile.handsPlayed ?? 0} HANDS`;
+    const lvl = levelFromXp(profile.xp).level;
+    card.textContent = `LEVEL ${lvl} · ${badges}/4 BADGES${streak > 0 ? ` · ${streak}D STREAK` : ''} · ${profile.handsPlayed ?? 0} HANDS`;
     card.hidden = false;
   } else if (card) {
     card.hidden = true;
@@ -416,7 +420,7 @@ el('btnBecome').onclick = () => {
   if (profile && !becomeArmed) {
     becomeArmed = true;
     el('btnBecome').textContent = 'REPLACE YOUR SAVE?';
-    el('classDetailText').textContent = 'THIS REPLACES YOUR CURRENT PLAYER PROFILE, LEVEL, BELTS AND RECORD ON THIS BROWSER. PRESS AGAIN TO CONFIRM, OR BACK TO KEEP YOUR SAVE.';
+    el('classDetailText').textContent = 'THIS REPLACES YOUR CURRENT PLAYER PROFILE, LEVEL, BADGES AND RECORD ON THIS BROWSER. PRESS AGAIN TO CONFIRM, OR BACK TO KEEP YOUR SAVE.';
     return;
   }
   becomeArmed = false;
@@ -497,9 +501,10 @@ function computeToday() {
     };
   }
   const due = mistakeReviewQueue(profile, localDayKey()).filter(row => row.due).length;
+  const countdown = formatDailyCountdown();
   if (due) {
     return {
-      state: `DAILY DRILL #${number} DONE. ${due} MISTAKE REVIEW${due === 1 ? '' : 'S'} DUE NOW.`,
+      state: `DAILY DRILL #${number} DONE (NEXT IN ${countdown}). ${due} MISTAKE REVIEW${due === 1 ? '' : 'S'} DUE NOW.`,
       label: `REVIEWS DUE: ${due}`,
       action: () => openReview(),
     };
@@ -507,7 +512,7 @@ function computeToday() {
   const rec = recommendedPractice(profile);
   const gym = rec ? GYM_BY_ID[rec.gymId] : gymForClass(profile.classId);
   return {
-    state: `DAILY DRILL #${number} DONE. NEXT: KEEP TRAINING FIVE HANDS OF ${TRAINING_LABEL[gym.game]}.`,
+    state: `DAILY DRILL #${number} DONE (NEXT IN ${countdown}). NEXT: KEEP TRAINING FIVE HANDS OF ${TRAINING_LABEL[gym.game]}.`,
     label: `FIVE HANDS · ${TRAINING_LABEL[gym.game]}`,
     action: () => {
       if (!profile.activeSession) profile = beginSession(profile, gym.id);
@@ -737,7 +742,7 @@ function renderMap() {
     btn.dataset.gym = gym.id;
     btn.disabled = !open;
     btn.innerHTML = `<span>${gym.name.replace(' GYM', '')}</span><small>${
-      cleared ? '✓ BELT EARNED · PRACTICE' : open ? '▶ ENTER GYM' : 'LOCKED'
+      cleared ? '✓ BADGE EARNED · PRACTICE' : open ? '▶ ENTER GYM' : 'LOCKED'
     }</small>`;
     btn.onclick = () => startGym(gym);
     list.appendChild(btn);
@@ -993,6 +998,7 @@ function startGym(gym, sprint = false, mode = null) {
   awaitingBadge = false;
   sessionBest = 0;
   sessionMistakes = [];
+  sessionResults = [];
   el('masterLabel').textContent = gym.leader;
   el('masterName').textContent = gym.leader;
   renderSprite(profile);
@@ -1095,7 +1101,10 @@ function advanceLesson() {
   onDone?.();
 }
 
-el('btnLessonNext').onclick = advanceLesson;
+el('btnLessonNext').onclick = () => {
+  finishTyping(el('lessonText'));
+  advanceLesson();
+};
 el('lessonBox').onclick = () => {
   const line = el('lessonText');
   if (line._typer) return fastForward(line);
@@ -1159,7 +1168,8 @@ function cardNode(card, zone, i) {
   }
 
   const name = `${rankLabel(card.r)} of ${SUIT_NAME[card.s]}`;
-  node.innerHTML = `<span>${rankLabel(card.r)}</span><span class="pip">${SUIT_GLYPH[card.s]}</span>`;
+  node.classList.add(card.s === 1 || card.s === 2 ? 'suit-red' : 'suit-black');
+  node.innerHTML = `<span class="rank">${rankLabel(card.r)}</span><span class="pip">${SUIT_GLYPH[card.s]}</span>`;
 
   if (zone.holds) {
     const held = Boolean(zone.holds[i]);
@@ -1422,6 +1432,8 @@ function setControls() {
     // live so it cannot be used to discard a bad deal and reroll for free.
     el('btnDeal').disabled = !handDone;
     el('btnDraw').disabled = handDone;
+    el('btnDraw').classList.toggle('primary', !handDone);
+    el('btnDeal').classList.toggle('primary', handDone);
     return;
   }
   if (gameId === 'blackjack') {
@@ -1535,6 +1547,7 @@ function settleHand({ optimal, difficulty, line, review }) {
   if (shortSession && !coached) {
     if (optimal) sessionBest = Math.max(sessionBest, profile.streak);
     else if (review) sessionMistakes.push(review);
+    sessionResults.push(Boolean(optimal));
     profile = scoreSession(profile, optimal);
   }
   save();
@@ -1572,7 +1585,7 @@ function settleHand({ optimal, difficulty, line, review }) {
       : `FIVE HANDS: ${session.played}/${SESSION_HANDS} DONE. ${session.optimal} CORRECT.`;
   } else if (passed && canPractice(profile, gym.id)) {
     awaitingBadge = true;
-    verdict = `${gym.leader}: PRACTICE COMPLETE. YOUR BELT IS ALREADY EARNED. COME BACK TO KEEP TRAINING!`;
+    verdict = `${gym.leader}: PRACTICE COMPLETE. YOUR BADGE IS ALREADY EARNED. COME BACK TO KEEP TRAINING!`;
   } else if (passed && !awaitingBadge) {
     awaitingBadge = true;
     const awarded = awardBadge(profile, gym.id);
@@ -1580,7 +1593,7 @@ function settleHand({ optimal, difficulty, line, review }) {
     save();
     verdict = `${gym.leader}: ENOUGH. YOU HAVE THE ${gym.badge}. EXAM PASSED!`;
   } else if (passed) {
-    verdict = `${gym.leader}: WELL DONE. THE BELT IS YOURS. EXAM PASSED!`;
+    verdict = `${gym.leader}: WELL DONE. THE BADGE IS YOURS. EXAM PASSED!`;
   } else if (exhausted) {
     // Ten hands is the exam. Below the pass line there is no eleventh hand.
     awaitingBadge = true;
@@ -1658,6 +1671,13 @@ function renderSessionSummary(session) {
   const head = document.createElement('h2');
   head.textContent = 'FIVE HANDS COMPLETE';
   box.appendChild(head);
+  if (sessionResults.length > 0) {
+    const grid = document.createElement('p');
+    grid.className = 'session-grid';
+    grid.setAttribute('aria-label', `${sessionResults.filter(Boolean).length} of ${sessionResults.length} hands correct`);
+    grid.textContent = sessionResults.map(ok => ok ? '🟩' : '🟥').join('');
+    box.appendChild(grid);
+  }
   const score = document.createElement('p');
   score.className = 'hint';
   score.textContent = `${session.optimal}/${SESSION_HANDS} CORRECT · BEST STREAK ${sessionBest}`;
@@ -1680,6 +1700,7 @@ function renderSessionSummary(session) {
   actions.className = 'row';
   const again = document.createElement('button');
   again.type = 'button';
+  again.className = 'primary';
   again.textContent = 'PLAY AGAIN';
   again.onclick = () => {
     const gym = gymId ? GYM_BY_ID[gymId] : null;
@@ -1690,21 +1711,22 @@ function renderSessionSummary(session) {
     startGym(gym, true);
   };
   actions.appendChild(again);
-  const share = document.createElement('button');
-  share.type = 'button';
-  share.textContent = 'SHARE';
-  share.onclick = async () => {
-    const text = `Poker Gym: ${session.optimal}/${SESSION_HANDS} correct in ${GYM_BY_ID[gymId]?.name ?? 'training'}. Free practice, no real money: ${inviteUrl()}`;
+  const challenge = document.createElement('button');
+  challenge.type = 'button';
+  challenge.textContent = 'CHALLENGE A FRIEND';
+  challenge.onclick = async () => {
+    const dayNum = dailyNumber(dailyKey());
+    const text = `Poker Gym: ${session.optimal}/${SESSION_HANDS} correct in ${GYM_BY_ID[gymId]?.name ?? 'training'}. Beat my score on Daily Drill #${dayNum}: ${shareUrl(dayNum)}`;
     try {
       if (typeof navigator.share === 'function') {
-        await navigator.share({ title: 'Poker Gym', text });
+        await navigator.share({ title: 'Poker Gym Challenge', text });
       } else {
         await navigator.clipboard.writeText(text);
       }
-      window.trackEvent?.('share', { channel: 'session' });
+      window.trackEvent?.('share', { channel: 'challenge' });
     } catch (e) { /* user cancelled */ }
   };
-  actions.appendChild(share);
+  actions.appendChild(challenge);
   box.appendChild(actions);
   const dismiss = document.createElement('button');
   dismiss.type = 'button';
@@ -1753,7 +1775,7 @@ function settleDailyHand({ optimal, difficulty, line, review }) {
     : 'NO. THE BETTER MOVE WAS DIFFERENT.';
   const verdict = run.finished
     ? (run.scored
-        ? `DAILY DRILL #${run.number} COMPLETE: ${tally}/${DAILY_HANDS} CORRECT. COME BACK TOMORROW FOR #${run.number + 1}. THE STREAK IS ${fmt(profile.daily.streak)}.${[3, 7, 14].includes(profile.daily.streak) ? ' STREAK MILESTONE!' : ''}`
+        ? `DAILY DRILL #${run.number} COMPLETE: ${tally}/${DAILY_HANDS} CORRECT. COME BACK TOMORROW FOR #${run.number + 1} (NEXT IN ${formatDailyCountdown()}). THE STREAK IS ${fmt(profile.daily.streak)}.${[3, 7, 14].includes(profile.daily.streak) ? ' STREAK MILESTONE!' : ''}`
         : `PRACTICE REPLAY DONE: ${tally}/${DAILY_HANDS} CORRECT. NO NEW XP OR SCORE TODAY.`)
     : `DAILY DRILL · HAND ${run.index} OF ${DAILY_HANDS}. ${tally} CORRECT SO FAR.`;
   const full = `${line} ${say} ${verdict}`;

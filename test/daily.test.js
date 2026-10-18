@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  dailyKey, seededRng, dailyPlan, dailyNumber, dayGap, DAILY_HANDS, DAILY_GAMES, dailySummary, dailySession, dailyPlanV1,
+  dailyKey, seededRng, dailyPlan, dailyNumber, dayGap, DAILY_HANDS, DAILY_GAMES, dailySummary, dailySession, dailyPlanV1, formatDailyCountdown,
 } from '../src/rpg/daily.js';
 import { createProfile, completeDaily, dailyCompleted, setDailyProgress } from '../src/rpg/state.js';
 import { readBackup, writeBackup } from '../src/rpg/backup.js';
@@ -65,6 +65,12 @@ test('dailyNumber counts days since the fixed launch date', () => {
   assert.equal(dailyNumber('2026-01-01'), 1);
   assert.equal(dailyNumber('2026-01-02'), 2);
   assert.equal(dayGap('2026-10-12', '2026-10-10'), 2);
+});
+
+test('formatDailyCountdown formats remaining hours and minutes until local midnight', () => {
+  assert.equal(formatDailyCountdown(new Date(2026, 9, 17, 21, 30, 0)), '2H 30M');
+  assert.equal(formatDailyCountdown(new Date(2026, 9, 17, 22, 0, 0)), '2H');
+  assert.equal(formatDailyCountdown(new Date(2026, 9, 17, 23, 45, 0)), '15M');
 });
 
 test('three consecutive days build a streak of three', () => {

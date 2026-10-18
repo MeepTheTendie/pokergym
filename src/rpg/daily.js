@@ -102,6 +102,17 @@ export const DAILY_GAME_LABEL = {
   holdem: "hold'em",
 };
 
+// Time remaining until local midnight, when the next Daily Drill unlocks.
+export function formatDailyCountdown(now = new Date()) {
+  const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  const diffMs = Math.max(60000, nextMidnight.getTime() - now.getTime());
+  const totalMinutes = Math.ceil(diffMs / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours <= 0) return `${minutes}M`;
+  return minutes > 0 ? `${hours}H ${minutes}M` : `${hours}H`;
+}
+
 // Calendar windows, not the last seven sessions: a missed day is no attempt.
 // Only complete first-attempt records count. Replays never replace them.
 export function dailySummary(history = [], today = dailyKey()) {
