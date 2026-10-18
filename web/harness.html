@@ -342,8 +342,8 @@ async function run() {
   const mapPixels = d2.getElementById('mapTrainer').getContext('2d').getImageData(0,0,96,96).data;
   const trainerPixels = d2.getElementById('sprite').getContext('2d').getImageData(0,0,96,96).data;
   if (!mapPixels.every((pixel, i) => pixel === trainerPixels[i])) errors.push('Map trainer does not match selected trainer');
-  const resumedAudio = (await f.contentWindow.eval("import('./audio.js?v=20261006-audio3')")).default;
-  if (resumedAudio.status().track !== 'academy') errors.push('Continue selected the wrong soundtrack');
+  const resumedAudio = (await f.contentWindow.eval("import('./audio.js?v=20261017-vegas1')")).default;
+  if (resumedAudio.status().track !== 'vegas') errors.push('Continue selected the wrong soundtrack');
 
   log('\n--- fonts + palette ---');
   const live = f.contentDocument;

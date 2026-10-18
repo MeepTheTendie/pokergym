@@ -1,9 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { SONGS, SFX_NAMES, compileSong, validateSongs } from '../web/audio.js';
+import { readFileSync } from 'node:fs';
+import { SONGS, SFX_NAMES, DRUM_SOUNDS, HARMONICS, compileSong, validateSongs, swingOffset } from '../web/audio.js';
 
 const CHANNELS = ['lead', 'harm', 'bass', 'drum'];
-const TRACKS = ['academy', 'title', 'map', 'battle1', 'battle2', 'battle3', 'battle4'];
+const TRACKS = ['vegas', 'lounge', 'academy', 'title', 'map', 'battle1', 'battle2', 'battle3', 'battle4'];
 
 test('every track compiles without errors', () => {
   assert.deepEqual(validateSongs(), []);
@@ -97,4 +98,105 @@ test('the SFX bank exposes every sound the game asks for', () => {
   for (const name of ['blip', 'confirm', 'deal', 'chip', 'win', 'lose', 'badge']) {
     assert.ok(SFX_NAMES.includes(name), `missing sfx: ${name}`);
   }
+});
+
+test('every drum letter a song can use maps to a real sound', () => {
+  for (const [letter, name] of Object.entries(DRUM_SOUNDS)) {
+    assert.equal(letter.length, 1, letter);
+    assert.ok(typeof name === 'string' && name.length > 1, `${letter} -> ${name}`);
+  }
+  // every letter actually used in a score must resolve
+  for (const [song, s] of Object.entries(SONGS)) {
+    for (const ch of s.channels.drum.replace(/[\[\]\d:\s-]/g, '')) {
+      assert.ok(DRUM_SOUNDS[ch], `${song} uses unmapped drum "${ch}"`);
+    }
+  }
+});
+
+test('the lounge loop is slow, long and quiet', () => {
+  const song = SONGS.lounge;
+  assert.ok(song.bpm >= 80 && song.bpm <= 90, `bpm ${song.bpm}`);
+  assert.ok(song.bars >= 16, `only ${song.bars} bars`);
+  assert.ok(song.level > 0 && song.level <= 0.3, `level ${song.level}`);
+  const loopSeconds = song.bars * 4 * 60 / song.bpm;
+  assert.ok(loopSeconds >= 40, `loop is only ${loopSeconds.toFixed(1)}s`);
+});
+
+test('the lounge loop uses soft timbres, no chip pulse waves', () => {
+  for (const ch of ['lead', 'harm', 'bass']) {
+    const type = SONGS.lounge.voices[ch].type;
+    assert.ok(['sine', 'triangle'].includes(type), `${ch} is ${type}`);
+  }
+  assert.ok(SONGS.lounge.voices.harm.cutoff > 0, 'harm should be lowpassed');
+  assert.ok(!/[sho c]/.test(SONGS.lounge.channels.drum.replace(/[\[\]\d:\s-]/g, '').replace(/[kbt]/g, '')),
+    'lounge drums should stick to kick, brush and ride tick');
+});
+
+test('the lounge comping uses 7th chords (four-note voicings)', () => {
+  const data = compileSong(SONGS.lounge);
+  let fourNote = 0;
+  for (const evs of data.at.values()) if (evs.filter((e) => e.channel === 'harm').length >= 4) fourNote++;
+  assert.ok(fourNote >= 8, `only ${fourNote} four-note chords`);
+});
+
+test('swing delays only the off-beat eighth', () => {
+  const score = { swing: 0.5 };
+  assert.equal(swingOffset(score, 0, 0.2), 0);
+  assert.equal(swingOffset(score, 1, 0.2), 0);
+  assert.equal(swingOffset(score, 2, 0.2), 0.1);
+  assert.equal(swingOffset(score, 6, 0.2), 0.1);
+  assert.equal(swingOffset({}, 2, 0.2), 0);
+});
+
+test('every screen and the first request play the vegas loop', () => {
+  const app = readFileSync(new URL('../web/app.js', import.meta.url), 'utf8');
+  const block = app.slice(app.indexOf('const BATTLE_THEME'), app.indexOf('function show('));
+  const tracks = [...block.matchAll(/:\s*'([a-z0-9]+)'/g)].map((m) => m[1]);
+  assert.ok(tracks.length >= 9, 'screen map not found');
+  assert.deepEqual([...new Set(tracks)], ['vegas']);
+  const controls = readFileSync(new URL('../web/sound-controls.js', import.meta.url), 'utf8');
+  assert.match(controls, /audio\.music\('vegas'\)/);
+});
+
+test('the vegas loop is a slow, quiet, swung 16-24 bar trio', () => {
+  const song = SONGS.vegas;
+  assert.ok(song.bpm >= 76 && song.bpm <= 88, `bpm ${song.bpm}`);
+  assert.ok(song.bars >= 16 && song.bars <= 24, `${song.bars} bars`);
+  assert.ok(song.level > 0 && song.level <= 0.3, `level ${song.level}`);
+  assert.ok(song.swing > 0, 'vegas should swing');
+});
+
+test('the vegas loop sounds like piano and upright bass', () => {
+  const v = SONGS.vegas.voices;
+  assert.equal(v.lead.type, 'piano');
+  assert.equal(v.harm.type, 'piano');
+  assert.equal(v.bass.type, 'upright');
+  for (const ch of ['lead', 'harm', 'bass']) {
+    assert.ok(HARMONICS[v[ch].type], `${ch} timbre ${v[ch].type} undefined`);
+    assert.ok(v[ch].decay > 0 && v[ch].decay < 2, `${ch} needs a natural decay`);
+    assert.ok(v[ch].attack <= 0.01, `${ch} should strike fast`);
+    assert.ok(v[ch].cutoff > 0, `${ch} should be lowpassed`);
+  }
+  for (const [name, amps] of Object.entries(HARMONICS)) {
+    assert.equal(amps[0], 1, `${name} fundamental`);
+    for (let i = 1; i < amps.length; i++) assert.ok(amps[i] <= amps[i - 1], `${name} partials should fall off`);
+  }
+});
+
+test('the vegas drums are brushes only (no kick or snare)', () => {
+  const letters = SONGS.vegas.channels.drum.replace(/[\[\]\d:\s-]/g, '');
+  assert.match(letters, /^[bt]+$/);
+  assert.ok(SONGS.vegas.voices.drum.vol <= 0.5);
+});
+
+test('the vegas comping is rootless four-note voicings with blue notes in the melody', () => {
+  const data = compileSong(SONGS.vegas);
+  assert.ok(!data.error, data.error);
+  let fourNote = 0; const lead = new Set();
+  for (const evs of data.at.values()) {
+    if (evs.filter((e) => e.channel === 'harm').length === 4) fourNote++;
+    for (const e of evs) if (e.channel === 'lead') lead.add(e.note % 12);
+  }
+  assert.ok(fourNote >= 24, `only ${fourNote} four-note voicings`);
+  assert.ok(lead.has(8) && lead.has(9), 'melody should bend Ab -> A (the blue third in F)');
 });

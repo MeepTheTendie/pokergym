@@ -32,7 +32,7 @@ try {
     await new Promise(resolve => setTimeout(resolve, 500));
   }
   const result = await send('Runtime.evaluate', {awaitPromise:true,returnByValue:true,expression:`(async () => {
-    const audio = (await import('./audio.js?v=20261006-audio3')).default;
+    const audio = (await import('./audio.js?v=20261017-vegas1')).default;
     return {url:location.href,visible:!document.hidden, soundLabel:document.getElementById('btnSound')?.textContent,
       soundHandler:String(document.getElementById('btnSound')?.onclick), scripts:[...document.scripts].map(s=>s.src),
       audio:audio.status(), storedSound:localStorage.getItem('pokergym.sound'), unlock:String(audio.unlock)};

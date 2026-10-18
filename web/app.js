@@ -32,7 +32,7 @@ import { parseEntryParams, isSharedDayCurrent, cleanEntrySearch, buildDailyShare
 import { keyAction, shouldIgnoreKey } from '../src/rpg/keys.js';
 import { captureDrillPlan, restoreDrillPlan, BLACKJACK_DRILLS, DRILL_HANDS, DRILL_GAMES } from '../src/rpg/drills.js';
 import { drawArt, drawTrainerBack } from './characters.js';
-import audio from './audio.js?v=20261006-audio3';
+import audio from './audio.js?v=20261017-vegas1';
 import haptics from './haptics.js';
 import { drawWorld } from './world.js';
 
@@ -151,22 +151,23 @@ el('btnConfirmRestore').onclick = () => {
   } catch { el('backupStatus').textContent = 'RESTORE FAILED. BROWSER STORAGE MAY BE FULL OR BLOCKED.'; }
 };
 
-/* Music follows the screen: title and class select get the fanfare, the map
- * and lessons share the quiet overworld loop, and each gym has its own battle
- * theme. Nothing actually starts until the first click, because browsers will
- * not let an AudioContext run before a user gesture. */
+/* Music follows the screen. Every screen and every gym currently shares the
+ * "vegas" piano-trio loop ("lounge" is still defined, to switch back); the
+ * maps stay so a screen can get its own track later.
+ * Nothing actually starts until the first click, because browsers will not
+ * let an AudioContext run before a user gesture. */
 const BATTLE_THEME = {
-  pokergym: 'academy',
-  countyfair: 'academy',
-  villaoak: 'academy',
-  riverstone: 'academy',
+  pokergym: 'vegas',
+  countyfair: 'vegas',
+  villaoak: 'vegas',
+  riverstone: 'vegas',
 };
 const AMBIENT = {
-  'scr-title': 'academy',
-  'scr-class': 'academy',
-  'scr-map': 'academy',
-  'scr-review': 'academy',
-  'scr-lesson': 'academy',
+  'scr-title': 'vegas',
+  'scr-class': 'vegas',
+  'scr-map': 'vegas',
+  'scr-review': 'vegas',
+  'scr-lesson': 'vegas',
 };
 
 function show(id) {

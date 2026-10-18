@@ -42,7 +42,7 @@ try {
   await send('Fetch.enable', { patterns: [{ urlPattern: '*characters-v2.png', requestStage: 'Request' }] });
   await send('Page.navigate', { url: process.argv[2] ?? 'http://127.0.0.1:8901/web/index.html' });
   for (let i = 0; i < 100 && !await evaluate('Boolean(document.getElementById("btnSound")?.onclick)'); i++) await sleep(50);
-  await evaluate(`(async () => { window.testAudio = (await import('./audio.js?v=20261006-audio3')).default; })()`);
+  await evaluate(`(async () => { window.testAudio = (await import('./audio.js?v=20261017-vegas1')).default; })()`);
   const tap = async button => {
     const p = await evaluate(`(() => { const r = document.getElementById(${JSON.stringify(button)}).getBoundingClientRect(); return {x:r.x+r.width/2, y:r.y+r.height/2}; })()`);
     await send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ ...p, radiusX: 2, radiusY: 2 }] });
