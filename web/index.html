@@ -28,11 +28,11 @@
 <div class="shell">
 
 <div class="topbar">
-  <span class="brand">♠ POKER GYM <small>CARD TRAINER</small></span>
-  <button id="btnMap" type="button" hidden>HOME</button>
-  <button id="btnTitle" type="button" hidden>START</button>
-  <button id="btnSound" class="sound-toggle" type="button" aria-pressed="true">SOUND</button>
-  <button id="btnHaptics" class="sound-toggle" type="button" aria-pressed="true">HAPTICS</button>
+  <span class="brand"><span class="brand-spade" aria-hidden="true">♠</span><span class="brand-copy"><b>POKER GYM</b><small>CARD TRAINER</small></span></span>
+  <button id="btnMap" class="pill-btn" type="button" hidden>HOME</button>
+  <button id="btnTitle" class="pill-btn" type="button" hidden>START</button>
+  <button id="btnSound" class="sound-toggle pill-btn" type="button" aria-pressed="true">SOUND</button>
+  <button id="btnHaptics" class="sound-toggle pill-btn" type="button" aria-pressed="true">HAPTICS</button>
 </div>
 
 <p class="window hint" id="saveStatus" role="status" hidden></p>
@@ -82,9 +82,25 @@
 
 <!-- ============ GYM MAP ============ -->
 <section id="scr-map" class="screen" hidden>
-  <div class="window" id="todayCard">
-    <h2>TODAY'S TRAINING</h2>
-    <p class="hint" id="todayState">Your next step.</p>
+  <div class="window today-hero" id="todayCard">
+    <div class="today-hero-head">
+      <div class="today-hero-copy">
+        <h2>TODAY'S TRAINING</h2>
+        <p class="today-hero-title">Can you get 5/5?</p>
+        <p class="hint" id="todayState">Your next step.</p>
+      </div>
+      <div class="today-hero-art" aria-hidden="true">
+        <span class="mini-card mini-card-back"><span>A</span><i>♠</i></span>
+        <span class="mini-card mini-card-front suit-red"><span>A</span><i>♥</i></span>
+      </div>
+    </div>
+    <div class="daily-squares" aria-hidden="true">
+      <span class="sq sq-green">✓</span>
+      <span class="sq sq-green">✓</span>
+      <span class="sq sq-green">✓</span>
+      <span class="sq sq-green">✓</span>
+      <span class="sq sq-red">✕</span>
+    </div>
     <div class="row" id="todayActions"></div>
     <textarea id="dailySharePreview" readonly rows="4" hidden aria-label="Daily result to copy"></textarea>
     <p id="dailyShareStatus" class="hint" role="status" hidden>Nothing sent. Choose who receives it yourself.</p>
@@ -96,41 +112,55 @@
   </div>
 
   <div class="world-panel">
-    <div class="world-heading"><h2>TRAIN</h2><span>CHOOSE A GYM</span></div>
+    <div class="world-heading"><h2>CHOOSE A GYM</h2><span>Pick a game. Play five hands. Earn the badge.</span></div>
     <div class="overworld"><div id="gymList"></div></div>
     <p class="map-caption">Pick a game. Play five hands. Earn the badge.</p>
   </div>
 
   <div class="window">
-    <h2>FIVE-HAND TRAINING</h2>
+    <div class="section-header">
+      <h2>FIVE-HAND TRAINING</h2>
+      <span class="section-sub">Play any game now</span>
+    </div>
     <p class="hint">Play any game now. The coach explains every decision. Unfinished sessions resume where you left off.</p>
     <div id="shortSessions" aria-live="polite"></div>
     <p class="hint">Last seven results. Saved in this browser only.</p>
   </div>
 
   <div class="window trainer-card">
-    <h2>YOUR TRAINER</h2>
+    <div class="section-header">
+      <h2>YOUR TRAINER</h2>
+      <span class="trainer-streak-badge"><span class="streak-flame" aria-hidden="true">🔥</span> <small>BEST STREAK</small> <b id="bestStreak">0</b></span>
+    </div>
     <div class="dlg">
       <canvas class="sprite" id="sprite" width="48" height="48" aria-hidden="true"></canvas>
-      <div>
-        <p id="trainerLine" style="margin:0; font-weight:800;"></p>
-        <p class="hint" id="trainerStats" style="margin:2px 0 0;"></p>
+      <div class="trainer-main">
+        <div class="trainer-level-row">
+          <p id="trainerLine" class="trainer-name"></p>
+          <p class="hint trainer-xp" id="xpLine"></p>
+        </div>
+        <div class="meter"><div id="xpBar"></div></div>
+        <p class="hint" id="trainerStats" style="margin:8px 0 0;"></p>
+        <p class="hint trainer-score-line">Score <b id="scoreCount">0</b></p>
       </div>
     </div>
-    <div class="meter" style="margin-top:12px;"><div id="xpBar"></div></div>
-    <p class="hint" id="xpLine" style="margin:6px 0 0;"></p>
-    <p class="hint" style="margin:6px 0 0;">Score <span id="scoreCount">0</span> · Best streak <span id="bestStreak">0</span></p>
-  </div>
-
-  <div class="window">
-    <h2>PRACTICE RECORD</h2>
-    <div id="practiceSummary" aria-live="polite"></div>
-    <p class="hint">Correct decisions, not lucky wins. Tracking starts with your next hand.</p>
   </div>
 
   <div class="window badge-case">
-    <h2>BADGES</h2>
+    <div class="section-header">
+      <h2>BADGES</h2>
+      <span class="section-sub">Earn a badge for each game</span>
+    </div>
     <div class="badge-list" id="badgeList"></div>
+  </div>
+
+  <div class="window">
+    <div class="section-header">
+      <h2>PRACTICE RECORD</h2>
+      <span class="section-sub">Correct decisions, not lucky wins</span>
+    </div>
+    <div id="practiceSummary" aria-live="polite"></div>
+    <p class="hint" style="margin:8px 0 0;">Correct decisions, not lucky wins. Tracking starts with your next hand.</p>
   </div>
 
   <details class="window" id="mapMore">
@@ -224,32 +254,45 @@
 <section id="scr-battle" class="screen" hidden>
   <div class="battle-stage">
   <div class="scene">
-    <span class="battle-label">GYM CHALLENGE</span>
+    <div class="scene-progress">
+      <span class="battle-label">GYM CHALLENGE</span>
+      <div class="battle-pips" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i>
+      </div>
+    </div>
     <canvas class="sprite master" id="masterSprite" width="48" height="48" aria-hidden="true"></canvas>
     <div class="table-felt" aria-hidden="true"></div>
     <canvas class="sprite player" id="battleSprite" width="48" height="48" aria-hidden="true"></canvas>
   </div>
 
-  <div class="statusbox">
-    <div class="row1"><span id="masterLabel">MASTER ROYALE</span><span id="handGrade">JUNK</span></div>
-    <div class="gauge"><i id="potentialBar" style="width:0%"></i></div>
-    <p class="hint" id="potentialText" style="margin:6px 0 0;">Hand potential</p>
+  <div class="window master-coach-card">
+    <div class="dialogue" id="masterBox" role="button" tabindex="0" aria-labelledby="masterName masterLine">
+      <span class="coach-eyebrow">YOUR COACH</span>
+      <span class="nameplate" id="masterName">MASTER ROYALE</span>
+      <p id="masterLine">&nbsp;</p>
+      <span class="prompt" id="masterPrompt">▼</span>
+    </div>
+
+    <div class="statusbox">
+      <div class="row1"><span id="masterLabel">MASTER ROYALE</span><span id="handGrade">JUNK</span></div>
+      <div class="gauge"><i id="potentialBar" style="width:0%"></i></div>
+      <p class="hint" id="potentialText" style="margin:6px 0 0;">Hand potential</p>
+    </div>
+
+    <div class="row" id="rowVariant" hidden>
+      <label class="hint variant-label" for="variantSelect">PAY TABLE</label>
+      <select id="variantSelect"></select>
+    </div>
+  </div>
   </div>
 
-  </div>
   <div class="battle-talk">
-  <div class="dialogue" id="masterBox" role="button" tabindex="0" aria-labelledby="masterName masterLine">
-    <span class="nameplate" id="masterName">MASTER ROYALE</span>
-    <p id="masterLine">&nbsp;</p>
-    <span class="prompt" id="masterPrompt">▼</span>
-  </div>
-
   <div class="window" id="tipBox" hidden>
-    <h2>TIP</h2>
+    <h2>COACH TIP</h2>
     <p id="tipText" class="hint" style="margin:0;"></p>
   </div>
-
   </div>
+
   <div class="battle-table">
   <div class="window hand-panel">
     <h2 id="handTitle">YOUR HAND</h2>
@@ -257,12 +300,12 @@
     <p class="hint" id="holdHint" hidden style="margin:8px 0 0; text-align:center;">Tap cards to hold them, then press DRAW.</p>
     <p class="hint" id="pays" style="margin:8px 0 0; text-align:center;"></p>
   </div>
-
   </div>
+
   <div class="battle-side">
   <div class="window" id="coachPanel" hidden>
-    <h2>COACH</h2>
-    <div class="dialogue" style="background:var(--panel-2); margin-bottom:0;">
+    <h2>WHY THIS WAS RIGHT</h2>
+    <div class="dialogue" style="background:var(--surface-2); margin-bottom:0;">
       <p id="advice" style="margin:0;"></p>
     </div>
     <div class="row">
@@ -272,17 +315,7 @@
     <p class="hint" id="why" hidden style="margin:8px 0 0;"></p>
   </div>
 
-  <div class="row" id="rowVariant" hidden>
-    <label class="hint variant-label" for="variantSelect">PAY TABLE</label>
-    <select id="variantSelect"></select>
-  </div>
-
-  <details class="window payout-panel">
-    <summary id="paytableTitle">PAY TABLE</summary>
-    <div class="paytable" id="paytable"></div>
-  </details>
-
-  <div class="row">
+  <div class="row battle-action-bar">
     <button id="btnAsk" data-key="C">ASK COACH</button>
     <button id="btnDeal" data-key="D" class="primary">DEAL</button>
     <button id="btnDraw" data-key="D">DRAW</button>
@@ -296,7 +329,7 @@
   </div>
 
   <div class="row" id="rowBet" hidden>
-    <button id="btnBanker"  class="primary">BANKER</button>
+    <button id="btnBanker" class="primary">BANKER</button>
     <button id="btnPlayer">PLAYER</button>
     <button id="btnTie">TIE</button>
   </div>
@@ -311,6 +344,11 @@
   <div class="row" id="battleEndRow" hidden>
     <button id="btnNext" class="primary" data-key="ENTER">CONTINUE</button>
   </div>
+
+  <details class="window payout-panel">
+    <summary id="paytableTitle">PAY TABLE</summary>
+    <div class="paytable" id="paytable"></div>
+  </details>
   </div>
 </section>
 
