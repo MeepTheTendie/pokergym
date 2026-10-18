@@ -172,6 +172,9 @@ button:focus-visible { outline: 4px solid var(--t02); outline-offset: 2px; }
 #main:focus { outline: none; }
 .skip:focus { left: 8px; top: 8px; z-index: 100; background: #ffe3a0; color: #14121c; padding: 8px; }
 
+/* Prevent double-tap zoom and text selection on rapid taps across all controls. */
+button { touch-action: manipulation; -webkit-user-select: none; user-select: none; }
+
 /* Cards: GBC green tile with a hard 3D edge */
 .hand { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
 .card {

@@ -1155,14 +1155,14 @@ function cardNode(card, zone, i) {
     node.disabled = Boolean(zone.disabled);
     node.setAttribute('aria-pressed', String(held));
     node.setAttribute('aria-label', `${name}, ${held ? 'held' : 'to be redrawn'}`);
-    node.onclick = () => { audio.sfx('chip'); zone.onCard(i); };
+    node.onclick = () => { try { audio.sfx('chip'); } catch {} zone.onCard(i); };
   } else if (zone.indices) {
     const isPicked = picked.has(zone.indices[i]);
     node.dataset.picked = String(isPicked);
     node.disabled = Boolean(zone.disabled);
     node.setAttribute('aria-pressed', String(isPicked));
     node.setAttribute('aria-label', `${name}, ${isPicked ? 'picked' : 'not picked'}`);
-    node.onclick = () => { audio.sfx('chip'); zone.onCard(zone.indices[i]); };
+    node.onclick = () => { try { audio.sfx('chip'); } catch {} zone.onCard(zone.indices[i]); };
   } else {
     node.setAttribute('aria-label', name);
     node.disabled = true;
