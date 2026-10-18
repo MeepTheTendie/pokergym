@@ -19,11 +19,11 @@ const BG = [0x14, 0x12, 0x1c];
 const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <style>
-@font-face{font-family:'PressStart2P';src:url('/web/fonts/PressStart2P-Regular.woff2') format('woff2');}
+@font-face{font-family:'Sora';font-style:normal;font-weight:400 800;font-display:swap;src:url('/web/fonts/Sora.woff2') format('woff2');}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:1200px;height:630px;overflow:hidden}
 body{background:#14121c;color:#f5f1e8;font-family:system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;text-align:center}
-h1{font-family:'PressStart2P',monospace;font-size:64px;letter-spacing:4px;text-shadow:0 6px 0 #0b0a13}
+h1{font-family:'Sora',sans-serif;font-size:64px;font-weight:800;letter-spacing:-1px;text-shadow:0 6px 0 #0b0a13}
 .sub{font-size:28px;letter-spacing:1px;opacity:.92}
 .cards{display:flex;gap:16px}
 .card{width:104px;height:148px;border-radius:10px;border:3px solid #f5f1e8;background:#fffaf2;color:#111;display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:700;box-shadow:0 6px 12px rgba(0,0,0,.4)}
@@ -42,9 +42,9 @@ const types = { '.woff2': 'font/woff2', '.html': 'text/html; charset=utf-8' };
 const server = createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
   if (url.pathname === '/og.html') { res.writeHead(200, { 'content-type': types['.html'] }); res.end(html); return; }
-  if (url.pathname === '/web/fonts/PressStart2P-Regular.woff2') {
+  if (url.pathname === '/web/fonts/Sora.woff2') {
     res.writeHead(200, { 'content-type': types['.woff2'] });
-    res.end(await readFile(path.join(root, 'web/fonts/PressStart2P-Regular.woff2')));
+    res.end(await readFile(path.join(root, 'web/fonts/Sora.woff2')));
     return;
   }
   res.writeHead(404); res.end();
@@ -79,7 +79,7 @@ try {
   await send('Page.navigate', { url: `${origin}/og.html` });
   for (let i = 0; i < 100 && await evaluate('document.readyState') !== 'complete'; i++) await sleep(50);
   await evaluate('document.fonts.ready.then(() => true)');
-  if (!await evaluate(`document.fonts.check("64px PressStart2P")`)) throw new Error('Press Start 2P did not load');
+  if (!await evaluate(`document.fonts.check("64px Sora")`)) throw new Error('Sora did not load');
   const shot = await send('Page.captureScreenshot', { format: 'png', clip: { x: 0, y: 0, width: 1200, height: 630, scale: 1 } });
 
   // Non-blank assertion: decode the capture in the page and sample pixels.

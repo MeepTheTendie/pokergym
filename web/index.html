@@ -21,6 +21,7 @@
 <meta name="twitter:image" content="https://playpokergym.com/og.png">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="preload" href="fonts/Sora.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="gbc.css">
 </head>
 <body>
@@ -43,7 +44,7 @@
 <section id="scr-title" class="screen">
   <div class="title-art"><canvas id="titleTrainer" class="title-trainer" width="96" height="96" aria-hidden="true"></canvas><span class="title-league">TRAIN · PLAY · REVIEW</span></div>
   <div class="window title-menu">
-    <h1><span>POKER</span> <span>GYM</span></h1>
+    <h1><span>Poker</span> <span>Gym</span></h1>
     <p class="hint">Train your card sense.<br>One hand at a time.</p>
     <p id="practiceInvitation" class="hint" hidden></p>
     <div id="trainerCard" class="hint" hidden></div>
@@ -65,12 +66,12 @@
 <!-- ============ CLASS SELECT ============ -->
 <section id="scr-class" class="screen" hidden>
   <div class="window">
-    <h2>CHOOSE YOUR STYLE</h2>
+    <h2>Choose Your Style</h2>
     <p class="hint" style="margin:0 0 10px;">Your class decides your first gym and your stronger stat. You can change it later.</p>
     <div class="class-grid" id="classGrid"></div>
   </div>
   <div class="window" id="classDetail" hidden>
-    <h2 id="classDetailName">PLAYER</h2>
+    <h2 id="classDetailName">Player</h2>
     <p class="hint" id="classDetailText" style="margin:0 0 8px;"></p>
     <div class="badge-list" id="classDetailStats"></div>
     <div class="row">
@@ -85,7 +86,7 @@
   <div class="window today-hero" id="todayCard">
     <div class="today-hero-head">
       <div class="today-hero-copy">
-        <h2>TODAY'S TRAINING</h2>
+        <h2>Today's Training</h2>
         <p class="today-hero-title">Can you get 5/5?</p>
         <p class="hint" id="todayState">Your next step.</p>
       </div>
@@ -112,14 +113,14 @@
   </div>
 
   <div class="world-panel">
-    <div class="world-heading"><h2>CHOOSE A GYM</h2><span>Pick a game. Play five hands. Earn the badge.</span></div>
+    <div class="world-heading"><h2>Choose a Gym</h2><span>Pick a game. Play five hands. Earn the badge.</span></div>
     <div class="overworld"><div id="gymList"></div></div>
     <p class="map-caption">Pick a game. Play five hands. Earn the badge.</p>
   </div>
 
   <div class="window">
     <div class="section-header">
-      <h2>FIVE-HAND TRAINING</h2>
+      <h2>Five-Hand Training</h2>
       <span class="section-sub">Play any game now</span>
     </div>
     <p class="hint">Play any game now. The coach explains every decision. Unfinished sessions resume where you left off.</p>
@@ -129,7 +130,7 @@
 
   <div class="window trainer-card">
     <div class="section-header">
-      <h2>YOUR TRAINER</h2>
+      <h2>Your Trainer</h2>
       <span class="trainer-streak-badge"><span class="streak-flame" aria-hidden="true">🔥</span> <small>BEST STREAK</small> <b id="bestStreak">0</b></span>
     </div>
     <div class="dlg">
@@ -148,7 +149,7 @@
 
   <div class="window badge-case">
     <div class="section-header">
-      <h2>BADGES</h2>
+      <h2>Badges</h2>
       <span class="section-sub">Earn a badge for each game</span>
     </div>
     <div class="badge-list" id="badgeList"></div>
@@ -156,7 +157,7 @@
 
   <div class="window">
     <div class="section-header">
-      <h2>PRACTICE RECORD</h2>
+      <h2>Practice Record</h2>
       <span class="section-sub">Correct decisions, not lucky wins</span>
     </div>
     <div id="practiceSummary" aria-live="polite"></div>
@@ -166,20 +167,20 @@
   <details class="window" id="mapMore">
     <summary>MORE · REVIEW, SHARE, BACKUP</summary>
 
-    <h2>REVIEW MISTAKES</h2>
+    <h2>Review Mistakes</h2>
     <p class="hint">Missed decisions come back on a spaced schedule. Answer before revealing; retries stay separate from game accuracy.</p>
     <div class="row"><button id="btnReview" type="button">ALL CAUGHT UP</button></div>
     <p id="reviewScheduleSummary" class="hint">SPACED RECALL: A MISS IS DUE TODAY, THEN 2, 4, 8 AND 16 DAYS AFTER CORRECT RETRIES. A MISS SENDS IT BACK TO TOMORROW. CORRECT REVIEWS ADD A SMALL DECISION SCORE BONUS; NO XP. SAVED ONLY IN THIS BROWSER.</p>
 
     <div id="playerShare" class="window" hidden>
-      <h2>INVITE A PRACTICE PARTNER</h2>
+      <h2>Invite a Practice Partner</h2>
       <p class="hint">Share the free demo if it helped. Your progress, scores and save stay private.</p>
       <textarea id="sharePreview" readonly rows="4" aria-label="Invitation to copy">Try Poker Gym: free five-hand card-game practice with coaching and mistake review. No signup, deposits or real-money wagering. https://playpokergym.com/web/?ref=invite</textarea>
       <div class="row"><button id="btnShare" type="button" hidden>OPEN SHARE OPTIONS</button><button id="btnCopyShare" type="button">COPY INVITATION</button></div>
       <p id="shareStatus" class="hint" role="status">Nothing sent. Choose who receives it yourself.</p>
     </div>
     <div id="playerFeedback" class="window" hidden>
-      <h2>HELP SHAPE YOUR NEXT SESSION</h2>
+      <h2>Help Shape Your Next Session</h2>
       <p class="hint">YOU FINISHED FIVE HANDS. WHAT WOULD MAKE YOU COME BACK?</p>
       <p class="hint"><a href="https://github.com/MeepTheTendie/pokergym/issues/1" target="_blank" rel="noopener noreferrer">SHARE FEEDBACK ON GITHUB</a> — OPTIONAL PUBLIC THREAD; GITHUB ACCOUNT REQUIRED. OMIT PERSONAL DETAILS AND SAVE BACKUPS. EMAIL IS ALSO AVAILABLE BELOW.</p>
       <form id="feedbackForm">
@@ -221,7 +222,7 @@
 <!-- ============ REVIEW ============ -->
 <section id="scr-review" class="screen" hidden>
   <div class="window">
-    <h2>REVIEW MISTAKES</h2>
+    <h2>Review Mistakes</h2>
     <div id="reviewSummary" class="hint" aria-live="polite"></div>
     <div class="row"><button id="btnReviewDone" type="button">BACK TO MAP</button></div>
   </div>
@@ -231,7 +232,7 @@
 <!-- ============ TUTORIAL ============ -->
 <section id="scr-lesson" class="screen" hidden>
   <div class="window">
-    <h2 id="lessonTitle">HOW TO PLAY</h2>
+    <h2 id="lessonTitle">How to Play</h2>
     <div class="tutbar" id="lessonBar"></div>
     <div class="statusbox">
       <div class="row1"><span>PAGE</span><span id="lessonPage">1/14</span></div>
@@ -288,14 +289,14 @@
 
   <div class="battle-talk">
   <div class="window" id="tipBox" hidden>
-    <h2>COACH TIP</h2>
+    <h2>Coach Tip</h2>
     <p id="tipText" class="hint" style="margin:0;"></p>
   </div>
   </div>
 
   <div class="battle-table">
   <div class="window hand-panel">
-    <h2 id="handTitle">YOUR HAND</h2>
+    <h2 id="handTitle">Your Hand</h2>
     <div id="zones"></div>
     <p class="hint" id="holdHint" hidden style="margin:8px 0 0; text-align:center;">Tap cards to hold them, then press DRAW.</p>
     <p class="hint" id="pays" style="margin:8px 0 0; text-align:center;"></p>
@@ -304,7 +305,7 @@
 
   <div class="battle-side">
   <div class="window" id="coachPanel" hidden>
-    <h2>WHY THIS WAS RIGHT</h2>
+    <h2>Why This Was Right</h2>
     <div class="dialogue" style="background:var(--surface-2); margin-bottom:0;">
       <p id="advice" style="margin:0;"></p>
     </div>
