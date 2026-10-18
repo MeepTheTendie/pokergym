@@ -29,16 +29,19 @@ function loadImage(src) {
 
 export function drawArt(canvas, id) {
   if (!canvas) return;
-  canvas.width = 96;
-  canvas.height = 96;
+  const size = 256;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, 96, 96);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.clearRect(0, 0, size, size);
   const src = TRAINER_FILES[id] ?? MASTER_FILES[id] ?? TRAINER_FILES.grinder;
   loadImage(src).then((img) => {
-    const scale = Math.min(88 / img.naturalWidth, 90 / img.naturalHeight);
+    const scale = Math.min(240 / img.naturalWidth, 250 / img.naturalHeight);
     const w = Math.round(img.naturalWidth * scale);
     const h = Math.round(img.naturalHeight * scale);
-    ctx.drawImage(img, Math.floor((96 - w) / 2), 94 - h, w, h);
+    ctx.drawImage(img, Math.floor((size - w) / 2), size - h, w, h);
   }).catch(() => { /* keep the frame blank on failure */ });
 }
 
