@@ -97,7 +97,7 @@
 
 ### 3.1 Home (default for returning users)
 
-- Streak badge + level + belts (compact trainer card)
+- Streak, level, and badges (compact trainer card)
 - Daily Drill hero: 🟩🟩🟥🟩🟩 grid, "Can you get 5/5?", "Try today's drill →", countdown
 - Game grid (2×2): each shows game icon, name, level, "Play →"
 - Weak-spot nudge (if mistakes exist)
