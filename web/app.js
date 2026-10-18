@@ -716,13 +716,14 @@ function renderMap() {
 
   badges.innerHTML = '';
   for (const gym of GYMS) {
-    const d = document.createElement('div');
+    const d = document.createElement('img');
     const owned = profile.badges.includes(gym.id);
     d.className = `badge${owned ? '' : ' locked'}`;
-    d.setAttribute('role', 'img');
-    d.setAttribute('aria-label', owned ? gym.badge : `${gym.badge} (locked)`);
-    d.textContent = gym.badgeGlyph;
-    d.style.color = owned ? gym.colour : '#78836d';
+    d.src = `assets/badge-${{ videopoker: 'spade', blackjack: 'diamond', baccarat: 'heart', holdem: 'club' }[gym.game]}.png`;
+    d.alt = owned ? gym.badge : `${gym.badge} (locked)`;
+    d.width = 32;
+    d.height = 32;
+    d.style.opacity = owned ? '1' : '0.35';
     d.title = owned ? gym.badge : 'LOCKED';
     badges.appendChild(d);
   }
