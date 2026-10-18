@@ -501,8 +501,11 @@ button:focus-visible { outline: 3px solid #386a9c; outline-offset: 3px; }
 .world-heading { padding: 10px 12px; }
 .world-heading h2 { font-size: 9px; margin: 0 0 3px; }
 .world-heading span { font-size: 9px; color: #526451; }
-.overworld { position: relative; }
+.overworld { position: relative; background: linear-gradient(180deg, #c8b89a 0%, #b8a88a 100%); border: 2px solid var(--ink); }
+.overworld::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0, transparent 48px, rgba(0,0,0,.06) 48px, rgba(0,0,0,.06) 49px); pointer-events: none; }
 .overworld > canvas { display: block; width: 100%; }
+.badge { font-size: 20px; line-height: 1; }
+#trainerCard { background: var(--panel-2); border: 1px solid var(--ink); padding: 6px 8px; border-radius: 4px; }
 .overworld > #mapTrainer { position: absolute; width: 76px; height: 76px; left: 50%; top: 41%; transform: translateX(-50%); pointer-events: none; }
 #gymList { position: absolute; inset: 0; }
 #gymList button { position: absolute; width: 34%; min-height: 48px; padding: 4px 2px; font-size: 9px; line-height: 1.4; background: #f6f5e8; box-shadow: 2px 2px 0 #263c35; }

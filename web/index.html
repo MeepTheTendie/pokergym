@@ -41,11 +41,12 @@
 
 <!-- ============ TITLE ============ -->
 <section id="scr-title" class="screen">
-  <div class="title-art"><canvas id="titleWorld" width="240" height="176" aria-hidden="true"></canvas><span>YOUR JOURNEY STARTS HERE</span><canvas id="titleTrainer" class="title-trainer" width="96" height="96" aria-hidden="true"></canvas><span class="title-gym gym-nw">GYM</span><span class="title-gym gym-ne">GYM</span><span class="title-gym gym-sw">GYM</span><span class="title-gym gym-se">GYM</span><span class="title-league">THE CARD ACADEMY</span></div>
+  <div class="title-art"><canvas id="titleWorld" width="240" height="176" aria-hidden="true"></canvas><span>YOUR JOURNEY STARTS HERE</span><canvas id="titleTrainer" class="title-trainer" width="96" height="96" aria-hidden="true"></canvas><span class="title-gym gym-nw">GYM</span><span class="title-gym gym-ne">GYM</span><span class="title-gym gym-sw">GYM</span><span class="title-gym gym-se">GYM</span><span class="title-league">THE DOJO</span></div>
   <div class="window title-menu" style="text-align:center; padding:20px 12px;">
     <h1 style="font-size:20px; margin:0 0 14px;"><span style="color:#263c35;">POKER</span> <span style="color:#9a4d43;">GYM</span></h1>
     <p class="hint" style="font-size:10px; margin:0 0 16px;">TRAIN. LEVEL UP.<br>BEAT THE MASTERS.</p>
     <p id="practiceInvitation" class="hint" hidden></p>
+    <div id="trainerCard" class="hint" style="font-size:9px; margin:0 0 12px; text-align:center; line-height:1.6;"></div>
     <div class="row" style="flex-direction:column; gap:10px;">
       <button id="btnStart" class="primary">START TRAINING</button>
       <button id="btnNew">CHOOSE STYLE</button>
@@ -95,9 +96,9 @@
   </div>
 
   <div class="world-panel">
-    <div class="world-heading"><h2>THE CARD ACADEMY</h2><span>CHOOSE YOUR GAME</span></div>
+    <div class="world-heading"><h2>THE DOJO</h2><span>CHOOSE YOUR MAT</span></div>
     <div class="overworld"><canvas id="mapWorld" width="240" height="208" aria-hidden="true"></canvas><canvas id="mapTrainer" width="96" height="96" aria-hidden="true"></canvas><div id="gymList"></div></div>
-    <p class="map-caption">Visit a gym. Learn the game. Earn your badge.</p>
+    <p class="map-caption">Step onto a mat. Learn the game. Earn your belt.</p>
   </div>
 
   <div class="window">
@@ -128,7 +129,7 @@
   </div>
 
   <div class="window badge-case">
-    <h2>BADGES</h2>
+    <h2>BELTS</h2>
     <div class="badge-list" id="badgeList"></div>
   </div>
 

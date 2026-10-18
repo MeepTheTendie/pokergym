@@ -133,7 +133,7 @@ el('btnRestore').onclick = () => {
   el('btnConfirmRestore').hidden = true;
   try {
     pendingRestore = sanitizeProfile(readBackup(el('backupText').value));
-    el('backupStatus').textContent = `VALID BACKUP: ${CLASS_BY_ID[pendingRestore.classId].name}, ${pendingRestore.handsPlayed} HANDS, ${pendingRestore.badges.length} BADGES. CONFIRM TO REPLACE LOCAL PROGRESS.`;
+    el('backupStatus').textContent = `VALID BACKUP: ${CLASS_BY_ID[pendingRestore.classId].name}, ${pendingRestore.handsPlayed} HANDS, ${pendingRestore.badges.length} BELTS. CONFIRM TO REPLACE LOCAL PROGRESS.`;
     el('btnConfirmRestore').hidden = false;
   } catch { el('backupStatus').textContent = 'INVALID OR UNSUPPORTED BACKUP. YOUR PROGRESS IS UNCHANGED.'; }
 };
@@ -275,6 +275,16 @@ function initTitle() {
       };
     }
   }
+  const card = el('trainerCard');
+  if (card && profile) {
+    const belts = profile.badges?.length ?? 0;
+    const streak = profile.daily?.streak ?? 0;
+    const level = profile.level ?? 1;
+    card.textContent = `LEVEL ${level} · ${belts}/4 BELTS${streak > 0 ? ` · ${streak}D STREAK` : ''} · ${profile.handsPlayed ?? 0} HANDS`;
+    card.hidden = false;
+  } else if (card) {
+    card.hidden = true;
+  }
   // Practice wins for routing: with ?practice= the start button stays primary.
   const promoteDaily = sharedDaily && !requestedGym;
   el('btnDaily').classList.toggle('primary', promoteDaily);
@@ -406,7 +416,7 @@ el('btnBecome').onclick = () => {
   if (profile && !becomeArmed) {
     becomeArmed = true;
     el('btnBecome').textContent = 'REPLACE YOUR SAVE?';
-    el('classDetailText').textContent = 'THIS REPLACES YOUR CURRENT PLAYER PROFILE, LEVEL, BADGES AND RECORD ON THIS BROWSER. PRESS AGAIN TO CONFIRM, OR BACK TO KEEP YOUR SAVE.';
+    el('classDetailText').textContent = 'THIS REPLACES YOUR CURRENT PLAYER PROFILE, LEVEL, BELTS AND RECORD ON THIS BROWSER. PRESS AGAIN TO CONFIRM, OR BACK TO KEEP YOUR SAVE.';
     return;
   }
   becomeArmed = false;
@@ -711,6 +721,7 @@ function renderMap() {
     d.setAttribute('role', 'img');
     d.setAttribute('aria-label', owned ? gym.badge : `${gym.badge} (locked)`);
     d.textContent = gym.badgeGlyph;
+    d.style.color = owned ? gym.colour : '#78836d';
     d.title = owned ? gym.badge : 'LOCKED';
     badges.appendChild(d);
   }
@@ -726,7 +737,7 @@ function renderMap() {
     btn.dataset.gym = gym.id;
     btn.disabled = !open;
     btn.innerHTML = `<span>${gym.name.replace(' GYM', '')}</span><small>${
-      cleared ? '✓ BADGE EARNED · PRACTICE' : open ? '▶ ENTER GYM' : 'LOCKED'
+      cleared ? '✓ BELT EARNED · PRACTICE' : open ? '▶ ENTER GYM' : 'LOCKED'
     }</small>`;
     btn.onclick = () => startGym(gym);
     list.appendChild(btn);
@@ -1561,7 +1572,7 @@ function settleHand({ optimal, difficulty, line, review }) {
       : `FIVE HANDS: ${session.played}/${SESSION_HANDS} DONE. ${session.optimal} CORRECT.`;
   } else if (passed && canPractice(profile, gym.id)) {
     awaitingBadge = true;
-    verdict = `${gym.leader}: PRACTICE COMPLETE. YOUR BADGE IS ALREADY EARNED. COME BACK TO KEEP TRAINING!`;
+    verdict = `${gym.leader}: PRACTICE COMPLETE. YOUR BELT IS ALREADY EARNED. COME BACK TO KEEP TRAINING!`;
   } else if (passed && !awaitingBadge) {
     awaitingBadge = true;
     const awarded = awardBadge(profile, gym.id);
@@ -1569,7 +1580,7 @@ function settleHand({ optimal, difficulty, line, review }) {
     save();
     verdict = `${gym.leader}: ENOUGH. YOU HAVE THE ${gym.badge}. EXAM PASSED!`;
   } else if (passed) {
-    verdict = `${gym.leader}: WELL DONE. THE BADGE IS YOURS. EXAM PASSED!`;
+    verdict = `${gym.leader}: WELL DONE. THE BELT IS YOURS. EXAM PASSED!`;
   } else if (exhausted) {
     // Ten hands is the exam. Below the pass line there is no eleventh hand.
     awaitingBadge = true;
