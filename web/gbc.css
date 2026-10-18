@@ -184,6 +184,8 @@ button:focus-visible { outline: 4px solid var(--t02); outline-offset: 2px; }
   color: var(--ink);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   padding: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transition: transform 60ms ease-in-out, box-shadow 60ms ease-in-out, filter 60ms ease-in-out;
 }
 .card .pip { font-size: 17px; line-height: 1; }
@@ -223,7 +225,7 @@ button:focus-visible { outline: 4px solid var(--t02); outline-offset: 2px; }
 .card:active:not(:disabled),
 .card[aria-pressed='true'],
 .card:focus-visible:not(:disabled) {
-  transform: translate(2px, 2px);
+  transform: translate(2px, 2px) scale(0.96);
   box-shadow: inset 0 0 0 3px var(--gbc-0), inset 0 0 0 3px var(--gbc-1);
   outline: none;
 }
