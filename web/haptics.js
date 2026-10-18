@@ -20,6 +20,7 @@ export const HAPTIC_PATTERNS = {
   wrong: [30, 40, 30],
   level: [20, 30, 20, 30, 60],
   badge: [40, 40, 80],
+  tap: 8,
 };
 
 let enabled = true;

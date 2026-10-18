@@ -94,6 +94,7 @@ let sessionMistakes = []; // misses recorded this session, for the end-of-sessio
 let coachedHand = false; // the coach was opened this hand, so it cannot score or count
 let dailyMode = false;
 let dailyRun = null; // { key, plan, number, index, results, scored, finished }
+let holdHintShown = false; // one-time first-hand hint for video poker holds
 let drillMode = null; // 'master' | 'weak' | null — a rigged five-hand drill session
 let drillHands = [];
 let drillLabel = ''; // the situation name for the current drill hand
@@ -1197,6 +1198,13 @@ function renderPlay() {
     el('pays').textContent = round.drawn
       ? `RESULT: ${round.winLabel.toUpperCase()}. YOUR HOLD WAS ${round.holdBest ? 'BEST' : 'NOT BEST'}.`
       : `HOLDING ${round.holds.filter(Boolean).length} OF 5`;
+    const hint = el('holdHint');
+    if (hint && !round.drawn && !holdHintShown && !localStorage.getItem('pg_hold_hint')) {
+      holdHintShown = true;
+      hint.hidden = false;
+      setTimeout(() => { hint.hidden = true; try { localStorage.setItem('pg_hold_hint', '1'); } catch {} }, 6000);
+    }
+    if (round.drawn && hint) hint.hidden = true;
     return;
   }
 
@@ -1757,6 +1765,10 @@ function toggleVpHold(index) {
   toggleHold(round, index);
   advice = null;
   el('coachPanel').hidden = true;
+  const hint = el('holdHint');
+  if (hint) hint.hidden = true;
+  try { localStorage.setItem('pg_hold_hint', '1'); } catch {}
+  haptics.buzz('tap', audio.isMuted());
   renderBattle();
 }
 

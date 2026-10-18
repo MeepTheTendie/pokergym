@@ -195,10 +195,13 @@ button:focus-visible { outline: 4px solid var(--t02); outline-offset: 2px; }
   box-shadow: inset 0 0 0 3px var(--gbc-1), 0 0 0 3px var(--gbc-0);
 }
 .card[data-held='true']::after {
-  content: 'HELD';
-  font-size: 10px;
+  content: 'HELD ✓';
+  font-size: 12px;
   font-family: 'Silkscreen', monospace;
   letter-spacing: 1px;
+}
+.card[data-held='true'] {
+  transform: translateY(-6px);
 }
 /* hold'em: cards picked for your best five out of seven */
 .card[data-picked='true'] {
