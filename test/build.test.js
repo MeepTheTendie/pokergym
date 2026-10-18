@@ -34,7 +34,9 @@ test('public build contains its module graph without repository or diagnostic fi
   assert.match(landing, /href="\/web\/"/);
   assert.doesNotMatch(landing, /http-equiv="refresh"/);
   assert.match(landing, /<script src="\/web\/posthog-loader\.js"><\/script>/);
-  assert.match(landing, /data-track="start_training"/);
+  assert.match(landing, /data-track="cta_click" data-cta="start_training"/);
+  // In-app event names must not be reused for landing clicks (one meaning each).
+  assert.doesNotMatch(landing, /data-track="(open_trainer|start_training|start_daily|game_start)"/);
   const loader = await readFile(path.join(root, 'web/posthog-loader.js'), 'utf8');
   assert.match(loader, /PROD_HOSTS/, 'analytics must be limited to the production host');
   assert.match(loader, /playpokergym\.com/);

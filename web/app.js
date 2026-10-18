@@ -30,6 +30,7 @@ import {
 } from '../src/rpg/daily.js';
 import { parseEntryParams, isSharedDayCurrent, cleanEntrySearch, buildDailyShareText, shareUrl, inviteUrl } from '../src/rpg/links.js';
 import { keyAction, shouldIgnoreKey } from '../src/rpg/keys.js';
+import { createAnalytics } from '../src/rpg/analytics.js';
 import { captureDrillPlan, restoreDrillPlan, BLACKJACK_DRILLS, DRILL_HANDS, DRILL_GAMES } from '../src/rpg/drills.js';
 import { drawArt, drawTrainerBack } from './characters.js';
 import audio from './audio.js?v=20261017-vegas1';
@@ -104,6 +105,15 @@ let requestedGym = GYMS.find(gym => gym.game === entryParams.practice) ?? null;
 // one day of today's number; otherwise it is ignored silently. ref is read only
 // to strip it: it is never stored (no localStorage, cookie or sessionStorage).
 let sharedDaily = entryParams.daily || isSharedDayCurrent(entryParams.day, dailyNumber(dailyKey()));
+// How a Daily Drill link reached us, for start_daily's `entry` property.
+const dailyLinkEntry = entryParams.daily ? 'daily_link' : sharedDaily ? 'share_link' : null;
+// One meaning per event; see docs/analytics-events.md. The ref tag is the
+// loader's snapshot (it also covers referrer fallback), else the parsed ?ref=.
+const analytics = createAnalytics({
+  send: (name, props) => window.trackEvent?.(name, props),
+  ref: () => window.__pgAttribution?.ref ?? (entryParams.ref !== 'none' ? entryParams.ref : null),
+});
+let sessionToken = null; // live game_start run, closed by session_complete
 if (['ref', 'd', 'daily'].some(k => new URLSearchParams(location.search).has(k))) {
   try { history.replaceState(history.state, '', location.pathname + cleanEntrySearch(location.search) + location.hash); } catch {}
 }
@@ -326,8 +336,9 @@ el('btnDaily').onclick = () => {
     save();
     applyPalette(DEFAULT_CLASS);
   }
+  const entry = sharedDaily ? (dailyLinkEntry ?? 'title') : 'title';
   sharedDaily = false;
-  startDaily();
+  startDaily(entry);
 };
 el('btnReview').onclick = openReview;
 el('btnReviewDone').onclick = () => { renderMap(); show('scr-map'); };
@@ -487,14 +498,14 @@ function computeToday() {
     return {
       state: `DAILY DRILL #${number} IN PROGRESS · ${progress.index}/${DAILY_HANDS} HANDS DONE.`,
       label: 'RESUME DAILY DRILL',
-      action: () => startDaily(),
+      action: () => startDaily('map_resume'),
     };
   }
   if (daily.lastKey !== key) {
     return {
       state: `DAILY DRILL #${number} IS READY · FIVE HANDS · ONE MIX OF ALL FOUR GAMES.`,
       label: `DAILY DRILL #${number}`,
-      action: () => startDaily(),
+      action: () => startDaily('map'),
     };
   }
   const due = mistakeReviewQueue(profile, localDayKey()).filter(row => row.due).length;
@@ -547,7 +558,7 @@ function renderToday() {
     const again = document.createElement('button');
     again.type = 'button';
     again.textContent = 'REPLAY DAILY DRILL';
-    again.onclick = () => startDaily();
+    again.onclick = () => startDaily('replay');
     actions.appendChild(again);
     const copy = document.createElement('button');
     copy.type = 'button';
@@ -937,7 +948,7 @@ function renderReviewEntry(container, row, scoredDue) {
  * explains each hand; the first complete run of a day counts toward XP, score
  * and the daily streak, and any replay is practice only.
  */
-function startDaily() {
+function startDaily(entry = 'other') {
   if (!profile || dailyMode) return;
   const key = dailyKey();
   const number = dailyNumber(key);
@@ -945,6 +956,9 @@ function startDaily() {
   const { plan, index, results } = dailySession(key, daily.progress);
   const completed = dailyCompleted(profile, key);
   dailyRun = { key, plan, number, index, results, scored: !completed, finished: false };
+  dailyRun.token = analytics.startDaily({
+    entry, number, resumed: index > 0, scored: !completed, shared: entry === 'daily_link' || entry === 'share_link',
+  });
   profile = setDailyProgress(profile, { key, plan, index, results });
   save();
   dailyMode = true;
@@ -988,7 +1002,11 @@ function startGym(gym, sprint = false, mode = null) {
   drillHands = restoreDrillPlan(plan, gym.game);
   drillMode = drillHands.length ? plan.mode : null;
   gymId = gym.id;
-  window.trackEvent?.('game_start', { game: gym.game });
+  sessionToken = analytics.gameStart({
+    game: gym.game,
+    mode: sprint ? (drillMode ?? 'session') : 'challenge',
+    resumed: Boolean(sprint && profile.activeSession?.played > 0),
+  });
   gameId = gym.game;
   handsWon = 0;
   handsAtGym = 0;
@@ -1463,6 +1481,7 @@ function renderBattle() {
 
 /* ---------------- battle: one hand in, one hand out ---------------- */
 function startHand() {
+  analytics.handStarted({ game: gameId, mode: dailyMode ? 'daily' : shortSession ? 'session' : 'challenge' });
   handDone = false;
   decisions = [];
   picked = new Set();
@@ -1685,7 +1704,7 @@ function renderSessionSummary(session) {
     near.textContent = 'ONE MORE CORRECT WOULD HAVE BEEN A PERFECT RUN. PLAY AGAIN?';
     box.appendChild(near);
   }
-  window.trackEvent?.('session_complete', { game: GYM_BY_ID[gymId]?.game, correct: session.optimal });
+  analytics.sessionComplete(sessionToken, { correct: session.optimal });
   const miss = sessionMistakes[0];
   if (miss) {
     const detail = document.createElement('p');
@@ -1766,7 +1785,7 @@ function settleDailyHand({ optimal, difficulty, line, review }) {
   el('battleEndRow').hidden = false;
 
   const tally = run.results.filter(Boolean).length;
-  if (run.finished) window.trackEvent?.('daily_complete', { correct: tally });
+  if (run.finished) analytics.dailyComplete(run.token, { correct: tally, number: run.number, scored: run.scored });
   const say = optimal
     ? 'GOOD READ. THAT IS THE PLAY.'
     : 'NO. THE BETTER MOVE WAS DIFFERENT.';
@@ -2124,3 +2143,7 @@ document.addEventListener('keydown', (e) => {
 // title screen with one-tap training. The title is always reachable from HOME.
 if (profile) { renderMap(); show('scr-map'); }
 else initTitle();
+analytics.openTrainer({
+  entry: dailyLinkEntry ?? (entryParams.practice ? 'practice_link' : 'direct'),
+  returning: Boolean(profile),
+});

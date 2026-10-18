@@ -19,7 +19,8 @@
     "test:installability": "node scripts/installability-browser-test.mjs",
     "test:offline": "POKERGYM_OFFLINE_TEST=1 node scripts/itch-browser-test.mjs",
     "test:storage:denied": "POKERGYM_STORAGE_TEST=denied node scripts/itch-browser-test.mjs",
-    "test:storage:quota": "POKERGYM_STORAGE_TEST=quota node scripts/itch-browser-test.mjs"
+    "test:storage:quota": "POKERGYM_STORAGE_TEST=quota node scripts/itch-browser-test.mjs",
+    "test:analytics": "node scripts/analytics-browser-test.mjs"
   },
   "devDependencies": {
     "wrangler": "^4.148.0"

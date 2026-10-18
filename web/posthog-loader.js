@@ -87,6 +87,9 @@
   } catch (error) {
     // Analytics must never break a page.
   }
+  // Read-only copy for the trainer, which adds `ref` to its own events
+  // (src/rpg/analytics.js). Nothing here changes how ref is parsed.
+  window.__pgAttribution = ATTRIBUTION;
 
   // Any element can be marked data-track="event_name"; the event fires with the
   // path, the element's other data-* attributes, and its own text. Capture
