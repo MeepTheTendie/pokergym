@@ -15,7 +15,48 @@ export const PUBLISHED_REFS = Object.freeze([
   'youtube', 'tiktok', 'reels', 'x',
   'reddit', 'playmygame', 'webgames',
   'sideproject', 'hn', 'videopoker',
+  'instagram', 'facebook',
 ]);
+
+// Host -> ref fallback for visitors who arrive without a ?ref= tag. Keys are
+// lowercased hostnames (no leading www.). Kept here as the single source of
+// truth; web/posthog-loader.js mirrors a small table of the same values.
+export const REFERRER_REFS = Object.freeze({
+  'instagram.com': 'instagram',
+  'l.instagram.com': 'instagram',
+  'facebook.com': 'facebook',
+  'l.facebook.com': 'facebook',
+  'm.facebook.com': 'facebook',
+  'lm.facebook.com': 'facebook',
+  'x.com': 'x',
+  't.co': 'x',
+  'twitter.com': 'x',
+  'youtube.com': 'youtube',
+  'm.youtube.com': 'youtube',
+  'youtu.be': 'youtube',
+  'tiktok.com': 'tiktok',
+  'reddit.com': 'reddit',
+  'out.reddit.com': 'reddit',
+});
+
+// Infer a published ref from a document.referrer value. Returns null when the
+// referrer is missing, invalid, or not a recognised host.
+export function refFromReferrer(href) {
+  if (href === null || href === undefined) return null;
+  const text = String(href).trim();
+  if (text === '') return null;
+  let host;
+  try { host = new URL(text).hostname.toLowerCase(); } catch { return null; }
+  if (!host) return null;
+  if (host.startsWith('www.')) host = host.slice(4);
+  // Exact match first, then subdomain suffix.
+  if (Object.prototype.hasOwnProperty.call(REFERRER_REFS, host)) return REFERRER_REFS[host];
+  for (const key of Object.keys(REFERRER_REFS)) {
+    const bare = key.startsWith('www.') ? key.slice(4) : key;
+    if (host === bare || host.endsWith('.' + bare)) return REFERRER_REFS[key];
+  }
+  return null;
+}
 
 // A ref in the list maps to itself; missing/blank maps to 'none'; everything
 // else (case variants, junk, prototype keys) maps to 'other'.

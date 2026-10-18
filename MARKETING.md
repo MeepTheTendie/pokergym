@@ -55,6 +55,8 @@ Every published link carries `?ref=<channel>` so the source is attributable in b
 | YouTube Shorts description | `youtube` |
 | TikTok | `tiktok` |
 | Instagram Reels | `reels` |
+| Instagram (unattributed, from referrer) | `instagram` |
+| Facebook (unattributed, from referrer) | `facebook` |
 | X / Twitter | `x` |
 | r/playmygame launch post | `playmygame` |
 | r/WebGames launch post | `webgames` |

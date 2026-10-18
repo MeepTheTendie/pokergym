@@ -59,8 +59,33 @@
       var value = params.get(key);
       if (value) ATTRIBUTION[key] = String(value).slice(0, 100);
     });
+    // Fallback attribution from the referrer when no explicit ?ref= tag is
+    // present. Mirror of REFERRER_REFS in src/rpg/links.js — keep in sync.
+    if (!ATTRIBUTION.ref) {
+      var referrerHost = '';
+      try { referrerHost = new URL(document.referrer).hostname.toLowerCase(); } catch (e) { referrerHost = ''; }
+      if (referrerHost.startsWith('www.')) referrerHost = referrerHost.slice(4);
+      var REFERRER_MAP = {
+        'instagram.com': 'instagram', 'l.instagram.com': 'instagram',
+        'facebook.com': 'facebook', 'l.facebook.com': 'facebook', 'm.facebook.com': 'facebook', 'lm.facebook.com': 'facebook',
+        'x.com': 'x', 't.co': 'x', 'twitter.com': 'x',
+        'youtube.com': 'youtube', 'm.youtube.com': 'youtube', 'youtu.be': 'youtube',
+        'tiktok.com': 'tiktok',
+        'reddit.com': 'reddit', 'www.reddit.com': 'reddit', 'out.reddit.com': 'reddit'
+      };
+      var matched = REFERRER_MAP[referrerHost];
+      if (!matched) {
+        for (var k in REFERRER_MAP) {
+          if (Object.prototype.hasOwnProperty.call(REFERRER_MAP, k)) {
+            var bare = k.startsWith('www.') ? k.slice(4) : k;
+            if (referrerHost === bare || referrerHost.endsWith('.' + bare)) { matched = REFERRER_MAP[k]; break; }
+          }
+        }
+      }
+      if (matched) ATTRIBUTION.ref = String(matched).slice(0, 100);
+    }
   } catch (error) {
-    // Analytics must never break the page.
+    // Analytics must never break a page.
   }
 
   // Any element can be marked data-track="event_name"; the event fires with the

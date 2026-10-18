@@ -3,10 +3,12 @@ import assert from 'node:assert/strict';
 import {
   PUBLISHED_REFS, classifyRef, shareUrl, inviteUrl, buildDailyShareText,
   parseEntryParams, isSharedDayCurrent, cleanEntrySearch,
+  REFERRER_REFS, refFromReferrer,
 } from '../src/rpg/links.js';
+import { readFileSync } from 'node:fs';
 
 test('PUBLISHED_REFS is exactly the published list', () => {
-  assert.deepEqual([...PUBLISHED_REFS], ['share', 'invite', 'youtube', 'tiktok', 'reels', 'x', 'reddit', 'playmygame', 'webgames', 'sideproject', 'hn', 'videopoker']);
+  assert.deepEqual([...PUBLISHED_REFS], ['share', 'invite', 'youtube', 'tiktok', 'reels', 'x', 'reddit', 'playmygame', 'webgames', 'sideproject', 'hn', 'videopoker', 'instagram', 'facebook']);
   assert.ok(Object.isFrozen(PUBLISHED_REFS));
 });
 
@@ -85,4 +87,39 @@ test('?daily=1 is a supported Daily Drill entry param and is stripped from the a
   assert.equal(cleanEntrySearch('?daily=1&practice=blackjack'), '?practice=blackjack');
   const landing = (await import('node:fs')).readFileSync(new URL('../web/landing.html', import.meta.url), 'utf8');
   assert.ok(landing.includes(`href="${DAILY_ENTRY_URL}"`));
+});
+
+test('REFERRER_REFS is frozen and maps instagram host', () => {
+  assert.ok(Object.isFrozen(REFERRER_REFS));
+  assert.equal(REFERRER_REFS['l.instagram.com'], 'instagram');
+  assert.equal(REFERRER_REFS['instagram.com'], 'instagram');
+});
+
+test('refFromReferrer maps known hosts', () => {
+  assert.equal(refFromReferrer('https://l.instagram.com/'), 'instagram');
+  assert.equal(refFromReferrer('https://www.instagram.com/x'), 'instagram');
+  assert.equal(refFromReferrer('https://l.facebook.com/y'), 'facebook');
+  assert.equal(refFromReferrer('https://m.facebook.com/'), 'facebook');
+  assert.equal(refFromReferrer('https://t.co/abc'), 'x');
+  assert.equal(refFromReferrer('https://twitter.com/foo'), 'x');
+  assert.equal(refFromReferrer('https://x.com/bar'), 'x');
+  assert.equal(refFromReferrer('https://www.youtube.com/watch?v=1'), 'youtube');
+  assert.equal(refFromReferrer('https://youtu.be/abc'), 'youtube');
+  assert.equal(refFromReferrer('https://www.tiktok.com/@a'), 'tiktok');
+  assert.equal(refFromReferrer('https://www.reddit.com/r/x'), 'reddit');
+  assert.equal(refFromReferrer('https://out.reddit.com/t'), 'reddit');
+});
+
+test('refFromReferrer returns null for unknown/invalid input', () => {
+  for (const v of [null, undefined, '', '   ', 'not a url', 'http://example.com/', 'https://notinstagram.com/', 'https://x.com.evil.test/']) {
+    assert.equal(refFromReferrer(v), null, String(v));
+  }
+});
+
+test('posthog-loader mirrors every REFERRER_REFS host and ref', () => {
+  const src = readFileSync(new URL('../web/posthog-loader.js', import.meta.url), 'utf8');
+  for (const [host, ref] of Object.entries(REFERRER_REFS)) {
+    assert.ok(src.includes(`'${host}'`), `loader missing host ${host}`);
+    assert.ok(src.includes(`'${ref}'`), `loader missing ref ${ref}`);
+  }
 });

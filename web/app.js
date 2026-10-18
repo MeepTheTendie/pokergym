@@ -237,7 +237,10 @@ el('btnTitle').onclick = () => { dailyMode = false; dailyRun = null; initTitle()
 function initTitle() {
   el('btnContinue').disabled = !profile;
   // Without a save the daily is reachable only from a shared link (option a).
-  el('btnDaily').hidden = !profile && !sharedDaily;
+  // The Daily Drill is the built-in reason to come back; show it to everyone,
+  // including first-time visitors with no save. The onclick path below creates
+  // a profile on tap, so no save is required to start it.
+  el('btnDaily').hidden = false;
   const key = dailyKey();
   const number = dailyNumber(key);
   const done = profile && dailyCompleted(profile, key);
@@ -247,6 +250,8 @@ function initTitle() {
       : `DAILY DRILL #${number}`;
   } else if (profile) {
     el('btnDaily').textContent = done ? `DAILY DRILL #${number} ✓` : `DAILY DRILL #${number}`;
+  } else {
+    el('btnDaily').textContent = `DAILY DRILL #${number}`;
   }
   // Practice wins for routing: with ?practice= the start button stays primary.
   const promoteDaily = sharedDaily && !requestedGym;
