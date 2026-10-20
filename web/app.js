@@ -2194,13 +2194,17 @@ el('btnNext').onclick = () => {
   startHand();
 };
 
-el('masterBox').onclick = () => { finishTyping(el('masterLine')); if (!handDone) return; el('btnNext').click(); };
+function advanceCoachDialogue() {
+  // Let players reveal and read feedback before a second activation moves on.
+  if (finishTyping(el('masterLine')) || !handDone) return;
+  el('btnNext').click();
+}
+el('masterBox').onclick = advanceCoachDialogue;
 el('masterBox').onkeydown = (e) => {
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault();
-    finishTyping(el('masterLine'));
-    if (!handDone) return;
-    el('btnNext').click();
+    e.stopPropagation();
+    advanceCoachDialogue();
   }
 };
 
