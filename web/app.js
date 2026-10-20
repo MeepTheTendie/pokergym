@@ -80,6 +80,9 @@ const vpVariant = () => variantById(vpVariantId);
 const activePaytable = () =>
   (round && round.game === 'videopoker' && round.drawn ? variantById(round.variantId) : vpVariant());
 let handDone = false;
+let acted = false; // the player has made a decision this hand (reveals the coach meter)
+let firstDecisionStart = 0;   // performance.now() when the session's first hand was dealt
+let firstDecisionEmitted = false;
 let decisions = [];   // blackjack: one entry per action taken this round
 let picked = new Set(); // hold'em: indices into round.hand7
 let handsWon = 0;
@@ -555,6 +558,8 @@ function renderToday() {
   if (daily.lastKey === key) {
     const results = daily.history.find(entry => entry.key === key)?.results ?? [];
     const text = dailyShareText(key, results, dailyNumber(key));
+    const number = dailyNumber(key);
+    const games = [...new Set(dailyPlan(key).map(entry => DAILY_GAME_LABEL[entry.game]))];
     const again = document.createElement('button');
     again.type = 'button';
     again.textContent = 'REPLAY DAILY DRILL';
@@ -563,7 +568,7 @@ function renderToday() {
     const copy = document.createElement('button');
     copy.type = 'button';
     copy.textContent = 'COPY DAILY RESULT';
-    copy.onclick = () => shareDaily(text, false);
+    copy.onclick = () => shareDaily(text, false, results, number, games);
     actions.appendChild(copy);
     el('dailySharePreview').value = text;
     const fb = document.createElement('p');
@@ -608,13 +613,29 @@ function dailyShareText(key, results, number) {
   return buildDailyShareText({ number, results, total: DAILY_HANDS, games });
 }
 
-async function shareDaily(text, useShare) {
+async function shareDaily(text, useShare, results = null, number = null, games = null) {
   const status = el('dailyShareStatus');
   const preview = el('dailySharePreview');
   try {
     if (useShare && typeof navigator.share === 'function') {
+      if (results && number && typeof navigator.canShare === 'function') {
+        try {
+          const canvas = renderDailyImage(number, results, games ?? []);
+          const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+          if (blob) {
+            const file = new File([blob], 'poker-gym-daily.png', { type: 'image/png' });
+            if (navigator.canShare({ files: [file] })) {
+              await navigator.share({ title: 'Poker Gym Daily', text, files: [file] });
+              status.textContent = 'Share options closed. Delivery is handled by your chosen app.';
+              window.trackEvent?.('share', { channel: 'daily', format: 'image' });
+              return;
+            }
+          }
+        } catch { /* fall through to text share */ }
+      }
       await navigator.share({ title: 'Poker Gym Daily', text });
       status.textContent = 'Share options closed. Delivery is handled by your chosen app.';
+      window.trackEvent?.('share', { channel: 'daily', format: 'text' });
     } else {
       await navigator.clipboard.writeText(text);
       status.textContent = 'Result copied. Nothing sent; paste it where you choose.';
@@ -628,6 +649,44 @@ async function shareDaily(text, useShare) {
     preview.select();
   }
   status.hidden = false;
+}
+
+function renderDailyImage(number, results, games) {
+  const tally = results.filter(v => v).length;
+  const canvas = document.createElement('canvas');
+  const w = 600, h = 360;
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#0a1a14';
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = '#d4a843';
+  ctx.font = 'bold 36px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Poker Gym Daily', w / 2, 56);
+  ctx.fillStyle = '#e8f0e8';
+  ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  ctx.fillText(`#${number}  ${tally}/${results.length}`, w / 2, 100);
+  const sq = 52, gap = 10;
+  const gridW = results.length * (sq + gap) - gap;
+  const startX = (w - gridW) / 2;
+  const startY = 130;
+  results.forEach((ok, i) => {
+    ctx.fillStyle = ok ? '#27ae60' : '#c0392b';
+    const x = startX + i * (sq + gap);
+    ctx.fillRect(x, startY, sq, sq);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 28px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(ok ? '\u2713' : '\u2715', x + sq / 2, startY + sq / 2 + 10);
+  });
+  ctx.fillStyle = '#8fa89a';
+  ctx.font = '18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText((games || []).join(' \u00b7 '), w / 2, startY + sq + 44);
+  ctx.fillStyle = '#d4a843';
+  ctx.font = '16px monospace';
+  ctx.fillText('playpokergym.com', w / 2, h - 28);
+  return canvas;
 }
 
 function renderMap() {
@@ -967,6 +1026,8 @@ function startDaily(entry = 'other') {
   handsWon = 0;
   handsAtGym = index;
   awaitingBadge = false;
+  firstDecisionStart = performance.now();
+  firstDecisionEmitted = false;
   renderSprite(profile);
   show('scr-battle');
   loadDailyHand();
@@ -1007,6 +1068,8 @@ function startGym(gym, sprint = false, mode = null) {
     mode: sprint ? (drillMode ?? 'session') : 'challenge',
     resumed: Boolean(sprint && profile.activeSession?.played > 0),
   });
+  firstDecisionStart = performance.now();
+  firstDecisionEmitted = false;
   gameId = gym.game;
   handsWon = 0;
   handsAtGym = 0;
@@ -1025,11 +1088,13 @@ function startGym(gym, sprint = false, mode = null) {
     // The pages beyond the intro surface one per hand across the first four
     // hands of this first session.
     tutorialTips = firstTime ? lessonTips(lesson).slice(0, 4) : [];
+    if (firstTime) { profile = markLessonDone(profile, gameId); save(); }
     show('scr-battle');
     startHand();
   };
-  if (firstTime) startLesson(gym.game, begin);
-  else begin();
+  // Skip the multi-page lesson entirely for first-time visitors. The intro
+  // tips still surface as in-game coaching during the first four hands.
+  begin();
 }
 
 function typewriter(node, text, done) {
@@ -1116,10 +1181,11 @@ function advanceLesson() {
   onDone?.();
 }
 
-el('btnLessonNext').onclick = () => {
+el('btnLessonNext').addEventListener('click', (e) => {
+  e.stopPropagation();
   finishTyping(el('lessonText'));
   advanceLesson();
-};
+});
 el('lessonBox').onclick = () => {
   const line = el('lessonText');
   if (line._typer) return fastForward(line);
@@ -1296,6 +1362,12 @@ function renderPlay() {
 
 function renderStatus() {
   if (gameId === 'videopoker') {
+    if (!handDone && !coachedHand && !acted) {
+      el('handGrade').textContent = 'YOUR CALL';
+      setGauge(0, 'mid');
+      el('potentialText').textContent = 'MAKE YOUR HOLD, THEN DRAW.';
+      return;
+    }
     if (!handDone) {
       // The gauge reads the hand as it was dealt, so it only refreshes before
       // the draw; afterwards the panel reports what the hand actually became.
@@ -1318,6 +1390,12 @@ function renderStatus() {
       el('potentialText').textContent = 'THE SHOE HAS SPOKEN.';
       return;
     }
+    if (!coachedHand && !acted) {
+      el('handGrade').textContent = 'YOUR CALL';
+      setGauge(0, 'mid');
+      el('potentialText').textContent = 'YOUR CALL.';
+      return;
+    }
     const best = bjBest(round);
     el('handGrade').textContent = best.action ? ACTION_LABEL[best.action] : 'DEAL';
     setGauge((best.ev + 1) * 40, best.ev >= 0.1 ? 'high' : best.ev >= -0.1 ? 'mid' : 'low');
@@ -1328,6 +1406,12 @@ function renderStatus() {
   }
 
   if (gameId === 'baccarat') {
+    if (!handDone && !coachedHand && !acted) {
+      el('handGrade').textContent = 'YOUR CALL';
+      setGauge(0, 'mid');
+      el('potentialText').textContent = 'YOUR CALL.';
+      return;
+    }
     const p = bacBest().probabilities;
     const quiz = round?.quiz;
     if (quiz?.type === 'commission') {
@@ -1483,6 +1567,7 @@ function renderBattle() {
 function startHand() {
   analytics.handStarted({ game: gameId, mode: dailyMode ? 'daily' : shortSession ? 'session' : 'challenge' });
   handDone = false;
+  acted = false;
   decisions = [];
   picked = new Set();
   advice = null;
@@ -1547,6 +1632,15 @@ function startHand() {
 function settleHand({ optimal, difficulty, line, review }) {
   if (handDone) return;
   handDone = true;
+  if (!firstDecisionEmitted && firstDecisionStart > 0) {
+    firstDecisionEmitted = true;
+    window.trackEvent?.('time_to_first_decision', {
+      ms: Math.round(performance.now() - firstDecisionStart),
+      game: gameId,
+      mode: dailyMode ? 'daily' : (shortSession ? 'session' : 'challenge'),
+    });
+  }
+
   const coached = coachedHand;
 
   if (dailyMode) return settleDailyHand({ optimal, difficulty, line, review });
@@ -1824,6 +1918,7 @@ function toggleVpHold(index) {
 
 function doDraw() {
   if (!round || round.drawn || handDone) return;
+  acted = true;
   // Grade the hold against the coach's answer rather than against whatever
   // advice happens to be on screen: a hold played correctly without opening
   // the panel is still the correct hold.
@@ -1857,6 +1952,7 @@ function bjSituationType(round) {
 
 function bjAct(action) {
   if (handDone || !round || round.settled) return;
+  acted = true;
   const before = bjBest(round); // grade against the state the player is deciding in
   if (!legalActions(round).includes(action)) return;
   const review = {
@@ -1917,6 +2013,7 @@ function renderQuizButtons() {
 
 function bacAnswer(choice) {
   if (handDone || !round?.quiz) return;
+  acted = true;
   const quiz = round.quiz;
   const correct = choice === quiz.correct;
   settleHand({
@@ -1942,6 +2039,7 @@ function togglePick(index) {
 
 function heConfirm() {
   if (handDone || picked.size !== 5) return;
+  acted = true;
   const chosen = round.hand7.filter((_, i) => picked.has(i));
   settleHand({
     optimal: playsBestFive(round.hand7, chosen),
@@ -2048,6 +2146,7 @@ function showCoach() {
   // Opening the coach reveals the answer, so this hand is a learning rep: it can
   // still teach (XP, practice record) but it can never score or count.
   coachedHand = true;
+  renderStatus();
 }
 
 el('btnAsk').onclick = showCoach;
@@ -2139,10 +2238,18 @@ document.addEventListener('keydown', (e) => {
   if (button) { e.preventDefault(); button.click(); }
 });
 
-// Returning trainers land on their home screen; first-time visitors get the
-// title screen with one-tap training. The title is always reachable from HOME.
+// Returning trainers land on their home screen; first-time visitors get dropped
+// straight into a five-hand blackjack session so the first hand happens in one
+// page load instead of two or three taps. The title screen (daily drill,
+// choose style, etc.) is still reachable from HOME.
 if (profile) { renderMap(); show('scr-map'); }
-else initTitle();
+else {
+  profile = createProfile(DEFAULT_CLASS);
+  profile.createdAt = new Date().toISOString();
+  save();
+  applyPalette(DEFAULT_CLASS);
+  startDefaultSession();
+}
 analytics.openTrainer({
   entry: dailyLinkEntry ?? (entryParams.practice ? 'practice_link' : 'direct'),
   returning: Boolean(profile),
