@@ -29,8 +29,7 @@ export function headersFileText() {
   // Default: no long-lived caching for HTML/JS/CSS (they are not hashed).
   // Immutable, long-lived caching for versioned assets and source modules.
   return `/*\n${lines.join('\n')}\n  cache-control: public, max-age=0, must-revalidate\n` +
-    `*/\n` +
-    `/web/assets/*\n  cache-control: public, max-age=31536000, immutable\n` +
-    `/web/fonts/*\n  cache-control: public, max-age=31536000, immutable\n` +
-    `/src/*\n  cache-control: public, max-age=31536000, immutable\n`;
+    `\n/web/assets/*\n  cache-control: public, max-age=31536000, immutable\n` +
+    `\n/web/fonts/*\n  cache-control: public, max-age=31536000, immutable\n` +
+    `\n/src/*\n  cache-control: public, max-age=31536000, immutable\n`;
 }
