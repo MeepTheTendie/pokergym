@@ -1138,8 +1138,12 @@ function typewriter(node, text, done) {
   }
   node.textContent = '';
   let i = 0;
+  // Build the visible string in a local variable and assign once per tick so
+  // the browser does a single text update instead of read-append-write.
+  let shown = '';
   function tick() {
-    node.textContent += text[i++];
+    shown += text[i++];
+    node.textContent = shown;
     if (i >= text.length) {
       clearInterval(node._typer);
       node._typer = null;
