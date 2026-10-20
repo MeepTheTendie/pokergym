@@ -36,6 +36,7 @@ export const REFERRER_REFS = Object.freeze({
   'youtu.be': 'youtube',
   'tiktok.com': 'tiktok',
   'reddit.com': 'reddit',
+  'www.reddit.com': 'reddit',
   'out.reddit.com': 'reddit',
 });
 

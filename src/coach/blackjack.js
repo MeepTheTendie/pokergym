@@ -111,8 +111,10 @@ const dealerMemo = new Map();
 const DEALER_MEMO_LIMIT = 400000;
 
 function signature(counts) {
-  // One char per rank instead of number concatenation: counts never exceed 96, so
-  // the code points stay distinct and this runs at every node of the recursion.
+  // One char per rank instead of number concatenation: the collapsed ten-rank
+  // count tops out at 96 (4 ranks x 4 suits x 6 decks) and every other rank
+  // at 24, so the code points stay distinct and this runs at every node of
+  // the recursion.
   let s = '';
   for (let i = 0; i < RANKS; i++) s += String.fromCharCode(counts[i]);
   return s;

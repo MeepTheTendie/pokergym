@@ -124,6 +124,8 @@ export function dailySummary(history = [], today = dailyKey()) {
         (entry.games !== undefined && !validDailyGames(entry.games))) return false;
     const gap = dayGap(today, entry.key);
     if (!Number.isFinite(gap) || gap < 0 || gap >= 14) return false;
+    // Reject calendar keys that do not round-trip through UTC day numbers
+    // (e.g. 2026-02-30 normalises to a different day).
     if (new Date(keyToDay(entry.key) * DAY_MS).toISOString().slice(0, 10) !== entry.key) return false;
     seen.add(entry.key);
     return true;

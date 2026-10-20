@@ -21,21 +21,33 @@ export function isIngestPath(pathname) {
 export function upstreamRequest(requestUrl, region = POSTHOG_REGION) {
   const url = new URL(requestUrl);
   const hosts = HOSTS[region] ?? HOSTS.us;
-  const rest = url.pathname.slice('/ingest'.length) || '/';
+  // Normalise the path so traversal sequences cannot escape /ingest or bypass
+  // the asset check. PostHog only ever sees its own paths.
+  const rawRest = url.pathname.slice('/ingest'.length) || '/';
+  const rest = new URL(rawRest, 'https://pokergym.invalid').pathname || '/';
   const isAsset = rest === '/static' || rest.startsWith('/static/');
   const host = isAsset ? hosts.assets : hosts.api;
   return { url: `https://${host}${rest}${url.search}`, isAsset };
 }
 
 // Forward one request upstream. The Host header is dropped so the edge derives
-// it from the target URL; everything else (method, body, headers) passes
-// through unchanged. Cookies are forwarded but PostHog sets none of its own.
+// it from the target URL; cookies and authorization are stripped because
+// PostHog sets none of its own and forwarding them only leaks origin state.
+// A 10s timeout keeps a hung upstream from holding the worker invocation.
 export async function proxyPostHog(request, region = POSTHOG_REGION) {
   const { url, isAsset } = upstreamRequest(request.url, region);
   const headers = new Headers(request.headers);
   headers.delete('host');
-  const init = isAsset
-    ? { method: 'GET', headers }
-    : { method: request.method, headers, body: request.body };
-  return fetch(url, init);
+  headers.delete('cookie');
+  headers.delete('authorization');
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+  try {
+    const init = isAsset
+      ? { method: 'GET', headers, signal: controller.signal }
+      : { method: request.method, headers, body: request.body, signal: controller.signal };
+    return await fetch(url, init);
+  } finally {
+    clearTimeout(timer);
+  }
 }

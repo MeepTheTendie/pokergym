@@ -100,9 +100,10 @@ export function dailyCompleted(profile, key) {
 
 export function setDailyProgress(profile, progress) {
   if (!profile) return profile;
-  const captured = progress == null ? null : { ...progress,
-    results: [...progress.results],
-    ...(progress.plan === undefined ? {} : { plan: progress.plan.map(hand => ({ ...hand })) }),
+  const captured = progress == null ? null : {
+    ...progress,
+    results: Array.isArray(progress.results) ? [...progress.results] : progress.results,
+    ...(Array.isArray(progress.plan) ? { plan: progress.plan.map(hand => ({ ...hand })) } : {}),
   };
   return { ...profile, daily: { ...dailyOf(profile), progress: captured } };
 }
