@@ -2247,6 +2247,10 @@ document.addEventListener('keydown', (e) => {
 // page load instead of two or three taps. The title screen (daily drill,
 // choose style, etc.) is still reachable from HOME.
 const returning = Boolean(profile);
+analytics.openTrainer({
+  entry: dailyLinkEntry ?? (entryParams.practice ? 'practice_link' : 'direct'),
+  returning,
+});
 if (profile) { renderMap(); show('scr-map'); }
 else {
   profile = createProfile(DEFAULT_CLASS);
@@ -2255,7 +2259,3 @@ else {
   applyPalette(DEFAULT_CLASS);
   startDefaultSession();
 }
-analytics.openTrainer({
-  entry: dailyLinkEntry ?? (entryParams.practice ? 'practice_link' : 'direct'),
-  returning,
-});
