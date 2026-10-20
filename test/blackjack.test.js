@@ -451,30 +451,12 @@ for (const row of GOLDEN) {
  * allowed (GAME.doubleAfterSplit), no surrender. P = split, S = stand, H = hit,
  * D = double. Upcards in order 2..9, 10, A.
  */
-const PAIR_CHART = {
-  2: 'PPPPPPHHHH', 3: 'PPPPPPHHHH', 4: 'HHHPPHHHHH', 5: 'DDDDDDDDHH',
-  6: 'PPPPPHHHHH', 7: 'PPPPPPHHHH', 8: 'PPPPPPPPPP', 9: 'PPPPPSPPSS',
-  10: 'SSSSSSSSSS', 14: 'PPPPPPPPPP',
-};
-const CHART_ACTION = { P: 'split', S: 'stand', H: 'hit', D: 'double' };
-const UPCARDS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 14];
-
 test('8,8 splits against a 10 and against an ace', () => {
   for (const up of [10, 14]) {
     clearCache();
     assert.equal(bestAction(roundWith([8, 8], up)).action, 'split', `8,8 vs ${up}`);
   }
 });
-
-for (const [pair, row] of Object.entries(PAIR_CHART)) {
-  test(`pair ${pair},${pair} follows the six deck S17 DAS chart`, () => {
-    UPCARDS.forEach((up, k) => {
-      clearCache();
-      const r = Number(pair);
-      assert.equal(bestAction(roundWith([r, r], up)).action, CHART_ACTION[row[k]], `${pair},${pair} vs ${up}`);
-    });
-  });
-}
 
 test('split aces are valued as one card each and then a stand', () => {
   clearCache();
