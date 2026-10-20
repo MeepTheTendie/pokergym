@@ -414,7 +414,11 @@ function renderClassSelect() {
     card.className = 'class-card';
     card.type = 'button';
     card.setAttribute('aria-pressed', String(pendingClass === cls.id));
-    card.innerHTML = `<span class="nm">${cls.name}</span><span class="bl">${gym.name}<br>${cls.blurb}</span>`;
+    const nmSpan = document.createElement('span'); nmSpan.className = 'nm'; nmSpan.textContent = cls.name;
+    const blSpan = document.createElement('span'); blSpan.className = 'bl'; blSpan.textContent = gym.name;
+    const br = document.createElement('br');
+    blSpan.append(br, document.createTextNode(cls.blurb));
+    card.append(nmSpan, blSpan);
     const portrait = document.createElement('canvas');
     portrait.width = portrait.height = 48;
     portrait.className = 'class-portrait';
@@ -443,7 +447,8 @@ function showClassDetail(cls) {
     b.style.fontSize = '9px';
     const base = 1 + (cls.biases[key] ?? 0);
     const stars = '\u25c6'.repeat(base);
-    b.innerHTML = `<span class="stat-label">${STAT_LABEL[key]}</span> ${stars}`;
+    const statLabel = document.createElement('span'); statLabel.className = 'stat-label'; statLabel.textContent = STAT_LABEL[key];
+    b.append(statLabel, document.createTextNode(' ' + stars));
     stats.appendChild(b);
   }
   el('classDetail').hidden = false;
@@ -839,9 +844,10 @@ function renderMap() {
     btn.className = open ? 'primary' : '';
     btn.dataset.gym = gym.id;
     btn.disabled = !open;
-    btn.innerHTML = `<span>${gym.name.replace(' GYM', '')}</span><small>${TRAINING_LABEL[gym.game]}</small><small>${
-      cleared ? '✓ BADGE EARNED · PRACTICE' : open ? '▶ ENTER GYM' : 'LOCKED'
-    }</small>`;
+    const nameSpan = document.createElement('span'); nameSpan.textContent = gym.name.replace(' GYM', '');
+    const labelSmall = document.createElement('small'); labelSmall.textContent = TRAINING_LABEL[gym.game];
+    const statusSmall = document.createElement('small'); statusSmall.textContent = cleared ? '✓ BADGE EARNED · PRACTICE' : open ? '▶ ENTER GYM' : 'LOCKED';
+    btn.append(nameSpan, labelSmall, statusSmall);
     btn.onclick = () => startGym(gym);
     list.appendChild(btn);
   }
@@ -1285,7 +1291,9 @@ function cardNode(card, zone, i) {
 
   const name = `${rankLabel(card.r)} of ${SUIT_NAME[card.s]}`;
   node.classList.add(card.s === 1 || card.s === 2 ? 'suit-red' : 'suit-black');
-  node.innerHTML = `<span class="rank">${rankLabel(card.r)}</span><span class="pip">${SUIT_GLYPH[card.s]}</span>`;
+  const rankSpan = document.createElement('span'); rankSpan.className = 'rank'; rankSpan.textContent = rankLabel(card.r);
+  const pipSpan = document.createElement('span'); pipSpan.className = 'pip'; pipSpan.textContent = SUIT_GLYPH[card.s];
+  node.append(rankSpan, pipSpan);
 
   if (zone.holds) {
     const held = Boolean(zone.holds[i]);
@@ -1318,7 +1326,13 @@ function renderZones(zones) {
     if (z.label) {
       const head = document.createElement('p');
       head.className = 'hint zone-head';
-      head.innerHTML = z.note ? `${z.label} <b>${z.note}</b>` : z.label;
+      head.textContent = '';
+      head.append(document.createTextNode(z.label));
+      if (z.note) {
+        head.append(document.createTextNode(' '));
+        const bold = document.createElement('b'); bold.textContent = z.note;
+        head.appendChild(bold);
+      }
       zone.appendChild(head);
     }
     const hand = document.createElement('div');
@@ -1480,9 +1494,13 @@ function renderStatus() {
 function renderVariantSelect() {
   const select = el('variantSelect');
   if (select.options.length !== VARIANTS.length) {
-    select.innerHTML = VARIANTS
-      .map(v => `<option value="${v.id}">${v.name}${v.ratio ? ` (${v.ratio})` : ''}</option>`)
-      .join('');
+    select.replaceChildren();
+    for (const v of VARIANTS) {
+      const opt = document.createElement('option');
+      opt.value = v.id;
+      opt.textContent = v.name + (v.ratio ? ` (${v.ratio})` : '');
+      select.appendChild(opt);
+    }
   }
   select.value = vpVariantId;
 }
@@ -1499,8 +1517,15 @@ function chooseVariant(id) {
 }
 
 function payRow(label, amt, on) {
-  const cls = on ? ' class="won"' : '';
-  return `<div${cls}>${on ? '>' : ''}${label}</div><div class="amt${on ? ' won' : ''}">${amt}</div>`;
+  const wrap = document.createElement('div');
+  wrap.className = on ? 'won' : '';
+  const left = document.createElement('div');
+  left.textContent = (on ? '> ' : '') + label;
+  const right = document.createElement('div');
+  right.className = 'amt' + (on ? ' won' : '');
+  right.textContent = amt;
+  wrap.append(left, right);
+  return wrap;
 }
 
 function renderPaytable() {
@@ -1543,7 +1568,7 @@ function renderPaytable() {
     }
   }
 
-  el('paytable').innerHTML = rows.join('');
+  el('paytable').replaceChildren(...rows);
 }
 
 function setControls() {
