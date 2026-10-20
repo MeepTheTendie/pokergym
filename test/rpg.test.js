@@ -6,6 +6,7 @@ import { GYMS, gymForClass, isUnlocked, gymByOrder } from '../src/rpg/gyms.js';
 import {
   createProfile, applyResult, awardBadge, canBattle,
   xpForLevel, levelFromXp, serialize, deserialize, handDifficulty, SAVE_VERSION,
+  migrateMistakeBoxes, completeDaily, setDailyProgress,
 } from '../src/rpg/state.js';
 import { lessonFor, lessonIntro, lessonTips, LESSON_INTRO_PAGES, hasCompletedLesson, markLessonDone } from '../src/rpg/lessons.js';
 import { evaluate5 } from '../src/evaluate.js';
@@ -329,4 +330,33 @@ test('completing a past day is ignored instead of regressing the streak', async 
   assert.equal(past.daily.history.length, 2, 'no duplicate or rewritten history entry');
 
   assert.equal(completeDaily(profile, 'nope', [true, true, true, true, true]), profile, 'a malformed key is ignored');
+});
+
+test('completing a past day clears a stale in-progress drill', () => {
+  let profile = createProfile('scholar');
+  profile = completeDaily(profile, '2026-01-02', [true, true, true, true, true]);
+  profile = completeDaily(profile, '2026-01-03', [true, true, true, true, true]);
+  profile = setDailyProgress(profile, { key: '2026-01-01', index: 2, results: [true, false] });
+  assert.ok(profile.daily.progress);
+  const past = completeDaily(profile, '2026-01-01', [true, true, true, true, true]);
+  assert.equal(past.daily.progress, null, 'stale progress is cleared');
+  assert.equal(past.daily.streak, 2);
+  assert.equal(past.daily.lastKey, '2026-01-03');
+});
+
+test('migrateMistakeBoxes gives legacy entries box 1 due today', () => {
+  const today = '2026-01-05';
+  const profile = {
+    ...createProfile('scholar'),
+    mistakes: [
+      { game: 'blackjack', situation: 'a', chosen: 'b', correction: 'c' },
+      { game: 'blackjack', situation: 'd', chosen: 'e', correction: 'f', box: 2, due: '2026-01-10', mastered: false },
+    ],
+  };
+  const migrated = migrateMistakeBoxes(profile, today);
+  assert.equal(migrated.mistakes[0].box, 1);
+  assert.equal(migrated.mistakes[0].due, today);
+  assert.equal(migrated.mistakes[0].mastered, false);
+  assert.equal(migrated.mistakes[1].box, 2);
+  assert.equal(migrated.mistakes[1].due, '2026-01-10');
 });

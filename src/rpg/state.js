@@ -123,7 +123,11 @@ export function completeDaily(profile, key, results, games = dailyPlan(key).map(
 
   const gap = daily.lastKey ? dayGap(key, daily.lastKey) : null;
   // A past or out-of-order day must never regress the streak or rewrite history.
-  if (gap !== null && gap <= 0) return profile;
+  if (gap !== null && gap <= 0) {
+    const daily = dailyOf(profile);
+    if (daily.progress == null) return profile;
+    return { ...profile, daily: { ...daily, progress: null } };
+  }
   let streak;
   let restKey = daily.restKey;
   if (gap === null) {
