@@ -81,6 +81,7 @@ const activePaytable = () =>
   (round && round.game === 'videopoker' && round.drawn ? variantById(round.variantId) : vpVariant());
 let handDone = false;
 let acted = false; // the player has made a decision this hand (reveals the coach meter)
+let autoAdvanceTimer = null;
 
 // Off-main-thread video-poker coach. Kicked off on deal; result lands on
 // round.vpBest when ready. Falls back to a synchronous compute if the worker
@@ -1172,6 +1173,10 @@ function fastForward(node) {
   return false;
 }
 
+function cancelAutoAdvance() {
+  if (autoAdvanceTimer) { clearTimeout(autoAdvanceTimer); autoAdvanceTimer = null; }
+}
+
 function finishTyping(node) {
   return fastForward(node);
 }
@@ -1625,6 +1630,7 @@ function renderBattle() {
 
 /* ---------------- battle: one hand in, one hand out ---------------- */
 function startHand() {
+  cancelAutoAdvance();
   analytics.handStarted({ game: gameId, mode: dailyMode ? 'daily' : shortSession ? 'session' : 'challenge' });
   handDone = false;
   acted = false;
@@ -1793,7 +1799,17 @@ function settleHand({ optimal, difficulty, line, review }) {
   const full = `${line} ${say} ${gainLine} ${verdict}`;
   el('masterLine')._dataset = { full };
   el('masterPrompt').hidden = false;
-  typewriter(el('masterLine'), full);
+  cancelAutoAdvance();
+  typewriter(el('masterLine'), full, () => {
+    if (dailyMode || awaitingBadge || reduceMotion()) return;
+    if (!el('coachPanel').hidden) return;
+    autoAdvanceTimer = setTimeout(() => {
+      autoAdvanceTimer = null;
+      if (!handDone || awaitingBadge || dailyMode) return;
+      if (!el('coachPanel').hidden) return;
+      el('btnNext').click();
+    }, 3000);
+  });
 
   advice = null;
   el('coachPanel').hidden = true;
@@ -2210,7 +2226,7 @@ function showCoach() {
   renderStatus();
 }
 
-el('btnAsk').onclick = showCoach;
+el('btnAsk').onclick = () => { cancelAutoAdvance(); showCoach(); };
 el('btnWhy').onclick = () => {
   if (!advice) return;
   el('why').textContent = advice.why;
@@ -2222,7 +2238,7 @@ el('btnApply').onclick = () => {
 };
 
 /* ---------------- battle controls ---------------- */
-el('btnDeal').onclick = () => { if (handDone) el('btnNext').click(); };
+el('btnDeal').onclick = () => { cancelAutoAdvance(); if (handDone) el('btnNext').click(); };
 el('btnDraw').onclick = doDraw;
 el('btnHit').onclick = () => bjAct('hit');
 el('btnStand').onclick = () => bjAct('stand');
@@ -2235,6 +2251,7 @@ el('btnConfirm').onclick = heConfirm;
 el('btnClear').onclick = () => { if (!handDone) { picked = new Set(); renderBattle(); } };
 
 el('btnNext').onclick = () => {
+  cancelAutoAdvance();
   if (dailyMode && dailyRun) {
     if (dailyRun.finished) {
       dailyMode = false;
