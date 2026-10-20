@@ -31,7 +31,7 @@ LAUNCH.md.
   channel** — `npm run scorecard` (PostHog, bots filtered). Needs the
   `POSTHOG_PERSONAL_API_KEY` setup in README "Visit stats". This project's own
   test traffic is excluded automatically, so the numbers are players only.
-- **Video views per platform** — YouTube Studio / TikTok / Instagram / X, or ask
+- **Video views per platform** — YouTube Studio / Instagram / X, or ask Grok Bot on the number-check days (Fri Oct 23, Mon Oct 26, Thu Oct 29). TikTok account banned 2026-10-18; channel retired.
   Grok Bot on the number-check days (Fri Oct 23, Mon Oct 26, Thu Oct 29).
 - **Unprompted requests** — copy the exact words. If you asked "would you want
   X?" it does not count. This one is the Pro trigger, so it has to be evidence,
@@ -41,7 +41,7 @@ LAUNCH.md.
 
 ## Daily rows
 
-| Date | X posted | YouTube | TikTok | Reels | X | Real people | Returning | Comments | Unprompted / notable (verbatim) |
+| Date | X posted | YouTube | FB Reels | Real people | Returning | Comments | Unprompted / notable (verbatim) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Fri Oct 16 | | | | | | | | | |
 | Sat Oct 17 | | | | | | | | | |

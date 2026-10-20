@@ -26,5 +26,11 @@ export const SECURITY_HEADERS = {
 // The plain-text _headers file Cloudflare applies to static-asset responses.
 export function headersFileText() {
   const lines = Object.entries(SECURITY_HEADERS).map(([name, value]) => `  ${name}: ${value}`);
-  return `/*\n${lines.join('\n')}\n`;
+  // Default: no long-lived caching for HTML/JS/CSS (they are not hashed).
+  // Immutable, long-lived caching for versioned assets and source modules.
+  return `/*\n${lines.join('\n')}\n  cache-control: public, max-age=0, must-revalidate\n` +
+    `*/\n` +
+    `/web/assets/*\n  cache-control: public, max-age=31536000, immutable\n` +
+    `/web/fonts/*\n  cache-control: public, max-age=31536000, immutable\n` +
+    `/src/*\n  cache-control: public, max-age=31536000, immutable\n`;
 }

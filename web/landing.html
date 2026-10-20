@@ -45,7 +45,7 @@ a{color:var(--gold)}
 a:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 .skip{position:absolute;left:-999px}.skip:focus{left:12px;top:12px;z-index:100;background:var(--gold);color:#1a1408;padding:10px 14px;border-radius:8px}
 #main:focus{outline:none}
-.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:center;padding-top:24px;padding-bottom:40px}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:center;padding-top:24px;padding-bottom:40px;cursor:pointer}
 .eyebrow{margin:0 0 12px;font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold)}
 h1{font-size:clamp(30px,5vw,54px);line-height:1.1;letter-spacing:-1.5px;margin:0 0 16px;font-weight:900}
 h1 span{color:var(--gold)}
@@ -131,9 +131,10 @@ footer{border-top:1px solid var(--border);color:var(--dim);font-size:13px;paddin
 <section class="hero" aria-labelledby="hero-heading">
 <div>
 <p class="eyebrow">Free card-game trainer</p>
-<h1 id="hero-heading">Train your card sense.<br><span>One hand at a time.</span></h1>
-<p class="lead">Practice blackjack, video poker, baccarat and Hold’em hand reading. Play five hands and the coach tells you, after every decision, what the best play was and why.</p>
-<a class="cta" href="/web/" data-track="cta_click" data-cta="start_training" data-location="hero">Start training free →</a>
+<h1 id="hero-heading">Can you get 5/5 today?</h1>
+<p class="lead">Five hands, one daily challenge. The coach explains every decision after you make it. No signup, no real money, no ads.</p>
+<a class="cta" href="/web/?daily=1" data-track="cta_click" data-cta="start_daily" data-location="hero">Try today’s drill →</a>
+<p style="margin:10px 0 0;font-size:13px;color:var(--dim)">Or <a href="/web/" data-track="cta_click" data-cta="start_training" data-location="hero_secondary">play one hand →</a></p>
 <ul class="trust" aria-label="What to expect">
 <li>✓ 100% free</li><li>✓ No signup</li><li>✓ No real money</li><li>✓ No ads</li><li>✓ Works offline</li>
 </ul>
@@ -193,7 +194,7 @@ footer{border-top:1px solid var(--border);color:var(--dim);font-size:13px;paddin
 <section class="final" aria-labelledby="final-heading">
 <h2 id="final-heading">Ready for five hands?</h2>
 <p>Free, no signup, no real money. Questions or ideas? <a href="mailto:meep@mail.grokbot.com?subject=Poker%20Gym%20feedback">Email feedback</a>.</p>
-<a class="cta" href="/web/" data-track="cta_click" data-cta="start_training" data-location="final">Start training free →</a>
+<a class="cta" href="/web/" data-track="cta_click" data-cta="start_training" data-location="final">Play your first hand →</a>
 </section>
 </main>
 <footer>
@@ -213,6 +214,12 @@ footer{border-top:1px solid var(--border);color:var(--dim);font-size:13px;paddin
 </div>
 <p class="fine"><span>Free, education only.</span> <span>No real-money gambling.</span> <span>Built with AI assistance.</span></p>
 </footer>
-<div class="sticky-cta"><a class="cta" href="/web/" data-track="cta_click" data-cta="start_training" data-location="sticky_mobile">Start training free →</a></div>
+<div class="sticky-cta"><a class="cta" href="/web/" data-track="cta_click" data-cta="start_training" data-location="sticky_mobile">Play your first hand →</a></div>
 <script src="/web/posthog-loader.js"></script>
+<script>
+document.querySelector('.hero')?.addEventListener('click', (e) => {
+  if (e.target.closest('a, button')) return;
+  window.location.href = '/web/';
+});
+</script>
 </body></html>

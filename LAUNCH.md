@@ -26,7 +26,9 @@ The production build now includes the frontend and strategy modules, and exclude
 
 Target one to two hours per day once there is a stable shareable demo and a verified scheduled execution mechanism. Find relevant channels that permit promotion; publish accurate gameplay demonstrations and useful training content using available authorized accounts. Reply to interested players, record attribution and feedback, then improve the highest-impact onboarding issue. No spam, fabricated reviews, guaranteed winnings, platform-rule evasion or unapproved ad spend. Measure qualified players, activation, retention and actual paid subscriptions, not number of posts. The measurement is `npm run stats`: it prints the crawler-inclusive visit counter plus the PostHog real-player report (unique people per day, journey stages, top events); use the PostHog numbers to pick the next improvement. See MARKETING.md for how to read it.
 
-Daily scheduling is requested but not yet configured or verified. An active thread goal or a delayed tool call is not evidence of a daily scheduled marketing job. Verify the scheduler, authorized publishing accounts and a completed run before reporting automation as operational.
+Daily scheduling is verified: pokergym-daily.timer fires at 09:00 America/Chicago with
+Persistent=true. The runner uses the keyring for PostHog reads (verified reachable from
+systemd --user). See automation/README.md.
 
 ## Owner involvement
 
@@ -53,7 +55,12 @@ Worker version 590a4b43-6219-4265-8041-2768ace08cea adds a complete versioned of
 
 Worker version 24118c9f-531e-49a3-8ee6-2487a195824d adds voluntary feedback after a completed five-hand session: clarity and return interest (a pricing question in this release was removed on 2026-10-15). Players review an unsent email draft and send it themselves. No signup, checkout or paid plan exists. All 171 unit tests, portable/offline browser checks and final live 390px offline smoke check passed. No actual demand or revenue verified; see automation/PROGRESS.md for limitations and access blockers.
 
-## Immediate training choice release
+## Android distribution (decided 2026-10-19)
+
+Distribution is the web app (`playpokergym.com/web/` + manifest + offline worker). No
+Play Store listing is planned at this stage. The PWA is installable on Android via
+"Add to home screen" and works offline. A Play Store listing (Bubblewrap/TWA) remains an
+option if demand justifies the $25 developer fee and the data-safety/content-rating work.
 
 Worker version 0a10cbe6-2307-4c89-9ed3-5e7c3367d689 makes five-hand training available in all four games from a new trainer's first map. Badge progression remains a separate longer challenge. All 173 unit tests, portable phone embed and final live/offline phone checks passed, including actual five-hand completion in the three formerly gated games. No customer demand or payment verified; see automation/PROGRESS.md for the initial live-check failure, limits and access blockers.
 

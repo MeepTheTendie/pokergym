@@ -81,6 +81,37 @@ const activePaytable = () =>
   (round && round.game === 'videopoker' && round.drawn ? variantById(round.variantId) : vpVariant());
 let handDone = false;
 let acted = false; // the player has made a decision this hand (reveals the coach meter)
+
+// Off-main-thread video-poker coach. Kicked off on deal; result lands on
+// round.vpBest when ready. Falls back to a synchronous compute if the worker
+// is unavailable or the player acts before it finishes.
+let vpWorker = null;
+function getVpWorker() {
+  if (vpWorker) return vpWorker;
+  try { vpWorker = new Worker(new URL('./vp-coach-worker.js', import.meta.url), { type: 'module' }); }
+  catch { vpWorker = null; }
+  return vpWorker;
+}
+function vpKickoff(round) {
+  const w = getVpWorker();
+  if (!w || !round) { if (round) round.vpBest = null; return; }
+  round.vpBest = undefined; // pending
+  const jobId = (round._vpJobId = Math.random().toString(36).slice(2));
+  const handler = (event) => {
+    if (event.data?.id !== jobId) return;
+    w.removeEventListener('message', handler);
+    if (event.data?.result) round.vpBest = event.data.result;
+    else round.vpBest = null;
+  };
+  w.addEventListener('message', handler);
+  try { w.postMessage({ id: jobId, hand: round.hand, variantId: round.variantId }); }
+  catch { round.vpBest = null; }
+}
+function vpBest() {
+  const cached = round?.vpBest;
+  if (cached && cached.holds) return cached;
+  return bestHold(round.hand, { variant: round.variantId });
+}
 let firstDecisionStart = 0;   // performance.now() when the session's first hand was dealt
 let firstDecisionEmitted = false;
 let decisions = [];   // blackjack: one entry per action taken this round
@@ -1221,7 +1252,7 @@ function setGauge(pct, cls) {
 }
 
 function renderPotential() {
-  const best = bestHold(round.hand, { variant: round.variantId });
+  const best = vpBest();
   const pct = Math.max(0, Math.min(100, (best.ev / 3) * 100));
   const g = gradeFor(best.ev);
   setGauge(pct, g.cls);
@@ -1596,6 +1627,7 @@ function startHand() {
       hand: drilled?.hand ?? null,
       variantId: dailyMode ? DEFAULT_VARIANT.id : vpVariantId,
     });
+    vpKickoff(round);
   } else if (gameId === 'blackjack') {
     round = newBjRound(rng ?? Math.random,
       drilled?.player ? { player: drilled.player, dealer: [drilled.dealer, drilled.hole] } : undefined);
@@ -1922,7 +1954,7 @@ function doDraw() {
   // Grade the hold against the coach's answer rather than against whatever
   // advice happens to be on screen: a hold played correctly without opening
   // the panel is still the correct hold.
-  const best = bestHold(round.hand, { variant: round.variantId });
+  const best = vpBest();
   const optimal = best.optimal.some((pattern) => pattern.join('') === round.holds.join(''));
   const review = {
     situation: round.hand.map(cardLabel).join(' '),
@@ -2076,7 +2108,7 @@ function buildAdvice() {
   if (handDone) return null;
 
   if (gameId === 'videopoker') {
-    const best = bestHold(round.hand, { variant: round.variantId });
+    const best = vpBest();
     const kept = round.hand.filter((_, i) => best.holds[i]);
     return {
       holds: best.holds,
@@ -2252,10 +2284,4 @@ analytics.openTrainer({
   returning,
 });
 if (profile) { renderMap(); show('scr-map'); }
-else {
-  profile = createProfile(DEFAULT_CLASS);
-  profile.createdAt = new Date().toISOString();
-  save();
-  applyPalette(DEFAULT_CLASS);
-  startDefaultSession();
-}
+else { initTitle(); }

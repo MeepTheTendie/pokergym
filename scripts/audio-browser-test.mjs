@@ -39,7 +39,6 @@ try {
       createGain() { const gain = super.createGain(); window.testGains.push(gain); return gain; }
     };
   ` });
-  await send('Fetch.enable', { patterns: [{ urlPattern: '*characters-v2.png', requestStage: 'Request' }] });
   await send('Page.navigate', { url: process.argv[2] ?? 'http://127.0.0.1:8901/web/index.html' });
   for (let i = 0; i < 100 && !await evaluate('Boolean(document.getElementById("btnSound")?.onclick)'); i++) await sleep(50);
   await evaluate(`(async () => { window.testAudio = (await import('./audio.js?v=20261017-vegas1')).default; })()`);

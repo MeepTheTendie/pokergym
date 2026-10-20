@@ -77,6 +77,20 @@ export function returningQuery(start, end) {
 )`;
 }
 
+// Which hook (utm_content) brought people, so "make more of what works" can answer at
+// the hook level, not just the platform level.
+export function hooksQuery(start, end) {
+  assertDay(start, 'start');
+  assertDay(end, 'end');
+  return `SELECT properties.utm_content AS hook, count(DISTINCT person_id) AS people
+FROM events
+WHERE toDate(timestamp) BETWEEN toDate('${start}') AND toDate('${end}')
+  AND ${notTestClause()}
+  AND properties.utm_content IS NOT NULL
+GROUP BY hook
+ORDER BY people DESC`;
+}
+
 // Which channel brought people, so "make more of what works" has an answer.
 export function channelsQuery(start, end) {
   assertDay(start, 'start');
@@ -97,7 +111,7 @@ function table(head, body, rightCols = []) {
   return [fmt(head), widths.map(w => '-'.repeat(w)).join('  '), ...body.map(fmt)].join('\n');
 }
 
-export function formatScorecard({ start, end, days, peopleByDay = {}, totals = {}, returning = 0, channels = [] }) {
+export function formatScorecard({ start, end, days, peopleByDay = {}, totals = {}, returning = 0, channels = [], hooks = [] }) {
   const n = v => Number(v ?? 0);
   const people = n(totals.people);
   const lines = [
@@ -126,6 +140,11 @@ export function formatScorecard({ start, end, days, peopleByDay = {}, totals = {
     channels.length
       ? table(['ref', 'people'], channels.map(r => [String(r.ref), n(r.people)]), [1])
       : 'no tagged arrivals yet — check the tagging convention in MARKETING.md',
+    '',
+    'PEOPLE PER HOOK (utm_content)',
+    hooks.length
+      ? table(['hook', 'people'], hooks.map(r => [String(r.hook), n(r.people)]), [1])
+      : 'no tagged hooks yet — add utm_content=<hook-id> to every link',
   ];
   return lines.join('\n');
 }
@@ -149,16 +168,17 @@ async function main() {
     return;
   }
   const { start, end } = windowFromArgs();
-  const [perDay, totals, returning, channels] = await Promise.all([
+  const [perDay, totals, returning, channels, hooks] = await Promise.all([
     hogql(key, peoplePerDayQuery(start, end)),
     hogql(key, totalsQuery(start, end)),
     hogql(key, returningQuery(start, end)),
     hogql(key, channelsQuery(start, end)),
+    hogql(key, hooksQuery(start, end)),
   ]);
   const peopleByDay = Object.fromEntries(perDay.map(r => [String(r.day), r.people]));
   console.log(formatScorecard({
     start, end, days: dayRange(start, end), peopleByDay,
-    totals: totals[0] ?? {}, returning: returning[0]?.people ?? 0, channels,
+    totals: totals[0] ?? {}, returning: returning[0]?.people ?? 0, channels, hooks,
   }));
 }
 

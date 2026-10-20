@@ -56,9 +56,12 @@ test('www homepage enters canonical save origin with attribution preserved', asy
   assert.deepEqual(e.served, []);
   assert.deepEqual(e.points, []);
   assert.equal(c.waits.length, 0);
-  for (const address of ['https://playpokergym.com/', 'https://www.playpokergym.com/web/']) {
+  for (const address of ['https://playpokergym.com/', 'https://playpokergym.com/web/']) {
     assert.equal((await worker.fetch(nav(address), e, c)).status, 200);
   }
+  const wwwWeb = await worker.fetch(nav('https://www.playpokergym.com/web/'), e, c);
+  assert.equal(wwwWeb.status, 307);
+  assert.equal(wwwWeb.headers.get('location'), 'https://playpokergym.com/web/');
 });
 
 test('worker counts a page view and always serves assets', async () => {

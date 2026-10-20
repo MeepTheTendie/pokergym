@@ -228,7 +228,7 @@ export const LESSONS = {
 // A lesson opens with at most three short pages of context. Everything after
 // that becomes a tip: shown one at a time in the coach box across the first
 // four hands of the player's first session, then never again.
-export const LESSON_INTRO_PAGES = 3;
+export const LESSON_INTRO_PAGES = 1;
 
 export function lessonFor(gameId) {
   return LESSONS[gameId] ?? null;

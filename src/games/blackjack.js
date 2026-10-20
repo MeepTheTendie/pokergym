@@ -105,7 +105,7 @@ export function newRound(rng = Math.random, { bet = BET, decks = GAME.decks, pla
   };
   round.dealerUpcard = round.dealerHand[0];
   round.hands[0].natural = isBlackjack(round.hands[0].cards);
-  round.log.push('TWO CARDS EACH. THE DEALER SHOWS ONE. THE OTHER ONE STAYS FACE DOWN. NO PEEK FOR ANYBODY.');
+  round.log.push('TWO CARDS EACH. THE DEALER SHOWS ONE. THE OTHER ONE STAYS FACE DOWN. THE DEALER CHECKS FOR BLACKJACK.');
   if (round.hands[0].natural || isBlackjack(round.dealerHand)) {
     round.log.push('NATUREL ON THE BOARD. THE ROUND IS OVER RIGHT NOW.');
     finishRound(round);

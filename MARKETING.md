@@ -52,14 +52,16 @@ Every published link carries `?ref=<channel>` so the source is attributable in b
 
 | Where it is posted | ref |
 | --- | --- |
-| YouTube Shorts description | `youtube` |
-| TikTok | `tiktok` |
+| YouTube Shorts description (pinned comment too) | `youtube` |
+| Facebook Reels (link in description) | `reels` |
 | Instagram Reels | `reels` |
 | Instagram (unattributed, from referrer) | `instagram` |
 | Facebook (unattributed, from referrer) | `facebook` |
 | X / Twitter | `x` |
 | r/playmygame launch post | `playmygame` |
 | r/WebGames launch post | `webgames` |
+
+TikTok account banned 2026-10-18; channel retired. Reels + Shorts are the live surfaces.
 | Helpful answers in other subreddits | `reddit` |
 | Hacker News | `hn` |
 | Player's own shared daily result | `share` |

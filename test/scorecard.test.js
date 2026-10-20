@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   LAUNCH_START, LAUNCH_END, TARGETS, dayRange, peoplePerDayQuery, totalsQuery,
-  returningQuery, channelsQuery, formatScorecard, windowFromArgs,
+  returningQuery, channelsQuery, hooksQuery, formatScorecard, windowFromArgs,
 } from '../scripts/scorecard.mjs';
 import { notTestClause } from '../scripts/stats.mjs';
 
@@ -29,6 +29,7 @@ test('scorecard: queries count people, not page requests', () => {
   assert.match(totalsQuery(LAUNCH_START, LAUNCH_END), /finished_the_daily_drill/);
   assert.match(returningQuery(LAUNCH_START, LAUNCH_END), /HAVING count\(DISTINCT toDate\(timestamp\)\) > 1/);
   assert.match(channelsQuery(LAUNCH_START, LAUNCH_END), /properties\.ref/);
+  assert.match(hooksQuery(LAUNCH_START, LAUNCH_END), /properties\.utm_content/);
 });
 
 test('scorecard: prints a row per day, filling zeroes, and the four targets', () => {
@@ -39,6 +40,7 @@ test('scorecard: prints a row per day, filling zeroes, and the four targets', ()
     totals: { people: 12, finished_a_session: 3, finished_the_daily_drill: 1 },
     returning: 2,
     channels: [{ ref: 'youtube', people: 7 }],
+    hooks: [{ hook: 'link_in_bio', people: 5 }],
   });
   assert.match(out, /14-DAY SCORECARD \(2026-10-16 to 2026-10-29\)/);
   assert.match(out, /Real human site visits\s+300\+\s+12/);
@@ -50,6 +52,7 @@ test('scorecard: prints a row per day, filling zeroes, and the four targets', ()
   assert.match(out, /2026-10-17\s+4/);
   assert.match(out, /2026-10-29\s+0/);
   assert.match(out, /youtube\s+7/);
+  assert.match(out, /link_in_bio\s+5/);
   assert.equal(TARGETS.visits, 300);
 });
 
@@ -61,11 +64,13 @@ test('scorecard: this project\'s own probe traffic is excluded from every count'
   for (const query of [
     peoplePerDayQuery(LAUNCH_START, LAUNCH_END), totalsQuery(LAUNCH_START, LAUNCH_END),
     returningQuery(LAUNCH_START, LAUNCH_END), channelsQuery(LAUNCH_START, LAUNCH_END),
+    hooksQuery(LAUNCH_START, LAUNCH_END),
   ]) assert.match(query, /event NOT IN \('iso_probe'/, 'test traffic must not inflate the launch numbers');
 });
 
 test('scorecard: says so when nothing is tagged or nobody visited', () => {
   const out = formatScorecard({ start: LAUNCH_START, end: LAUNCH_END, days: dayRange(LAUNCH_START, LAUNCH_END) });
   assert.match(out, /no tagged arrivals yet/);
+  assert.match(out, /no tagged hooks yet/);
   assert.match(out, /not yet/);
 });

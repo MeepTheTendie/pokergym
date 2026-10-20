@@ -26,9 +26,10 @@ export default {
         return new Response('analytics proxy unavailable', { status: 502 });
       }
     }
-    // Keep new homepage visitors on one save/install origin. Existing www
-    // game URLs stay accessible so their browser-local saves can be exported.
-    if (url.hostname === 'www.playpokergym.com' && url.pathname === '/') {
+    // Keep every visitor on one save/install origin. Redirect the whole www
+    // host to the bare domain so browser-local saves and visitor counts do
+    // not split across two origins.
+    if (url.hostname === 'www.playpokergym.com') {
       url.hostname = 'playpokergym.com';
       url.protocol = 'https:';
       return Response.redirect(url.href, 307);
