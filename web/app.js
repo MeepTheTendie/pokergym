@@ -2246,6 +2246,7 @@ document.addEventListener('keydown', (e) => {
 // straight into a five-hand blackjack session so the first hand happens in one
 // page load instead of two or three taps. The title screen (daily drill,
 // choose style, etc.) is still reachable from HOME.
+const returning = Boolean(profile);
 if (profile) { renderMap(); show('scr-map'); }
 else {
   profile = createProfile(DEFAULT_CLASS);
@@ -2256,5 +2257,5 @@ else {
 }
 analytics.openTrainer({
   entry: dailyLinkEntry ?? (entryParams.practice ? 'practice_link' : 'direct'),
-  returning: Boolean(profile),
+  returning,
 });
