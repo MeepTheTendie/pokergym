@@ -22,7 +22,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preload" href="fonts/Sora.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="gbc.css">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -245,7 +245,7 @@
       <span class="prompt" id="lessonPrompt">▼</span>
     </div>
     <div class="row">
-      <button id="btnSkip" data-key="ESC">SKIP</button>
+      <button id="btnSkip" data-key="ESC" class="primary">SKIP LESSON</button>
       <button id="btnLessonNext" data-key="ENTER" class="primary">NEXT</button>
     </div>
   </div>
@@ -298,6 +298,26 @@
   <div class="window hand-panel">
     <h2 id="handTitle">Your Hand</h2>
     <div id="zones"></div>
+    <div class="row battle-action-bar">
+      <button id="btnAsk" data-key="C">ASK COACH</button>
+      <button id="btnDeal" data-key="D" class="primary">DEAL</button>
+      <button id="btnDraw" data-key="D">DRAW</button>
+    </div>
+    <div class="row" id="rowActions" hidden>
+      <button id="btnHit" data-key="H">HIT</button>
+      <button id="btnStand" data-key="S" class="primary">STAND</button>
+      <button id="btnDouble" data-key="D">DOUBLE</button>
+      <button id="btnSplit" data-key="P">SPLIT</button>
+    </div>
+    <div class="row" id="rowBet" hidden>
+      <button id="btnBanker" class="primary">BANKER</button>
+      <button id="btnPlayer">PLAYER</button>
+      <button id="btnTie">TIE</button>
+    </div>
+    <div class="row" id="rowPick" hidden>
+      <button id="btnClear" data-key="X">CLEAR</button>
+      <button id="btnConfirm" data-key="ENTER" class="primary">CONFIRM 5</button>
+    </div>
     <p class="hint" id="holdHint" hidden style="margin:8px 0 0; text-align:center;">Tap cards to hold them, then press DRAW.</p>
     <p class="hint" id="pays" style="margin:8px 0 0; text-align:center;"></p>
   </div>
@@ -314,30 +334,6 @@
       <button id="btnApply" data-key="A" class="primary">APPLY PLAY</button>
     </div>
     <p class="hint" id="why" hidden style="margin:8px 0 0;"></p>
-  </div>
-
-  <div class="row battle-action-bar">
-    <button id="btnAsk" data-key="C">ASK COACH</button>
-    <button id="btnDeal" data-key="D" class="primary">DEAL</button>
-    <button id="btnDraw" data-key="D">DRAW</button>
-  </div>
-
-  <div class="row" id="rowActions" hidden>
-    <button id="btnHit" data-key="H">HIT</button>
-    <button id="btnStand" data-key="S" class="primary">STAND</button>
-    <button id="btnDouble" data-key="D">DOUBLE</button>
-    <button id="btnSplit" data-key="P">SPLIT</button>
-  </div>
-
-  <div class="row" id="rowBet" hidden>
-    <button id="btnBanker" class="primary">BANKER</button>
-    <button id="btnPlayer">PLAYER</button>
-    <button id="btnTie">TIE</button>
-  </div>
-
-  <div class="row" id="rowPick" hidden>
-    <button id="btnClear" data-key="X">CLEAR</button>
-    <button id="btnConfirm" data-key="ENTER" class="primary">CONFIRM 5</button>
   </div>
 
   <div class="window" id="sessionSummary" hidden></div>
