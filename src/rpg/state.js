@@ -333,7 +333,15 @@ export function migrateMistakeBoxes(profile, today = localDayKey()) {
 // than reject them (which would silently wipe progress) or trust them (which
 // lets one corrupt entry crash a render), normalize the shape: keep what is
 // valid, drop what is not, and always return a usable profile.
-const isCount = n => Number.isSafeInteger(n) && n >= 0;
+
+// Shared primitive validators used by both sanitizeProfile (lenient) and the
+// backup reader (strict). Single source of truth for field-level checks.
+export const count = n => Number.isSafeInteger(n) && n >= 0;
+export const text = (s, max) => typeof s === 'string' && s.length <= max;
+export const game = id => GYMS.some(g => g.game === id);
+export const list = (xs, max, check) => Array.isArray(xs) && xs.length <= max && xs.every(check);
+export const dayKey = k => typeof k === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(k);
+const isCount = count;
 const clampCount = (n, fallback = 0) => (isCount(n) ? n : fallback);
 const asList = xs => (Array.isArray(xs) ? xs : []);
 
@@ -341,7 +349,7 @@ function sanitizeSession(s) {
   if (!s || typeof s !== 'object' || !GYM_BY_ID[s.gymId]) return null;
   const played = clampCount(s.played);
   if (played > SESSION_HANDS) return null;
-  const out = { gymId: s.gymId, played, optimal: Math.min(clampCount(s.optimal), played),
+  const out = { gymId: s.gymId, played, dealt: clampCount(s.dealt), optimal: Math.min(clampCount(s.optimal), played),
     startedAt: typeof s.startedAt === 'string' && s.startedAt.length <= 100 ? s.startedAt : new Date().toISOString() };
   if (validDrillPlan(s.drill, GYM_BY_ID[s.gymId].game)) out.drill = { mode: s.drill.mode, indices: [...s.drill.indices] };
   if (typeof s.completedAt === 'string' && s.completedAt.length <= 100) out.completedAt = s.completedAt;
@@ -389,7 +397,9 @@ export function sanitizeProfile(profile) {
   const sessions = asList(profile.sessions).map(sanitizeSession).filter(s => s && s.completedAt).slice(0, 30);
   const active = sanitizeSession(profile.activeSession);
   const handsPlayed = clampCount(profile.handsPlayed);
-  return { ...profile,
+  // Allowlist: build the profile from known fields only so unknown/tampered
+  // keys in a stored or restored profile cannot persist into the live object.
+  return {
     version: SAVE_VERSION,
     classId,
     name: typeof profile.name === 'string' && profile.name.length <= 100 ? profile.name : 'PLAYER',
@@ -408,6 +418,7 @@ export function sanitizeProfile(profile) {
     sessions,
     activeSession: active && active.played < SESSION_HANDS ? active : null,
     daily: dailyOf(profile),
+    createdAt: typeof profile.createdAt === 'string' && profile.createdAt.length <= 100 ? profile.createdAt : null,
   };
 }
 
@@ -438,7 +449,7 @@ export function canTrain(profile, gymId) {
 export function beginSession(profile, gymId, now = new Date().toISOString()) {
   if (!canTrain(profile, gymId)) return profile;
   if (profile.activeSession) return profile;
-  return { ...profile, activeSession: { gymId, played: 0, optimal: 0, startedAt: now } };
+  return { ...profile, activeSession: { gymId, played: 0, optimal: 0, dealt: 0, startedAt: now } };
 }
 export function scoreSession(profile, optimal, now = new Date().toISOString()) {
   if (!profile.activeSession) return profile;
