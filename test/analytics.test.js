@@ -265,3 +265,12 @@ test('docs list every event', () => {
   const doc = read('../docs/analytics-events.md');
   for (const name of [...Object.values(EVENTS), 'cta_click']) assert.match(doc, new RegExp('`' + name + '`'), name);
 });
+
+test('progress bar is driven by JS, not a hardcoded three-green rule', () => {
+  const css = readFileSync(new URL('../web/styles.css', import.meta.url), 'utf8');
+  assert.doesNotMatch(css, /\.battle-pips i:nth-child\(-n\+3\)/);
+  assert.match(css, /\.battle-pips i\.done/);
+  const app = readFileSync(new URL('../web/app.js', import.meta.url), 'utf8');
+  assert.match(app, /function updateBattlePips/);
+  assert.match(app, /updateBattlePips\(\)/);
+});

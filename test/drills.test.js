@@ -183,3 +183,18 @@ test('invalid drill plans are rejected in backups and removed safely from local 
     assert.equal(sanitizeProfile(p).activeSession.played, 0);
   }
 });
+
+
+test('session dealt counter is tracked and survives sanitize', async () => {
+  const { createProfile, beginSession, scoreSession, sanitizeProfile } = await import('../src/rpg/state.js');
+  let p = beginSession(createProfile('scholar'), 'countyfair');
+  assert.equal(p.activeSession.dealt, 0);
+  p = scoreSession(p, true);
+  assert.equal(p.activeSession.played, 1);
+  assert.equal(p.activeSession.dealt, 0); // scoreSession preserves dealt; app increments it in settleHand
+  // sanitize preserves dealt (and clamps)
+  const restored = sanitizeProfile({ ...p, activeSession: { ...p.activeSession, dealt: 99 } });
+  assert.equal(restored.activeSession.dealt, 99); // valid count, preserved
+  const restored2 = sanitizeProfile({ ...p, activeSession: { ...p.activeSession, dealt: 2 } });
+  assert.equal(restored2.activeSession.dealt, 2);
+});

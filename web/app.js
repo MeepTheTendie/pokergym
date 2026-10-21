@@ -1126,7 +1126,7 @@ function startGym(gym, sprint = false, mode = null) {
   gameId = gym.game;
   handsWon = 0;
   handsAtGym = 0;
-  handNumber = shortSession ? (profile.activeSession?.played ?? 0) : 0;
+  handNumber = shortSession ? (profile.activeSession?.dealt ?? profile.activeSession?.played ?? 0) : 0;
   decisionsThisHand = 0;
   awaitingBadge = false;
   sessionBest = 0;
@@ -1638,11 +1638,22 @@ function setControls() {
   el('btnClear').disabled = handDone || picked.size === 0;
 }
 
+function updateBattlePips() {
+  const pips = document.querySelectorAll('.battle-pips i');
+  if (!pips.length) return;
+  let done = 0;
+  if (dailyMode && dailyRun) done = dailyRun.index;
+  else if (shortSession) done = profile?.activeSession?.played ?? 0;
+  else done = Math.min(handsWon ?? 0, pips.length);
+  pips.forEach((pip, i) => pip.classList.toggle('done', i < done));
+}
+
 function renderBattle() {
   renderPlay();
   renderStatus();
   renderPaytable();
   setControls();
+  updateBattlePips();
 }
 
 /* ---------------- battle: one hand in, one hand out ---------------- */
@@ -1752,6 +1763,9 @@ function settleHand({ optimal, difficulty, line, review }) {
   profile = applied.profile;
   if (!optimal && review) profile = recordMistake(profile, { game: gameId, ...review });
   if (optimal && !coached) handsWon++;
+  if (shortSession && profile?.activeSession) {
+    profile = { ...profile, activeSession: { ...profile.activeSession, dealt: (profile.activeSession.dealt ?? 0) + 1 } };
+  }
   if (shortSession && !coached) {
     if (optimal) sessionBest = Math.max(sessionBest, profile.streak);
     else if (review) sessionMistakes.push(review);

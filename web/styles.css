@@ -782,7 +782,7 @@ img.badge {
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
-.battle-pips i:nth-child(-n+3) {
+.battle-pips i.done {
   background: linear-gradient(180deg, #38cf7a, #219d56);
   border-color: #52e391;
 }
