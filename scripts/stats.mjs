@@ -60,24 +60,50 @@ export function projectId() {
 // launch numbers honest. A new probe must carry one of these markers, or a
 // distinct_id listed below, so that it stays excluded.
 const TEST_EVENT_NAMES = ['iso_probe', 'pg_probe_batch', 'pg_proxy_probe', 'pg_proxy_probe2',
-  'attrib_probe', 'diag_manual_probe', 'manual_probe'];
+  'attrib_probe', 'diag_manual_probe', 'diag_pipeline_check', 'manual_probe'];
 const TEST_REFS = ['attribcheck', 'funnel-check'];
-// Two probe visits hit a bare URL with no marker, so no property can catch them.
-const TEST_DISTINCT_IDS = ['01a14b73-6c7f-7169-99d2-5ce023d03e89', '01a14ba3-de9e-731c-ba49-9c24fe4b762e'];
+// Probe visits hit a bare URL with no marker, so no property can catch them.
+const TEST_DISTINCT_IDS = ['01a14b73-6c7f-7169-99d2-5ce023d03e89',
+  '01a14ba3-de9e-731c-ba49-9c24fe4b762e', '8b1034d9-00ab-5c69-af64-c57fc786eb6d'];
 
-// SQL fragment (HogQL) that drops this project's own test traffic.
+// Automated visits, not people: five separate browser profiles ran the same
+// scripted path (landing page -> CTA -> trainer in under ten seconds) in two
+// bursts, all with the same impossible user agent (Chrome 125 paired with
+// Edge 12, a browser from 2015). Excluded by profile id and user agent so a
+// repeat run with fresh ids is still caught.
+const AUTOMATION_PERSON_IDS = ['ba45edef-65e8-507c-b152-87c8381300a2',
+  'd7f0bd04-54f6-5299-ba90-f9702a921326', 'be9b3d85-2d61-55a9-b4d4-0fb8dac4b753',
+  '5f2a6724-9a8f-5e93-9fe6-1a62dae1ee97', '5a42fe0e-c180-5c13-a659-3a2edd49adea'];
+const AUTOMATION_USER_AGENTS = ['Edge/12.246'];
+
+// PostHog's own "Internal / Test users" cohort. Profiles are marked
+// $internal_or_test_user=true on the person and recalculated into this cohort.
+export const INTERNAL_COHORT_ID = 644643;
+
+// SQL fragment (HogQL) that drops this project's own probe traffic and the
+// automation above.
 export function notTestClause() {
   const quoted = list => list.map(v => `'${v}'`).join(', ');
+  const uaFilters = AUTOMATION_USER_AGENTS
+    .map(ua => `properties.$raw_user_agent NOT LIKE '%${ua}%'`).join(' AND ');
   return `event NOT IN (${quoted(TEST_EVENT_NAMES)})
     AND distinct_id NOT IN (${quoted(TEST_DISTINCT_IDS)})
-    AND (properties.ref IS NULL OR properties.ref NOT IN (${quoted(TEST_REFS)}))`;
+    AND person_id NOT IN (${quoted(AUTOMATION_PERSON_IDS)})
+    AND person_id NOT IN COHORT ${INTERNAL_COHORT_ID}
+    AND (properties.ref IS NULL OR properties.ref NOT IN (${quoted(TEST_REFS)}))
+    AND (properties.first_ref IS NULL OR properties.first_ref NOT IN (${quoted(TEST_REFS)}))
+    AND (properties.session_ref IS NULL OR properties.session_ref NOT IN (${quoted(TEST_REFS)}))
+    AND (properties.$raw_user_agent IS NULL OR ${uaFilters})`;
 }
 
-// Unique people per day, the number the dashboard shows as DAU.
+// Unique people per day, the number the dashboard shows as DAU. A pageview is
+// the test for "was here": events like $set and $pageleave can arrive for a
+// stale person from an earlier visit and would otherwise count as a player.
 export function playersByDayQuery(days = 14) {
   return `SELECT toDate(timestamp) AS day, count(DISTINCT person_id) AS people
 FROM events
 WHERE timestamp > now() - INTERVAL ${Number(days)} DAY
+  AND event = '$pageview'
   AND ${notTestClause()}
 GROUP BY day
 ORDER BY day`;

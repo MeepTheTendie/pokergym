@@ -49,7 +49,9 @@ Releases and their tags are point-in-time source snapshots. The [spaced-recall-d
 
 Either section is skipped, not fatal, if its credential is missing.
 
-`npm run scorecard` prints the launch scorecard instead: the Oct 16–29 targets (real site visits, people who came back on a second day) and people per channel, with this project's own test traffic excluded. See `SCORECARD.md` for the tracking table and the decision rule.
+`npm run scorecard` prints the launch scorecard instead: the Oct 16–29 targets (real site visits, people who came back on a second day) and people per channel, with this project's own test traffic excluded. See `SCORECARD.md` for the tracking table and the decision rule. It uses UTC days, so label it that way when comparing it with the Chicago report below.
+
+`npm run report` prints the reconciled product scorecard: **America/Chicago** reporting days, today's partial numbers, seven-day comparisons, one-bucket-per-person source attribution, the hand-level funnel, Daily Drill participation, retention by first-touch cohort, exclusion audits, and data-quality warnings. See `docs/analytics-metrics.md` for the definitions and known gaps.
 
 One-time setup:
 

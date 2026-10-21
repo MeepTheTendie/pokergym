@@ -58,15 +58,25 @@
   // onload handler below. Reading the URL there would lose the source of every
   // trainer event, so read it here instead.
   var ATTRIBUTION = {};
+  var FIRST_KEY = 'pg_first_touch_v1';
+  var SESSION_KEY = 'pg_session_source_v1';
+  var SOURCE_KEYS = ['ref', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content'];
+  function readStore(store, key) {
+    try { var raw = store.getItem(key); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
+  }
+  function writeStore(store, key, value) {
+    try { store.setItem(key, JSON.stringify(value)); } catch (e) { /* storage blocked or full */ }
+  }
   try {
     var params = new URLSearchParams(window.location.search);
-    ['ref', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'd', 'practice'].forEach(function (key) {
+    var entry = {};
+    SOURCE_KEYS.concat(['d', 'practice']).forEach(function (key) {
       var value = params.get(key);
-      if (value) ATTRIBUTION[key] = String(value).slice(0, 100);
+      if (value) entry[key] = String(value).slice(0, 100);
     });
     // Fallback attribution from the referrer when no explicit ?ref= tag is
     // present. Mirror of REFERRER_REFS in src/rpg/links.js — keep in sync.
-    if (!ATTRIBUTION.ref) {
+    if (!entry.ref) {
       var referrerHost = '';
       try { referrerHost = new URL(document.referrer).hostname.toLowerCase(); } catch (e) { referrerHost = ''; }
       if (referrerHost.startsWith('www.')) referrerHost = referrerHost.slice(4);
@@ -87,7 +97,59 @@
           }
         }
       }
-      if (matched) ATTRIBUTION.ref = String(matched).slice(0, 100);
+      if (matched) entry.ref = String(matched).slice(0, 100);
+    }
+    // An explicit UTM source is attribution too: in-app browsers often hide the
+    // referrer, and Instagram's link-in-bio tag arrives as utm_source=ig.
+    if (!entry.ref && entry.utm_source) {
+      var UTM_REFS = {
+        youtube: 'youtube', yt: 'youtube',
+        instagram: 'instagram', ig: 'instagram', reels: 'reels', ig_reels: 'reels',
+        facebook: 'facebook', fb: 'facebook',
+        tiktok: 'tiktok', x: 'x', twitter: 'x', reddit: 'reddit',
+      };
+      var utm = String(entry.utm_source).toLowerCase();
+      if (UTM_REFS[utm]) entry.ref = UTM_REFS[utm];
+    }
+
+    function sourceOnly(obj) {
+      var out = { at: Date.now() };
+      for (var i = 0; i < SOURCE_KEYS.length; i++) {
+        var key = SOURCE_KEYS[i];
+        if (obj[key]) out[key] = obj[key];
+      }
+      return out;
+    }
+
+    // First touch is written once and never overwritten by a later visit.
+    var first = readStore(window.localStorage, FIRST_KEY);
+    if (!first || typeof first !== 'object') {
+      first = sourceOnly(entry);
+      writeStore(window.localStorage, FIRST_KEY, first);
+    }
+    // Current-session source: kept across internal navigation, renewed after
+    // 30 idle minutes (PostHog's default session window), and separate from
+    // the first-touch source above.
+    var session = readStore(window.sessionStorage, SESSION_KEY);
+    if (!session || typeof session !== 'object' || !session.at || Date.now() - session.at > 30 * 60 * 1000) {
+      session = sourceOnly(entry);
+      writeStore(window.sessionStorage, SESSION_KEY, session);
+    } else if (!session.ref && entry.ref) {
+      // A tagged link opened inside the same session fills a missing source.
+      session.ref = entry.ref;
+      writeStore(window.sessionStorage, SESSION_KEY, session);
+    }
+
+    // Current page's explicit params remain the unprefixed super properties.
+    for (var p in entry) if (Object.prototype.hasOwnProperty.call(entry, p)) ATTRIBUTION[p] = entry[p];
+    // `ref` keeps its old meaning (this visit's source) for existing reports.
+    if (session.ref || entry.ref) ATTRIBUTION.ref = session.ref || entry.ref;
+    else delete ATTRIBUTION.ref;
+    if (session.ref) ATTRIBUTION.session_ref = session.ref;
+    if (first.ref) ATTRIBUTION.first_ref = first.ref;
+    for (var s = 0; s < SOURCE_KEYS.length; s++) {
+      var sourceKey = SOURCE_KEYS[s];
+      if (sourceKey !== 'ref' && first[sourceKey]) ATTRIBUTION['first_' + sourceKey] = first[sourceKey];
     }
   } catch (error) {
     // Analytics must never break a page.

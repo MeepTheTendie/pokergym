@@ -6,14 +6,23 @@
 // completions can be split by channel without relying on super properties.
 // Starts hand out a run token; a completion fires only for a live token, so a
 // completion can never be counted twice or without its start.
+//
+// Run tokens are also sent as `run_id` so hand-level events can be grouped
+// into one session. They are unique per page load (random boot segment), so
+// two visits that both start their first session cannot merge.
+
+export const EVENT_VERSION = 2;
 
 export const EVENTS = Object.freeze({
-  OPEN_TRAINER: 'open_trainer',     // trainer page loaded (once per page load)
-  START_TRAINING: 'start_training', // first hand dealt in this page load
-  GAME_START: 'game_start',         // a five-hand session or gym run begins
-  SESSION_COMPLETE: 'session_complete',
-  START_DAILY: 'start_daily',       // a Daily Drill run begins (new, resumed or replay)
-  DAILY_COMPLETE: 'daily_complete',
+  OPEN_TRAINER: 'open_trainer',       // trainer page loaded (once per page load)
+  START_TRAINING: 'start_training',   // first hand dealt in this page load
+  GAME_START: 'game_start',           // a five-hand session or gym run begins
+  HAND_DEALT: 'hand_dealt',           // a hand (or Daily Drill step) was dealt
+  DECISION_MADE: 'decision_made',     // first player decision in a hand
+  HAND_COMPLETE: 'hand_complete',     // that hand was settled
+  SESSION_COMPLETE: 'session_complete', // five finished hands in one session
+  START_DAILY: 'start_daily',         // a Daily Drill run begins (new, resumed or replay)
+  DAILY_COMPLETE: 'daily_complete',   // five finished Daily Drill hands
 });
 
 export const GAMES = Object.freeze(['blackjack', 'videopoker', 'baccarat', 'holdem']);
@@ -31,7 +40,9 @@ export function createAnalytics({ send, ref = () => null } = {}) {
   let opened = false;
   let trained = false;
   let seq = 0;
-  const live = new Map(); // token -> { kind, game }
+  // Anonymous runs need a unique id even when two page loads start at once.
+  const boot = Math.random().toString(36).slice(2, 8);
+  const live = new Map(); // token -> { kind, game, mode, hands, decisions }
 
   function emit(name, props = {}) {
     const out = { ...props };
@@ -40,9 +51,9 @@ export function createAnalytics({ send, ref = () => null } = {}) {
     try { send?.(name, out); } catch { /* analytics must never break the game */ }
   }
 
-  function begin(kind, game) {
-    const token = `${kind}-${++seq}`;
-    live.set(token, { kind, game });
+  function begin(kind, game, mode) {
+    const token = `${kind}-${boot}-${++seq}`;
+    live.set(token, { kind, game, mode, hands: new Set(), decisions: new Set() });
     return token;
   }
 
@@ -51,6 +62,23 @@ export function createAnalytics({ send, ref = () => null } = {}) {
     if (!run || run.kind !== kind) return null;
     live.delete(token);
     return run;
+  }
+
+  function runFor(token, kind) {
+    const run = live.get(token);
+    if (!run || (kind && run.kind !== kind)) return null;
+    return run;
+  }
+
+  function runProps(run, token, extra = {}) {
+    return {
+      run_id: token,
+      run_kind: run.kind,
+      game: run.game,
+      mode: run.mode,
+      event_version: EVENT_VERSION,
+      ...extra,
+    };
   }
 
   return {
@@ -75,29 +103,90 @@ export function createAnalytics({ send, ref = () => null } = {}) {
       if (!GAMES.includes(game)) return null;
       // Starting a new run abandons any unfinished one.
       for (const [token, run] of live) if (run.kind === 'session') live.delete(token);
-      const token = begin('session', game);
-      emit(EVENTS.GAME_START, { game, mode, resumed: Boolean(resumed) });
+      const token = begin('session', game, mode);
+      emit(EVENTS.GAME_START, { game, mode, resumed: Boolean(resumed), run_id: token, event_version: EVENT_VERSION });
       return token;
     },
 
-    sessionComplete(token, { correct } = {}) {
+    /** A hand was dealt inside a live run. */
+    handDealt(token, { handIndex, handTotal, mode } = {}) {
+      const run = runFor(token, 'session') ?? runFor(token, 'daily');
+      if (!run) return false;
+      emit(EVENTS.HAND_DEALT, runProps(run, token, {
+        hand_index: Number.isInteger(handIndex) ? handIndex : null,
+        hand_total: Number.isInteger(handTotal) ? handTotal : null,
+        mode: mode ?? run.mode,
+      }));
+      return true;
+    },
+
+    /**
+     * The first player decision in a hand. Later actions in the same hand do
+     * not emit again; hand_complete's `decisions` count keeps the total.
+     */
+    decisionMade(token, { handIndex, action, mode } = {}) {
+      const run = runFor(token, 'session') ?? runFor(token, 'daily');
+      if (!run) return false;
+      const index = Number.isInteger(handIndex) ? handIndex : null;
+      if (index !== null) {
+        if (run.decisions.has(index)) return false;
+        run.decisions.add(index);
+      }
+      emit(EVENTS.DECISION_MADE, runProps(run, token, {
+        hand_index: index,
+        action: typeof action === 'string' ? action.slice(0, 40) : null,
+        mode: mode ?? run.mode,
+      }));
+      return true;
+    },
+
+    /** The hand was settled. Fires once per hand index per run. */
+    handComplete(token, { handIndex, optimal, decisions = 0, difficulty, mode } = {}) {
+      const run = runFor(token, 'session') ?? runFor(token, 'daily');
+      if (!run) return false;
+      const index = Number.isInteger(handIndex) ? handIndex : run.hands.size + 1;
+      if (run.hands.has(index)) return false;
+      run.hands.add(index);
+      emit(EVENTS.HAND_COMPLETE, runProps(run, token, {
+        hand_index: index,
+        optimal: Boolean(optimal),
+        decisions: Number.isFinite(decisions) ? decisions : 0,
+        difficulty: Number.isFinite(difficulty) ? difficulty : null,
+        mode: mode ?? run.mode,
+      }));
+      return true;
+    },
+
+    sessionComplete(token, { correct, hands = 5 } = {}) {
       const run = finish(token, 'session');
       if (!run) return false;
-      emit(EVENTS.SESSION_COMPLETE, { game: run.game, correct });
+      emit(EVENTS.SESSION_COMPLETE, {
+        game: run.game,
+        correct,
+        run_id: token,
+        hands_completed: hands,
+        event_version: EVENT_VERSION,
+      });
       return true;
     },
 
     /** A Daily Drill run begins, from any entry path. */
     startDaily({ entry, number, resumed = false, scored = true, shared = false } = {}) {
       for (const [token, run] of live) if (run.kind === 'daily') live.delete(token);
-      const token = begin('daily', 'daily');
-      emit(EVENTS.START_DAILY, { entry, number, resumed: Boolean(resumed), scored: Boolean(scored), shared: Boolean(shared) });
+      const token = begin('daily', 'daily', 'daily');
+      emit(EVENTS.START_DAILY, {
+        entry, number, resumed: Boolean(resumed), scored: Boolean(scored), shared: Boolean(shared),
+        run_id: token, event_version: EVENT_VERSION,
+      });
       return token;
     },
 
-    dailyComplete(token, { correct, number, scored = true } = {}) {
+    dailyComplete(token, { correct, number, scored = true, hands = 5 } = {}) {
       if (!finish(token, 'daily')) return false;
-      emit(EVENTS.DAILY_COMPLETE, { correct, number, scored: Boolean(scored) });
+      emit(EVENTS.DAILY_COMPLETE, {
+        correct, number, scored: Boolean(scored), run_id: token,
+        hands_completed: hands, event_version: EVENT_VERSION,
+      });
       return true;
     },
   };

@@ -149,6 +149,19 @@ const analytics = createAnalytics({
   ref: () => window.__pgAttribution?.ref ?? (entryParams.ref !== 'none' ? entryParams.ref : null),
 });
 let sessionToken = null; // live game_start run, closed by session_complete
+let handNumber = 0;      // 1-based index of the hand being dealt in this run
+let decisionsThisHand = 0;
+// Hand-level events share the run token of their game_start/start_daily parent.
+function handToken() { return dailyMode ? (dailyRun?.token ?? null) : sessionToken; }
+function handMode() { return dailyMode ? 'daily' : shortSession ? (drillMode ?? 'session') : 'challenge'; }
+function trackDecision(action) {
+  decisionsThisHand += 1;
+  // The first decision marks the hand as started by the player; later
+  // blackjack actions are counted in hand_complete.decisions instead.
+  if (decisionsThisHand === 1) {
+    analytics.decisionMade(handToken(), { handIndex: handNumber, action, mode: handMode() });
+  }
+}
 if (['ref', 'd', 'daily'].some(k => new URLSearchParams(location.search).has(k))) {
   try { history.replaceState(history.state, '', location.pathname + cleanEntrySearch(location.search) + location.hash); } catch {}
 }
@@ -1063,6 +1076,8 @@ function startDaily(entry = 'other') {
   tutorialTips = [];
   handsWon = 0;
   handsAtGym = index;
+  handNumber = index;
+  decisionsThisHand = 0;
   awaitingBadge = false;
   firstDecisionStart = performance.now();
   firstDecisionEmitted = false;
@@ -1111,6 +1126,8 @@ function startGym(gym, sprint = false, mode = null) {
   gameId = gym.game;
   handsWon = 0;
   handsAtGym = 0;
+  handNumber = shortSession ? (profile.activeSession?.played ?? 0) : 0;
+  decisionsThisHand = 0;
   awaitingBadge = false;
   sessionBest = 0;
   sessionMistakes = [];
@@ -1632,6 +1649,8 @@ function renderBattle() {
 function startHand() {
   cancelAutoAdvance();
   analytics.handStarted({ game: gameId, mode: dailyMode ? 'daily' : shortSession ? 'session' : 'challenge' });
+  handNumber += 1;
+  decisionsThisHand = 0;
   handDone = false;
   acted = false;
   decisions = [];
@@ -1672,6 +1691,11 @@ function startHand() {
     round = newHeRound(rng ?? Math.random);
   }
 
+  analytics.handDealt(handToken(), {
+    handIndex: handNumber,
+    handTotal: dailyMode ? DAILY_HANDS : shortSession ? SESSION_HANDS : HANDS_TO_WIN,
+    mode: handMode(),
+  });
   renderBattle();
   audio.sfx('deal');
   const instructions = {
@@ -1699,6 +1723,13 @@ function startHand() {
 function settleHand({ optimal, difficulty, line, review }) {
   if (handDone) return;
   handDone = true;
+  analytics.handComplete(handToken(), {
+    handIndex: handNumber,
+    optimal: Boolean(optimal),
+    decisions: decisionsThisHand,
+    difficulty,
+    mode: handMode(),
+  });
   if (!firstDecisionEmitted && firstDecisionStart > 0) {
     firstDecisionEmitted = true;
     window.trackEvent?.('time_to_first_decision', {
@@ -1875,7 +1906,7 @@ function renderSessionSummary(session) {
     near.textContent = 'ONE MORE CORRECT WOULD HAVE BEEN A PERFECT RUN. PLAY AGAIN?';
     box.appendChild(near);
   }
-  analytics.sessionComplete(sessionToken, { correct: session.optimal });
+  analytics.sessionComplete(sessionToken, { correct: session.optimal, hands: SESSION_HANDS });
   const miss = sessionMistakes[0];
   if (miss) {
     const detail = document.createElement('p');
@@ -1956,7 +1987,7 @@ function settleDailyHand({ optimal, difficulty, line, review }) {
   el('battleEndRow').hidden = false;
 
   const tally = run.results.filter(Boolean).length;
-  if (run.finished) analytics.dailyComplete(run.token, { correct: tally, number: run.number, scored: run.scored });
+  if (run.finished) analytics.dailyComplete(run.token, { correct: tally, number: run.number, scored: run.scored, hands: DAILY_HANDS });
   const say = optimal
     ? 'GOOD READ. THAT IS THE PLAY.'
     : 'NO. THE BETTER MOVE WAS DIFFERENT.';
@@ -1996,6 +2027,7 @@ function toggleVpHold(index) {
 function doDraw() {
   if (!round || round.drawn || handDone) return;
   acted = true;
+  trackDecision('draw');
   // Grade the hold against the coach's answer rather than against whatever
   // advice happens to be on screen: a hold played correctly without opening
   // the panel is still the correct hold.
@@ -2046,6 +2078,7 @@ function bjAct(action) {
   else return;
 
   decisions.push({ action, optimal: Boolean(before.optimal?.includes(action)), review });
+  trackDecision(action);
   advice = null;
   el('coachPanel').hidden = true;
   el('why').hidden = true;
@@ -2091,6 +2124,7 @@ function renderQuizButtons() {
 function bacAnswer(choice) {
   if (handDone || !round?.quiz) return;
   acted = true;
+  trackDecision(choice);
   const quiz = round.quiz;
   const correct = choice === quiz.correct;
   settleHand({
@@ -2117,6 +2151,7 @@ function togglePick(index) {
 function heConfirm() {
   if (handDone || picked.size !== 5) return;
   acted = true;
+  trackDecision('confirm');
   const chosen = round.hand7.filter((_, i) => picked.has(i));
   settleHand({
     optimal: playsBestFive(round.hand7, chosen),

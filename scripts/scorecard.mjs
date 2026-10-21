@@ -115,8 +115,9 @@ export function formatScorecard({ start, end, days, peopleByDay = {}, totals = {
   const n = v => Number(v ?? 0);
   const people = n(totals.people);
   const lines = [
-    `POKER GYM — 14-DAY SCORECARD (${start} to ${end})`,
+    `POKER GYM — 14-DAY SCORECARD (${start} to ${end}, UTC days)`,
     'Site-side numbers only. Video views and unprompted requests are filled in by hand.',
+    'This launch tracker uses PostHog UTC days and is not the reconciled Chicago scorecard (`npm run report`).',
     '',
     'TARGETS',
     table(

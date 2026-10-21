@@ -42,7 +42,8 @@ test('scorecard: prints a row per day, filling zeroes, and the four targets', ()
     channels: [{ ref: 'youtube', people: 7 }],
     hooks: [{ hook: 'link_in_bio', people: 5 }],
   });
-  assert.match(out, /14-DAY SCORECARD \(2026-10-16 to 2026-10-29\)/);
+  assert.match(out, /14-DAY SCORECARD \(2026-10-16 to 2026-10-29, UTC days\)/);
+  assert.match(out, /reconciled Chicago scorecard/);
   assert.match(out, /Real human site visits\s+300\+\s+12/);
   assert.match(out, /People who came back \(2nd day\)\s+20\+\s+2/);
   assert.match(out, /Unprompted requests for more\s+3\+\s+by hand/);
