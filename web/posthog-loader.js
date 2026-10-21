@@ -25,6 +25,11 @@
   var CONFIG = {
     api_host: API_HOST,
     ui_host: UI_HOST,
+    // Create/update a person profile for every visitor (not only identified
+    // ones). PostHog's default is 'identified_only', which left our anonymous
+    // visitors without profiles and made the lifecycle/retention insights
+    // (New vs returning, Do players come back?) render all zeros.
+    person_profiles: 'always',
     capture_pageview: true,
     capture_pageleave: true,
     autocapture: true,
