@@ -17,7 +17,9 @@ self.addEventListener('install', event => {
       }));
     }
   })());
-  // Updates wait until existing game tabs close, avoiding mixed game versions.
+  // Activate the new worker as soon as it installs so instrumentation and
+  // fixes reach existing tabs without waiting for every tab to close.
+  self.skipWaiting();
 });
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
