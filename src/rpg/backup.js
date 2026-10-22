@@ -1,15 +1,10 @@
-import { deserialize, serialize, validMistakeQuiz, validMistakeBox, validMistakeDue, SESSION_HANDS } from './state.js';
+import { deserialize, serialize, validMistakeQuiz, validMistakeBox, validMistakeDue, SESSION_HANDS, count, text, game, list, dayKey } from './state.js';
 import { GYMS, GYM_BY_ID } from './gyms.js';
 import { validDailyGames, validDailyPlan, DAILY_HANDS } from './daily.js';
 
 import { validDrillPlan } from './drills.js';
 
-const count = n => Number.isSafeInteger(n) && n >= 0;
-const text = (s, max) => typeof s === 'string' && s.length <= max;
-const game = id => GYMS.some(g => g.game === id);
-const list = (xs, max, check) => Array.isArray(xs) && xs.length <= max && xs.every(check);
 const session = s => s && GYM_BY_ID[s.gymId] && count(s.played) && s.played <= SESSION_HANDS && count(s.optimal) && s.optimal <= s.played && text(s.startedAt, 100) && (s.drill === undefined || validDrillPlan(s.drill, GYM_BY_ID[s.gymId].game));
-const dayKey = k => typeof k === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(k);
 const dayResults = r => Array.isArray(r) && r.length === DAILY_HANDS && r.every(v => typeof v === 'boolean');
 const daily = d => d && typeof d === 'object' && !Array.isArray(d) &&
   (d.lastKey == null || dayKey(d.lastKey)) &&

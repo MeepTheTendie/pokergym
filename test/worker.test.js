@@ -5,7 +5,7 @@ import { PUBLISHED_REFS } from '../src/rpg/links.js';
 import { GUIDE_PATHS, pathBucket, isPageLike, countBucket, dataPoint } from '../worker/count.js';
 import worker from '../worker/index.js';
 import { SECURITY_HEADERS, headersFileText } from '../worker/security.js';
-import { buildQuery, formatTable, playersByDayQuery, stageReachQuery, eventTotalsQuery, formatPlayers, formatStages, formatEvents } from '../scripts/stats.mjs';
+import { buildQuery, formatTable, playersByDayQuery, stageReachQuery, eventTotalsQuery, formatPlayers, formatStages, formatEvents, notTestClause } from '../scripts/stats.mjs';
 
 const nav = (url, extra = {}) => new Request(url, { headers: { 'sec-fetch-mode': 'navigate', ...extra } });
 
@@ -129,6 +129,7 @@ test('stats query and table label', () => {
 test('stats: real-player report counts people, not requests', () => {
   assert.match(playersByDayQuery(14), /count\(DISTINCT person_id\)/);
   assert.match(playersByDayQuery(14), /INTERVAL 14 DAY/);
+  assert.match(playersByDayQuery(14), /event = '\$pageview'/, 'only a pageview proves someone was here today');
   assert.match(stageReachQuery(30), /finished_the_daily_drill/);
   assert.match(stageReachQuery(30), /properties\.\$pathname = '\/web\/'/);
   assert.match(eventTotalsQuery(30), /event NOT IN \(/);
@@ -146,6 +147,14 @@ test('stats: real-player report counts people, not requests', () => {
 
   assert.match(formatEvents([{ event: 'game_start', times: 9, people: 3 }]), /game_start\s+9\s+3/);
   assert.match(formatEvents([]), /nothing yet/);
+});
+
+test('stats: probe and scripted automation visits are excluded', () => {
+  const clause = notTestClause();
+  assert.match(clause, /'diag_pipeline_check'/);
+  assert.match(clause, /person_id NOT IN \('ba45edef-/);
+  assert.match(clause, /properties\.\$raw_user_agent IS NULL OR/);
+  assert.match(clause, /NOT LIKE '%Edge\/12\.246%'/);
 });
 
 

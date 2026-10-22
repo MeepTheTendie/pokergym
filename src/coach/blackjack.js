@@ -108,6 +108,7 @@ export function addCard(total, aces, index) {
  * what keeps the search in the millisecond range.
  */
 const dealerMemo = new Map();
+const buildHitsMemo = new Map();
 const DEALER_MEMO_LIMIT = 400000;
 
 function signature(counts) {
@@ -215,6 +216,9 @@ const SLOTS = (BLACKJACK_TOTAL + 1) * 2;
  * of the HIT action.
  */
 export function buildHits(dist, weights, maxHits = MAX_HITS) {
+  const key = Array.from(dist).join(',') + '|' + Array.from(weights).join(',') + '|' + maxHits;
+  const cached = buildHitsMemo.get(key);
+  if (cached) return cached;
   const n = countsSize(weights);
   const stand = new Float64Array(SLOTS);
   for (let total = 0; total <= BLACKJACK_TOTAL; total++) {
@@ -230,7 +234,9 @@ export function buildHits(dist, weights, maxHits = MAX_HITS) {
       best.push(row);
       hitVal.push(new Float64Array(SLOTS).fill(-1));
     }
-    return { best, hitVal, n };
+    const result = { best, hitVal, n };
+    buildHitsMemo.set(key, result);
+    return result;
   }
   for (let d = 1; d <= maxHits; d++) {
     const prev = best[d - 1];
@@ -254,7 +260,9 @@ export function buildHits(dist, weights, maxHits = MAX_HITS) {
     hitVal.push(hv);
     best.push(row);
   }
-  return { best, hitVal, n };
+  const result = { best, hitVal, n };
+  buildHitsMemo.set(key, result);
+  return result;
 }
 
 /* ---- action values ------------------------------------------------------ */
@@ -372,6 +380,7 @@ const STRATEGY_CACHE = new Map();
 export function clearCache() {
   STRATEGY_CACHE.clear();
   dealerMemo.clear();
+  buildHitsMemo.clear();
 }
 
 /*
