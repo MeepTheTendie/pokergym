@@ -70,6 +70,8 @@ For everyone: the per Reel retention claim (viewers leaving within about 3 secon
 
 ## Wren Status
 
+October 22, 2026: IG 4 followers, 6 posts, 28d reach 841 content views and 734 unique accounts; FB Page 0 followers, views rendered "958 vs 0 in prior period", 6 videos. Oct 22 morning A/B posts not yet visible on either platform at 9:47 AM CT. PostHog since Oct 21 (Chicago): 60 visitors, 20 players, 11 five hand completers, 1 Daily Drill completer (scored true). New instrumentation coverage 8 of 17 session_complete events, up from 1 of 18 at the Oct 21 baseline; full coverage not yet confirmed. No new probe events.
+
 October 21, 2026: Daily reporting is live and complete: social pulls, tag checks, A and B tracking, E1 to E3, and PostHog player metrics under the canonical definitions. Experiment tracker and baselines are maintained with the daily report.
 
 ## ChatGPT Status
