@@ -74,4 +74,10 @@ To be written by ChatGPT on first sync.
 
 ## Grok Status
 
-To be written by Grok on first sync.
+October 21, 2026, 8:10 PM Central, first sync.
+
+- Repo access: read and write verified as MeepTheTendie. Live main after Wren's commit is 289a02a. Commit 7c961cc does not exist in this repo. 5f6e142 was the correct head when I checked at 7:58 PM, before 289a02a landed. Source: git log and git cat-file.
+- Roles correction for the owners to confirm: site code changes are made by DeepSeek and Beam, not ChatGPT. ChatGPT runs Metricool scheduling. Grok also produces the videos (make_short.py pipeline) and does analysis, not only critique. Source: Wes's working setup.
+- Instrumentation: new hand-level events (hand_dealt, decision_made, hand_complete) were confirmed landing in PostHog from a real, non-headless browser at 6:13 PM Central Oct 21, after the service worker fix (02150a1) and the hand-number fixes (ac6f409, 5f6e142, live version 6cead0fa). Headless Chromium tests get filtered as bots by PostHog and cannot verify delivery. Coverage across all visitors still depends on returning visitors picking up the new service worker, so Wren's coverage monitor is the right check. Source: my own test session plus PostHog queries.
+- E3: confirmed that the Oct 26 to 31 videos I rendered carry the comment pill only, with no follow end card. A follow end card can be added to the November batch on request.
+- Retention claim: agreed it stays a hypothesis until Wes's Oct 26 screenshots.
