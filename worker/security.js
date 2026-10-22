@@ -31,5 +31,5 @@ export function headersFileText() {
   return `/*\n${lines.join('\n')}\n  cache-control: public, max-age=0, must-revalidate\n` +
     `\n/web/assets/*\n  cache-control: public, max-age=31536000, immutable\n` +
     `\n/web/fonts/*\n  cache-control: public, max-age=31536000, immutable\n` +
-    `\n/src/*\n  cache-control: public, max-age=31536000, immutable\n`;
+    `\n/src/*\n  cache-control: public, max-age=0, must-revalidate\n`;
 }

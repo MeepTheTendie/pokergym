@@ -24,6 +24,6 @@
     "test:analytics": "node scripts/analytics-browser-test.mjs"
   },
   "devDependencies": {
-    "wrangler": "^4.148.0"
+    "wrangler": "^4.151.3"
   }
 }
