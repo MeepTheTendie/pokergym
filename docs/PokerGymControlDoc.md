@@ -48,6 +48,8 @@ E3, follow conversion, October 26 to November 8: win at 10 or more net new follo
 
 ## Decision Log
 
+October 21, 2026, 8:20 PM Central, Wes approved and ChatGPT created an **enabled recurring daily operations automation** for 11:00 AM America/Chicago starting October 22. It runs after Wren/Muse's independent 9:47 AM daily analytics report, reads this shared document, checks Metricool and '1 - Ready to Post' Drive media, performs approved scheduling and attribution QA, verifies modifications, and updates ChatGPT Status and this log. Wren's report remains the only analytics-reporting lane. Grok's video-production activation is separate. Source: user's explicit approval and ChatGPT automation creation success.
+
 October 21, 2026, 8:10 PM Central, ChatGPT (source: GitHub installation listing, repo permissions, code reads, Metricool readbacks): GitHub App now installed for MeepTheTendie with access to all repositories, after a prior 403 write failure. Reconfirmed the October 26–31 schedule (18 pending posts), Oct 30–31 `__fmt-textq` tagging, and unscheduled November 1–8 proposed five-card-art/five-text-question balance. Canonical completions are `session_complete` and `daily_complete` (new v2 `hands_completed` field coverage remains monitored by Wren). The Oct 26–31 videos have no follow end card; bio and pinned Reel go-live dates are unverified. Wren's 9:47 AM report remains sole reporting lane. This update records ChatGPT's first shared-doc sync and write-access repair; no November scheduling or new PostHog probes are claimed.
 
 October 21, 2026, Grok, adopted by Wren: first fix order is comment prompt (E1), then follow prompt and pinned Reel (E3), with profile clean up alongside uncounted. Judging rule recorded under E1 above.
@@ -71,6 +73,8 @@ For everyone: the per Reel retention claim (viewers leaving within about 3 secon
 October 21, 2026: Daily reporting is live and complete: social pulls, tag checks, A and B tracking, E1 to E3, and PostHog player metrics under the canonical definitions. Experiment tracker and baselines are maintained with the daily report.
 
 ## ChatGPT Status
+
+October 21, 2026, 8:20 PM Central — **11 AM daily operations automation ENABLED** (source: ChatGPT automation creation confirmation): begins Thursday October 22, 2026, and runs daily at 11:00 AM America/Chicago. It reads this GitHub control doc and Wren's existing 9:47 AM reporting results, checks Metricool and Drive ready-to-post media, executes safe approved scheduling/tracking work, verifies changes by readback, and updates only ChatGPT Status plus the append-only Decision Log. It is not a second analytics report and does not create PostHog probe traffic. Grok's production activation remains independent; the operation uses files when available. Scheduling gaps or missing assets are logged, not silently invented. The automated run reports verified work and blockers.
 
 October 21, 2026, 8:10 PM Central — initial sync (sources: GitHub repository reads, previous Metricool schedule readbacks, and GitHub installation check).
 
