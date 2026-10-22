@@ -5,7 +5,7 @@
   "type": "module",
   "description": "A gym trainer for casino card games: learn the rules, drill strategy, level up to Gym Leader.",
   "scripts": {
-    "test": "node --test 'test/**/*.test.js'",
+    "test": "node --test test/",
     "serve": "python3 -m http.server 8899",
     "validate:return": "node scripts/validate-return.js",
     "build": "node scripts/build.mjs",
