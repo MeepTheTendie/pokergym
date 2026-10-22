@@ -46,7 +46,36 @@ E2, text questions versus card art, October 30 to November 8: format is tagged i
 
 E3, follow conversion, October 26 to November 8: win at 10 or more net new followers combined, kill at fewer than 3. Implementation status, verified by ChatGPT frame inspection and account checks: the follow prompt end card is absent from the October 26 to 31 videos, which end on a Train free at playpokergym.com screen; the updated bios and the pinned Hold'em straight Reel are unverified and unconfirmed, pending Wes's work in the social accounts.
 
+## PostHog Dashboard Spec (crew negotiation, opened October 22, 2026, by Wes's order)
+
+Wes's order: the three assistants agree on what one real PostHog dashboard (inside PostHog, project 670990) needs to include, and all three contribute to making it. The CanonicalDashboard.md file is the interim numbers source until this dashboard exists. Rules for this section: each assistant writes only in its own subsection below. An insight belongs on the dashboard only if it feeds a decision (fix, kill, or scale). One screen, no vanity panels. Social numbers stay off it; views are not visits.
+
+### Wren proposal (October 22, 2026)
+
+Windows fixed to the canonical ones: all time, reporting epoch since October 21, 2026 (00:00 America/Chicago), today partial. Probe and test events excluded everywhere.
+1. Headline tiles (epoch): Visitors, Players, Finished five hands (persons, with session count), Daily Drill finishers, Returned another day.
+2. Funnel: $pageview to game_start to session_complete, person conversion at each step.
+3. Returns: D1 by first touch cohort, computed only for cohorts whose next day is complete, split at the October 22, 2026, 12:00 PM Central deploy boundary. Plus days_since_last_visit distribution on open_trainer.
+4. Recap panel (post deploy): recap_view count, recap_tap split by button, share of recap viewers who tap daily_drill, start_daily with entry recap.
+5. Channels: Visitors, Players, and Finishers by first touch bucket and first utm_content, with unknown reported separately and never merged.
+6. Data quality tile: event_version 2 and hands_completed coverage on new completion events, so the crew can see instrumentation health at a glance.
+Build note from Wren: my PostHog key is query read only, so I cannot create dashboard objects in PostHog. I can spec and verify every number on it. State in your subsection whether you hold PostHog write access, because that decides who builds it.
+
+### ChatGPT additions
+
+(pending: ChatGPT adds its must haves and cuts here, and states whether it holds PostHog write access)
+
+### Grok additions
+
+(pending: Grok adds its must haves and cuts here, and states whether it holds PostHog write access)
+
+### Convergence
+
+When all three subsections are filled, Wren drafts the final spec from what survives all three reviews, Wes approves it, and the assistant with PostHog write access builds it in PostHog. The finished dashboard then replaces CanonicalDashboard.md as the numbers source, and the daily report cites it.
+
 ## Decision Log
+October 22, 2026, Wes (decision): Build one real PostHog dashboard together. The three assistants will agree its contents in the new PostHog Dashboard Spec section of this doc, each contributing in its own subsection, and the crew will build it inside PostHog. CanonicalDashboard.md is the interim source only. ChatGPT and Grok: fill your subsections on your next sync, including whether you hold PostHog write access.
+
 October 22, 2026, Wes (decision): One canonical dashboard. Wes ordered a single set of numbers the whole crew agrees on after three different completer counts reached him in one day. Wren created docs/CanonicalDashboard.md with fixed windows (all time; reporting epoch since Oct 21, 2026, 00:00 America/Chicago; today, partial) and the event dictionary definitions. Crew rule: cite that file for player numbers; if you compute a different number, log the difference and your method here instead of reporting a rival figure to Wes. Wren refreshes the dashboard with the daily report.
 
 October 22, 2026, 4:21 PM Central, Grok (Wes approved): Backlog item for Beam/DeepSeek, to be prioritized at the Oct 27 review: add a free save-code export/import so progress and streaks survive a browser clear or iOS Safari's 7-day storage eviction (progress currently lives only in browser storage, and the homepage says clearing site data removes the save). Keep it free; no paid drill pack (Ko-fi is the only income). Hypothesis: no player has lost a save yet, since almost nobody has returned. An outside $99 'native app wrapper' pitch was declined.
@@ -125,4 +154,5 @@ October 21, 2026, 8:10 PM Central, first sync.
 - Instrumentation: new hand-level events (hand_dealt, decision_made, hand_complete) were confirmed landing in PostHog from a real, non-headless browser at 6:13 PM Central Oct 21, after the service worker fix (02150a1) and the hand-number fixes (ac6f409, 5f6e142, live version 6cead0fa). Headless Chromium tests get filtered as bots by PostHog and cannot verify delivery. Coverage across all visitors still depends on returning visitors picking up the new service worker, so Wren's coverage monitor is the right check. Source: my own test session plus PostHog queries.
 - E3: confirmed that the Oct 26 to 31 videos I rendered carry the comment pill only, with no follow end card. A follow end card can be added to the November batch on request.
 - Retention claim: agreed it stays a hypothesis until Wes's Oct 26 screenshots.
+
 
