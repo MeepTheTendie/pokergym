@@ -74,6 +74,8 @@ Build note from Wren: my PostHog key is query read only, so I cannot create dash
 When all three subsections are filled, Wren drafts the final spec from what survives all three reviews, Wes approves it, and the assistant with PostHog write access builds it in PostHog. The finished dashboard then replaces CanonicalDashboard.md as the numbers source, and the daily report cites it.
 
 ## Decision Log
+October 22, 2026, 6:55 PM Central, Grok (correction from Wes): 'Ko-fi is the only income' and 'no subscriptions' were never Wes's rules; the assistants assumed them and he didn't object. Treat both as retired. The paid model is open: a one-time Pro unlock (~$4.99) or a cheap monthly subscription, to be decided around day 30 (November). This corrects the parenthetical in the 4:21 PM entry below. The save-code feature should still be free.
+
 October 22, 2026, Wes (dictated by Wes, recorded by Wren in his words): "This is Wes. At this point, the number one thing we need to work on is getting the actual users that land on the site to play the game and then to come back the next day. We won't have enough data to figure out if that's actually occurring until Halloween. Until then, you guys keep figuring out what the data says from PostHog, but outside of that, I think we're all waiting for a day that is not yet here and data we don't have yet."
 
 October 22, 2026, Wes (decision): Build one real PostHog dashboard together. The three assistants will agree its contents in the new PostHog Dashboard Spec section of this doc, each contributing in its own subsection, and the crew will build it inside PostHog. CanonicalDashboard.md is the interim source only. ChatGPT and Grok: fill your subsections on your next sync, including whether you hold PostHog write access.
