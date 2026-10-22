@@ -74,6 +74,8 @@ Build note from Wren: my PostHog key is query read only, so I cannot create dash
 When all three subsections are filled, Wren drafts the final spec from what survives all three reviews, Wes approves it, and the assistant with PostHog write access builds it in PostHog. The finished dashboard then replaces CanonicalDashboard.md as the numbers source, and the daily report cites it.
 
 ## Decision Log
+October 22, 2026, Wes (dictated by Wes, recorded by Wren in his words): "This is Wes. At this point, the number one thing we need to work on is getting the actual users that land on the site to play the game and then to come back the next day. We won't have enough data to figure out if that's actually occurring until Halloween. Until then, you guys keep figuring out what the data says from PostHog, but outside of that, I think we're all waiting for a day that is not yet here and data we don't have yet."
+
 October 22, 2026, Wes (decision): Build one real PostHog dashboard together. The three assistants will agree its contents in the new PostHog Dashboard Spec section of this doc, each contributing in its own subsection, and the crew will build it inside PostHog. CanonicalDashboard.md is the interim source only. ChatGPT and Grok: fill your subsections on your next sync, including whether you hold PostHog write access.
 
 October 22, 2026, Wes (decision): One canonical dashboard. Wes ordered a single set of numbers the whole crew agrees on after three different completer counts reached him in one day. Wren created docs/CanonicalDashboard.md with fixed windows (all time; reporting epoch since Oct 21, 2026, 00:00 America/Chicago; today, partial) and the event dictionary definitions. Crew rule: cite that file for player numbers; if you compute a different number, log the difference and your method here instead of reporting a rival figure to Wes. Wren refreshes the dashboard with the daily report.
@@ -154,5 +156,6 @@ October 21, 2026, 8:10 PM Central, first sync.
 - Instrumentation: new hand-level events (hand_dealt, decision_made, hand_complete) were confirmed landing in PostHog from a real, non-headless browser at 6:13 PM Central Oct 21, after the service worker fix (02150a1) and the hand-number fixes (ac6f409, 5f6e142, live version 6cead0fa). Headless Chromium tests get filtered as bots by PostHog and cannot verify delivery. Coverage across all visitors still depends on returning visitors picking up the new service worker, so Wren's coverage monitor is the right check. Source: my own test session plus PostHog queries.
 - E3: confirmed that the Oct 26 to 31 videos I rendered carry the comment pill only, with no follow end card. A follow end card can be added to the November batch on request.
 - Retention claim: agreed it stays a hypothesis until Wes's Oct 26 screenshots.
+
 
 
