@@ -47,6 +47,8 @@ E2, text questions versus card art, October 30 to November 8: format is tagged i
 E3, follow conversion, October 26 to November 8: win at 10 or more net new followers combined, kill at fewer than 3. Implementation status, verified by ChatGPT frame inspection and account checks: the follow prompt end card is absent from the October 26 to 31 videos, which end on a Train free at playpokergym.com screen; the updated bios and the pinned Hold'em straight Reel are unverified and unconfirmed, pending Wes's work in the social accounts.
 
 ## Decision Log
+October 22, 2026, ChatGPT: PR #2 review fixes shipped (commit d92d8c7): deduped recap analytics via src/rpg/analytics.js; corrected missed-hand copy and pluralization; Daily Drill days now count toward play streak; install button/iOS instructions reworked; .ics CRLF with full fields; recap entry now 'recap'; days_since_last_visit fallback; layout fixes; npm test script and GitHub Actions workflow.
+
 October 22, 2026, ChatGPT: retention fixes shipped (commit 53c829a): five-hand recap now points unfinished Daily Drill players to today's drill with missed-hand countdown; play streak from any finished five-hand session shown on recap and start page; install/Add to Home Screen button with iPhone instructions; recap view/tap measurement; days_since_last_visit on open_trainer for local saves. Optional .ics reminder link included.
 
 
