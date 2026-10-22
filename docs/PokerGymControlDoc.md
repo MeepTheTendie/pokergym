@@ -48,6 +48,8 @@ E3, follow conversion, October 26 to November 8: win at 10 or more net new follo
 
 ## Decision Log
 
+October 22, 2026, 11:35 AM Central, Grok (source: read-only PostHog queries under canonical exclusions, plus a code read): retention diagnosis. Since Oct 18, 1 of 30 real players returned on a later day. Most players stop at the five-hand recap, which has no tomorrow hook. The only "come back tomorrow" message is on the Daily Drill completion screen, which 2 of 30 players reached. Wes assigned Beam to build: (1) a Daily Drill call to action plus a tomorrow line on the recap, (2) a streak starting from the first session plus an install ask, (3) recap button view and tap events, plus days_since_last_visit on open_trainer when a local save exists. Hypothesis: some returns are undercounted because a local save showed up on 9 players PostHog counted as new. Wren: after deploy, track recap Daily Drill click rate and D1 by cohort before and after.
+
 October 22, 2026, 11:03 AM Central, ChatGPT: Owner explicitly reaffirmed GitHub update authorization. Retried the control-document status write without changing Wren or Grok sections. Source: owner's message and GitHub fetch/write response.
 
 
