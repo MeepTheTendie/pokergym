@@ -23,6 +23,8 @@ export const EVENTS = Object.freeze({
   SESSION_COMPLETE: 'session_complete', // five finished hands in one session
   START_DAILY: 'start_daily',         // a Daily Drill run begins (new, resumed or replay)
   DAILY_COMPLETE: 'daily_complete',   // five finished Daily Drill hands
+  RECAP_VIEW: 'recap_view',           // five-hand recap shown
+  RECAP_TAP: 'recap_tap',             // a recap button tapped
 });
 
 export const GAMES = Object.freeze(['blackjack', 'videopoker', 'baccarat', 'holdem']);
@@ -187,6 +189,18 @@ export function createAnalytics({ send, ref = () => null } = {}) {
         correct, number, scored: Boolean(scored), run_id: token,
         hands_completed: hands, event_version: EVENT_VERSION,
       });
+      return true;
+    },
+
+    /** A five-hand recap screen was shown. */
+    recapView(props = {}) {
+      emit(EVENTS.RECAP_VIEW, { ...props, event_version: EVENT_VERSION });
+      return true;
+    },
+
+    /** A button on the five-hand recap was tapped. */
+    recapTap(props = {}) {
+      emit(EVENTS.RECAP_TAP, { ...props, event_version: EVENT_VERSION });
       return true;
     },
   };

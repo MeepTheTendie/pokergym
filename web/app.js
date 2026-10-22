@@ -25,7 +25,7 @@ import {
   completeDaily, dailyOf, dailyCompleted, setDailyProgress,
 } from '../src/rpg/state.js';
 import {
-  dailyKey, dailyPlan, dailyNumber, seededRng as dailySeedRng, DAILY_HANDS,
+  dailyKey, dailyPlan, dailyNumber, seededRng as dailySeedRng, DAILY_HANDS, dayGap,
   DAILY_GAME_LABEL, dailySummary, dailySession, formatDailyCountdown,
 } from '../src/rpg/daily.js';
 import { parseEntryParams, isSharedDayCurrent, cleanEntrySearch, buildDailyShareText, shareUrl, inviteUrl } from '../src/rpg/links.js';
@@ -339,7 +339,17 @@ function initTitle() {
     const badges = profile.badges?.length ?? 0;
     const streak = profile.daily?.streak ?? 0;
     const lvl = levelFromXp(profile.xp).level;
-    card.textContent = `LEVEL ${lvl} · ${badges}/4 BADGES${streak > 0 ? ` · ${streak}D STREAK` : ''} · ${profile.handsPlayed ?? 0} HANDS`;
+    const playStreak = sessionStreak(profile);
+    card.textContent = `LEVEL ${lvl} · ${badges}/4 BADGES · ${profile.handsPlayed ?? 0} HANDS`;
+    const streakLine = el('playStreakLine');
+    if (streakLine) {
+      if (playStreak > 0) {
+        streakLine.textContent = `🔥 Day ${playStreak} streak — play tomorrow to make it ${playStreak + 1}`;
+        streakLine.hidden = false;
+      } else {
+        streakLine.hidden = true;
+      }
+    }
     card.hidden = false;
   } else if (card) {
     card.hidden = true;
@@ -1896,6 +1906,34 @@ function flashScene(optimal) {
 const TIP_URL = 'https://ko-fi.com/playpokergym';
 const TIP_HTML = `Poker Gym is free. If it helped, you can <a href="${TIP_URL}" target="_blank" rel="noopener">Support Poker Gym ☕</a> on Ko-fi.`;
 
+function sessionStreak(profile) {
+  const days = new Set();
+  for (const s of (profile?.sessions ?? [])) {
+    try { days.add(localDayKey(new Date(s.completedAt))); } catch {}
+  }
+  const daily = profile?.daily;
+  if (daily?.lastKey) days.add(daily.lastKey);
+  for (const entry of (daily?.history ?? [])) {
+    if (typeof entry?.key === 'string') days.add(entry.key);
+  }
+  if (!days.size) return 0;
+  const sorted = [...days].sort();
+  const latest = sorted[sorted.length - 1];
+  const today = localDayKey();
+  const toKeyDate = (key) => { const [y, m, d] = String(key).split('-').map(Number); return new Date(y, (m || 1) - 1, d || 1); };
+  const gap = Math.round((toKeyDate(today) - toKeyDate(latest)) / 86400000);
+  if (gap > 1) return 0;
+  let streak = 0;
+  let cursor = latest;
+  while (days.has(cursor)) {
+    streak += 1;
+    const dt = toKeyDate(cursor);
+    dt.setDate(dt.getDate() - 1);
+    cursor = localDayKey(dt);
+  }
+  return streak;
+}
+
 function renderSessionSummary(session) {
   const box = el('sessionSummary');
   if (!box || !session) return;
@@ -1920,6 +1958,7 @@ function renderSessionSummary(session) {
     near.textContent = 'ONE MORE CORRECT WOULD HAVE BEEN A PERFECT RUN. PLAY AGAIN?';
     box.appendChild(near);
   }
+  const recapRunId = sessionToken;
   analytics.sessionComplete(sessionToken, { correct: session.optimal, hands: SESSION_HANDS });
   const miss = sessionMistakes[0];
   if (miss) {
@@ -1928,13 +1967,33 @@ function renderSessionSummary(session) {
     detail.textContent = `REVIEW: ${miss.situation} — ${miss.correction}`;
     box.appendChild(detail);
   }
+  const dailyDone = Boolean(profile && dailyCompleted(profile, dailyKey()));
+  const todayNum = dailyNumber(dailyKey());
+  const missed = sessionResults.filter(ok => !ok).length;
+  // Measurement: the recap is seen whenever a five-hand session ends.
+  analytics.recapView({ daily_done: dailyDone, missed, run_id: recapRunId });
+
   const actions = document.createElement('div');
   actions.className = 'row';
+  if (!dailyDone) {
+    // Tomorrow hook: point the player at today's Daily Drill first.
+    const dailyBtn = document.createElement('button');
+    dailyBtn.type = 'button';
+    dailyBtn.className = 'primary';
+    dailyBtn.textContent = `PLAY DAILY DRILL #${todayNum}`;
+    dailyBtn.onclick = () => {
+      analytics.recapTap({ button: 'daily_drill', run_id: recapRunId });
+      startDaily('recap');
+    };
+    actions.appendChild(dailyBtn);
+  }
+
   const again = document.createElement('button');
   again.type = 'button';
-  again.className = 'primary';
+  again.className = dailyDone ? 'primary' : '';
   again.textContent = 'PLAY AGAIN';
   again.onclick = () => {
+    analytics.recapTap({ button: 'play_again', run_id: recapRunId });
     const gym = gymId ? GYM_BY_ID[gymId] : null;
     if (!gym || !profile) { box.hidden = true; return; }
     profile = beginSession(profile, gym.id);
@@ -1960,6 +2019,80 @@ function renderSessionSummary(session) {
   };
   actions.appendChild(challenge);
   box.appendChild(actions);
+
+  if (!dailyDone && missed > 0) {
+    const handWord = missed === 1 ? 'hand' : 'hands';
+    const line = document.createElement('p');
+    line.className = 'hint';
+    line.textContent = `Review your ${missed} missed ${handWord} in the notebook · Drill #${todayNum + 1} in ${formatDailyCountdown()}`;
+    box.appendChild(line);
+  }
+
+  // Streak from the first finished session: any five-hand session counts.
+  const streak = sessionStreak(profile);
+  if (streak > 0) {
+    const streakLine = document.createElement('p');
+    streakLine.textContent = `🔥 Day ${streak} streak — play tomorrow to make it ${streak + 1}`;
+    box.appendChild(streakLine);
+  }
+
+  // Install / Add to Home Screen. Hidden when already installed; iPhone shows
+  // instructions only (the browser prompt never fires on iOS); elsewhere the
+  // button appears only when an install prompt is actually available.
+  const standalone = window.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone === true;
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent || '') && !window.MSStream;
+  if (!standalone) {
+    if (isIOS) {
+      const installNote = document.createElement('p');
+      installNote.className = 'hint';
+      installNote.textContent = 'IPHONE: TAP SHARE, THEN ADD TO HOME SCREEN.';
+      box.appendChild(installNote);
+    } else {
+      const existing = document.getElementById('btnInstall');
+      const installBtn = document.createElement('button');
+      installBtn.type = 'button';
+      installBtn.textContent = 'INSTALL / ADD TO HOME SCREEN';
+      installBtn.hidden = !existing || existing.hidden;
+      installBtn.onclick = () => {
+        analytics.recapTap({ button: 'install', run_id: recapRunId });
+        if (existing && !existing.hidden) existing.click();
+      };
+      box.appendChild(installBtn);
+      // Reveal the button later if the browser fires beforeinstallprompt.
+      const syncInstall = () => { installBtn.hidden = !existing || existing.hidden; };
+      window.addEventListener('beforeinstallprompt', syncInstall, { once: false });
+    }
+  }
+
+  // Optional: remind me tomorrow calendar link (its own row).
+  const ics = document.createElement('a');
+  ics.textContent = 'REMIND ME TOMORROW (.ICS)';
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(9, 0, 0, 0);
+  const end = new Date(tomorrow.getTime() + 15 * 60 * 1000);
+  const toStamp = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const uid = `poker-gym-${tomorrow.toISOString().slice(0, 10)}@playpokergym.com`;
+  const dtstamp = toStamp(new Date());
+  const url = 'https://playpokergym.com/web/?daily=1&ref=ics';
+  const body = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Poker Gym//Daily Drill//EN',
+    'BEGIN:VEVENT',
+    `UID:${uid}`,
+    `DTSTAMP:${dtstamp}`,
+    `DTSTART:${toStamp(tomorrow)}`,
+    `DTEND:${toStamp(end)}`,
+    'SUMMARY:Poker Gym Daily Drill',
+    `DESCRIPTION:${url}`,
+    `URL:${url}`,
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ].join('\r\n');
+  ics.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(body);
+  ics.download = 'poker-gym-reminder.ics';
+  box.appendChild(ics);
   const dismiss = document.createElement('button');
   dismiss.type = 'button';
   dismiss.textContent = 'GOT IT';
@@ -2374,9 +2507,24 @@ document.addEventListener('keydown', (e) => {
 // page load instead of two or three taps. The title screen (daily drill,
 // choose style, etc.) is still reachable from HOME.
 const returning = Boolean(profile);
+let lastVisitDay = profile ? localStorage.getItem('pg_last_visit_day') : null;
+if (profile && !lastVisitDay) {
+  const sessionDays = (profile.sessions ?? []).map(s => {
+    try { return localDayKey(new Date(s.completedAt)); } catch { return null; }
+  }).filter(Boolean);
+  const dailyDays = (profile.daily?.history ?? []).map(e => e?.key).filter(k => typeof k === 'string');
+  if (profile.daily?.lastKey) dailyDays.push(profile.daily.lastKey);
+  const all = [...sessionDays, ...dailyDays].sort();
+  lastVisitDay = all.length ? all[all.length - 1] : null;
+}
+const daysSinceLastVisit = lastVisitDay ? dayGap(localDayKey(), lastVisitDay) : null;
+if (profile) {
+  try { localStorage.setItem('pg_last_visit_day', localDayKey()); } catch {}
+}
 analytics.openTrainer({
   entry: dailyLinkEntry ?? (entryParams.practice ? 'practice_link' : 'direct'),
   returning,
+  days_since_last_visit: daysSinceLastVisit,
 });
 if (profile) { renderMap(); show('scr-map'); }
 else { initTitle(); }
