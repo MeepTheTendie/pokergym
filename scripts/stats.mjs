@@ -102,14 +102,16 @@ export function notTestClause() {
     AND (properties.session_ref IS NULL OR properties.session_ref NOT IN (${quoted(TEST_REFS)}))
     AND (properties.$raw_user_agent IS NULL OR ${uaFilters})
     AND person_id NOT IN (
-      SELECT person_id FROM events
-      WHERE event = 'open_trainer'
-        AND properties.$viewport = '1366x768'
-        AND toHour(timestamp) = ${UNFURL_POST_HOUR_UTC}
-        AND toMinute(timestamp) <= ${UNFURL_POST_WINDOW_MINUTES}
-      GROUP BY person_id
-      HAVING argMin(event, timestamp) = 'open_trainer'
-        AND person_id NOT IN (SELECT DISTINCT person_id FROM events WHERE event IN ('game_start', 'decision_made', 'hand_complete', 'recap_tap', 'start_daily', 'daily_complete', 'share'))
+      SELECT person_id FROM (
+        SELECT person_id, argMin(event, timestamp) AS first_event, min(timestamp) AS first_ts
+        FROM events
+        GROUP BY person_id
+      ) WHERE first_event IN ('$pageview', 'open_trainer')
+        AND toHour(first_ts) = ${UNFURL_POST_HOUR_UTC}
+        AND toMinute(first_ts) <= ${UNFURL_POST_WINDOW_MINUTES}
+        AND first_ts > toDateTime('2026-10-18')
+        AND person_id IN (SELECT DISTINCT person_id FROM events WHERE event = 'open_trainer' AND properties.$screen_width = 1920 AND properties.$screen_height = 1080 AND toHour(timestamp) = ${UNFURL_POST_HOUR_UTC} AND toMinute(timestamp) <= ${UNFURL_POST_WINDOW_MINUTES})
+        AND person_id NOT IN (SELECT DISTINCT person_id FROM events WHERE event IN ('game_start', 'start_training', 'decision_made', 'hand_complete', 'recap_tap', 'start_daily', 'daily_complete', 'share'))
     )`;
 }
 

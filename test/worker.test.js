@@ -159,11 +159,22 @@ test('stats: probe and scripted automation visits are excluded', () => {
 
 test('stats: unfurl-bot visits are excluded', () => {
   const clause = notTestClause();
-  assert.match(clause, /1366x768/);
+  assert.match(clause, /properties\.\$screen_width = 1920/);
+  assert.match(clause, /properties\.\$screen_height = 1080/);
   assert.match(clause, /toHour\(timestamp\) = 21/);
   assert.match(clause, /toMinute\(timestamp\) <= 5/);
   assert.match(clause, /open_trainer/);
   assert.match(clause, /game_start/);
+  assert.match(clause, /\$pageview/);
+});
+
+test('stats: an unfurl bot whose $pageview lands before open_trainer is excluded', () => {
+  const clause = notTestClause();
+  // Condition 1 must allow $pageview as the first event, since 15 of 16
+  // cluster members have $pageview a few ms before open_trainer.
+  assert.match(clause, /event IN \('\$pageview', 'open_trainer'\)/);
+  assert.match(clause, /argMin\(event, timestamp\)/);
+  assert.match(clause, /IN \('\$pageview', 'open_trainer'\)/);
 });
 
 test('stats: a 1366x768 visitor at 21:01 who then fires game_start is kept', () => {
