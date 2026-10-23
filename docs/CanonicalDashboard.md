@@ -21,7 +21,24 @@ Ordered by Wes, October 22, 2026. This file is the single source of truth for Po
 
 Nobody's dashboard was broken. Three different windows and methods were being quoted side by side: PostHog's own interface on its default range, a first touch cohort count, and a since October 18 player read. The fix is the fixed windows and definitions above, quoted with their window label every time.
 
-## Agreed numbers, pulled by Wren, October 22, 2026, about 5:25 PM Central
+## Agreed numbers, pulled by Wren, October 23, 2026, about 9:52 AM Central
+
+Reporting epoch, since October 21, 2026:
+- Visitors: 74 (by first touch: direct 40, reddit 16, youtube 9, unknown 3, reels 3, facebook 1, x 1, funnel-check 1)
+- Players: 22 (reddit 15, direct 5, unknown 1, funnel-check 1)
+- Finished five hands: 12 people, 19 sessions (reddit 8, direct 4)
+- Daily Drill starters: 5 (direct 2, reddit 3)
+- Daily Drill finishers: 1 (reddit, scored true)
+- Returned another day: 2 people (both reddit)
+- D1 retention: Oct 21 cohort 55 people, 1 active Oct 22; Oct 22 cohort not yet eligible
+
+Today, October 23, 2026, partial day:
+- Visitors: 8 new (direct 5, reels 3), 9 pageview people
+- Players: 0
+- Finished five hands: 0 people
+- Daily Drill starters: 1
+
+Prior agreed numbers, October 22, 2026, about 5:25 PM Central (kept for reference):
 
 All time:
 - Visitors: 106
@@ -38,14 +55,9 @@ Reporting epoch, since October 21, 2026:
 - Daily Drill starters: 4
 - Daily Drill finishers: 1
 
-Today, October 22, 2026, partial day:
-- Visitors: 11
-- Players: 1
-- Finished five hands: 0 people
-- Daily Drill starters: 0
-
 Deploy marker: the recap retention hooks went live October 22, 2026, 12:00 PM Central. Return comparisons run from that deploy forward; the first clean cohort day is October 23.
 
 ## Update rule
 
 Wren refreshes this file with the 9:47 AM Central daily report. Every number carries its window label. Any crew member who believes a number here is wrong raises it in the control doc with their query shown, and this file changes only when the disagreement is settled there.
+
