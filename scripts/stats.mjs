@@ -110,7 +110,7 @@ export function notTestClause() {
         AND toHour(first_ts) = ${UNFURL_POST_HOUR_UTC}
         AND toMinute(first_ts) <= ${UNFURL_POST_WINDOW_MINUTES}
         AND first_ts > toDateTime('2026-10-18')
-        AND person_id IN (SELECT DISTINCT person_id FROM events WHERE event = 'open_trainer' AND properties.$screen_width = 1920 AND properties.$screen_height = 1080 AND toHour(timestamp) = ${UNFURL_POST_HOUR_UTC} AND toMinute(timestamp) <= ${UNFURL_POST_WINDOW_MINUTES})
+        AND person_id IN (SELECT DISTINCT person_id FROM events WHERE event = 'open_trainer' AND properties.$viewport_width = 1366 AND properties.$viewport_height = 768 AND properties.$screen_width = 1920 AND properties.$screen_height = 1080 AND toHour(timestamp) = ${UNFURL_POST_HOUR_UTC} AND toMinute(timestamp) <= ${UNFURL_POST_WINDOW_MINUTES})
         AND person_id NOT IN (SELECT DISTINCT person_id FROM events WHERE event IN ('game_start', 'start_training', 'decision_made', 'hand_complete', 'recap_tap', 'start_daily', 'daily_complete', 'share'))
     )`;
 }

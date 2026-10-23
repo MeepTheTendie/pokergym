@@ -159,6 +159,8 @@ test('stats: probe and scripted automation visits are excluded', () => {
 
 test('stats: unfurl-bot visits are excluded', () => {
   const clause = notTestClause();
+  assert.match(clause, /properties\.\$viewport_width = 1366/);
+  assert.match(clause, /properties\.\$viewport_height = 768/);
   assert.match(clause, /properties\.\$screen_width = 1920/);
   assert.match(clause, /properties\.\$screen_height = 1080/);
   assert.match(clause, /toHour\(timestamp\) = 21/);
@@ -166,6 +168,16 @@ test('stats: unfurl-bot visits are excluded', () => {
   assert.match(clause, /open_trainer/);
   assert.match(clause, /game_start/);
   assert.match(clause, /\$pageview/);
+});
+
+test('stats: a 1920x1080 screen with a normal window size is kept', () => {
+  const clause = notTestClause();
+  // The exclusion requires BOTH the 1366x768 viewport and the 1920x1080 screen,
+  // so a real player whose window is not 1366x768 survives the filter.
+  assert.match(clause, /properties\.\$viewport_width = 1366/);
+  assert.match(clause, /properties\.\$viewport_height = 768/);
+  assert.match(clause, /properties\.\$screen_width = 1920/);
+  assert.match(clause, /properties\.\$screen_height = 1080/);
 });
 
 test('stats: an unfurl bot whose $pageview lands before open_trainer is excluded', () => {
