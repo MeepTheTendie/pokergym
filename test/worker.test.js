@@ -157,6 +157,35 @@ test('stats: probe and scripted automation visits are excluded', () => {
   assert.match(clause, /NOT LIKE '%Edge\/12\.246%'/);
 });
 
+test('stats: unfurl-bot visits are excluded', () => {
+  const clause = notTestClause();
+  assert.match(clause, /1366x768/);
+  assert.match(clause, /toHour\(timestamp\) = 21/);
+  assert.match(clause, /toMinute\(timestamp\) <= 5/);
+  assert.match(clause, /open_trainer/);
+  assert.match(clause, /game_start/);
+});
+
+test('stats: a 1366x768 visitor at 21:01 who then fires game_start is kept', () => {
+  const clause = notTestClause();
+  // The exclusion subquery must require no later interaction events, so a
+  // visitor who fires game_start survives the filter.
+  assert.match(clause, /person_id NOT IN \(SELECT DISTINCT person_id FROM events WHERE event IN/);
+  assert.match(clause, /'game_start'/);
+});
+
+test('stats: a normal visitor is kept', () => {
+  const clause = notTestClause();
+  // The clause is an exclusion list, so a normal visitor matches none of it.
+  assert.doesNotMatch(clause, /person_id NOT IN \('normal/);
+  assert.match(clause, /person_id NOT IN COHORT/);
+});
+
+test('stats: stageReachQuery handles dates before open_trainer existed', () => {
+  assert.match(stageReachQuery(30), /event = 'open_trainer'/);
+  assert.match(stageReachQuery(30), /properties\.\$pathname = '\/web\/'/);
+});
+
 
 test('guide campaign attribution excludes private queries, assets, cache fills and failed pages', async () => {
   for (const path of GUIDE_PATHS) {

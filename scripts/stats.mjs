@@ -82,6 +82,13 @@ export const INTERNAL_COHORT_ID = 644643;
 
 // SQL fragment (HogQL) that drops this project's own probe traffic and the
 // automation above.
+// Unfurl bots: link-preview crawlers that survive PostHog's own bot filter.
+// They arrive 0-5 minutes after a scheduled post (UNFURL_POST_HOUR_UTC), with a
+// 1366x768 viewport, their first event is open_trainer, and they never interact.
+// Reporting only: events are never dropped, only excluded from these counts.
+export const UNFURL_POST_HOUR_UTC = 21;
+export const UNFURL_POST_WINDOW_MINUTES = 5;
+
 export function notTestClause() {
   const quoted = list => list.map(v => `'${v}'`).join(', ');
   const uaFilters = AUTOMATION_USER_AGENTS
@@ -94,7 +101,16 @@ export function notTestClause() {
     AND (properties.first_ref IS NULL OR properties.first_ref NOT IN (${quoted(TEST_REFS)}))
     AND (properties.session_ref IS NULL OR properties.session_ref NOT IN (${quoted(TEST_REFS)}))
     AND (properties.$raw_user_agent IS NULL OR ${uaFilters})
-    AND (properties.preview IS NULL OR properties.preview = false)`;
+    AND person_id NOT IN (
+      SELECT person_id FROM events
+      WHERE event = 'open_trainer'
+        AND properties.$viewport = '1366x768'
+        AND toHour(timestamp) = ${UNFURL_POST_HOUR_UTC}
+        AND toMinute(timestamp) <= ${UNFURL_POST_WINDOW_MINUTES}
+      GROUP BY person_id
+      HAVING argMin(event, timestamp) = 'open_trainer'
+        AND person_id NOT IN (SELECT DISTINCT person_id FROM events WHERE event IN ('game_start', 'decision_made', 'hand_complete', 'recap_tap', 'start_daily', 'daily_complete', 'share'))
+    )`;
 }
 
 // Unique people per day, the number the dashboard shows as DAU. A pageview is
@@ -114,7 +130,7 @@ ORDER BY day`;
 export function stageReachQuery(days = 30) {
   return `SELECT
   count(DISTINCT if(event = '$pageview', person_id, NULL)) AS saw_a_page,
-  count(DISTINCT if(event = 'open_trainer', person_id, NULL)) AS opened_the_trainer,
+  count(DISTINCT if(event = 'open_trainer', person_id, if(event = '$pageview' AND properties.$pathname = '/web/' AND timestamp < toDateTime('2026-10-18'), person_id, NULL))) AS opened_the_trainer,
   count(DISTINCT if(event = 'game_start', person_id, NULL)) AS started_a_session,
   count(DISTINCT if(event = 'session_complete', person_id, NULL)) AS finished_five_hands,
   count(DISTINCT if(event = 'daily_complete', person_id, NULL)) AS finished_the_daily_drill

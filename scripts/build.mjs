@@ -19,16 +19,6 @@ const files = ['index.html', 'app.js', 'audio.js', 'sound-controls.js', 'haptics
   'icon.svg', 'icon-maskable.svg', 'offline.js', 'feedback.js', 'privacy.html',
   'posthog-loader.js'];
 for (const file of files) await cp(path.join(root, 'web', file), path.join(output, 'web', file));
-// Cache-bust the trainer bundle on every build: rewrite the ?v= query string
-// in the published index.html with a content hash of app.js so returning
-// visitors always pick up the current bundle instead of a stale cached copy.
-const { createHash } = await import('node:crypto');
-const { readFile, writeFile } = await import('node:fs/promises');
-const appJs = await readFile(path.join(output, 'web', 'app.js'));
-const v = createHash('sha256').update(appJs).digest('hex').slice(0, 12);
-const indexPath = path.join(output, 'web', 'index.html');
-const indexHtml = await readFile(indexPath, 'utf8');
-await writeFile(indexPath, indexHtml.replace(/app\.js\?v=[^"']*/g, `app.js?v=${v}`));
 for (const folder of ['assets', 'fonts']) {
   await mkdir(path.join(output, 'web', folder), { recursive: true });
   for (const entry of await readdir(path.join(root, 'web', folder))) {

@@ -48,7 +48,7 @@ E3, follow conversion, October 26 to November 8: win at 10 or more net new follo
 
 ## PostHog Dashboard Spec (crew negotiation, opened October 22, 2026, by Wes's order)
 
-Wes's order: the three assistants agree on what one real PostHog dashboard (inside PostHog, project 670990) needs to include, and all three contribute to making it. The CanonicalDashboard.md file is the interim numbers source until this dashboard exists. Rules for this section: each assistant writes only in its own subsection below. An insight belongs on the dashboard only if it feeds a decision (fix, kill, or scale). One screen, no vanity panels. Social numbers stay off it; views are not visits.
+Wes's order: the three assistants agree on what one real PostHog dashboard (inside PostHog, project 670990) needs to include, and all three contribute to making it. The CanonicalDashboard.md file is the interim numbers source until this dashboard exists. Rules for this section: each assistant writes only in its own subsection below. An insight belongs on the dashboard only if it feeds a decision (fix, kill, or scale). One screen, no vanity panels. Social numbers stay off it; views are not visits. All funnel stages exclude unfurl-bot visits as defined by notTestClause().
 
 ### Wren proposal (October 22, 2026)
 
@@ -74,6 +74,8 @@ Build note from Wren: my PostHog key is query read only, so I cannot create dash
 When all three subsections are filled, Wren drafts the final spec from what survives all three reviews, Wes approves it, and the assistant with PostHog write access builds it in PostHog. The finished dashboard then replaces CanonicalDashboard.md as the numbers source, and the daily report cites it.
 
 ## Decision Log
+Oct 23, 2026: Retracting the '55 → 40' visitor prediction from e7636d6. Grok's PostHog query found 13 unfurl-bot visits (Oct 18–23, 21:01–21:02 UTC, 1366x768, post utm_content, spoofed Chrome 146–155), and none of them carry preview. The visibility filter catches nothing. Replaced by the behavior filter below.
+
 October 23, 2026, Wes (decision, relayed and recorded by Wren): Print a short typed path on the video end screen so hand typed visitors become attributable. Background from Wren's PostHog pull today: unattributed new arrivals run 7 to 8 per day and land on / and /web/ with a $direct referrer and no ref, i.e. they type playpokergym.com after seeing it printed on screen, while tagged caption links get almost no clicks (one Facebook click total). Spec: one short path printed on every end screen (same video ships to all platforms), playpokergym.com/go, redirecting to /web/ with ref=endscreen and utm_content=typed so PostHog buckets the typers as their own source instead of unknown. Site side is a simple redirect (Beam or DeepSeek, via the normal site change list, candidate for the October 27 review output). Video side is Grok's end screen template whenever the next batch renders; no need to re render the October 26 to 31 batch mid flight. Per platform printed paths are a later refinement only if the crew wants the split.
 
 
