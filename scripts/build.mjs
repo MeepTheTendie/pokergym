@@ -29,6 +29,23 @@ for (const entry of await readdir(path.join(root, 'web'))) {
   if (/^icon-(?:192|512|maskable-512)\.png$/.test(entry)) await cp(path.join(root, 'web', entry), path.join(output, 'web', entry));
 }
 await cp(path.join(root, 'src'), path.join(output, 'src'), { recursive: true });
+
+// Optional: compile the verified Bend reference (src/evaluate.bend) into the
+// build output when the bend toolchain is available. The app keeps using the
+// JavaScript implementation; this artifact is for verification and future use.
+try {
+  const { spawnSync } = await import('node:child_process');
+  const bend = process.env.BEND_BIN || 'bend';
+  const probe = spawnSync(bend, ['--help'], { encoding: 'utf8' });
+  if (probe.status === 0) {
+    const compiled = path.join(output, 'src', 'evaluate.mjs');
+    const r = spawnSync(bend, [path.join(root, 'src', 'evaluate.bend'), '-o', compiled], { encoding: 'utf8' });
+    if (r.status !== 0) console.warn('Bend compile skipped:', (r.stderr || r.stdout || '').trim());
+  }
+} catch (e) {
+  console.warn('Bend compile skipped:', e?.message ?? e);
+}
+
 await cp(path.join(root, 'web/landing.html'), path.join(output, 'index.html'));
 await cp(path.join(root, 'public/sitemap.xml'), path.join(output, 'sitemap.xml'));
 await cp(path.join(root, 'public/robots.txt'), path.join(output, 'robots.txt'));

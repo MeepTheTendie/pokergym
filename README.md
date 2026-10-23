@@ -39,6 +39,16 @@ Releases and their tags are point-in-time source snapshots. The [spaced-recall-d
 
 
 
+## Bend verification (optional dev tool)
+
+Poker Gym keeps its runtime in JavaScript so the game stays browser-first and offline-capable. The hand-evaluation logic also has a verified reference implementation in [`src/evaluate.bend`](src/evaluate.bend), checked with the [Bend](https://github.com/bendlang/bend) language.
+
+- `npm run bend:check` type-checks the Bend reference.
+- `npm run bend:verify` compiles it to JavaScript and compares 5,000 random hands against `src/evaluate.js`.
+- `npm run bend:proofs` checks the laws in `LAWS.bend` (proofs in `PROOF.bend`).
+
+Bend is optional: if the `bend` binary is not installed, `bend:verify` skips gracefully. The app itself never depends on Bend at runtime.
+
 ## Visit stats (owner only)
 
 `npm run stats` prints two independent reports.
