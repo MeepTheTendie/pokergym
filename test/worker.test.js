@@ -131,7 +131,7 @@ test('stats: real-player report counts people, not requests', () => {
   assert.match(playersByDayQuery(14), /INTERVAL 14 DAY/);
   assert.match(playersByDayQuery(14), /event = '\$pageview'/, 'only a pageview proves someone was here today');
   assert.match(stageReachQuery(30), /finished_the_daily_drill/);
-  assert.match(stageReachQuery(30), /properties\.\$pathname = '\/web\/'/);
+  assert.match(stageReachQuery(30), /event = 'open_trainer'/);
   assert.match(eventTotalsQuery(30), /event NOT IN \(/);
 
   const stages = formatStages({ saw_a_page: 10, opened_the_trainer: 6, started_a_session: 5, finished_five_hands: 3, finished_the_daily_drill: 1 });

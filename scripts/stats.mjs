@@ -93,7 +93,8 @@ export function notTestClause() {
     AND (properties.ref IS NULL OR properties.ref NOT IN (${quoted(TEST_REFS)}))
     AND (properties.first_ref IS NULL OR properties.first_ref NOT IN (${quoted(TEST_REFS)}))
     AND (properties.session_ref IS NULL OR properties.session_ref NOT IN (${quoted(TEST_REFS)}))
-    AND (properties.$raw_user_agent IS NULL OR ${uaFilters})`;
+    AND (properties.$raw_user_agent IS NULL OR ${uaFilters})
+    AND (properties.preview IS NULL OR properties.preview = false)`;
 }
 
 // Unique people per day, the number the dashboard shows as DAU. A pageview is
@@ -113,7 +114,7 @@ ORDER BY day`;
 export function stageReachQuery(days = 30) {
   return `SELECT
   count(DISTINCT if(event = '$pageview', person_id, NULL)) AS saw_a_page,
-  count(DISTINCT if(event = '$pageview' AND properties.$pathname = '/web/', person_id, NULL)) AS opened_the_trainer,
+  count(DISTINCT if(event = 'open_trainer', person_id, NULL)) AS opened_the_trainer,
   count(DISTINCT if(event = 'game_start', person_id, NULL)) AS started_a_session,
   count(DISTINCT if(event = 'session_complete', person_id, NULL)) AS finished_five_hands,
   count(DISTINCT if(event = 'daily_complete', person_id, NULL)) AS finished_the_daily_drill

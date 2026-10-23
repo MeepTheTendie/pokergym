@@ -88,7 +88,17 @@ export function createAnalytics({ send, ref = () => null } = {}) {
     openTrainer(props = {}) {
       if (opened) return false;
       opened = true;
-      emit(EVENTS.OPEN_TRAINER, props);
+      // Link-preview crawlers (Reddit/Discord/Slack unfurls) load the trainer
+      // in a background tab: the page is never visible, yet they fire
+      // open_trainer and pollute the funnel. Tag those so the scorecard and
+      // stats queries can exclude them; everything else behaves as before.
+      const preview =
+        typeof document !== 'undefined' &&
+        document.visibilityState !== 'visible';
+      emit(EVENTS.OPEN_TRAINER, {
+        ...props,
+        ...(preview ? { preview: true } : {}),
+      });
       return true;
     },
 
