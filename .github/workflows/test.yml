@@ -11,3 +11,13 @@ jobs:
         with:
           node-version: '20'
       - run: npm test
+      - name: Install Bend
+        run: curl -fsSL https://bend-lang.com/install.sh | sh
+      - name: Verify Bend reference
+        run: |
+          export PATH="$HOME/.bend/bin:$PATH"
+          export BEND_NO_TELEMETRY=1
+          npm run bend:check
+          npm run bend:verify
+          npm run bend:verify:vp
+          npm run bend:proofs
