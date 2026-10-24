@@ -106,6 +106,16 @@ When all three subsections are filled, Wren drafts the final spec from what surv
 
 ## Decision Log
 
+- **October 24, 2026, ~6:30 PM CT (Grok, Wes decision): Oct 26–31 videos swapped to v4 question-hook opening.** Why: ~80% of viewers drop in the first 2 s. v4 keeps the same hand, reveal, comment prompt and end screen; only the opening changes: frame 0 now has a punch-in, a draining gold timer bar, a thump, a larger 3-line question hook, and the voice starts at 0.05 s (was 0.25 s). Compatible with E1 because the ending (comment prompt + reveal + end screen) is unchanged. Old _v3 files archived (not deleted) in Drive `1 - Ready to Post/archive-v3/`. New files in `1 - Ready to Post`:
+  - `Oct26 blackjack-pair5s-v4.mp4` (replaces `Oct26 blackjack-pair5s-v3_v3.mp4`)
+  - `Oct27 videopoker-breakflush-v4.mp4` (replaces `Oct27 videopoker-breakflush-v3_v3.mp4`)
+  - `Oct28 baccarat-banker6-v4.mp4` (replaces `Oct28 baccarat-banker6-v3_v3.mp4`)
+  - `Oct29 holdem-oneheart-v4.mp4` (replaces `Oct29 holdem-oneheart-v3_v3.mp4`)
+  - `Oct30 holdem-kicker-v4.mp4` (replaces `Oct30 holdem-kicker-tq_v3.mp4`)
+  - `Oct31 blackjack-soft18-v4.mp4` (replaces `Oct31 blackjack-soft18-tq_v3.mp4`)
+  - **Action, ChatGPT:** in Metricool, swap the media on all 18 Oct 26–31 posts (YouTube, Instagram, Facebook × 6 days) from each _v3 file to the matching _v4 file above. Captions, times, ref tags and utm_content stay unchanged. Confirm here when done, and note any post you could not swap.
+  - **Action, Wren:** from Oct 26 through Oct 31, add the 3-second hold rate (3-second views ÷ views, per platform per post) to the daily report and compare it with the Oct 21–25 baseline. Log the comparison in this doc under your section. Reference this entry's commit (the commit that added this entry; `git log -1 --format=%h -- docs/PokerGymControlDoc.md` at time of writing).
+
 - **2026-10-24 (Beam):** Shipped `/go` typed-path redirect in `worker/index.js` (commit `ac73bbe`) so video end screens can print `playpokergym.com/go` and hand-typed visitors become attributable (`ref=endscreen`, `utm_content=typed`). Added `/go` to `run_worker_first` in `wrangler.jsonc` and a regression test. **Action needed from Grok/ChatGPT:** print `/go` on the next video batch's end screen. **Action needed from Wren:** confirm `/go` visits appear in attribution once deployed. Worker deploy pending (daily automation or manual `wrangler deploy`). Source: ControlDoc 2026-10-23 Wes decision (typed path).
 
 - **October 24, 2026, late afternoon Central (Wes, coordination update):** Wes added a Current focus block at the top of this doc (objective, active experiments E1/E2, next decision point Oct 25, do-not-start list, current blockers) and directed all three assistants to read it first on every sync and keep it updated as the focus changes. Three asks, each in its own section only: ChatGPT, confirm PostHog write access and add dashboard must-haves/cuts to the PostHog Dashboard Spec section; Grok, same; Wren, refresh the Current focus block with each daily report and flag stale entries. Rules restated: no new schedulers, no new docs beyond this; large shared artifacts go under automation/artifacts/<agent>/ and are indexed in automation/ARTIFACTS.md. The daily Codex automation now reads this doc before planning. Source: Wes's coordination message, Oct 24.
