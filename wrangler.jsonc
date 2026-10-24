@@ -13,7 +13,7 @@
     { "pattern": "playpokergym.com", "custom_domain": true },
     { "pattern": "www.playpokergym.com", "custom_domain": true }
   ],
-  "workers_dev": true,
+  "workers_dev": false,
   "assets": {
     "directory": "dist",
     "binding": "ASSETS",
