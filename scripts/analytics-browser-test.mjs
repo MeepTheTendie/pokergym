@@ -159,6 +159,27 @@ expectCounts('start training', log, { open_trainer: 1, game_start: 1, start_trai
 expectProps('start training', props(log, 'game_start'), { game: 'blackjack', mode: 'session', resumed: false });
 expectProps('start training', props(log, 'session_complete'), { game: 'blackjack' });
 
+// The authored first hand is hard nine versus two; standing misses the play.
+// Recap review must open recall without creating a new run or changing saves.
+const savedBeforeReview = await evaluate('localStorage.getItem("pokergym:save:v1")');
+assert.ok(JSON.parse(savedBeforeReview).mistakes.length > 0, 'Session saved an actual mistake');
+await run(`
+  const review = [...$('sessionSummary').querySelectorAll('button')].find(b => b.textContent === 'REVIEW MISTAKES');
+  if (!review) throw new Error('Missing direct recap review');
+  review.click();
+  return true;
+`);
+assert.equal(await evaluate('document.getElementById("scr-review").hidden'), false, 'Recap opens notebook');
+assert.ok(await evaluate('Boolean(document.querySelector("#reviewCard .review-entry"))'), 'Recall card rendered');
+assert.ok(await evaluate('[...document.querySelectorAll("#reviewCard .mistake-answer")].every(answer => answer.hidden)'), 'Answers stay hidden until recall');
+assert.equal(await evaluate('localStorage.getItem("pokergym:save:v1")'), savedBeforeReview, 'Opening review preserves scores, XP, sessions and schedule');
+log = await events();
+expectCounts('recap mistake review', log, { recap_tap: 1, game_start: 1, session_complete: 1, start_daily: 0 });
+expectProps('recap mistake review', props(log, 'recap_tap'), { button: 'review_mistakes', run_id: props(log, 'session_complete').run_id });
+await run("$('btnReviewDone').click(); return true;");
+assert.equal(await evaluate('document.getElementById("scr-map").hidden'), false, 'Review returns to map');
+assert.equal(await evaluate('localStorage.getItem("pokergym:save:v1")'), savedBeforeReview, 'Returning to map preserves completed session');
+
 // 6. ?practice=holdem link, 2 hands, then reload and resume from the map.
 await open(BASE + '?practice=holdem&ref=x');
 await run("$('btnStart').click(); await wait(80); await playHands(2); return true;");

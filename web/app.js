@@ -1975,6 +1975,16 @@ function renderSessionSummary(session) {
 
   const actions = document.createElement('div');
   actions.className = 'row';
+  if (missed > 0 && profile?.mistakes?.length) {
+    const review = document.createElement('button');
+    review.type = 'button';
+    review.textContent = 'REVIEW MISTAKES';
+    review.onclick = () => {
+      analytics.recapTap({ button: 'review_mistakes', run_id: recapRunId });
+      openReview();
+    };
+    actions.appendChild(review);
+  }
   if (!dailyDone) {
     // Tomorrow hook: point the player at today's Daily Drill first.
     const dailyBtn = document.createElement('button');
@@ -2024,7 +2034,7 @@ function renderSessionSummary(session) {
     const handWord = missed === 1 ? 'hand' : 'hands';
     const line = document.createElement('p');
     line.className = 'hint';
-    line.textContent = `Review your ${missed} missed ${handWord} in the notebook · Drill #${todayNum + 1} in ${formatDailyCountdown()}`;
+    line.textContent = `${missed} missed ${handWord} · REVIEW MISTAKES opens your saved notebook. Drill #${todayNum + 1} in ${formatDailyCountdown()}`;
     box.appendChild(line);
   }
 
