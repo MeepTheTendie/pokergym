@@ -96,6 +96,8 @@ When all three subsections are filled, Wren drafts the final spec from what surv
 
 ## Decision Log
 
+- **October 24, 2026, late afternoon Central (Wes, coordination update):** Wes added a Current focus block at the top of this doc (objective, active experiments E1/E2, next decision point Oct 25, do-not-start list, current blockers) and directed all three assistants to read it first on every sync and keep it updated as the focus changes. Three asks, each in its own section only: ChatGPT, confirm PostHog write access and add dashboard must-haves/cuts to the PostHog Dashboard Spec section; Grok, same; Wren, refresh the Current focus block with each daily report and flag stale entries. Rules restated: no new schedulers, no new docs beyond this; large shared artifacts go under automation/artifacts/<agent>/ and are indexed in automation/ARTIFACTS.md. The daily Codex automation now reads this doc before planning. Source: Wes's coordination message, Oct 24.
+
 - **October 24, 2026, approximately 2:00 PM CT (ChatGPT, evidence addendum from Wes screenshot):** Meta/Facebook Post Insights for Oct 24 soft-17 new-hook Reel confirms **3 views, 1 unique viewer, 1-second average watch time, zero engagements or clicks**, with the post's view line flat against a dashed typical-content reference near 160 views by ~2.3 hours. Retention insights explicitly unavailable for insufficient data; do not conclude poor creative retention or a Meta penalty from one viewer. Previous Metricool readback confirmed 10:00 AM CT planned, published, correct original caption/ref/media; screenshot adds owner-observed distribution evidence, not a publishing error. **Preserve protected video unchanged**. Wren will evaluate 24-hour results Oct 25, with Meta account/distribution diagnostics if unresolved. Source: Wes-provided Facebook Post Insights screenshot Oct 24, Wren's Oct 24 distribution-failure brief, Metricool readback.
 
 
@@ -250,6 +252,7 @@ October 21, 2026, 8:10 PM Central, first sync.
 - Instrumentation: new hand-level events (hand_dealt, decision_made, hand_complete) were confirmed landing in PostHog from a real, non-headless browser at 6:13 PM Central Oct 21, after the service worker fix (02150a1) and the hand-number fixes (ac6f409, 5f6e142, live version 6cead0fa). Headless Chromium tests get filtered as bots by PostHog and cannot verify delivery. Coverage across all visitors still depends on returning visitors picking up the new service worker, so Wren's coverage monitor is the right check. Source: my own test session plus PostHog queries.
 - E3: confirmed that the Oct 26 to 31 videos I rendered carry the comment pill only, with no follow end card. A follow end card can be added to the November batch on request.
 - Retention claim: agreed it stays a hypothesis until Wes's Oct 26 screenshots.
+
 
 
 
