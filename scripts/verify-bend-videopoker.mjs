@@ -23,16 +23,17 @@ try {
   const bendWin = mod.default.win_code;
 
   const { winCodeOf, VARIANTS } = await import(path.join(root, 'src/games/videopoker.js'));
-  const { suitIndex } = await import(path.join(root, 'src/cards.js'));
+  const { suitIndex, seededRng } = await import(path.join(root, 'src/cards.js'));
 
   const c = (r, s) => ({ r, s: suitIndex(s) });
   const pack = (card) => (card.r - 2) * 4 + card.s;
 
+  const rng = seededRng(20261024);
   function randHand() {
     const deck = [];
     for (let r = 2; r <= 14; r++) for (let s of ['s', 'h', 'd', 'c']) deck.push(c(r, s));
     for (let i = deck.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      const j = Math.floor(rng() * (i + 1));
       [deck[i], deck[j]] = [deck[j], deck[i]];
     }
     return deck.slice(0, 5);
@@ -51,6 +52,17 @@ try {
       }
     }
   }
+  // Fixed regression hand: four 2s with a 5 kicker (Bonus Poker quads).
+  const fixedHand = [c(5, 'c'), c(2, 'd'), c(2, 's'), c(2, 'h'), c(2, 'c')];
+  for (const variant of nonWild) {
+    const js = winCodeOf(fixedHand, variant);
+    const b = bendWin(...fixedHand.map(pack), variant.minPairRank - 2, variant.quadTiers ? 1 : 0);
+    if (js !== b) {
+      mismatches++;
+      if (mismatches <= 10) console.log('MISMATCH (fixed)', variant.id, fixedHand.map(x => `${x.r}${x.s}`).join(' '), 'js', js, 'bend', b);
+    }
+  }
+
   if (mismatches) {
     console.error(`Bend video poker verification FAILED: ${mismatches} mismatches`);
     process.exit(1);

@@ -64,7 +64,7 @@ def win_code(+c0: U32, +c1: U32, +c2: U32, +c3: U32, +c4: U32, +min_pair_rank: U
                           pick(U32.is_eq(ce, U32.from_nat(1n)), e, U32.from_nat(0n))))))
 
   # quad tiers mapping (only used when cat == 7, i.e. four of a kind)
-  +low_kicker = Bool.or(U32.is_eq(kicker_rank, U32.from_nat(2n)), Bool.or(U32.is_eq(kicker_rank, U32.from_nat(3n)), U32.is_eq(kicker_rank, U32.from_nat(4n))))
+  +low_kicker = Bool.or(U32.is_eq(kicker_rank, U32.from_nat(0n)), Bool.or(U32.is_eq(kicker_rank, U32.from_nat(1n)), U32.is_eq(kicker_rank, U32.from_nat(2n))))
   +quad_code = pick(U32.is_eq(quad_tiers, U32.from_nat(0n)), w_four_kind(),
                   pick(U32.is_eq(quad_rank, U32.from_nat(12n)), pick(low_kicker, w_four_aces_kicker(), w_four_aces()),
                     pick(U32.is_le(quad_rank, U32.from_nat(2n)), pick(Bool.or(U32.is_eq(kicker_rank, U32.from_nat(12n)), low_kicker), w_four_234_kicker(), w_four_234()),

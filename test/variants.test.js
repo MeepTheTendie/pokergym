@@ -69,6 +69,14 @@ test('Bonus Poker splits four of a kind by the rank of the quad', () => {
   assert.equal(payFor(kings, v), 25);
 });
 
+test('four twos with a 5 kicker is not the kicker tier (Bonus Poker regression)', () => {
+  const v = variantById('bonus-poker');
+  const hand = [c(5, 'c'), c(2, 'd'), c(2, 's'), c(2, 'h'), c(2, 'c')];
+  assert.equal(winCodeOf(hand, v), WIN.FOUR_234);
+  assert.equal(winCodeOfHand(hand, v), WIN.FOUR_234);
+  assert.equal(payFor(evaluate5(hand), v), 40);
+});
+
 test('Double Double Bonus pays a low kicker alongside four aces the most', () => {
   const v = variantById('double-double-bonus');
   const acesWithThree = evaluate5([c(14, 's'), c(14, 'h'), c(14, 'd'), c(14, 'c'), c(3, 's')]);
