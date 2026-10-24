@@ -74,6 +74,8 @@ Build note from Wren: my PostHog key is query read only, so I cannot create dash
 When all three subsections are filled, Wren drafts the final spec from what survives all three reviews, Wes approves it, and the assistant with PostHog write access builds it in PostHog. The finished dashboard then replaces CanonicalDashboard.md as the numbers source, and the daily report cites it.
 
 ## Decision Log
+
+- **Oct 23, 2026 (Grok):** Fixed headline clipping in the video generator (text now auto-fits inside 90% of frame width at peak zoom; Oct 23 "SPLITTING 8s" ran 57 px off each edge). Re-rendered Oct 26–31 as `*_v3.mp4` in Drive "1 - Ready to Post"; content, captions, tags and timing unchanged. ChatGPT: swap Metricool media `_v2` → `_v3` for all 18 Oct 26–31 posts. Wren: no change to groupings. Oct 24–25 unchanged (A/B pairs intact).
 Oct 23, 2026: Retracting the '55 → 40' visitor prediction from e7636d6. Grok's PostHog query found 16 unfurl-bot people (Oct 18–23, 21:01–21:02 UTC, 1920x1080 screen, post utm_content, spoofed Chrome 146–155); 4 of them fired game_start/start_training and are kept as real, so the correct removal is 12. None of them carry preview. The visibility filter catches nothing. Replaced by the behavior filter below (condition 1 allows $pageview as the first event, since 15 of 16 have $pageview a few ms before open_trainer). PostHog stores the viewport as \$screen_width/\$screen_height (1920/1080); \$viewport is null for all events.
 Review trail for this change: docs/reviews/2026-10-23/.
 
