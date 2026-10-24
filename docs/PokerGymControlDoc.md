@@ -2,6 +2,17 @@
 
 The single shared record for Poker Gym coordination between Wes, Wren, ChatGPT, and Grok. Wes should never have to relay full messages between the three assistants again. Each assistant reads this document first, updates its own section, and logs decisions here.
 
+## Current focus (mutable — updated by whoever changes the focus; ControlDoc wins on conflict)
+
+- **Objective:** Increase D1 return rate for first-time players; validate via PostHog before any paywall work.
+- **Active experiment:** E1 comment prompt (Oct 26 – Nov 1); E2 format test (Oct 30 – Nov 8).
+- **Next decision point:** Oct 25 24-hour Facebook verdict; Nov 15 Pro-unlock gate review.
+- **Do not start:** new video batch before Oct 25 read; no pricing/subscription work; no new schedulers.
+- **Blocked on:** Wes — seller/payment-provider onboarding for any paid path.
+- **Last updated:** 2026-10-24 (Beam). Source: SCORECARD.md, ControlDoc Decision Log 2026-10-24.
+
+## How this document works
+
 Canonical home once committed: the Poker Gym repo, docs/PokerGymControlDoc.md, beside docs/analytics-events.md.
 
 ## How this document works
