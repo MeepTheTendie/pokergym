@@ -20,7 +20,7 @@
     // Array form: run for entry pages, published guides and the PostHog proxy.
     // The proxy path must reach the worker; guide/unknown paths not in this
     // list go straight to assets.
-    "run_worker_first": ["/", "/web/", "/web", "/web/index.html", "/guides/*", "/ingest/*"]
+    "run_worker_first": ["/", "/go", "/web/", "/web", "/web/index.html", "/guides/*", "/ingest/*"]
   },
   "analytics_engine_datasets": [
     { "binding": "VISITS", "dataset": "pokergym_visits" }

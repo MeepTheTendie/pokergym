@@ -17,6 +17,14 @@ function secure(response) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    // Typed-path attribution: a short path printed on video end screens so
+    // hand-typed visitors become attributable (ControlDoc 2026-10-23).
+    if (url.pathname === '/go' || url.pathname === '/go/') {
+      const target = new URL('/web/', url.origin);
+      target.searchParams.set('ref', 'endscreen');
+      target.searchParams.set('utm_content', 'typed');
+      return Response.redirect(target.href, 302);
+    }
     // PostHog is proxied through our own origin (see worker/proxy.js). This is
     // never counted and never wrapped in the page security headers.
     if (isIngestPath(url.pathname)) {
