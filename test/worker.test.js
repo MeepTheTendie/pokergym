@@ -114,7 +114,7 @@ test('wrangler config: worker + assets binding, array run_worker_first, AE datas
   for (const p of cfg.assets.run_worker_first.filter(p => !p.includes('*'))) assert.ok(pathBucket(p), `${p} is a counted path`);
   assert.deepEqual(cfg.analytics_engine_datasets, [{ binding: 'VISITS', dataset: 'pokergym_visits' }]);
   assert.ok(cfg.routes.some(r => r.pattern === 'playpokergym.com' && r.custom_domain));
-  assert.equal(cfg.workers_dev, true);
+  assert.equal(cfg.workers_dev, false);
 });
 
 test('stats query and table label', () => {
