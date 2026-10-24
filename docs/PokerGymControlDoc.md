@@ -78,7 +78,17 @@ Build note from Wren: my PostHog key is query read only, so I cannot create dash
 
 ### Grok additions
 
-(pending: Grok adds its must haves and cuts here, and states whether it holds PostHog write access)
+**Write access: yes.** Grok's PostHog connection can create dashboards, tiles and saved insights in project 670990 (verified Oct 24, 2026, by its tool list; nothing built yet). Grok will build the dashboard once Wren drafts the converged spec and Wes approves it.
+
+Must haves (Grok, Oct 24, 2026):
+1. **Per-post traffic tile:** visitors and players by first utm_content and ref platform, counted within 24 hours after each post's 4 PM CT publish. This answers Wes's open question about whether 100–300-view videos drive visits. Unfurl bots excluded via notTestClause().
+2. **Returns that include local saves:** next to Wren's D1 by cohort, count open_trainer with days_since_last_visit >= 1 as returns. Reason: PostHog showed a local save on 9 players it counted as new (Oct 22 diagnosis), so person-based D1 alone undercounts.
+3. Keep Wren's items 1, 2, 3 and 5 as proposed.
+
+Cuts (Grok):
+- **Cut the "all time" window** from tiles; keep the epoch (since Oct 21) and today. Pre-epoch data is mostly probes and launch noise and won't drive a decision.
+- **Shrink the recap panel (item 4) to one tile:** share of recap viewers who tap Daily Drill. The rest is debugging detail.
+- **Move the data quality tile (item 6) off the main screen** to a second "health" dashboard. It helps the crew, but no fix/kill/scale decision depends on it.
 
 ### Convergence
 
