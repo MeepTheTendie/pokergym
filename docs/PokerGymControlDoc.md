@@ -106,6 +106,8 @@ When all three subsections are filled, Wren drafts the final spec from what surv
 
 ## Decision Log
 
+- **October 25, 2026, early afternoon Central (Wes decision, three moves on the dead mornings):** Wes approved three moves after the Facebook export showed the Oct 25 morning post at distribution -3.8x with 2 views, matching the Oct 18 disaster (-3.7x), while the Oct 24 morning scored only -0.7x with 5 views. (1) Wes checks Business Suite distribution detail, Page account status, and any flags on the two dead posts, which connectors cannot see. (2) ChatGPT verifies the Oct 25 Facebook morning post in Metricool (scheduled time, published status, media file vs the original, caption tags, any publish errors), same investigation as the Oct 24 post, and does not edit, delete, or repost the video. (3) Wes invites the three Facebook strangers who reacted Oct 23 (John Maffetore, Ranjan Seal, Miguel Angel) to follow the Page via the native invite on the post's likes; this is warm strangers, not the personal Rolodex, which stays dead. No repost of the dead videos, no schedule change, no extra post today; the Oct 25 4 PM control and the Oct 26 to 31 batch run untouched. Source: Wes's approval, Oct 25, plus Wes's Sep-27 to Oct-25 Facebook export.
+
 - **October 25, 2026, ~11 AM CT (ChatGPT; Grok high-bitrate v4 re-pick executed): COMPLETE, 18/18.** Grok's Oct 24 ~9:15 PM Decision Log update replaced all six previously used low-bitrate v4 Drive files with new **11.3–13.0 MB** high-bitrate v4 MP4s under new Drive IDs, and explicitly required ChatGPT to re-pick any already scheduled v4 media. Located all six new `application/mp4` files plus the matching existing `.txt` captions in `1 - Ready to Post`; reattached the high-bitrate files to the **existing Oct 26–31** YouTube Shorts and reused their new Metricool-hosted media URLs on Instagram and Facebook Reels. A separate fresh Metricool brand **7282227** readback verified **all 18** at **4 PM America/Chicago**, `PENDING`, `autoPublish=true`, not drafts, correct same new v4 video per day on all three networks, unchanged text, settings, `ref` and `utm_content` (including Oct 30/31 `__fmt-textq`). **No failures; no remaining re-picks.** Oct 25 protected A/B posts untouched (8 AM trio published, 4 PM trio pending). **Nov 1–8 scheduling blocked on absent approved MP4/caption pairs**; retain E2 balance (card art Nov 1/3/5/7/8, text question Nov 2/4/6). First verified follow-prompt end-card ship date remains unknown; the October v4 videos only changed the opening. Wren owns the Oct 27 performance review. Sources: Grok Oct 24 ~9:15 PM ControlDoc re-encode note; Wren Oct 25 ~9:50 AM Status; Google Drive current folder listing, raw MP4 and text reads; Metricool 18 update responses and Oct 25–Nov 11 independent readback. No new docs/schedulers/analytics reports or PostHog probe traffic.
 
 
@@ -201,7 +203,7 @@ October 21, 2026, Wes: the manual setup list (Facebook username, cover, About, p
 
 ## Open Questions
 
-For ChatGPT: schedule the proposed November 1 to 8 creative allocation with format suffixes on the links, and confirm here when scheduled. Also confirm the first ship date of any future video batch that carries the follow prompt end card.
+For ChatGPT: schedule the proposed November 1 to 8 creative allocation with format suffixes on the links, and confirm here when scheduled. Also confirm the first ship date of any future video batch that carries the follow prompt end card. Also verify the October 25 Facebook morning post in Metricool (scheduled time, published status, media file vs the original, caption tags, any publish errors) and log the result here; Wren's connector read shows published 8:02 AM Central with ref=facebook and utm_content=new-hook, and the Facebook export scores it -3.8x with 2 views. Do not edit, delete, or repost the video.
 
 For Wes: complete the bio updates and the Reel pin in the social accounts, then note the date here or tell Wren, so E3 can be scored honestly.
 
@@ -296,6 +298,7 @@ October 21, 2026, 8:10 PM Central, first sync.
 - Instrumentation: new hand-level events (hand_dealt, decision_made, hand_complete) were confirmed landing in PostHog from a real, non-headless browser at 6:13 PM Central Oct 21, after the service worker fix (02150a1) and the hand-number fixes (ac6f409, 5f6e142, live version 6cead0fa). Headless Chromium tests get filtered as bots by PostHog and cannot verify delivery. Coverage across all visitors still depends on returning visitors picking up the new service worker, so Wren's coverage monitor is the right check. Source: my own test session plus PostHog queries.
 - E3: confirmed that the Oct 26 to 31 videos I rendered carry the comment pill only, with no follow end card. A follow end card can be added to the November batch on request.
 - Retention claim: agreed it stays a hypothesis until Wes's Oct 26 screenshots.
+
 
 
 
