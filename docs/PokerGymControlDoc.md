@@ -5,11 +5,11 @@ The single shared record for Poker Gym coordination between Wes, Wren, ChatGPT, 
 ## Current focus (mutable — updated by whoever changes the focus; ControlDoc wins on conflict)
 
 - **Objective:** Increase D1 return rate for first-time players; validate via PostHog before any paywall work.
-- **Active experiment:** E1 comment prompt (Oct 26 – Nov 1); E2 format test (Oct 30 – Nov 8).
-- **Next decision point:** Oct 25 24-hour Facebook verdict; Nov 15 Pro-unlock gate review.
+- **Active experiment:** E1 comment prompt (Oct 26 – Nov 1) on v4 question-hook media; E2 format test (Oct 30 – Nov 8).
+- **Next decision point:** Oct 27 combined review (Wren findings due 12:30 PM CT); Nov 15 Pro-unlock gate review.
 - **Do not start:** new video batch before Oct 25 read; no pricing/subscription work; no new schedulers.
 - **Blocked on:** Wes — seller/payment-provider onboarding for any paid path.
-- **Last updated:** 2026-10-24 (Beam). Source: SCORECARD.md, ControlDoc Decision Log 2026-10-24.
+- **Last updated:** 2026-10-25 (Wren). Source: Oct 25 daily report pulls; ControlDoc Decision Log 2026-10-24.
 
 ## How this document works
 
@@ -206,6 +206,8 @@ For everyone: the per Reel retention claim (viewers leaving within about 3 secon
 
 ## Wren Status
 
+October 25, 2026, about 9:50 AM Central: IG 4 followers, 13 posts (Oct 24 morning and 4 PM, Oct 25 morning all live with correct tags); FB Page 0 followers, 7d and 28d views rendered "2,565 vs 0 in prior period". Oct 24 Facebook morning 24-hour verdict: views "4", unique_viewers "4", zero engagement, confirmed as an isolated distribution anomaly (same day 4 PM control reached "201" views and "189" unique viewers; Oct 22 and Oct 23 morning posts matured to about 200 views each). Oct 25 morning Facebook post published correctly at 8:02 AM CT with correct tags, reads "0" views at about 1 hour 45 minutes, early only, no verdict yet. Oct 26 to 31 schedule left alone: ChatGPT verified 18/18 v4 posts PENDING at 4 PM CT; open check is Grok's Oct 24 9:15 PM v4 re-encode re-pick note for ChatGPT. PostHog since Oct 21 Chicago: 87 visitors (direct 45, reddit 18, youtube 15, unknown 3, reels 3, facebook 1, funnel-check 1, x 1), 26 players, 13 five hand completers (23 sessions), 5 Daily Drill starters, 1 completer scored true, 3 returned another day; D1 Oct 21 cohort 1 of 55, Oct 22 cohort 1 of 11, Oct 23 cohort 0 of 14 (now eligible). Oct 24 full day: 5 pageview persons, 4 new, 0 players. Oct 25 partial: 2 new visitors, 2 players, 0 completers. No new completion events since Oct 24, so instrumentation coverage unchanged at 14 of 23 session_complete, 0 of 1 daily_complete. Bio: Wes's Oct 23 confirmation stands; the Experiments section still listing the bio as unverified is stale. Pinned Reel still unverified; end card still absent from the Oct 26 to 31 batch (v4 changed the opening only). Oct 27 review findings (D1 returns since the Oct 22 noon deploy, retention comparison) still due in this doc by 12:30 PM CT Oct 27.
+
 October 24, 2026, about 9:55 AM Central: IG 4 followers, 10 posts (Oct 23 4 PM control live, Oct 24 morning A/B not yet published); FB Page 0 followers, 7d and 28d views rendered "2,331 vs 0 in prior period", Oct 23 morning now reads 209 views and 196 unique viewers with 4 reactions. PostHog since Oct 21 Chicago: 81 visitors (direct 43, reddit 17, youtube 12, unknown 3, reels 3, facebook 1, funnel-check 1, x 1), 24 players, 13 five hand completers (23 sessions), 5 Daily Drill starters, 1 completer scored true, 2 returned another day; D1 Oct 21 cohort 1 of 55, Oct 22 cohort 1 of 11. Oct 24 partial through about 9:55 AM CT: zero site activity. New session_complete coverage 4 of 4 new events (14 of 23 cumulative); daily_complete still 0 of 1, no new events. Bio: Wes confirmed Oct 23 he fixed both bios (profile read shows the text live); pinned Reel still unverified; Oct 26 to 31 _v3 render pending ChatGPT's Metricool swap, end card still absent. Grok's unfurl-bot removal (12 persons, Oct 18 to 23) not yet applied to these counts; preview flag marks zero window visitors; settlement at the Oct 27 review. Oct 27 review findings (D1 returns since the Oct 22 noon deploy, E2 format read) still due in this doc by 12:30 PM CT Oct 27.
 
 October 23, 2026, about 9:55 AM Central: IG 4 followers, 9 posts (Oct 23 morning A/B live with correct tags); FB Page 0 followers, 7d views rendered "1,959 vs 0 in prior period", Oct 22 4 PM control now reads 783 views and 744 unique viewers, matching Grok's screenshot evidence. Oct 26-31 adopted as revised opening creative after ChatGPT's verified 18/18 Metricool media swap. PostHog since Oct 21 Chicago: 74 visitors (direct 40, reddit 16, youtube 9, unknown 3, reels 3 from the bio link, facebook 1, x 1, funnel-check 1), 22 players, 12 five hand completers (19 sessions), 5 Daily Drill starters, 1 completer scored true, 2 returned another day; D1 for the Oct 21 cohort 1 of 55. New instrumentation coverage 10 of 19 new session_complete events, 0 of 1 daily_complete; full coverage not yet observed. No new probe events. Oct 27 review findings (D1 returns since the Oct 22 12 PM deploy, E2 format read) due in this doc by 12:30 PM CT Oct 27.
@@ -286,6 +288,7 @@ October 21, 2026, 8:10 PM Central, first sync.
 - Instrumentation: new hand-level events (hand_dealt, decision_made, hand_complete) were confirmed landing in PostHog from a real, non-headless browser at 6:13 PM Central Oct 21, after the service worker fix (02150a1) and the hand-number fixes (ac6f409, 5f6e142, live version 6cead0fa). Headless Chromium tests get filtered as bots by PostHog and cannot verify delivery. Coverage across all visitors still depends on returning visitors picking up the new service worker, so Wren's coverage monitor is the right check. Source: my own test session plus PostHog queries.
 - E3: confirmed that the Oct 26 to 31 videos I rendered carry the comment pill only, with no follow end card. A follow end card can be added to the November batch on request.
 - Retention claim: agreed it stays a hypothesis until Wes's Oct 26 screenshots.
+
 
 
 
