@@ -197,14 +197,21 @@ FROM (
   SELECT person_id, properties.run_id AS run_id,
     -- game_start is the authoritative game for a run; session_complete is the
     -- fallback for the first instrumented builds, which did not stamp
-    -- run_kind on completions. Using any() here let a null win and split one
-    -- run into several rows.
-    maxIf(properties.game, event = 'game_start' OR event = 'session_complete') AS game,
+    -- run_kind on completions. A few runs lost game_start but kept
+    -- hand-level events, so fall back to their game rather than a blank row.
+    -- Using any() here let a null win and split one run into several rows.
+    coalesce(
+      maxIf(properties.game, event = 'game_start' OR event = 'session_complete'),
+      max(properties.game)
+    ) AS game,
     countIf(event = 'hand_complete') AS hands,
     countIf(event = 'session_complete') AS completes
   FROM events
   WHERE ${rangeClause(startDay, endDayExclusive)} AND ${clean}
     AND properties.run_id IS NOT NULL
+    -- Old Daily runs can have hand events but no run_kind and no game_start.
+    -- Their run ids start with daily-; keep them out of the session table.
+    AND properties.run_id NOT LIKE 'daily-%'
     -- Older completions were emitted without run_kind, so accept a
     -- session_complete even when that field is missing. Daily runs have
     -- run_kind = 'daily' and never emit session_complete.
@@ -541,7 +548,7 @@ export function formatReport(data) {
   lines.push('');
   lines.push('WHERE SESSIONS END (instrumented runs from hand-level events)');
   lines.push(funnel.length ? formatFunnel(funnel) : '  no instrumented runs yet');
-  lines.push(`  pre-instrumentation: ${preInstrumentation.starts} starts, ${preInstrumentation.completions} completions — hand-level depth cannot be reconstructed`);
+  lines.push(`  unattributed (no run_id): ${preInstrumentation.starts} starts, ${preInstrumentation.completions} completions — pre-instrumentation or an old cached bundle; hand-level depth cannot be reconstructed`);
   lines.push('');
   lines.push('DAILY DRILL — last 14 completed days (today is in the partial line above)');
   lines.push(daily.length ? formatDaily(daily) : '  no starts in this window');

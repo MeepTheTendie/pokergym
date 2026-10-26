@@ -2563,5 +2563,25 @@ analytics.openTrainer({
   returning,
   days_since_last_visit: daysSinceLastVisit,
 });
-if (profile) { renderMap(); show('scr-map'); }
-else { initTitle(); }
+function startFromEntry() {
+  const wantsDaily = Boolean(entryParams.daily);
+  const wantsPractice = Boolean(requestedGym);
+  if (!wantsDaily && !wantsPractice) return false;
+  if (!profile) {
+    profile = createProfile(DEFAULT_CLASS);
+    profile.createdAt = new Date().toISOString();
+    save();
+    applyPalette(DEFAULT_CLASS);
+  }
+  if (wantsDaily) {
+    sharedDaily = false;
+    startDaily('daily_link');
+  } else {
+    enterTraining();
+  }
+  return true;
+}
+if (!startFromEntry()) {
+  if (profile) { renderMap(); show('scr-map'); }
+  else { initTitle(); }
+}

@@ -86,7 +86,9 @@ test('the funnel groups by run id and ignores challenge exams', () => {
   const sql = funnelQuery('2026-10-14', '2026-10-21');
   assert.match(sql, /properties\.run_id/);
   assert.match(sql, /properties\.run_kind = 'session'/);
-  assert.match(sql, /maxIf\(properties\.game, event = 'game_start' OR event = 'session_complete'\)/);
+  assert.match(sql, /properties\.run_id NOT LIKE 'daily-%'/, 'daily runs do not leak into the session funnel');
+  assert.match(sql, /coalesce\(\s*maxIf\(properties\.game, event = 'game_start' OR event = 'session_complete'\)/);
+  assert.match(sql, /max\(properties\.game\)/, 'hand events cover runs missing game_start');
   assert.match(sql, /properties\.run_kind IS NULL AND event = 'session_complete'/, 'older completions without run_kind still count');
   assert.match(sql, /GROUP BY person_id, run_id/);
   assert.match(sql, /properties\.mode != 'challenge'/);

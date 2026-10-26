@@ -236,7 +236,7 @@ test('start_daily lives inside startDaily, after its re-entry guard', () => {
 
 test('every Daily Drill entry path names itself', () => {
   const calls = [...app.matchAll(/(?<![.\w])startDaily\(([^)]*)\)/g)].map((m) => m[1]).filter((arg) => !arg.startsWith('entry ='));
-  assert.deepEqual(calls.sort(), ["'map'", "'map_resume'", "'recap'", "'replay'", "'replay'", 'entry'].sort());
+  assert.deepEqual(calls.sort(), ["'daily_link'", "'map'", "'map_resume'", "'recap'", "'replay'", "'replay'", 'entry'].sort());
   assert.match(app, /const entry = sharedDaily \? \(dailyLinkEntry \?\? 'title'\) : 'title';/);
   assert.match(app, /entryParams\.daily \? 'daily_link' : sharedDaily \? 'share_link' : null/);
 });
