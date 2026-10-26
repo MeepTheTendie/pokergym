@@ -40,7 +40,7 @@ export default {
     if (url.hostname === 'www.playpokergym.com') {
       url.hostname = 'playpokergym.com';
       url.protocol = 'https:';
-      return Response.redirect(url.href, 307);
+      return Response.redirect(url.href, 301);
     }
     let bucket = null;
     try { bucket = countBucket(request); } catch { bucket = null; }

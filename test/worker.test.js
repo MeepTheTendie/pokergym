@@ -51,7 +51,7 @@ function ctx() { const waits = []; return { waits, waitUntil(p) { waits.push(p);
 test('www homepage enters canonical save origin with attribution preserved', async () => {
   const e = env(); const c = ctx();
   const response = await worker.fetch(nav('https://www.playpokergym.com/?ref=youtube&daily=1'), e, c);
-  assert.equal(response.status, 307);
+  assert.equal(response.status, 301);
   assert.equal(response.headers.get('location'), 'https://playpokergym.com/?ref=youtube&daily=1');
   assert.deepEqual(e.served, []);
   assert.deepEqual(e.points, []);
@@ -60,7 +60,7 @@ test('www homepage enters canonical save origin with attribution preserved', asy
     assert.equal((await worker.fetch(nav(address), e, c)).status, 200);
   }
   const wwwWeb = await worker.fetch(nav('https://www.playpokergym.com/web/'), e, c);
-  assert.equal(wwwWeb.status, 307);
+  assert.equal(wwwWeb.status, 301);
   assert.equal(wwwWeb.headers.get('location'), 'https://playpokergym.com/web/');
 });
 

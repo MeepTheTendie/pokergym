@@ -163,7 +163,12 @@ export function createAnalytics({ send, ref = () => null } = {}) {
       const run = finish(token, 'session');
       if (!run) return false;
       emit(EVENTS.SESSION_COMPLETE, {
+        // run_kind is what lets reports tell a session completion apart from a
+        // Daily hand that happens to share the run_id field. Without it the
+        // funnel query drops every completion and reports 0 finished runs.
+        run_kind: run.kind,
         game: run.game,
+        mode: run.mode,
         correct,
         run_id: token,
         hands_completed: hands,
@@ -184,8 +189,10 @@ export function createAnalytics({ send, ref = () => null } = {}) {
     },
 
     dailyComplete(token, { correct, number, scored = true, hands = 5 } = {}) {
-      if (!finish(token, 'daily')) return false;
+      const run = finish(token, 'daily');
+      if (!run) return false;
       emit(EVENTS.DAILY_COMPLETE, {
+        run_kind: run.kind,
         correct, number, scored: Boolean(scored), run_id: token,
         hands_completed: hands, event_version: EVENT_VERSION,
       });

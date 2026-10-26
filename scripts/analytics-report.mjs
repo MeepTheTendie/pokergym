@@ -195,13 +195,21 @@ export function funnelQuery(startDay, endDayExclusive) {
   countIf(hands >= 5 AND completes = 0) AS five_without_complete
 FROM (
   SELECT person_id, properties.run_id AS run_id,
-    any(properties.game) AS game,
+    -- game_start is the authoritative game for a run; session_complete is the
+    -- fallback for the first instrumented builds, which did not stamp
+    -- run_kind on completions. Using any() here let a null win and split one
+    -- run into several rows.
+    maxIf(properties.game, event = 'game_start' OR event = 'session_complete') AS game,
     countIf(event = 'hand_complete') AS hands,
     countIf(event = 'session_complete') AS completes
   FROM events
   WHERE ${rangeClause(startDay, endDayExclusive)} AND ${clean}
     AND properties.run_id IS NOT NULL
-    AND properties.run_kind = 'session'
+    -- Older completions were emitted without run_kind, so accept a
+    -- session_complete even when that field is missing. Daily runs have
+    -- run_kind = 'daily' and never emit session_complete.
+    AND (properties.run_kind = 'session'
+      OR (properties.run_kind IS NULL AND event = 'session_complete'))
     AND (properties.mode IS NULL OR properties.mode != 'challenge')
     AND event IN ('game_start', 'hand_dealt', 'hand_complete', 'session_complete')
   GROUP BY person_id, run_id

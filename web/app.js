@@ -1934,44 +1934,55 @@ function sessionStreak(profile) {
   return streak;
 }
 
-function renderSessionSummary(session) {
+function renderSessionSummary(session, daily = null) {
   const box = el('sessionSummary');
-  if (!box || !session) return;
+  if (!box || (!session && !daily)) return;
+  const results = daily ? daily.results : sessionResults;
+  const total = daily ? DAILY_HANDS : SESSION_HANDS;
+  const correct = daily ? results.filter(Boolean).length : session.optimal;
+  const missed = results.filter(ok => !ok).length;
+  const recapRunId = daily ? daily.token : sessionToken;
+  const recapKind = daily ? 'daily' : 'session';
+  const bestStreak = daily ? (profile?.daily?.streak ?? 0) : sessionBest;
   box.replaceChildren();
   const head = document.createElement('h2');
-  head.textContent = 'FIVE HANDS COMPLETE';
+  head.textContent = daily ? `DAILY DRILL #${daily.number} COMPLETE` : 'FIVE HANDS COMPLETE';
   box.appendChild(head);
-  if (sessionResults.length > 0) {
+  if (results.length > 0) {
     const grid = document.createElement('p');
     grid.className = 'session-grid';
-    grid.setAttribute('aria-label', `${sessionResults.filter(Boolean).length} of ${sessionResults.length} hands correct`);
-    grid.textContent = sessionResults.map(ok => ok ? '🟩' : '🟥').join('');
+    grid.setAttribute('aria-label', `${correct} of ${results.length} hands correct`);
+    grid.textContent = results.map(ok => ok ? '🟩' : '🟥').join('');
     box.appendChild(grid);
   }
   const score = document.createElement('p');
   score.className = 'hint';
-  score.textContent = `${session.optimal}/${SESSION_HANDS} CORRECT · BEST STREAK ${sessionBest}`;
+  score.textContent = daily
+    ? `${correct}/${total} CORRECT · STREAK ${bestStreak}`
+    : `${correct}/${total} CORRECT · BEST STREAK ${bestStreak}`;
   box.appendChild(score);
-  if (session.optimal === SESSION_HANDS - 1) {
+  if (correct === total - 1) {
     const near = document.createElement('p');
     near.className = 'hint';
-    near.textContent = 'ONE MORE CORRECT WOULD HAVE BEEN A PERFECT RUN. PLAY AGAIN?';
+    near.textContent = daily
+      ? 'ONE MORE CORRECT WOULD HAVE BEEN A PERFECT DRILL. TOMORROW?'
+      : 'ONE MORE CORRECT WOULD HAVE BEEN A PERFECT RUN. PLAY AGAIN?';
     box.appendChild(near);
   }
-  const recapRunId = sessionToken;
-  analytics.sessionComplete(sessionToken, { correct: session.optimal, hands: SESSION_HANDS });
-  const miss = sessionMistakes[0];
+  // A regular session announces itself here; a daily already emitted
+  // daily_complete in settleDailyHand. Never fire both.
+  if (!daily) analytics.sessionComplete(sessionToken, { correct: session.optimal, hands: SESSION_HANDS });
+  const miss = daily ? null : sessionMistakes[0];
   if (miss) {
     const detail = document.createElement('p');
     detail.className = 'hint';
     detail.textContent = `REVIEW: ${miss.situation} — ${miss.correction}`;
     box.appendChild(detail);
   }
-  const dailyDone = Boolean(profile && dailyCompleted(profile, dailyKey()));
+  const dailyDone = daily ? true : Boolean(profile && dailyCompleted(profile, dailyKey()));
   const todayNum = dailyNumber(dailyKey());
-  const missed = sessionResults.filter(ok => !ok).length;
-  // Measurement: the recap is seen whenever a five-hand session ends.
-  analytics.recapView({ daily_done: dailyDone, missed, run_id: recapRunId });
+  // Measurement: the recap is seen whenever a five-hand session or daily ends.
+  analytics.recapView({ daily_done: dailyDone, missed, run_id: recapRunId, run_kind: recapKind });
 
   const actions = document.createElement('div');
   actions.className = 'row';
@@ -1985,7 +1996,7 @@ function renderSessionSummary(session) {
     };
     actions.appendChild(review);
   }
-  if (!dailyDone) {
+  if (!daily && !dailyDone) {
     // Tomorrow hook: point the player at today's Daily Drill first.
     const dailyBtn = document.createElement('button');
     dailyBtn.type = 'button';
@@ -2000,15 +2011,21 @@ function renderSessionSummary(session) {
 
   const again = document.createElement('button');
   again.type = 'button';
-  again.className = dailyDone ? 'primary' : '';
-  again.textContent = 'PLAY AGAIN';
+  again.className = daily || dailyDone ? 'primary' : '';
+  again.textContent = daily ? 'REPLAY DRILL' : 'PLAY AGAIN';
   again.onclick = () => {
-    analytics.recapTap({ button: 'play_again', run_id: recapRunId });
+    analytics.recapTap({ button: daily ? 'replay_daily' : 'play_again', run_id: recapRunId });
+    box.hidden = true;
+    if (daily) {
+      dailyMode = false;
+      dailyRun = null;
+      startDaily('replay');
+      return;
+    }
     const gym = gymId ? GYM_BY_ID[gymId] : null;
-    if (!gym || !profile) { box.hidden = true; return; }
+    if (!gym || !profile) return;
     profile = beginSession(profile, gym.id);
     save();
-    box.hidden = true;
     startGym(gym, true);
   };
   actions.appendChild(again);
@@ -2017,20 +2034,23 @@ function renderSessionSummary(session) {
   challenge.textContent = 'CHALLENGE A FRIEND';
   challenge.onclick = async () => {
     const dayNum = dailyNumber(dailyKey());
-    const text = `Poker Gym: ${session.optimal}/${SESSION_HANDS} correct in ${GYM_BY_ID[gymId]?.name ?? 'training'}. Beat my score on Daily Drill #${dayNum}: ${shareUrl(dayNum)}`;
+    const text = daily
+      ? dailyShareText(daily.key, daily.results, daily.number)
+      : `Poker Gym: ${correct}/${SESSION_HANDS} correct in ${GYM_BY_ID[gymId]?.name ?? 'training'}. Beat my score on Daily Drill #${dayNum}: ${shareUrl(dayNum)}`;
     try {
       if (typeof navigator.share === 'function') {
         await navigator.share({ title: 'Poker Gym Challenge', text });
       } else {
         await navigator.clipboard.writeText(text);
       }
-      window.trackEvent?.('share', { channel: 'challenge' });
+      analytics.recapTap({ button: 'challenge', run_id: recapRunId });
+      window.trackEvent?.('share', { channel: daily ? 'daily' : 'challenge' });
     } catch (e) { /* user cancelled */ }
   };
   actions.appendChild(challenge);
   box.appendChild(actions);
 
-  if (!dailyDone && missed > 0) {
+  if (missed > 0) {
     const handWord = missed === 1 ? 'hand' : 'hands';
     const line = document.createElement('p');
     line.className = 'hint';
@@ -2039,7 +2059,7 @@ function renderSessionSummary(session) {
   }
 
   // Streak from the first finished session: any five-hand session counts.
-  const streak = sessionStreak(profile);
+  const streak = daily ? bestStreak : sessionStreak(profile);
   if (streak > 0) {
     const streakLine = document.createElement('p');
     streakLine.textContent = `🔥 Day ${streak} streak — play tomorrow to make it ${streak + 1}`;
@@ -2144,7 +2164,13 @@ function settleDailyHand({ optimal, difficulty, line, review }) {
   el('battleEndRow').hidden = false;
 
   const tally = run.results.filter(Boolean).length;
-  if (run.finished) analytics.dailyComplete(run.token, { correct: tally, number: run.number, scored: run.scored, hands: DAILY_HANDS });
+  if (run.finished) {
+    analytics.dailyComplete(run.token, { correct: tally, number: run.number, scored: run.scored, hands: DAILY_HANDS });
+    // Completing the daily is the habit loop. Give it the same return hooks
+    // (share, install, calendar reminder, streak) as a five-hand session
+    // instead of ending on a single line of verdict text.
+    renderSessionSummary(null, run);
+  }
   const say = optimal
     ? 'GOOD READ. THAT IS THE PLAY.'
     : 'NO. THE BETTER MOVE WAS DIFFERENT.';
@@ -2528,9 +2554,10 @@ if (profile && !lastVisitDay) {
   lastVisitDay = all.length ? all[all.length - 1] : null;
 }
 const daysSinceLastVisit = lastVisitDay ? dayGap(localDayKey(), lastVisitDay) : null;
-if (profile) {
-  try { localStorage.setItem('pg_last_visit_day', localDayKey()); } catch {}
-}
+// Write the visit day on every load, not only when a save exists. Otherwise a
+// first-time visitor who comes back tomorrow still reports days_since_last_visit
+// as null, and the retention report cannot measure the gap.
+try { localStorage.setItem('pg_last_visit_day', localDayKey()); } catch {}
 analytics.openTrainer({
   entry: dailyLinkEntry ?? (entryParams.practice ? 'practice_link' : 'direct'),
   returning,

@@ -3,7 +3,11 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Free card-game trainer that coaches every decision: video poker, blackjack, baccarat and Hold’em hand reading. Daily drill, mistake review, no signup.">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+<meta name="author" content="Poker Gym">
 <link rel="canonical" href="https://playpokergym.com/">
+<link rel="sitemap" type="application/xml" href="/sitemap.xml">
+<meta property="og:locale" content="en_US">
 <meta property="og:title" content="Poker Gym — free card-game practice">
 <meta property="og:description" content="Practice five hands, review mistakes, and learn card decisions in a free browser game.">
 <meta property="og:url" content="https://playpokergym.com/">
@@ -23,7 +27,119 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/web/icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="/web/icon-512.png">
 <link rel="apple-touch-icon" href="/web/icon-192.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Poker Gym","url":"https://playpokergym.com/","applicationCategory":"EducationalApplication","operatingSystem":"Any (web browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Free card-game trainer for blackjack, Jacks or Better video poker, baccarat and Hold’em hand reading. No real-money gambling."}</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://playpokergym.com/#organization",
+      "name": "Poker Gym",
+      "url": "https://playpokergym.com/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://playpokergym.com/web/icon-512.png",
+        "width": 512,
+        "height": 512
+      },
+      "sameAs": ["https://github.com/MeepTheTendie/pokergym"],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "meep@mail.grokbot.com",
+        "contactType": "customer support",
+        "availableLanguage": "English"
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://playpokergym.com/#website",
+      "url": "https://playpokergym.com/",
+      "name": "Poker Gym",
+      "description": "Free card-game trainer for blackjack, Jacks or Better video poker, baccarat and Texas Hold'em hand reading.",
+      "inLanguage": "en",
+      "publisher": {"@id": "https://playpokergym.com/#organization"}
+    },
+    {
+      "@type": "WebApplication",
+      "@id": "https://playpokergym.com/web/#app",
+      "name": "Poker Gym",
+      "url": "https://playpokergym.com/web/",
+      "applicationCategory": "EducationalApplication",
+      "applicationSubCategory": "Card game trainer",
+      "operatingSystem": "Any modern web browser",
+      "browserRequirements": "Requires JavaScript. Works offline after the first load.",
+      "isAccessibleForFree": true,
+      "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+      "description": "A free card-game trainer that coaches every decision in blackjack, Jacks or Better video poker, baccarat and Texas Hold'em hand reading. Five-hand sessions, a shared Daily Drill and spaced mistake review. No signup or real-money wagering.",
+      "featureList": [
+        "Five-hand coached sessions for four card games",
+        "A shared Daily Drill that resets at local midnight",
+        "Spaced mistake review",
+        "Progress saved in the browser",
+        "Offline play after the first load",
+        "No signup, no ads, no real money"
+      ],
+      "screenshot": "https://playpokergym.com/og.png",
+      "isPartOf": {"@id": "https://playpokergym.com/#website"},
+      "publisher": {"@id": "https://playpokergym.com/#organization"}
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://playpokergym.com/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is Poker Gym free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Every game, the Daily Drill, mistake review and progress saving are free. There is no signup, subscription or paid tier."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Poker Gym use real money?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. There are no deposits, bets, cash prizes or real-money wagering. The cards and odds are simulated for learning."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which card games does it teach?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Blackjack, Jacks or Better video poker, baccarat and Texas Hold'em hand reading. Each five-hand session is coached, and missed decisions return on a spaced schedule."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do I need an account?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Progress is saved in your browser on this device. You can export a backup before clearing site data or changing devices."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does it work offline?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, after the first load. Add it to your home screen to open it like an app."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is the coaching the same as a casino strategy chart?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. The coach compares average outcomes under the simulator's rules. Different rules or a depleted shoe can change a decision; the guides note the assumptions."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
 <style>
 @font-face{font-family:'Sora';font-style:normal;font-weight:400 800;font-display:swap;src:url('/web/fonts/Sora.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Sora';font-style:normal;font-weight:400 800;font-display:swap;src:url('/web/fonts/Sora-LatinExt.woff2') format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF}
@@ -85,6 +201,11 @@ h1 span{color:var(--gold)}
 .retain-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px}
 .retain-card b{display:block;font-size:14px;color:var(--gold);margin-bottom:6px}
 .retain-card p{margin:0;font-size:13px;color:var(--dim)}
+.faq{max-width:800px;margin:8px auto 40px}
+.faq details{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 18px;margin:10px 0}
+.faq summary{cursor:pointer;font-weight:700;color:var(--text);min-height:32px}
+.faq summary:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.faq p{margin:10px 0 0;font-size:14px;color:var(--dim)}
 .final{text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px 24px;margin-bottom:32px}
 .final h2{font-size:28px;margin:0 0 8px}
 .final p{margin:0 0 20px;color:var(--dim)}
@@ -132,7 +253,7 @@ footer{border-top:1px solid var(--border);color:var(--dim);font-size:13px;paddin
 <div>
 <p class="eyebrow">Free card-game trainer</p>
 <h1 id="hero-heading">Can you get 5/5 today?</h1>
-<p class="lead">Five hands, one daily challenge. The coach explains every decision after you make it. No signup, no real money, no ads.</p>
+<p class="lead">Five hands of blackjack, video poker, baccarat or Hold’em. The coach explains every decision after you make it. No signup, no real money, no ads.</p>
 <a class="cta" href="/web/?daily=1" data-track="cta_click" data-cta="start_daily" data-location="hero">Try today’s drill →</a>
 <p style="margin:10px 0 0;font-size:13px;color:var(--dim)">Or <a href="/web/" data-track="cta_click" data-cta="start_training" data-location="hero_secondary">play one hand →</a></p>
 <ul class="trust" aria-label="What to expect">
@@ -189,6 +310,18 @@ footer{border-top:1px solid var(--border);color:var(--dim);font-size:13px;paddin
 <div class="retain-card"><b>📣 Challenge a friend</b><p>Share today’s drill. Compare green-and-red grids. No spoilers, just scores.</p></div>
 </div>
 <p style="text-align:center;margin:0 0 40px;font-size:13px;color:var(--dim)">Want one-tap access? Add Poker Gym to your home screen — it works offline.</p>
+</section>
+
+<section aria-labelledby="faq-heading">
+<p class="section-title" id="faq-heading">Questions</p>
+<div class="faq">
+<details><summary>Is Poker Gym free?</summary><p>Yes. Every game, the Daily Drill, mistake review and progress saving are free. There is no signup, subscription or paid tier.</p></details>
+<details><summary>Does Poker Gym use real money?</summary><p>No. There are no deposits, bets, cash prizes or real-money wagering. The cards and odds are simulated for learning.</p></details>
+<details><summary>Which card games does it teach?</summary><p>Blackjack, Jacks or Better video poker, baccarat and Texas Hold’em hand reading. Each five-hand session is coached, and missed decisions return on a spaced schedule.</p></details>
+<details><summary>Do I need an account?</summary><p>No. Progress is saved in your browser on this device. You can export a backup before clearing site data or changing devices.</p></details>
+<details><summary>Does it work offline?</summary><p>Yes, after the first load. Add it to your home screen to open it like an app.</p></details>
+<details><summary>Is the coaching the same as a casino strategy chart?</summary><p>No. The coach compares average outcomes under the simulator’s rules. Different rules or a depleted shoe can change a decision; the guides note the assumptions.</p></details>
+</div>
 </section>
 
 <section class="final" aria-labelledby="final-heading">

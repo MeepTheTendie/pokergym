@@ -54,6 +54,7 @@ test('flow: ?daily=1 link -> button -> five hands -> one start_daily and one dai
   assert.equal(done.number, 12);
   assert.equal(done.scored, true);
   assert.equal(done.hands_completed, 5);
+  assert.equal(done.run_kind, 'daily', 'completion carries its run kind');
   assert.equal(done.run_id, start.run_id, 'completion carries its run id');
   assert.equal(done.event_version, 2);
 });
@@ -90,6 +91,8 @@ test('flow: five-hand session pairs game_start with session_complete', () => {
   const done = last('session_complete');
   assert.equal(done.game, 'holdem');
   assert.equal(done.correct, 3);
+  assert.equal(done.run_kind, 'session');
+  assert.equal(done.mode, 'session');
   assert.equal(done.run_id, token);
   assert.equal(done.hands_completed, 5);
   assert.equal(done.event_version, 2);
@@ -233,7 +236,7 @@ test('start_daily lives inside startDaily, after its re-entry guard', () => {
 
 test('every Daily Drill entry path names itself', () => {
   const calls = [...app.matchAll(/(?<![.\w])startDaily\(([^)]*)\)/g)].map((m) => m[1]).filter((arg) => !arg.startsWith('entry ='));
-  assert.deepEqual(calls.sort(), ["'map'", "'map_resume'", "'recap'", "'replay'", 'entry'].sort());
+  assert.deepEqual(calls.sort(), ["'map'", "'map_resume'", "'recap'", "'replay'", "'replay'", 'entry'].sort());
   assert.match(app, /const entry = sharedDaily \? \(dailyLinkEntry \?\? 'title'\) : 'title';/);
   assert.match(app, /entryParams\.daily \? 'daily_link' : sharedDaily \? 'share_link' : null/);
 });

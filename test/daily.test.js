@@ -18,7 +18,7 @@ test('daily summary uses calendar windows and attributes each decision to its se
   assert.deepEqual(summary.previous, { sessions: 2, hands: 10, correct: 3 });
   assert.deepEqual(summary.entries.map(row => row.key), ['2026-10-14', '2026-10-08', '2026-10-07', '2026-10-01']);
   for (const game of summary.games) {
-    const expected = history.slice(0, 2).flatMap(row => dailyPlan(row.key).map((hand, i) => ({ ...hand, correct: row.results[i] }))).filter(hand => hand.game === game.game);
+    const expected = history.slice(0, 2).flatMap(row => dailyPlanV1(row.key).map((hand, i) => ({ ...hand, correct: row.results[i] }))).filter(hand => hand.game === game.game);
     assert.equal(game.hands, expected.length);
     assert.equal(game.correct, expected.filter(hand => hand.correct).length);
   }
@@ -54,6 +54,7 @@ test('dailyPlan is identical for a key and mixes all four games into five hands'
   const plan = dailyPlan('2026-10-12');
   assert.deepEqual(plan, dailyPlan('2026-10-12'));
   assert.equal(plan.length, DAILY_HANDS);
+  assert.equal(plan[0].game, 'blackjack', 'a new player meets the familiar game first');
   assert.deepEqual(plan.map((entry, i) => entry.seed),
     Array.from({ length: DAILY_HANDS }, (_, i) => `2026-10-12#${i}`));
   assert.equal(new Set(plan.map(entry => entry.game)).size, DAILY_GAMES.length);

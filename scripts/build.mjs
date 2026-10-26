@@ -49,6 +49,8 @@ try {
 await cp(path.join(root, 'web/landing.html'), path.join(output, 'index.html'));
 await cp(path.join(root, 'public/sitemap.xml'), path.join(output, 'sitemap.xml'));
 await cp(path.join(root, 'public/robots.txt'), path.join(output, 'robots.txt'));
+await cp(path.join(root, 'public/llms.txt'), path.join(output, 'llms.txt'));
+await cp(path.join(root, 'public/llms-full.txt'), path.join(output, 'llms-full.txt'));
 await cp(path.join(root, 'public/guides'), path.join(output, 'guides'), { recursive: true });
 // Link-preview image: served only at the site root (/og.png). It is not in the
 // web/ allowlist above, so it never lands in dist/web/; the ASSETS filter below

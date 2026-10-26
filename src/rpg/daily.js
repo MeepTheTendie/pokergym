@@ -67,7 +67,22 @@ export function dailyPlanV1(key) {
 }
 
 export function dailyPlan(key) {
-  return dailyPlanV1(key);
+  return dailyPlanV2(key);
+}
+
+// Keep the five seeds and the one-of-each-game mix, but rotate so the first
+// hand is blackjack. A new player meets blackjack on the title screen; the
+// Daily Drill should not open with baccarat or hold'em before the game they
+// already know. Rotating descriptors keeps each hand's seed paired with its
+// game, so the drill is still identical for everyone on a given day.
+export function dailyPlanV2(key) {
+  const plan = dailyPlanV1(key);
+  const first = plan.findIndex(hand => hand.game === 'blackjack');
+  const games = first <= 0
+    ? plan.map(hand => hand.game)
+    : [...plan.slice(first), ...plan.slice(0, first)].map(hand => hand.game);
+  // Re-seed by index so the "hand i uses key#i" invariant still holds.
+  return games.map((game, i) => ({ game, seed: `${key}#${i}` }));
 }
 
 export function validDailyGames(games) {
