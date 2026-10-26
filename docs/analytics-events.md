@@ -78,9 +78,13 @@ compare a number from another report unless it uses the same definition.
 | Five-hand completer | Unique person with a valid `session_complete` (five finished hands). |
 | Five-hand completion rate | Five-hand completers divided by players. The report also prints total completions. |
 | Daily Drill starter / completer | Unique person with `start_daily` / `daily_complete` in the window. |
-| Returned another day | Person active on at least two distinct Chicago calendar days. |
-| D1 retention | Person active on the Chicago day immediately after their first-touch day. Only shown for cohorts whose next day is fully complete. |
-| 7-day return | Person active on any day from first-touch day +1 through +7. Only shown for cohorts whose day +7 is fully complete. |
+| Returned (any) | Person active on at least two distinct Chicago calendar days. This is the broadest return definition and is not the same as returning to play. |
+| Returned site | Person with a valid `$pageview` on at least two distinct Chicago days. |
+| Returned game | Person with a `game_start` on a later Chicago day than their first-touch day. |
+| D1 site return | Person with a valid `$pageview` on the Chicago day immediately after their first-touch day. Only shown for cohorts whose next day is fully complete. |
+| D1 return-to-game | Person with a `game_start` on the Chicago day immediately after their first-touch day. Only shown for cohorts whose next day is fully complete. |
+| D7 site return | Person with a valid `$pageview` on any day from first-touch day +1 through +7. Only shown for cohorts whose day +7 is fully complete. |
+| D7 return-to-game | Person with a `game_start` on any day from first-touch day +1 through +7. Only shown for cohorts whose day +7 is fully complete. |
 | First-touch source | The first valid `first_ref`, else the first non-empty `ref`, else `first_utm_source`/`utm_source` when it names a recognized platform, else `direct` when the earliest referrer is explicitly `$direct`, else `unknown`. One bucket per person, so rows reconcile to the visitor total. |
 
 Reporting days are **America/Chicago**, not UTC and not the PostHog project's
@@ -88,4 +92,4 @@ UTC setting. `scripts/analytics-report.mjs` converts each Chicago midnight to
 an explicit UTC instant with `Intl` (so DST transitions are handled) and groups
 events with `toDate(toTimeZone(timestamp, 'America/Chicago'))`. Yesterday is
 the last fully completed Chicago day; today is reported separately as partial.
-See `docs/analytics-metrics.md` for the scorecard and remaining gaps.
+See `docs/analytics-metrics.md` for the decision dashboard, metric definitions, and remaining gaps.

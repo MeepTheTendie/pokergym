@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { build } from '../scripts/build.mjs';
+import { build } from '../../scripts/build.mjs';
 
 const SITE = 'https://playpokergym.com';
 const REQUIRED = ['og:title', 'og:description', 'og:url', 'og:type', 'og:image', 'og:image:width',

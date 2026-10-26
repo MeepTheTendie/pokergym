@@ -5,7 +5,8 @@
   "type": "module",
   "description": "A gym trainer for casino card games: learn the rules, drill strategy, level up to Gym Leader.",
   "scripts": {
-    "test": "node --test \"test/**/*.test.js\"",
+    "test": "node --test \"test/*.test.js\"",
+    "test:release": "node --test \"test/release/**/*.test.js\"",
     "bend:check": "bend src/evaluate.bend",
     "bend:verify": "node scripts/verify-bend-evaluate.mjs",
     "bend:verify:vp": "node scripts/verify-bend-videopoker.mjs",

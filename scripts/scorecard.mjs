@@ -1,13 +1,11 @@
-// npm run scorecard — the Oct 16-29 launch scorecard, filled in from real
-// analytics wherever a number can be measured automatically.
+// npm run scorecard — HISTORICAL Oct 16-29 launch tracker.
 //
-// It reports the site-side half of the plan's targets (unique people, people
-// who came back on a second day, people per channel). Video views and
-// unprompted requests for more cannot be measured here and are filled in by
-// hand in SCORECARD.md.
+// This is no longer a decision tool. It is kept so the original launch record
+// can be reprinted. It uses UTC days, absolute counts, and an "any event"
+// definition of a return; it does not match the Chicago-day report.
 //
-// PostHog filters bots, so these are people, not requests. Do NOT use the
-// Cloudflare visit counter for humans: it includes crawlers and link previews.
+// The current decision surface is `npm run report` and the PostHog decision
+// dashboard. The old 3-of-4 build rule is retired.
 //
 // Needs POSTHOG_PERSONAL_API_KEY (same setup as npm run stats; see README
 // "Visit stats"). Override the window with:
@@ -115,23 +113,24 @@ export function formatScorecard({ start, end, days, peopleByDay = {}, totals = {
   const n = v => Number(v ?? 0);
   const people = n(totals.people);
   const lines = [
-    `POKER GYM — 14-DAY SCORECARD (${start} to ${end}, UTC days)`,
-    'Site-side numbers only. Video views and unprompted requests are filled in by hand.',
-    'This launch tracker uses PostHog UTC days and is not the reconciled Chicago scorecard (`npm run report`).',
+    `POKER GYM — HISTORICAL 14-DAY LAUNCH TRACKER (${start} to ${end}, UTC days)`,
+    'HISTORICAL ONLY — NOT A DECISION TOOL. The 3-of-4 build rule is retired.',
+    'Use `npm run report` and the PostHog decision dashboard for current definitions.',
+    'This tracker counts any event on a UTC day; it is not the reconciled Chicago report.',
     '',
-    'TARGETS',
+    'HISTORICAL TARGETS (kept for the archive; not a gate)',
     table(
       ['target', 'goal', 'now', 'status'],
       [
-        ['Real human site visits', `${TARGETS.visits}+`, people, people >= TARGETS.visits ? 'met' : 'not yet'],
-        ['People who came back (2nd day)', `${TARGETS.returning}+`, returning, returning >= TARGETS.returning ? 'met' : 'not yet'],
+        ['Clean browser profiles (historical)', `${TARGETS.visits}+`, people, '—'],
+        ['Active on 2+ UTC days (historical)', `${TARGETS.returning}+`, returning, '—'],
         ['Unprompted requests for more', `${TARGETS.requests}+`, 'by hand', '—'],
         ['Video views (all platforms)', `${TARGETS.views}+`, 'by hand', '—'],
       ],
       [1, 2, 3],
     ),
     '',
-    'CONTEXT',
+    'CONTEXT (not a decision metric)',
     `finished a five-hand session: ${n(totals.finished_a_session)}   finished the daily drill: ${n(totals.finished_the_daily_drill)}`,
     '',
     'PEOPLE PER DAY',

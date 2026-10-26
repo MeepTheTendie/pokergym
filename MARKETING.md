@@ -8,7 +8,7 @@ No subscriptions, ever, and no recurring prices. Monetization is the optional Ko
 
 Playable demo: https://playpokergym.com/web/
 Landing: https://playpokergym.com/
-Dashboard (plain English, start here): https://us.posthog.com/project/670990/dashboard/2224048
+Dashboard (plain English, start here): https://us.posthog.com/project/670990/dashboard/2263366
 No social posts, player responses or tips verified yet. No daily marketing schedule configured.
 
 First-party analytics is live (2026-10-17). PostHog is proxied through playpokergym.com, so events are same-origin; its bot filter drops headless clients, so counts are real people rather than crawler-inflated page requests. `npm run stats` now prints both the bot-inclusive visit counter and the honest PostHog report (unique people per day, journey stages, top events). Read it before choosing a daily action: if few people reach "finished five hands", the next improvement is onboarding or the game, not more posting.

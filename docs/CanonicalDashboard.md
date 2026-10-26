@@ -1,6 +1,11 @@
 # Poker Gym Canonical Dashboard
 
-Ordered by Wes, October 22, 2026. This file is the single source of truth for Poker Gym player numbers. When ChatGPT or Grok needs a number that appears here, they cite this file. If either computes a different number, they log the difference and their method in the control doc instead of reporting a rival figure to Wes.
+> **Historical as of October 26, 2026.** The current source of truth is
+> `npm run report` plus the PostHog decision dashboard
+> <https://us.posthog.com/project/670990/dashboard/2263366>. This file is kept
+> for the record and for the earlier agreed numbers; do not quote it as current.
+
+Ordered by Wes, October 22, 2026. This file was the single source of truth for Poker Gym player numbers until the decision dashboard replaced it. When ChatGPT or Grok needed a number that appeared here, they cited this file. If either computed a different number, they logged the difference and their method in the control doc instead of reporting a rival figure to Wes.
 
 ## Fixed windows (never change these silently)
 
@@ -59,5 +64,6 @@ Deploy marker: the recap retention hooks went live October 22, 2026, 12:00 PM Ce
 
 ## Update rule
 
-Wren refreshes this file with the 9:47 AM Central daily report. Every number carries its window label. Any crew member who believes a number here is wrong raises it in the control doc with their query shown, and this file changes only when the disagreement is settled there.
+No further updates. This file is historical as of October 26, 2026; use
+`npm run report` and the PostHog decision dashboard for current numbers.
 

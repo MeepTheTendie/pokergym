@@ -55,13 +55,13 @@ Bend is optional: if the `bend` binary is not installed, `bend:verify` skips gra
 
 **1. Visit counter (Analytics Engine).** Counts page-like requests to `/`, `/web/` and the five published learning guides per UTC day and by link label (`ref`, from the fixed list in `src/rpg/links.js`). No IPs, user agents or cookies are stored. These are page-like requests, not people: link-preview bots and crawlers count too, so treat this as an upper bound.
 
-**2. Real people (PostHog).** Unique people per day, the journey stages they reach, and the events they fire. PostHog is first-party (proxied through `playpokergym.com`) and its bot filter drops headless/automated clients, so these are the honest human numbers. The same data drives the "Poker Gym — Start Here" dashboard at <https://us.posthog.com/project/670990/dashboard/2224048>.
+**2. Clean traffic (PostHog).** Unique browser profiles per day, the journey stages they reach, and the events they fire. PostHog is first-party (proxied through `playpokergym.com`), and the report excludes known probes, automation, and unfurl traffic. These are **not verified humans**: a browser profile can be reset, shared, or merged, and exclusions are heuristics. The one-screen decision dashboard is <https://us.posthog.com/project/670990/dashboard/2263366>.
 
 Either section is skipped, not fatal, if its credential is missing.
 
-`npm run scorecard` prints the launch scorecard instead: the Oct 16–29 targets (real site visits, people who came back on a second day) and people per channel, with this project's own test traffic excluded. See `SCORECARD.md` for the tracking table and the decision rule. It uses UTC days, so label it that way when comparing it with the Chicago report below.
+`npm run scorecard` is the historical Oct 16–29 launch tracker. It uses UTC days and absolute counts, so it is not the decision tool. See `SCORECARD.md` for the archive and `docs/analytics-metrics.md` for the current definitions.
 
-`npm run report` prints the reconciled product scorecard: **America/Chicago** reporting days, today's partial numbers, seven-day comparisons, one-bucket-per-person source attribution, the hand-level funnel, Daily Drill participation, retention by first-touch cohort, exclusion audits, and data-quality warnings. See `docs/analytics-metrics.md` for the definitions and known gaps.
+`npm run report` prints the authoritative product report: **America/Chicago** reporting days, decision status, D1/D7 return-to-game with denominators and confidence intervals, today's partial numbers, seven-day comparisons, one-bucket-per-person source attribution, the hand-level funnel, Daily Drill participation, exclusion audits, and data-quality warnings. The same metrics drive the PostHog decision dashboard. See `docs/analytics-metrics.md` for the definitions and known gaps.
 
 One-time setup:
 

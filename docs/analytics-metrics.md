@@ -1,8 +1,12 @@
-# Analytics metrics and scorecard
+# Analytics metrics and decision dashboard
 
-`npm run report` prints the reconciled scorecard from PostHog. It is the
-authoritative product-usage report; Cloudflare visits, social impressions, and
-video views are not substitutes.
+`npm run report` prints the reconciled product-usage report from PostHog. It is
+the authoritative source; the one-screen PostHog dashboard is the summary view:
+<https://us.posthog.com/project/670990/dashboard/2263366>.
+
+Cloudflare visits, social impressions, video views, and manual “unprompted
+request” notes are not substitutes for the definitions below. The 14-day
+`npm run scorecard` output is a historical launch record, not a decision tool.
 
 The code is `scripts/analytics-report.mjs`; the event dictionary is
 `docs/analytics-events.md`. All queries are reproducible: the script prints the
@@ -33,9 +37,13 @@ edges of the day.
 | Five-hand completer | Unique person with a valid `session_complete` (five finished hands). |
 | Five-hand completion rate | Five-hand completers ÷ players. Total completions are printed separately because one person can finish more than one session. |
 | Daily Drill starter / completer | Unique person with `start_daily` / `daily_complete`. |
-| Returned another day | Person active on at least two distinct Chicago days. |
-| D1 retention | Active on the Chicago day immediately after first touch. Only cohorts whose next day is complete are eligible. |
-| 7-day return | Active on any day from first-touch day +1 through +7. Only cohorts whose day +7 is complete are eligible. |
+| Returned (any) | Person active on at least two distinct Chicago days. This is the broadest return definition; it is not the primary decision metric. |
+| Returned site | Person with a valid `$pageview` on at least two distinct Chicago days. |
+| Returned game | Person with a `game_start` on a later Chicago day than their first-touch day. |
+| D1 site return | Person with a valid `$pageview` on the Chicago day immediately after first touch. Only cohorts whose next day is complete are eligible. |
+| D1 return-to-game | Person with a `game_start` on the Chicago day immediately after first touch. Only cohorts whose next day is complete are eligible. |
+| D7 site return | Person with a valid `$pageview` on any day from first-touch day +1 through +7. Only cohorts whose day +7 is complete are eligible. |
+| D7 return-to-game | Person with a `game_start` on any day from first-touch day +1 through +7. Only cohorts whose day +7 is complete are eligible. |
 | First-touch source | First valid `first_ref`, else first non-empty `ref`, else `first_utm_source`/`utm_source` when it is a recognized platform, else `direct` when the earliest referrer is explicitly `$direct`, else `unknown`. Exactly one bucket per person. |
 
 The same exclusions are applied to visitors, attribution, conversion, retention,
@@ -45,32 +53,62 @@ PostHog's internal/test cohort `644643`. Exclusion counts are printed in the
 AUDIT section. Remaining visitors are **not** verified humans; they are traffic
 that survived these rules.
 
+## Decision status and sample gates
+
+The report prints a provisional decision status based on the weakest stage:
+
+- `too early` — not enough mature people for any action label.
+- `fix acquisition/onboarding` — visitors are not starting a game.
+- `fix onboarding/game` — players are not finishing five hands.
+- `fix retention` — people finish sessions but do not return to play.
+- `retention promising; keep collecting` — early return signal is at/above
+  threshold but the D7 denominator is not decision-grade.
+- `retention cleared; demand gate remains` — D7 is at/above threshold with at
+  least 100 eligible people; willingness to pay is still unmeasured.
+
+The thresholds in `DECISION_THRESHOLDS` are **provisional** until the owner
+approves them. Sample gates are deliberately conservative: under 30 eligible
+people is too early, 30–99 is directional, and 100+ is decision-grade. A rate
+with a tiny denominator is never shown as a green light.
+
+The primary metric is **D1/D7 return-to-game**, not “returned on any event.” A
+pageview-only return is still visible as a site return, but it does not count as
+a return to the product’s core loop.
+
 `trainer_open` is the brief's stage name; the event keeps its existing name
 `open_trainer` so historical series stay comparable. Likewise `game_start` and
 `session_complete` are the existing names for the session start and five-hand
 completion stages.
 
-## Scorecard sections
+## Report and dashboard sections
 
-1. Yesterday (complete Chicago day).
-2. Today (partial, through the generation time).
-3. Last seven completed days vs the preceding seven, including visitors,
+1. Decision status, D1/D7 return-to-game with denominators and confidence
+   intervals, and the provisional action label.
+2. Yesterday (complete Chicago day).
+3. Today (partial, through the generation time).
+4. Last seven completed days vs the preceding seven, including visitors,
    game-start rate, five-hand completers/completion rate, return rate, and
    Daily Drill completers.
-4. Today's source table and the last fourteen completed days' source table.
+5. Today's source table and the last fourteen completed days' source table.
    Each has one row per person and a total that must equal the visitor
    denominator. `Direct` and `Unknown` are separate rows; a missing referrer is
    never guessed into a platform. `reels` is tracked as its own `ref` and folded
    into Instagram in the report.
-5. Where sessions end, by game and hand number, using `run_id`. Runs before
+6. Where sessions end, by game and hand number, using `run_id`. Runs before
    this instrumentation are reported separately; their hand-level depth cannot
    be reconstructed.
-6. Daily Drill starts, completers, completion rate, replays, resumes, and total
-   completions.
-7. Retention by first-touch cohort, by source, and by first game; repeat site
-   visits and repeat gameplay are separate columns.
-8. Audit counts and a data-quality warning when any breakdown does not
+7. Daily Drill starts, completers, completion rate, replays, resumes, total
+   completions, and repeat starters/completers.
+8. Retention by first-touch cohort, by source, and by first game. D1/D7 site
+   and game returns are separate columns; “returned (any)” is not presented as
+   return-to-game.
+9. Audit counts and a data-quality warning when any breakdown does not
    reconcile or when completions exceed starts.
+
+The PostHog dashboard mirrors this order: status, retention, funnel, Daily
+Drill, source quality, session depth, and data health. It uses the same
+exclusion rules and Chicago-day boundaries. The report remains the
+reconciliation source if a tile and the CLI ever disagree.
 
 ## Before and after (same history, 2026-10-21 snapshot)
 
@@ -127,9 +165,16 @@ Historical values that **cannot** be reconstructed:
 
 ## Known gaps and permissions
 
-- The existing PostHog dashboard tile still uses its own filter and a cached
-  value. It is not automatically rewritten by this report. Refresh or replace
-  tiles manually; no scheduled task was recreated.
+- The new PostHog dashboard is a saved snapshot of SQL, not a live import of
+  this module. If `notTestClause()` or a metric definition changes, update the
+  dashboard tiles and reconcile them against `npm run report`.
+- PostHog returns at most 100 rows by default for raw queries. Per-person
+  queries in `scripts/analytics-report.mjs` now carry `LIMIT 100000`; without
+  that limit, the retention table silently stopped at the first 100 person-days.
+  Keep the limit on any new raw per-person query.
+- The legacy PostHog dashboard `2224048` is the old “Poker Gym Scorecard.” It is
+  retained as an archive until the replacement has run in parallel; do not use
+  it for decisions.
 - The legacy probe person `01a14ba3-de9e-731c-ba49-9c24fe4b762e` cannot be
   patched (PostHog returns 404 for the person) and is not in cohort `644643`.
   It can still appear in historical UTC views. The report's probe distinct-id
@@ -151,5 +196,8 @@ Historical values that **cannot** be reconstructed:
 - hand events after a run ends are rejected;
 - five-hand completion carries `hands_completed: 5`;
 - source rows reconcile to one person and one total;
-- D1/D7 maturity, repeat site vs repeat gameplay, and Chicago/DST boundaries;
+- D1/D7 maturity, site vs game return, repeat site vs repeat gameplay, and
+  Chicago/DST boundaries;
+- Wilson intervals, sample gates, and the decision-status action mapping;
+- per-person queries cannot be truncated by PostHog's default row limit;
 - a data-quality warning when sources or Daily Drill events do not reconcile.

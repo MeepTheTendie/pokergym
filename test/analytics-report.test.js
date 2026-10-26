@@ -1,11 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  CHICAGO_TZ, DAY_EXPR, addDays, chicagoDayKey, chicagoMidnightUtc, chicagoOffsetMinutes,
-  rangeClause, dayClause, windowTotalsQuery, personWindowQuery, funnelQuery, dailyDrillQuery,
-  sourcePersonQuery, auditQuery,
+  CHICAGO_TZ, DAY_EXPR, DECISION_THRESHOLDS, addDays, chicagoDayKey, chicagoMidnightUtc,
+  chicagoOffsetMinutes, rangeClause, dayClause, windowTotalsQuery, personWindowQuery,
+  funnelQuery, dailyDrillQuery, sourcePersonQuery, auditQuery, firstGameQuery, personDayQuery,
   aggregateSources, sourceLabel, computeRetention, returnRate, rates, dataWarnings,
-  formatSources,
+  decisionStatus, formatRetention, formatRetentionSummary, formatSources, sampleStatus,
+  wilsonInterval,
 } from '../scripts/analytics-report.mjs';
 
 const iso = d => d.toISOString();
@@ -153,14 +154,123 @@ test('retention only rates mature cohorts and separates site from gameplay', () 
   const a = retention.cohorts.find(c => c.cohort_day === '2026-09-20');
   assert.equal(a.people, 2);
   assert.equal(a.d1_eligible, 2);
-  assert.equal(a.d1, 1, 'a returned the next day');
+  assert.equal(a.d1, 1, 'a returned to the site the next day');
+  assert.equal(a.d1_game, 0, 'a did not start a game the next day');
   assert.equal(a.d7_eligible, 2);
-  assert.equal(a.d7, 2, 'both returned within seven days');
+  assert.equal(a.d7, 2, 'both returned to the site within seven days');
+  assert.equal(a.d7_game, 1, 'only b started a game within the seven-day window');
   assert.equal(a.returned_site, 2);
   assert.equal(a.returned_game, 2);
+  assert.equal(retention.overall.d1, 1);
+  assert.equal(retention.overall.d1_game, 0);
+  assert.equal(retention.overall.d7, 2);
+  assert.equal(retention.overall.d7_game, 1);
   const c = retention.cohorts.find(c => c.cohort_day === '2026-10-20');
   assert.equal(c.d1_eligible, 0, 'the next day has not finished');
   assert.equal(c.d7_eligible, 0);
+});
+
+test('a game-only return is not counted as a site return', () => {
+  const personDays = [
+    { person_id: 'a', day: '2026-09-20', pageviews: 1, starts: 1 },
+    { person_id: 'a', day: '2026-09-21', pageviews: 0, starts: 1 },
+  ];
+  const retention = computeRetention(personDays, { matureBefore: '2026-09-21' });
+  const a = retention.cohorts.find(c => c.cohort_day === '2026-09-20');
+  assert.equal(a.d1, 0);
+  assert.equal(a.d1_game, 1);
+  assert.equal(a.returned_site, 0);
+  assert.equal(a.returned_game, 1);
+  assert.equal(a.returned_any, 1);
+});
+
+test('activity before the first pageview is not a return', () => {
+  const personDays = [
+    { person_id: 'a', day: '2026-09-19', pageviews: 0, starts: 1 },
+    { person_id: 'a', day: '2026-09-20', pageviews: 1, starts: 0 },
+  ];
+  const retention = computeRetention(personDays, { matureBefore: '2026-09-21' });
+  const a = retention.cohorts.find(c => c.cohort_day === '2026-09-20');
+  assert.equal(a.returned_game, 0);
+  assert.equal(a.returned_any, 0);
+});
+
+test('the window source query carries its own active-day count', () => {
+  const sql = personWindowQuery('2026-10-14', '2026-10-21');
+  assert.match(sql, /count\(DISTINCT .*America\/Chicago.*\) AS days/);
+});
+
+test('per-person queries do not truncate at PostHog\'s default row limit', () => {
+  for (const sql of [
+    sourcePersonQuery(),
+    personWindowQuery('2026-10-14', '2026-10-21'),
+    firstGameQuery(),
+    personDayQuery('2026-10-14', '2026-10-21'),
+  ]) {
+    assert.match(sql, /LIMIT 100000/, 'raw per-person rows must not be cut off before aggregation');
+  }
+});
+
+test('sample status refuses to over-read small denominators', () => {
+  assert.equal(sampleStatus(0), 'too early');
+  assert.equal(sampleStatus(DECISION_THRESHOLDS.minDirectional - 1), 'too early');
+  assert.equal(sampleStatus(DECISION_THRESHOLDS.minDirectional), 'directional');
+  assert.equal(sampleStatus(DECISION_THRESHOLDS.minDecision), 'decision-grade');
+});
+
+test('Wilson intervals stay inside zero and one hundred percent', () => {
+  const zero = wilsonInterval(0, 11);
+  assert.equal(zero.n, 11);
+  assert.equal(zero.low, 0);
+  assert.ok(zero.high > 20 && zero.high < 30);
+  const half = wilsonInterval(5, 10);
+  assert.ok(half.low > 20 && half.low < 30);
+  assert.ok(half.high > 70 && half.high < 80);
+  assert.deepEqual(wilsonInterval(0, 0), { low: 0, high: 0, n: 0 });
+});
+
+test('decision status names the weakest stage and refuses to decide on tiny samples', () => {
+  assert.equal(decisionStatus({ visitors: 20, players: 2 }), 'too early');
+  assert.equal(decisionStatus({
+    visitors: 100, players: 20, fiveHandCompleters: 10,
+    d1Eligible: 100, d1Game: 10, d7Eligible: 0, d7Game: 0,
+  }), 'fix acquisition/onboarding');
+  assert.equal(decisionStatus({
+    visitors: 100, players: 50, fiveHandCompleters: 10,
+    d1Eligible: 100, d1Game: 10,
+  }), 'fix onboarding/game');
+  assert.equal(decisionStatus({
+    visitors: 100, players: 40, fiveHandCompleters: 20,
+    d1Eligible: 100, d1Game: 2,
+  }), 'fix retention');
+  assert.equal(decisionStatus({
+    visitors: 100, players: 40, fiveHandCompleters: 20,
+    d1Eligible: 100, d1Game: 10,
+  }), 'retention promising; keep collecting');
+  assert.equal(decisionStatus({
+    visitors: 120, players: 50, fiveHandCompleters: 25,
+    d1Eligible: 120, d1Game: 12, d7Eligible: 100, d7Game: 10,
+  }), 'retention cleared; demand gate remains');
+});
+
+test('retention output shows site and game separately', () => {
+  const rows = [{
+    cohort_day: '2026-09-20', people: 10, d1_eligible: 10, d1: 2, d1_game: 1,
+    d7_eligible: 10, d7: 3, d7_game: 2, returned_site: 4, returned_game: 3,
+  }];
+  const text = formatRetention({ cohorts: rows });
+  assert.match(text, /D1 site/);
+  assert.match(text, /D1 game/);
+  assert.match(text, /D7 game/);
+  assert.match(text, /10%/);
+});
+
+test('retention summary states the denominator and confidence interval', () => {
+  const text = formatRetentionSummary({ d1_eligible: 91, d1_game: 0, d7_eligible: 14, d7_game: 0 });
+  assert.match(text, /D1 return-to-game: 0\/91/);
+  assert.match(text, /95% CI/);
+  assert.match(text, /D7 return-to-game: 0\/14/);
+  assert.match(text, /too early/);
 });
 
 test('rates and warnings flag broken reconciliation', () => {

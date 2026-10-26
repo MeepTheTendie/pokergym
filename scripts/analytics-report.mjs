@@ -102,6 +102,22 @@ export function dayClause(day, { endExclusive = addDays(day, 1), partial = false
 
 const clean = `(${notTestClause()})`;
 
+/**
+ * Provisional decision thresholds. These are deliberately in one place and
+ * labelled provisional until the owner signs off on the target values. The
+ * sample-size gates are the important part: a rate from a handful of people is
+ * not a go/no-go signal.
+ */
+export const DECISION_THRESHOLDS = Object.freeze({
+  minDirectional: 30,
+  minDecision: 100,
+  gameStartTarget: 30,
+  fiveHandCompletionTarget: 40,
+  d1GameTarget: 5,
+  d7GameTarget: 10,
+  provisional: true,
+});
+
 /* --------------------------------- queries -------------------------------- */
 
 export function visitorsByDayQuery(startDay, endDayExclusive) {
@@ -147,7 +163,8 @@ export function sourcePersonQuery() {
   count(DISTINCT ${DAY_EXPR}) AS days
 FROM events
 WHERE ${clean}
-GROUP BY person_id`;
+GROUP BY person_id
+LIMIT 100000`;
 }
 
 // Window visitors (pageview people) plus their gameplay flags. Joins to the
@@ -158,18 +175,21 @@ export function personWindowQuery(startDay, endDayExclusive, { partial = false, 
   return `SELECT person_id,
   countIf(event = '$pageview') AS pageviews,
   countIf(event = 'game_start') AS starts,
-  countIf(event = 'session_complete') AS completes
+  countIf(event = 'session_complete') AS completes,
+  count(DISTINCT ${DAY_EXPR}) AS days
 FROM events
 WHERE ${range} AND ${clean}
 GROUP BY person_id
-HAVING pageviews > 0`;
+HAVING pageviews > 0
+LIMIT 100000`;
 }
 
 export function firstGameQuery() {
   return `SELECT person_id, argMin(properties.game, timestamp) AS first_game
 FROM events
 WHERE event = 'game_start' AND ${clean}
-GROUP BY person_id`;
+GROUP BY person_id
+LIMIT 100000`;
 }
 
 export function personDayQuery(startDay, endDayExclusive) {
@@ -180,7 +200,8 @@ export function personDayQuery(startDay, endDayExclusive) {
 FROM events
 WHERE ${rangeClause(startDay, endDayExclusive)} AND ${clean}
 GROUP BY person_id, day
-ORDER BY day, person_id`;
+ORDER BY day, person_id
+LIMIT 100000`;
 }
 
 export function funnelQuery(startDay, endDayExclusive) {
@@ -339,26 +360,38 @@ export function aggregateSources(people = [], daysByPerson = new Map()) {
  * Cohort retention from person-day rows. Only cohorts with a *completed* next
  * day are eligible for D1; only cohorts with a completed day+7 are eligible
  * for the seven-day rate. `matureBefore` is the last completed day.
+ *
+ * Site return uses valid pageview days. Game return uses game_start days.
+ * "Returned any" uses any tracked event, and is kept separate so the three
+ * definitions cannot be confused.
  */
 export function computeRetention(personDays = [], { matureBefore, sourceByPerson = new Map(), firstGameByPerson = new Map() } = {}) {
   const people = new Map();
   for (const row of personDays) {
     const id = row.person_id;
     if (!id) continue;
-    // Retention is a visitor metric: a day with no valid pageview is not a
-    // visit, even if a late event arrived for it.
-    if (Number(row.pageviews ?? 0) <= 0) continue;
-    const entry = people.get(id) ?? { days: new Set(), gameDays: new Set() };
-    entry.days.add(String(row.day));
-    if (Number(row.starts) > 0) entry.gameDays.add(String(row.day));
+    const entry = people.get(id) ?? { days: new Set(), gameDays: new Set(), activeDays: new Set() };
+    const day = String(row.day);
+    entry.activeDays.add(day);
+    if (Number(row.pageviews ?? 0) > 0) entry.days.add(day);
+    if (Number(row.starts) > 0) entry.gameDays.add(day);
     people.set(id, entry);
   }
-  const empty = () => ({ people: 0, d1_eligible: 0, d1: 0, d7_eligible: 0, d7: 0, returned_site: 0, returned_game: 0 });
+  const empty = () => ({
+    people: 0,
+    d1_eligible: 0, d1: 0, d1_game: 0,
+    d7_eligible: 0, d7: 0, d7_game: 0,
+    returned_site: 0, returned_game: 0, returned_any: 0,
+  });
   const cohorts = new Map();
   const bySource = new Map();
   const byGame = new Map();
+  const overall = empty();
 
   for (const [id, entry] of people) {
+    // Retention is a visitor metric: a person with no valid pageview is not in
+    // the visitor cohort, even if a later event arrived for them.
+    if (!entry.days.size) continue;
     const days = [...entry.days].sort();
     const cohort = days[0];
     const next = addDays(cohort, 1);
@@ -366,24 +399,41 @@ export function computeRetention(personDays = [], { matureBefore, sourceByPerson
     const d1Eligible = Boolean(matureBefore) && next <= matureBefore;
     const d7Eligible = Boolean(matureBefore) && seventh <= matureBefore;
     const d1 = d1Eligible && entry.days.has(next);
+    const d1Game = d1Eligible && entry.gameDays.has(next);
     const d7 = d7Eligible && days.some(day => day > cohort && day <= seventh);
+    const d7Game = d7Eligible && [...entry.gameDays].some(day => day > cohort && day <= seventh);
     const returnedSite = days.length > 1;
-    const returnedGame = [...entry.gameDays].some(day => day !== cohort);
+    const returnedGame = [...entry.gameDays].some(day => day > cohort);
+    const returnedAny = [...entry.activeDays].some(day => day > cohort);
 
-    const bump = (map, key) => {
-      const row = map.get(key) ?? empty();
+    const addTo = row => {
       row.people += 1;
-      if (d1Eligible) { row.d1_eligible += 1; if (d1) row.d1 += 1; }
-      if (d7Eligible) { row.d7_eligible += 1; if (d7) row.d7 += 1; }
+      if (d1Eligible) {
+        row.d1_eligible += 1;
+        if (d1) row.d1 += 1;
+        if (d1Game) row.d1_game += 1;
+      }
+      if (d7Eligible) {
+        row.d7_eligible += 1;
+        if (d7) row.d7 += 1;
+        if (d7Game) row.d7_game += 1;
+      }
       if (returnedSite) row.returned_site += 1;
       if (returnedGame) row.returned_game += 1;
+      if (returnedAny) row.returned_any += 1;
+    };
+    const bump = (map, key) => {
+      const row = map.get(key) ?? empty();
+      addTo(row);
       map.set(key, row);
     };
+    addTo(overall);
     bump(cohorts, cohort);
     bump(bySource, sourceLabel(sourceByPerson.get(id) ?? 'unknown'));
     bump(byGame, firstGameByPerson.get(id) ?? 'no game_start');
   }
   return {
+    overall,
     cohorts: [...cohorts].sort(([a], [b]) => a.localeCompare(b)).map(([cohort_day, row]) => ({ cohort_day, ...row })),
     bySource: [...bySource].sort(([a], [b]) => a.localeCompare(b)).map(([source, row]) => ({ source, ...row })),
     byGame: [...byGame].sort(([a], [b]) => a.localeCompare(b)).map(([game, row]) => ({ game, ...row })),
@@ -392,6 +442,77 @@ export function computeRetention(personDays = [], { matureBefore, sourceByPerson
 
 export function pct(n, d) {
   return d ? (100 * Number(n)) / Number(d) : 0;
+}
+
+/** Wilson score interval for a binomial rate, returned in percentage points. */
+export function wilsonInterval(successes, total, z = 1.96) {
+  const n = Math.max(0, Number(total) || 0);
+  const k = Math.max(0, Math.min(Number(successes) || 0, n));
+  if (!n) return { low: 0, high: 0, n: 0 };
+  const p = k / n;
+  const z2 = z * z;
+  const denom = 1 + z2 / n;
+  const center = (p + z2 / (2 * n)) / denom;
+  const margin = (z * Math.sqrt((p * (1 - p)) / n + z2 / (4 * n * n))) / denom;
+  const low = Math.max(0, (center - margin) * 100);
+  const high = Math.min(100, (center + margin) * 100);
+  return {
+    low: low < 1e-9 ? 0 : low,
+    high: high > 100 - 1e-9 ? 100 : high,
+    n,
+  };
+}
+
+/** How much confidence a rate with this denominator can support. */
+export function sampleStatus(n, thresholds = DECISION_THRESHOLDS) {
+  const value = Math.max(0, Number(n) || 0);
+  if (value < thresholds.minDirectional) return 'too early';
+  if (value < thresholds.minDecision) return 'directional';
+  return 'decision-grade';
+}
+
+/**
+ * A deliberately simple action label for the report. It is not a substitute
+ * for judgement, and the thresholds are provisional until the owner signs off.
+ */
+export function decisionStatus({
+  visitors = 0,
+  players = 0,
+  fiveHandCompleters = 0,
+  d1Eligible = 0,
+  d1Game = 0,
+  d7Eligible = 0,
+  d7Game = 0,
+} = {}, thresholds = DECISION_THRESHOLDS) {
+  const visitorCount = Number(visitors) || 0;
+  const playerCount = Number(players) || 0;
+  const completerCount = Number(fiveHandCompleters) || 0;
+  const d1EligibleCount = Number(d1Eligible) || 0;
+  const d7EligibleCount = Number(d7Eligible) || 0;
+  const gameStartRate = pct(playerCount, visitorCount);
+  const completionRate = pct(completerCount, playerCount);
+  const d1Rate = pct(d1Game, d1EligibleCount);
+  const d7Rate = pct(d7Game, d7EligibleCount);
+
+  if (visitorCount >= thresholds.minDirectional && gameStartRate < thresholds.gameStartTarget) {
+    return 'fix acquisition/onboarding';
+  }
+  if (playerCount >= thresholds.minDirectional && completionRate < thresholds.fiveHandCompletionTarget) {
+    return 'fix onboarding/game';
+  }
+  if (d1EligibleCount >= thresholds.minDirectional && d1Rate < thresholds.d1GameTarget) {
+    return 'fix retention';
+  }
+  if (d7EligibleCount >= thresholds.minDirectional && d7Rate < thresholds.d7GameTarget) {
+    return 'fix retention';
+  }
+  if (d7EligibleCount >= thresholds.minDecision && d7Rate >= thresholds.d7GameTarget) {
+    return 'retention cleared; demand gate remains';
+  }
+  if (d1EligibleCount >= thresholds.minDirectional && d1Rate >= thresholds.d1GameTarget) {
+    return 'retention promising; keep collecting';
+  }
+  return 'too early';
 }
 
 export function rates(totals = {}) {
@@ -415,12 +536,14 @@ export function returnRate(personDays = [], startDay, endDayInclusive) {
   for (const row of personDays) {
     const day = String(row.day);
     if (day < startDay || day > endDayInclusive) continue;
+    const pageviews = Number(row.pageviews ?? 0);
+    if (pageviews <= 0) continue;
     const entry = people.get(row.person_id) ?? { days: new Set(), pageviews: 0 };
     entry.days.add(day);
-    entry.pageviews += Number(row.pageviews ?? 0);
+    entry.pageviews += pageviews;
     people.set(row.person_id, entry);
   }
-  const visitors = [...people.values()].filter(p => p.pageviews > 0);
+  const visitors = [...people.values()];
   const returned = visitors.filter(p => p.days.size > 1).length;
   return { visitors: visitors.length, returned, rate: pct(returned, visitors.length) };
 }
@@ -459,14 +582,14 @@ function table(head, rows, right = []) {
 function metricLine(label, window, returnInfo = null) {
   const r = rates(window.totals);
   const returned = returnInfo
-    ? ` · ${returnInfo.returned}/${returnInfo.visitors} returned (${returnInfo.rate.toFixed(0)}%)`
+    ? ` · ${returnInfo.returned}/${returnInfo.visitors} returned site (${returnInfo.rate.toFixed(0)}%)`
     : '';
   return `${label}: ${r.visitors} visitors · ${r.players} players (${r.gameStartRate.toFixed(1)}%) · ${r.fiveHandCompleters} five-hand completers (${r.fiveHandCompletionRate.toFixed(1)}% of players, ${r.fiveHandCompletions} completions)${returned} · ${r.dailyCompleters} Daily Drill completers (${r.dailyCompletions} completions)`;
 }
 
 export function formatSources(rows) {
   return table(
-    ['Source', 'Visitors', 'Started hand', 'Finished 5 hands', 'Returned another day'],
+    ['Source', 'Visitors', 'Started hand', 'Finished 5 hands', 'Returned (any day)'],
     rows.map(r => [r.source, r.visitors, r.started, r.finished, r.returned]),
     [1, 2, 3, 4],
   );
@@ -490,25 +613,50 @@ export function formatDaily(rows) {
 
 export function formatRetention(retention) {
   return table(
-    ['Cohort', 'People', 'D1 eligible', 'D1', 'D1 %', '7-day eligible', '7-day return', 'Returned (site)', 'Returned (game)'],
-    retention.cohorts.map(r => [r.cohort_day, r.people, r.d1_eligible, r.d1, `${pct(r.d1, r.d1_eligible).toFixed(0)}%`, r.d7_eligible, r.d7, r.returned_site, r.returned_game]),
-    [1, 2, 3, 4, 5, 6, 7, 8],
+    ['Cohort', 'People', 'D1 eligible', 'D1 site', 'D1 game', 'D1 game %', 'D7 eligible', 'D7 site', 'D7 game', 'D7 game %', 'Returned site', 'Returned game'],
+    retention.cohorts.map(r => [
+      r.cohort_day, r.people, r.d1_eligible, r.d1, r.d1_game, `${pct(r.d1_game, r.d1_eligible).toFixed(0)}%`,
+      r.d7_eligible, r.d7, r.d7_game, `${pct(r.d7_game, r.d7_eligible).toFixed(0)}%`,
+      r.returned_site, r.returned_game,
+    ]),
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   );
 }
 
 export function formatRetentionGroup(rows, keyLabel, keyField) {
   return table(
-    [keyLabel, 'People', 'D1 eligible', 'D1', 'D1 %', '7-day eligible', '7-day return', 'Returned (site)', 'Returned (game)'],
-    rows.map(r => [r[keyField], r.people, r.d1_eligible, r.d1, `${pct(r.d1, r.d1_eligible).toFixed(0)}%`, r.d7_eligible, r.d7, r.returned_site, r.returned_game]),
-    [1, 2, 3, 4, 5, 6, 7, 8],
+    [keyLabel, 'People', 'D1 eligible', 'D1 site', 'D1 game', 'D1 game %', 'D7 eligible', 'D7 site', 'D7 game', 'D7 game %', 'Returned site', 'Returned game'],
+    rows.map(r => [
+      r[keyField], r.people, r.d1_eligible, r.d1, r.d1_game, `${pct(r.d1_game, r.d1_eligible).toFixed(0)}%`,
+      r.d7_eligible, r.d7, r.d7_game, `${pct(r.d7_game, r.d7_eligible).toFixed(0)}%`,
+      r.returned_site, r.returned_game,
+    ]),
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   );
+}
+
+export function formatRetentionSummary(overall = {}) {
+  const d1Eligible = Number(overall.d1_eligible ?? 0);
+  const d1Game = Number(overall.d1_game ?? 0);
+  const d7Eligible = Number(overall.d7_eligible ?? 0);
+  const d7Game = Number(overall.d7_game ?? 0);
+  const d1 = wilsonInterval(d1Game, d1Eligible);
+  const d7 = wilsonInterval(d7Game, d7Eligible);
+  const line = (label, success, eligible, interval) => {
+    if (!eligible) return `${label}: no eligible cohort`;
+    return `${label}: ${success}/${eligible} (${pct(success, eligible).toFixed(1)}%; 95% CI ${interval.low.toFixed(1)}-${interval.high.toFixed(1)}%) [${sampleStatus(eligible)}]`;
+  };
+  return [
+    line('D1 return-to-game', d1Game, d1Eligible, d1),
+    line('D7 return-to-game', d7Game, d7Eligible, d7),
+  ].join('\n');
 }
 
 export function formatReport(data) {
   const {
     now, today, yesterday, yesterdayWindow, todayWindow, last7, prev7,
     sources, sourcesToday, funnel, preInstrumentation, daily, dailyRepeat, retention, audit, auditToday, warnings,
-    return7, returnPrev7,
+    return7, returnPrev7, decision,
   } = data;
   const lines = [];
   const stamp = new Intl.DateTimeFormat('en-US', {
@@ -517,6 +665,11 @@ export function formatReport(data) {
   }).format(now);
   lines.push(`Poker Gym analytics — ${CHICAGO_TZ} reporting days`);
   lines.push(`Generated ${stamp}`);
+  lines.push('');
+  const status = decision?.status ?? 'too early';
+  const thresholdNote = decision?.thresholds?.provisional ? 'provisional thresholds; owner review required' : 'approved thresholds';
+  lines.push(`DECISION STATUS — ${status.toUpperCase()} (${thresholdNote})`);
+  lines.push(formatRetentionSummary(retention.overall));
   lines.push('');
   lines.push('DEFINITIONS — visitor = unique person with a valid $pageview; player = visitor with a game_start;');
   lines.push('five-hand completer = person with session_complete (five finished hands); Daily completer = person with daily_complete.');
@@ -554,7 +707,7 @@ export function formatReport(data) {
   lines.push(daily.length ? formatDaily(daily) : '  no starts in this window');
   lines.push(`  people who started a drill on 2+ Chicago days: ${dailyRepeat.repeat_starters}; completed on 2+ days: ${dailyRepeat.repeat_completers}`);
   lines.push('');
-  lines.push('RETENTION BY FIRST-TOUCH COHORT — last 30 days (only mature cohorts can show a rate)');
+  lines.push('RETENTION BY FIRST-TOUCH COHORT — last 30 days, site and game (only mature cohorts can show a rate)');
   lines.push(retention.cohorts.length ? formatRetention(retention) : '  no cohorts in this window');
   lines.push('');
   lines.push('RETENTION BY FIRST-TOUCH SOURCE');
@@ -625,11 +778,12 @@ async function main() {
   const daysByPerson = new Map();
   for (const row of personDays) daysByPerson.set(row.person_id, (daysByPerson.get(row.person_id) ?? 0) + 1);
   const allTimeSource = new Map(sourcePeopleAll.map(r => [r.person_id, r.source]));
-  const allTimeDays = new Map(sourcePeopleAll.map(r => [r.person_id, Number(r.days ?? 0)]));
+  // `personWindowQuery` supplies the window's active-day count. Do not replace
+  // it with the all-time count from sourcePersonQuery; that would turn a
+  // windowed "returned" column into an all-time one.
   const withSource = person => ({
     ...person,
     source: allTimeSource.get(person.person_id) ?? 'unknown',
-    days: allTimeDays.get(person.person_id) ?? 0,
   });
   const sourceRows = windowPeople.map(withSource);
   const todaySourceRows = todayPeople.map(withSource);
@@ -643,6 +797,19 @@ async function main() {
   });
   const return7 = returnRate(personDays, w.last7.start, w.last7.end);
   const returnPrev7 = returnRate(personDays, w.prev7.start, w.prev7.end);
+  const overall = retention.overall;
+  const decision = {
+    status: decisionStatus({
+      visitors: Number(analysis.visitors ?? 0),
+      players: Number(analysis.players ?? 0),
+      fiveHandCompleters: Number(analysis.five_hand_completers ?? 0),
+      d1Eligible: Number(overall.d1_eligible ?? 0),
+      d1Game: Number(overall.d1_game ?? 0),
+      d7Eligible: Number(overall.d7_eligible ?? 0),
+      d7Game: Number(overall.d7_game ?? 0),
+    }),
+    thresholds: DECISION_THRESHOLDS,
+  };
   const totals = yesterdayTotals[0] ?? {};
   const data = {
     now, ...w,
@@ -658,6 +825,7 @@ async function main() {
     daily,
     dailyRepeat: dailyRepeatRows[0] ?? { repeat_starters: 0, repeat_completers: 0 },
     retention,
+    decision,
     audit: audit[0] ?? { raw_visitors: 0, clean_visitors: 0, automation_profiles: 0, cohort_profiles: 0 },
     auditToday: auditToday[0] ?? { raw_visitors: 0, clean_visitors: 0, automation_profiles: 0, cohort_profiles: 0 },
   };

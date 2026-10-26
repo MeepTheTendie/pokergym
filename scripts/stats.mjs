@@ -4,10 +4,11 @@
 //      /web/ and the guides. Bots, crawlers and link unfurls are included, so
 //      it is an upper bound, not people. Needs CLOUDFLARE_API_TOKEN.
 //
-//   2. PostHog (first-party, proxied through playpokergym.com): real people,
-//      the journey stages they reach and the events they fire. PostHog's bot
-//      filter drops headless/automated clients, so these are the honest
-//      numbers. Needs POSTHOG_PERSONAL_API_KEY (read scope is enough).
+//   2. PostHog (first-party, proxied through playpokergym.com): clean traffic,
+//      the journey stages it reaches and the events it fires. Known probes,
+//      automation, and unfurl bots are excluded, but these are browser
+//      profiles, not verified humans. Needs POSTHOG_PERSONAL_API_KEY (read
+//      scope is enough).
 //
 // The two sections are independent: a missing credential skips that section
 // instead of failing the whole command. Secrets are never printed.
@@ -161,7 +162,7 @@ function tableText(head, body, rightCols = []) {
 }
 
 export function formatPlayers(rows) {
-  const lines = ['REAL PEOPLE — unique people per day (bots, crawlers and link previews excluded).', ''];
+  const lines = ['CLEAN TRAFFIC — unique browser profiles per day (known bots, probes and unfurls excluded).', ''];
   const body = rows.map(r => [String(r.day), Number(r.people)]);
   lines.push(tableText(['day', 'people'], body, [1]));
   if (!body.length) lines.push('(nobody yet)');
@@ -170,7 +171,7 @@ export function formatPlayers(rows) {
 
 export function formatStages(row = {}) {
   const n = v => Number(v ?? 0);
-  const lines = ['THE JOURNEY — people who reached each stage (last 30 days).', ''];
+  const lines = ['THE JOURNEY — clean browser profiles reaching each stage (last 30 days).', ''];
   const body = [
     ['saw a page', n(row.saw_a_page)],
     ['opened the trainer', n(row.opened_the_trainer)],
@@ -183,7 +184,7 @@ export function formatStages(row = {}) {
 }
 
 export function formatEvents(rows) {
-  const lines = ['WHAT PEOPLE DO — every event except automatic ones (last 30 days).', ''];
+  const lines = ['WHAT CLEAN TRAFFIC DOES — every event except automatic ones (last 30 days).', ''];
   const body = rows.map(r => [String(r.event), Number(r.times), Number(r.people)]);
   lines.push(tableText(['event', 'times', 'people'], body, [1, 2]));
   if (!body.length) lines.push('(nothing yet)');
