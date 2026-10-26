@@ -78,7 +78,7 @@ const vpVariant = () => variantById(vpVariantId);
 // The table the paytable panel shows: a hand already drawn keeps the table it was
 // dealt under, so the highlighted row always matches the payout it actually paid.
 const activePaytable = () =>
-  (round && round.game === 'videopoker' && round.drawn ? variantById(round.variantId) : vpVariant());
+  (round && round.game === 'videopoker' ? variantById(round.variantId) : vpVariant());
 let handDone = false;
 let acted = false; // the player has made a decision this hand (reveals the coach meter)
 let autoAdvanceTimer = null;
@@ -101,6 +101,7 @@ function vpKickoff(round) {
   const handler = (event) => {
     if (event.data?.id !== jobId) return;
     w.removeEventListener('message', handler);
+    if (round._vpJobId !== jobId) return;
     if (event.data?.result) round.vpBest = event.data.result;
     else round.vpBest = null;
   };
@@ -1543,14 +1544,19 @@ function renderVariantSelect() {
       select.appendChild(opt);
     }
   }
-  select.value = vpVariantId;
+  select.value = dailyMode ? DEFAULT_VARIANT.id : vpVariantId;
+  select.disabled = dailyMode;
 }
 
 function chooseVariant(id) {
+  if (dailyMode) return;
   vpVariantId = variantById(id).id;
   // A hand not yet drawn is regraded under the new table; a finished hand keeps
   // the payout it was dealt.
-  if (round && round.game === 'videopoker' && !round.drawn) round.variantId = vpVariantId;
+  if (round && round.game === 'videopoker' && !round.drawn) {
+    round.variantId = vpVariantId;
+    vpKickoff(round);
+  }
   advice = null;
   el('coachPanel').hidden = true;
   renderBattle();
