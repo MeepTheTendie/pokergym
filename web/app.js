@@ -142,6 +142,9 @@ let requestedGym = GYMS.find(gym => gym.game === entryParams.practice) ?? null;
 let sharedDaily = entryParams.daily || isSharedDayCurrent(entryParams.day, dailyNumber(dailyKey()));
 // How a Daily Drill link reached us, for start_daily's `entry` property.
 const dailyLinkEntry = entryParams.daily ? 'daily_link' : sharedDaily ? 'share_link' : null;
+// The entry source for this page load, carried onto run-level events so starts
+// and completions can be split by daily link, practice link, or direct.
+const trainerEntry = dailyLinkEntry ?? (entryParams.practice ? 'practice_link' : 'direct');
 // One meaning per event; see docs/analytics-events.md. The ref tag is the
 // loader's snapshot (it also covers referrer fallback), else the parsed ?ref=.
 const analytics = createAnalytics({
@@ -303,6 +306,8 @@ function initTitle() {
   const number = dailyNumber(key);
   const done = profile && dailyCompleted(profile, key);
   const streak = profile?.daily?.streak ?? 0;
+  const progress = profile?.daily?.progress;
+  const partial = progress?.key === key ? Math.max(0, Math.min(DAILY_HANDS, progress.index ?? 0)) : 0;
   if (sharedDaily) {
     el('btnDaily').textContent = profile
       ? `PLAY TODAY'S DAILY DRILL #${number}${done ? ' ✓' : ''}${streak > 0 ? ` · ${streak}D STREAK` : ''}`
@@ -313,6 +318,9 @@ function initTitle() {
       : `DAILY DRILL #${number}${streak > 0 ? ` · ${streak}D STREAK` : ''}`;
   } else {
     el('btnDaily').textContent = `DAILY DRILL #${number}`;
+  }
+  if (partial > 0 && !done) {
+    el('btnDaily').textContent = `RESUME DAILY DRILL #${number} · ${partial}/${DAILY_HANDS} DONE`;
   }
   // Weak-spot nudge: one tap into the blackjack mistakes you have actually made.
   const weakBtn = el('btnPracticeMisses');
@@ -1130,6 +1138,7 @@ function startGym(gym, sprint = false, mode = null) {
     game: gym.game,
     mode: sprint ? (drillMode ?? 'session') : 'challenge',
     resumed: Boolean(sprint && profile.activeSession?.played > 0),
+    entry: trainerEntry,
   });
   firstDecisionStart = performance.now();
   firstDecisionEmitted = false;
@@ -1615,8 +1624,9 @@ function setControls() {
   el('rowPick').hidden = gameId !== 'holdem';
   el('btnAsk').disabled = handDone;
   // The daily drill is scored as a clean read: no coach, so nobody can farm the
-  // streak by copying answers.
-  el('btnAsk').hidden = dailyMode;
+  // streak by copying answers. Hide it after a hand so a dead disabled control
+  // does not invite repeated taps (the rageclick signal).
+  el('btnAsk').hidden = dailyMode || handDone;
 
   if (vp) {
     // A fresh hand is dealt automatically. DEAL stays disabled while a hand is
@@ -1669,7 +1679,7 @@ function renderBattle() {
 /* ---------------- battle: one hand in, one hand out ---------------- */
 function startHand() {
   cancelAutoAdvance();
-  analytics.handStarted({ game: gameId, mode: dailyMode ? 'daily' : shortSession ? 'session' : 'challenge' });
+  analytics.handStarted({ game: gameId, mode: dailyMode ? 'daily' : shortSession ? 'session' : 'challenge', entry: trainerEntry });
   handNumber += 1;
   decisionsThisHand = 0;
   handDone = false;
@@ -1753,7 +1763,7 @@ function settleHand({ optimal, difficulty, line, review }) {
   });
   if (!firstDecisionEmitted && firstDecisionStart > 0) {
     firstDecisionEmitted = true;
-    window.trackEvent?.('time_to_first_decision', {
+    analytics.firstDecision(dailyMode ? dailyRun?.token : sessionToken, {
       ms: Math.round(performance.now() - firstDecisionStart),
       game: gameId,
       mode: dailyMode ? 'daily' : (shortSession ? 'session' : 'challenge'),
@@ -2470,6 +2480,9 @@ el('btnClear').onclick = () => { if (!handDone) { picked = new Set(); renderBatt
 
 el('btnNext').onclick = () => {
   cancelAutoAdvance();
+  // Hide the row immediately so a fast second tap cannot skip or double-deal
+  // the next hand while the screen is changing.
+  el('battleEndRow').hidden = true;
   if (dailyMode && dailyRun) {
     if (dailyRun.finished) {
       dailyMode = false;
@@ -2559,7 +2572,7 @@ const daysSinceLastVisit = lastVisitDay ? dayGap(localDayKey(), lastVisitDay) : 
 // as null, and the retention report cannot measure the gap.
 try { localStorage.setItem('pg_last_visit_day', localDayKey()); } catch {}
 analytics.openTrainer({
-  entry: dailyLinkEntry ?? (entryParams.practice ? 'practice_link' : 'direct'),
+  entry: trainerEntry,
   returning,
   days_since_last_visit: daysSinceLastVisit,
 });

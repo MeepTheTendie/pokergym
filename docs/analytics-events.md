@@ -28,14 +28,15 @@ visible in the data rather than implied by the event name.
 | Event | Fires when | Properties |
 |---|---|---|
 | `open_trainer` | The trainer page loads. Once per page load. | `entry`: `daily_link` (`?daily=1`), `share_link` (`?d=<n>` share grid), `practice_link` (`?practice=`), `direct`; `returning`: has a local save; `days_since_last_visit`: days since the last local visit when a save exists |
-| `start_training` | The first hand of the page load is dealt (any mode). Once per page load. | `game`; `mode`: `daily`, `session`, `challenge` |
-| `game_start` | A five-hand session, drill, or gym challenge begins, including a resumed one. Not fired for Daily Drill hands. | `game`: `blackjack`, `videopoker`, `baccarat`, `holdem`; `mode`: `session`, `master`, `weak` (drills), `challenge`; `resumed`; `run_id` |
-| `hand_dealt` | A hand is dealt inside a live `game_start`/`start_daily` run. | `run_id`, `run_kind` (`session`/`daily`), `game`, `mode`, `hand_index` (1-based), `hand_total` (5 for sessions/daily, 10 for a challenge), `event_version` |
+| `start_training` | The first hand of the page load is dealt (any mode). Once per page load. | `game`; `mode`: `daily`, `session`, `challenge`; `entry` |
+| `game_start` | A five-hand session, drill, or gym challenge begins, including a resumed one. Not fired for Daily Drill hands. | `game`: `blackjack`, `videopoker`, `baccarat`, `holdem`; `mode`: `session`, `master`, `weak` (drills), `challenge`; `resumed`; `entry`; `run_id` |
+| `hand_dealt` | A hand is dealt inside a live `game_start`/`start_daily` run. | `run_id`, `run_kind` (`session`/`daily`), `game`, `mode`, `entry`, `hand_index` (1-based), `hand_total` (5 for sessions/daily, 10 for a challenge), `event_version` |
 | `decision_made` | The **first** player decision in a hand. Later blackjack actions do not emit again. A natural blackjack has no decision. | same run fields plus `hand_index`, `action` (`hit`, `stand`, `double`, `split`, `draw`, `confirm`, or the baccarat choice) |
 | `hand_complete` | That hand is settled, once per hand index per run. | same run fields plus `hand_index`, `optimal` (boolean), `decisions` (actions taken in the hand), `difficulty` |
-| `session_complete` | Five finished hands in a session started by `game_start`. Once per run. | `run_kind` (`session`), `game`, `mode`, `correct` (0-5), `run_id`, `hands_completed: 5`, `event_version` |
+| `session_complete` | Five finished hands in a session started by `game_start`. Once per run. | `run_kind` (`session`), `game`, `mode`, `entry`, `correct` (0-5), `run_id`, `hands_completed: 5`, `event_version` |
 | `start_daily` | A Daily Drill run begins, from any entry path. | `entry`: `daily_link`, `share_link`, `title` (title-screen button), `map` (TODAY card), `map_resume` (TODAY card, unfinished run), `replay`, `recap` (five-hand recap button); `number` (drill id); `resumed`; `scored` (false when the day is already complete); `shared`; `run_id`; `event_version` |
-| `daily_complete` | A Daily Drill run started by `start_daily` finishes five hands. Once per run. | `run_kind` (`daily`), `correct` (0-5), `number`, `scored`, `run_id`, `hands_completed: 5`, `event_version` |
+| `daily_complete` | A Daily Drill run started by `start_daily` finishes five hands. Once per run. | `run_kind` (`daily`), `entry`, `correct` (0-5), `number`, `scored`, `run_id`, `hands_completed: 5`, `event_version` |
+| `time_to_first_decision` | The first player decision in a run is made. | `ms` (milliseconds from deal to decision), `game`, `mode`, `run_id`, `run_kind`, `entry`, `event_version` |
 | `recap_view` | The end-of-run recap is shown after a five-hand session **or a completed Daily Drill**. | `daily_done`, `missed`, `run_id`, `run_kind` (`session`/`daily`), `event_version` |
 | `recap_tap` | A button on the end-of-run recap is tapped. | `button`: `daily_drill`, `play_again`, `replay_daily`, `challenge`, `review_mistakes`, `install`; `run_id`, `event_version` |
 | `share` | A result is shared. | `channel`: `native`, `copy`, `challenge` |

@@ -55,6 +55,7 @@ test('flow: ?daily=1 link -> button -> five hands -> one start_daily and one dai
   assert.equal(done.scored, true);
   assert.equal(done.hands_completed, 5);
   assert.equal(done.run_kind, 'daily', 'completion carries its run kind');
+  assert.equal(done.entry, 'daily_link', 'daily completion carries its entry');
   assert.equal(done.run_id, start.run_id, 'completion carries its run id');
   assert.equal(done.event_version, 2);
 });
@@ -96,6 +97,36 @@ test('flow: five-hand session pairs game_start with session_complete', () => {
   assert.equal(done.run_id, token);
   assert.equal(done.hands_completed, 5);
   assert.equal(done.event_version, 2);
+});
+
+test('run events carry entry and first-decision timing', () => {
+  const { a, last } = harness('reddit');
+  const token = a.gameStart({ game: 'blackjack', mode: 'session', entry: 'practice_link' });
+  a.handStarted({ game: 'blackjack', mode: 'session', entry: 'practice_link' });
+  a.firstDecision(token, { ms: 1234, game: 'blackjack', mode: 'session' });
+  a.handDealt(token, { handIndex: 1, handTotal: 5 });
+  a.handComplete(token, { handIndex: 1, optimal: true });
+  a.sessionComplete(token, { correct: 1 });
+  assert.equal(last('start_training').entry, 'practice_link');
+  assert.equal(last('game_start').entry, 'practice_link');
+  assert.equal(last('time_to_first_decision').run_id, token);
+  assert.equal(last('time_to_first_decision').run_kind, 'session');
+  assert.equal(last('time_to_first_decision').entry, 'practice_link');
+  assert.equal(last('time_to_first_decision').ms, 1234);
+  assert.equal(last('hand_dealt').entry, 'practice_link');
+  assert.equal(last('hand_complete').entry, 'practice_link');
+  assert.equal(last('session_complete').entry, 'practice_link');
+});
+
+test('a Daily run carries entry through first decision and completion', () => {
+  const { a, last } = harness('reddit');
+  const token = a.startDaily({ entry: 'daily_link', number: 12, shared: true });
+  a.firstDecision(token, { ms: 800, game: 'blackjack', mode: 'daily' });
+  a.dailyComplete(token, { correct: 4, number: 12 });
+  assert.equal(last('time_to_first_decision').run_id, token);
+  assert.equal(last('time_to_first_decision').run_kind, 'daily');
+  assert.equal(last('time_to_first_decision').entry, 'daily_link');
+  assert.equal(last('daily_complete').entry, 'daily_link');
 });
 
 test('a completion never fires without its live start', () => {

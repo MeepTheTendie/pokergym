@@ -19,6 +19,7 @@ export const EVENTS = Object.freeze({
   GAME_START: 'game_start',           // a five-hand session or gym run begins
   HAND_DEALT: 'hand_dealt',           // a hand (or Daily Drill step) was dealt
   DECISION_MADE: 'decision_made',     // first player decision in a hand
+  TIME_TO_FIRST_DECISION: 'time_to_first_decision', // milliseconds from deal to first decision
   HAND_COMPLETE: 'hand_complete',     // that hand was settled
   SESSION_COMPLETE: 'session_complete', // five finished hands in one session
   START_DAILY: 'start_daily',         // a Daily Drill run begins (new, resumed or replay)
@@ -53,9 +54,9 @@ export function createAnalytics({ send, ref = () => null } = {}) {
     try { send?.(name, out); } catch { /* analytics must never break the game */ }
   }
 
-  function begin(kind, game, mode) {
+  function begin(kind, game, mode, entry = null) {
     const token = `${kind}-${boot}-${++seq}`;
-    live.set(token, { kind, game, mode, hands: new Set(), decisions: new Set() });
+    live.set(token, { kind, game, mode, entry, hands: new Set(), decisions: new Set() });
     return token;
   }
 
@@ -78,6 +79,7 @@ export function createAnalytics({ send, ref = () => null } = {}) {
       run_kind: run.kind,
       game: run.game,
       mode: run.mode,
+      entry: run.entry ?? null,
       event_version: EVENT_VERSION,
       ...extra,
     };
@@ -93,20 +95,24 @@ export function createAnalytics({ send, ref = () => null } = {}) {
     },
 
     /** A hand was dealt. Only the first hand of the page load emits start_training. */
-    handStarted({ game, mode } = {}) {
+    handStarted({ game, mode, entry } = {}) {
       if (trained) return false;
       trained = true;
-      emit(EVENTS.START_TRAINING, { game, mode });
+      const props = { game, mode };
+      if (entry) props.entry = entry;
+      emit(EVENTS.START_TRAINING, props);
       return true;
     },
 
     /** A five-hand session or gym run begins (including a resumed one). */
-    gameStart({ game, mode, resumed = false } = {}) {
+    gameStart({ game, mode, resumed = false, entry } = {}) {
       if (!GAMES.includes(game)) return null;
       // Starting a new run abandons any unfinished one.
       for (const [token, run] of live) if (run.kind === 'session') live.delete(token);
-      const token = begin('session', game, mode);
-      emit(EVENTS.GAME_START, { game, mode, resumed: Boolean(resumed), run_id: token, event_version: EVENT_VERSION });
+      const token = begin('session', game, mode, entry);
+      const props = { game, mode, resumed: Boolean(resumed), run_id: token, event_version: EVENT_VERSION };
+      if (entry) props.entry = entry;
+      emit(EVENTS.GAME_START, props);
       return token;
     },
 
@@ -169,6 +175,7 @@ export function createAnalytics({ send, ref = () => null } = {}) {
         run_kind: run.kind,
         game: run.game,
         mode: run.mode,
+        entry: run.entry ?? null,
         correct,
         run_id: token,
         hands_completed: hands,
@@ -180,7 +187,7 @@ export function createAnalytics({ send, ref = () => null } = {}) {
     /** A Daily Drill run begins, from any entry path. */
     startDaily({ entry, number, resumed = false, scored = true, shared = false } = {}) {
       for (const [token, run] of live) if (run.kind === 'daily') live.delete(token);
-      const token = begin('daily', 'daily', 'daily');
+      const token = begin('daily', 'daily', 'daily', entry);
       emit(EVENTS.START_DAILY, {
         entry, number, resumed: Boolean(resumed), scored: Boolean(scored), shared: Boolean(shared),
         run_id: token, event_version: EVENT_VERSION,
@@ -193,9 +200,22 @@ export function createAnalytics({ send, ref = () => null } = {}) {
       if (!run) return false;
       emit(EVENTS.DAILY_COMPLETE, {
         run_kind: run.kind,
+        entry: run.entry ?? null,
         correct, number, scored: Boolean(scored), run_id: token,
         hands_completed: hands, event_version: EVENT_VERSION,
       });
+      return true;
+    },
+
+    /** Milliseconds from the deal to the first decision in a run. */
+    firstDecision(token, { ms, game, mode } = {}) {
+      const run = runFor(token, 'session') ?? runFor(token, 'daily');
+      if (!run) return false;
+      emit(EVENTS.TIME_TO_FIRST_DECISION, runProps(run, token, {
+        ms: Number.isFinite(ms) ? ms : null,
+        game: game ?? run.game,
+        mode: mode ?? run.mode,
+      }));
       return true;
     },
 
