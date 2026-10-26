@@ -1713,7 +1713,7 @@ Next action: use the next scheduled stats read or voluntary feedback to check wh
 
 ## 2026-10-26 — brand differentiation: Play Poker Gym
 
-Outcome: deployed Worker `e51ea42d-3598-4edf-a0ae-e569c5504a77`. The primary public brand is now **Play Poker Gym**, with **Poker Gym** kept as the short form. Public metadata, guides, privacy page, `llms.txt`, `llms-full.txt`, structured data, and footers use the full name and describe the site as a **four-game casino trainer**. The in-game topbar keeps the short name with the tagline `FOUR-GAME TRAINER`; compact share cards keep the short form.
+Outcome: deployed Worker `63c9b982-7474-4e28-985a-ef76795190d1`. The primary public brand is now **Play Poker Gym**, with **Poker Gym** kept as the short form. Public metadata, guides, privacy page, `llms.txt`, `llms-full.txt`, structured data, and footers use the full name and describe the site as a **four-game casino trainer**. The 1200x630 OG image was regenerated with the full brand and four-game tagline. The in-game topbar keeps the short name with the tagline `FOUR-GAME TRAINER`; compact share cards keep the short form.
 
 Reason: `pokergym.org` was registered 2025-12-30, about 9.5 months before `playpokergym.com` (2026-10-13), and it currently ranks for "poker gym". The full name plus four-game positioning reduces brand confusion. This is brand differentiation, not a trademark claim, legal advice, or an assertion of affiliation.
 

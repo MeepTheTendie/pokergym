@@ -32,8 +32,8 @@ h1{font-family:'Sora',sans-serif;font-size:64px;font-weight:800;letter-spacing:-
 .cell{width:56px;height:56px;border-radius:6px}
 .g{background:#2fa84f}.r{background:#d23b3b}
 </style></head><body>
-<h1>POKER GYM</h1>
-<p class="sub">Free card-game trainer — blackjack · video poker · baccarat · hold'em</p>
+<h1>PLAY POKER GYM</h1>
+<p class="sub">Free four-game casino trainer — blackjack · video poker · baccarat · hold'em</p>
 <div class="cards"><div class="card" id="c0">J♠</div><div class="card red">J♥</div><div class="card">2♣</div><div class="card red">5♦</div><div class="card">9♣</div></div>
 <div class="grid" id="grid"><div class="cell g"></div><div class="cell g"></div><div class="cell r"></div><div class="cell g"></div><div class="cell g"></div></div>
 </body></html>`;
