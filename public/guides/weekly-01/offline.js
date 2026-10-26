@@ -13,7 +13,7 @@
       const registration = await navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' });
       const update = async () => {
         if (registration.waiting) {
-          status.textContent = 'Update downloaded. Close all Poker Gym tabs, then reopen this page online to finish.';
+          status.textContent = 'Update downloaded. Close all Play Poker Gym tabs, then reopen this page online to finish.';
           button.disabled = false;
           return;
         }
@@ -29,7 +29,7 @@
             return;
           }
         }
-        status.textContent = 'Reopen online after closing all Poker Gym tabs to finish the offline update.';
+        status.textContent = 'Reopen online after closing all Play Poker Gym tabs to finish the offline update.';
         button.disabled = false;
       };
       const check = () => { update().catch(() => {

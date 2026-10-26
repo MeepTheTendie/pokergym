@@ -12,7 +12,7 @@ test('voluntary feedback safely encodes text and records intent without implying
   assert.equal(github.origin, 'https://github.com');
   assert.equal(github.pathname, '/MeepTheTendie/pokergym/issues/new');
   assert.equal(github.searchParams.get('body'), draft.body);
-  assert.equal(github.searchParams.get('title'), 'Poker Gym player feedback');
+  assert.equal(github.searchParams.get('title'), 'Play Poker Gym player feedback');
   assert.deepEqual([...github.searchParams.keys()], ['title', 'body']);
   assert.doesNotMatch(draft.body, /US\$|price|unlock|subscri|month/i);
   assert.ok(draft.body.endsWith(note));

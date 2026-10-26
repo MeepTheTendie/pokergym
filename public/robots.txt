@@ -1,4 +1,4 @@
-# Poker Gym — free browser card-game trainer.
+# Play Poker Gym — free four-game casino trainer.
 # Search engines and AI assistants may crawl, index and quote these pages with
 # attribution. The plain-text guide for assistants is /llms.txt.
 # Full text: /llms-full.txt

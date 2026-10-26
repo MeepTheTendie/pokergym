@@ -7,7 +7,7 @@ test('portable links rewrite absolute paths into flat offline filenames', () => 
     '<a href="/guides/blackjack/">blackjack</a>',
     '<a href="/guides/weekly-01/">weekly</a>',
     '<a href="/web/?practice=holdem">play</a>',
-    '<a href="/web/privacy.html">privacy</a>',
+    '<a href="/web/privacy">privacy</a>',
     '<a href="/web/icon.svg">icon</a>',
     '<a href="/">home</a>',
   ].join('');

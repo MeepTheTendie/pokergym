@@ -58,7 +58,7 @@
     history.textContent = saved
       ? `First completed attempt: ${saved.first.correct}/${cards.length} (${saved.first.revealed} revealed before choosing). Latest completed attempt: ${saved.latest.correct}/${cards.length} (${saved.latest.revealed} revealed before choosing).`
       : 'No completed score saved yet.';
-    const storageText = saving ? 'Your current attempt, completed answers and scores stay in this browser. Choose Retry to start again. No score is sent to Poker Gym.'
+    const storageText = saving ? 'Your current attempt, completed answers and scores stay in this browser. Choose Retry to start again. No score is sent to Play Poker Gym.'
       : 'Saving unavailable. Keep a note of your scores before closing this page.';
     if (storage.textContent !== storageText) storage.textContent = storageText;
     retry.hidden = done !== cards.length;
@@ -74,7 +74,7 @@
     if (results.filter(value => value !== undefined).length !== cards.length) return;
     const correct = results.filter(value => value === true).length;
     const revealed = results.filter(value => value === 'revealed').length;
-    const text = `Poker Gym blackjack pack 01: ${correct}/5 correct (${revealed} revealed before choosing).\nFree five-decision practice, no signup or real-money wagering. Try the same drill:\nhttps://playpokergym.com/guides/weekly-01/?ref=share`;
+    const text = `Play Poker Gym blackjack pack 01: ${correct}/5 correct (${revealed} revealed before choosing).\nFree five-decision practice, no signup or real-money wagering. Try the same drill:\nhttps://playpokergym.com/guides/weekly-01/?ref=share`;
     shareText.value = text;
     shareText.hidden = false;
     shareStatus.textContent = 'Review the text below. Nothing is posted automatically.';
@@ -180,7 +180,7 @@
   };
   function updateDraftLinks() {
     const body = encodeURIComponent(draft.value.slice(0, 1800));
-    const subject = encodeURIComponent('Poker Gym drill pack 01 feedback');
+    const subject = encodeURIComponent('Play Poker Gym drill pack 01 feedback');
     document.getElementById('pack-feedback-email').href =
       `mailto:meep@mail.grokbot.com?subject=${subject}&body=${body}`;
     document.getElementById('pack-feedback-github').href =
@@ -190,7 +190,7 @@
   feedback.addEventListener('submit', event => {
     event.preventDefault();
     draft.value = [
-      'Poker Gym voluntary drill pack 01 feedback',
+      'Play Poker Gym voluntary drill pack 01 feedback',
       saved ? `First completed score: ${saved.first.correct}/5 (${saved.first.revealed} revealed before choosing).` : 'No completed score available.',
       saved ? `Latest completed score: ${saved.latest.correct}/5 (${saved.latest.revealed} revealed before choosing).` : '',
       '',

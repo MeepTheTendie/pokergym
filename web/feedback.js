@@ -1,7 +1,7 @@
 // No network, storage, identity, or gameplay data is collected here.
-// This subject split (survey uses 'Poker Gym player feedback', quick links use
-// 'Poker Gym feedback') is intentional, not drift.
-// No pricing or willingness-to-pay question is asked: Poker Gym has no
+// This subject split (survey uses 'Play Poker Gym player feedback', quick links use
+// 'Play Poker Gym feedback') is intentional, not drift.
+// No pricing or willingness-to-pay question is asked: Play Poker Gym has no
 // subscriptions, and paid features are only considered from unprompted requests.
 // Extra legacy fields (e.g. old price answers) are ignored.
 export function feedbackDraft({ clarity, returnInterest, note = '' }) {
@@ -10,7 +10,7 @@ export function feedbackDraft({ clarity, returnInterest, note = '' }) {
     throw new Error('Choose both feedback answers.');
   }
   const body = [
-    'Poker Gym voluntary player feedback',
+    'Play Poker Gym voluntary player feedback',
     `First session: ${clarity}`,
     `Return for short training: ${returnInterest}`,
     '',
@@ -18,7 +18,7 @@ export function feedbackDraft({ clarity, returnInterest, note = '' }) {
   ].join('\n');
   return {
     body,
-    githubHref: `https://github.com/MeepTheTendie/pokergym/issues/new?title=${encodeURIComponent('Poker Gym player feedback')}&body=${encodeURIComponent(body)}`,
-    href: `mailto:meep@mail.grokbot.com?subject=${encodeURIComponent('Poker Gym player feedback')}&body=${encodeURIComponent(body)}`,
+    githubHref: `https://github.com/MeepTheTendie/pokergym/issues/new?title=${encodeURIComponent('Play Poker Gym player feedback')}&body=${encodeURIComponent(body)}`,
+    href: `mailto:meep@mail.grokbot.com?subject=${encodeURIComponent('Play Poker Gym player feedback')}&body=${encodeURIComponent(body)}`,
   };
 }

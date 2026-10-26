@@ -505,12 +505,12 @@ el('btnBecome').onclick = () => {
 el('btnShare').hidden = typeof navigator.share !== 'function';
 el('btnShare').onclick = async () => {
   try {
-    await navigator.share({ title: 'Poker Gym — free training demo', text: el('sharePreview').value });
+    await navigator.share({ title: 'Play Poker Gym — free training demo', text: el('sharePreview').value });
     window.trackEvent?.('share', { channel: 'native' });
     el('shareStatus').textContent = 'Share options closed. Delivery is handled by your chosen app.';
   } catch (error) {
     el('shareStatus').textContent = error.name === 'AbortError'
-      ? 'Sharing canceled. Nothing sent by Poker Gym.'
+      ? 'Sharing canceled. Nothing sent by Play Poker Gym.'
       : 'Share options unavailable. Copy the invitation or select it above.';
   }
 };
@@ -702,7 +702,7 @@ async function shareDaily(text, useShare, results = null, number = null, games =
     }
   } catch (error) {
     status.textContent = error?.name === 'AbortError'
-      ? 'Sharing canceled. Nothing sent by Poker Gym.'
+      ? 'Sharing canceled. Nothing sent by Play Poker Gym.'
       : 'Copy unavailable. Result selected; use your device’s Copy command. Nothing sent.';
     preview.hidden = false;
     preview.focus();
@@ -1904,7 +1904,7 @@ function flashScene(optimal) {
 // reached, and one miss worth another look. One tap dismisses it.
 // Optional tip link. Unlocks nothing; the app stays free.
 const TIP_URL = 'https://ko-fi.com/playpokergym';
-const TIP_HTML = `Poker Gym is free. If it helped, you can <a href="${TIP_URL}" target="_blank" rel="noopener">Support Poker Gym ☕</a> on Ko-fi.`;
+const TIP_HTML = `Play Poker Gym is free. If it helped, you can <a href="${TIP_URL}" target="_blank" rel="noopener">Support Play Poker Gym ☕</a> on Ko-fi.`;
 
 function sessionStreak(profile) {
   const days = new Set();
@@ -2036,10 +2036,10 @@ function renderSessionSummary(session, daily = null) {
     const dayNum = dailyNumber(dailyKey());
     const text = daily
       ? dailyShareText(daily.key, daily.results, daily.number)
-      : `Poker Gym: ${correct}/${SESSION_HANDS} correct in ${GYM_BY_ID[gymId]?.name ?? 'training'}. Beat my score on Daily Drill #${dayNum}: ${shareUrl(dayNum)}`;
+      : `Play Poker Gym: ${correct}/${SESSION_HANDS} correct in ${GYM_BY_ID[gymId]?.name ?? 'training'}. Beat my score on Daily Drill #${dayNum}: ${shareUrl(dayNum)}`;
     try {
       if (typeof navigator.share === 'function') {
-        await navigator.share({ title: 'Poker Gym Challenge', text });
+        await navigator.share({ title: 'Play Poker Gym Challenge', text });
       } else {
         await navigator.clipboard.writeText(text);
       }

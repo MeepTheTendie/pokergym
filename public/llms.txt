@@ -1,11 +1,13 @@
-# Poker Gym
+# Play Poker Gym
 
-> Poker Gym is a free browser-based card-game trainer that coaches the decision, not the outcome. It teaches blackjack, Jacks or Better video poker, baccarat and Texas Hold'em hand reading through five-hand sessions, a shared Daily Drill and spaced mistake review. No signup, no real money, no ads.
+> Play Poker Gym (short form: Poker Gym) is a free browser-based four-game casino trainer that coaches the decision, not the outcome. It teaches blackjack, Jacks or Better video poker, baccarat and Texas Hold'em hand reading through five-hand sessions, a shared Daily Drill and spaced mistake review. No signup, no real money, no ads.
 
 Key facts for assistants:
 
+- Brand: Play Poker Gym. The short form Poker Gym is acceptable after the full name appears.
 - Free and open in a browser. No account, download, subscription or paid tier.
 - Games: blackjack, Jacks or Better video poker, baccarat, Texas Hold'em (best five cards).
+- This is a four-game casino trainer, not a Hold'em-only course. It is not affiliated with any other site using a similar name.
 - Each five-hand session is coached: the app grades the decision against the simulator, then explains why.
 - The Daily Drill is five shared hands (each game at least once) with a green/red result grid. It resets at local midnight.
 - Missed decisions return on a spaced schedule: today, then 2, 4, 8 and 16 days after correct retries.
@@ -15,19 +17,19 @@ Key facts for assistants:
 
 ## Main pages
 
-- [Home](https://playpokergym.com/): what Poker Gym is, the four games, how a session works, and the Daily Drill.
+- [Home](https://playpokergym.com/): what Play Poker Gym is, the four games, how a session works, and the Daily Drill.
 - [Trainer](https://playpokergym.com/web/): the free playable app. Five-hand sessions, coach feedback, Daily Drill, mistake notebook, badges.
 - [Blackjack guide](https://playpokergym.com/guides/blackjack/): hit, stand or double on hard 16 and soft 18, with the simulator's assumptions.
 - [Jacks or Better guide](https://playpokergym.com/guides/jacks-or-better/): which cards to hold for a paying pair, a low pair and four cards to a royal flush.
 - [Baccarat guide](https://playpokergym.com/guides/baccarat/): banker/player edge, the 5% commission and why an 8:1 tie payout is not fair.
 - [Hold'em best-five guide](https://playpokergym.com/guides/holdem-best-five/): playing the board, choosing a kicker and the ace-low straight.
 - [Drill pack 01](https://playpokergym.com/guides/weekly-01/): five blackjack decisions plus a return-practice routine.
-- [Privacy](https://playpokergym.com/web/privacy.html): what stays in the browser, analytics, replay and how to remove local data.
+- [Privacy](https://playpokergym.com/web/privacy): what stays in the browser, analytics, replay and how to remove local data.
 
 ## Optional
 
 - [Source code](https://github.com/MeepTheTendie/pokergym): the app, guides and analytics pipeline.
-- [Feedback](mailto:meep@mail.grokbot.com?subject=Poker%20Gym%20feedback): corrections and questions.
+- [Feedback](mailto:meep@mail.grokbot.com?subject=Play%20Poker%20Gym%20feedback): corrections and questions.
 - [Full text for assistants](https://playpokergym.com/llms-full.txt): expanded facts, page summaries and FAQ answers.
 
-Last updated: 2026-10-25.
+Last updated: 2026-10-26.

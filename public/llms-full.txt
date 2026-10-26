@@ -1,11 +1,13 @@
-# Poker Gym — full text for assistants
+# Play Poker Gym — full text for assistants
 
 Source: https://playpokergym.com/
-Last updated: 2026-10-25.
+Last updated: 2026-10-26.
 
 ## What it is
 
-Poker Gym is a free, browser-based trainer for casino card-game decisions. It is education, not gambling: there are no deposits, bets, cash prizes, subscriptions or real-money wagering. The app runs on the player's device; decisions are evaluated locally.
+Play Poker Gym (short form: Poker Gym) is a free, browser-based four-game casino trainer. It is education, not gambling: there are no deposits, bets, cash prizes, subscriptions or real-money wagering. The app runs on the player's device; decisions are evaluated locally.
+
+It teaches blackjack, Jacks or Better video poker, baccarat and Texas Hold'em hand reading. It is a four-game casino trainer, not a Hold'em-only course, and it is not affiliated with any other site using a similar name.
 
 The core loop is five hands of one game. After each decision the coach says whether it was the best available choice under the simulator's rules and explains why. A five-hand session ends with a score, a green/red grid, one mistake to review and optional sharing. The Daily Drill is five shared hands (one from each game plus a repeat) that resets at local midnight. Missed decisions enter a local notebook and return on a spaced schedule: today, then 2, 4, 8 and 16 days after correct retries.
 
@@ -26,21 +28,21 @@ Progress (class, XP, badges, practice record, recent sessions, mistake notebook)
 
 ## Page summaries
 
-- Home (https://playpokergym.com/): free card-game trainer; four games; Daily Drill; no signup, no real money, no ads; works offline.
+- Home (https://playpokergym.com/): free four-game casino trainer; blackjack, video poker, baccarat and Hold'em; Daily Drill; no signup, no real money, no ads; works offline.
 - Trainer (https://playpokergym.com/web/): the playable app, including five-hand sessions, coach feedback, Daily Drill, mistake review, badges and local progress.
 - Blackjack guide (https://playpokergym.com/guides/blackjack/): hard 16 against a six is a stand; the same 16 against a ten is a hit; soft 18 against a nine is a hit under the stated rules. A good decision can still lose.
 - Jacks or Better guide (https://playpokergym.com/guides/jacks-or-better/): hold a paying pair; a low pair can beat a tempting ace; hold four cards to a royal flush and replace the fifth.
 - Baccarat guide (https://playpokergym.com/guides/baccarat/): banker loses least on average but still has negative expected value; 5% commission turns 20 units of winnings into 19; an 8:1 tie payout has about a 14.36% expected loss and a break-even payout near 9.5:1.
 - Hold'em best-five guide (https://playpokergym.com/guides/holdem-best-five/): you may play the board; two pair needs the best fifth-card kicker; an ace can be low in A-2-3-4-5.
 - Drill pack 01 (https://playpokergym.com/guides/weekly-01/): five blackjack decisions (soft 18 vs ten, soft 19 vs four, eights vs nine, nines vs seven, hard nine vs two) with a return-practice routine.
-- Privacy (https://playpokergym.com/web/privacy.html): saved progress stays in the browser; product analytics and session replay are used; local data can be removed with site-data controls.
+- Privacy (https://playpokergym.com/web/privacy): saved progress stays in the browser; product analytics and session replay are used; local data can be removed with site-data controls.
 
 ## FAQ
 
-### Is Poker Gym free?
+### Is Play Poker Gym free?
 Yes. Every game, the Daily Drill, mistake review and local progress saving are free. There is no signup, subscription or paid tier.
 
-### Does Poker Gym use real money?
+### Does Play Poker Gym use real money?
 No. There are no deposits, bets, cash prizes or real-money wagering. Cards and odds are simulated for learning.
 
 ### Which card games does it teach?

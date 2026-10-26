@@ -187,14 +187,14 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     assert.equal(await evaluate('document.getElementById("btnInstall").hidden'), true, 'Embedded ZIP does not advertise cloud installation');
   }
   async function checkPrivacy() {
-    assert.equal(await evaluate(`document.querySelector('a[href="privacy.html"]').target`), '_blank', 'Data guidance preserves the running game');
+    assert.equal(await evaluate(`document.querySelector('a[href="privacy.html"], a[href="/web/privacy"]').target`), '_blank', 'Data guidance preserves the running game');
     await evaluate(`(() => {
       const frame = document.createElement('iframe');
-      frame.id = 'privacyCheck'; frame.src = 'privacy.html';
+      frame.id = 'privacyCheck'; frame.src = document.querySelector('a[href="privacy.html"], a[href="/web/privacy"]').href;
       frame.style.cssText = 'position:fixed;inset:0;width:390px;height:600px;border:0;z-index:9999';
       document.body.append(frame);
     })()`);
-    await waitFor('document.getElementById("privacyCheck").contentDocument?.title === "Privacy and your data — Poker Gym"');
+    await waitFor('document.getElementById("privacyCheck").contentDocument?.title === "Privacy and your data — Play Poker Gym"');
     const result = await evaluate(`(() => {
       const frame = document.getElementById('privacyCheck');
       const doc = frame.contentDocument;
@@ -202,7 +202,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
         returnPath: new URL(doc.querySelector('nav a').href).pathname,
         expectedPath: new URL('index.html', document.baseURI).pathname,
         scripts: doc.scripts.length,
-        controls: doc.body.textContent.includes('close Poker Gym tabs') && doc.body.textContent.includes('Delete any backup copies separately') };
+        controls: doc.body.textContent.includes('close Play Poker Gym tabs') && doc.body.textContent.includes('Delete any backup copies separately') };
     })()`);
     assert.equal(result.fits, true, 'Privacy guidance fits a 390px phone');
     assert.equal(result.returnPath, result.expectedPath, 'Return link works on cloud and portable hosts');
@@ -224,7 +224,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     assert.equal(parent.result.value, true, 'Parent cannot read embedded player storage');
     console.log('PASS: localhost parent embeds 127.0.0.1 game in an isolated cross-site target.');
   }
-  assert.equal(await evaluate('document.title'), 'Poker Gym — free card-game trainer');
+  assert.equal(await evaluate('document.title'), 'Play Poker Gym — free four-game casino trainer');
   const reorderedHolds = await evaluate(`(async () => {
     const { bestHold, clearCache } = await import('../src/coach/videopoker.js');
     clearCache();

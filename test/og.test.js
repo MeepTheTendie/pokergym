@@ -34,7 +34,7 @@ test('og.png is served at the root, 1200x630, and never precached', async () => 
   }
 });
 
-for (const [file, url, title] of [['web/landing.html', `${SITE}/`, null], ['web/index.html', `${SITE}/web/`, 'Poker Gym — free card-game trainer']]) {
+for (const [file, url, title] of [['web/landing.html', `${SITE}/`, null], ['web/index.html', `${SITE}/web/`, 'Play Poker Gym — free four-game casino trainer']]) {
   test(`${file} carries a full set of link-preview tags with absolute URLs`, async () => {
     const html = await readFile(file, 'utf8');
     const meta = metaMap(html);

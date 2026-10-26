@@ -10,7 +10,7 @@ const read = (file) => readFile(path.join(root, file), 'utf8');
 const pages = [
   { file: 'web/landing.html', url: 'https://playpokergym.com/', types: ['Organization', 'WebSite', 'WebApplication', 'FAQPage'] },
   { file: 'web/index.html', url: 'https://playpokergym.com/web/', types: ['Organization', 'WebSite', 'WebApplication'] },
-  { file: 'web/privacy.html', url: 'https://playpokergym.com/web/privacy.html', types: ['Organization', 'WebSite', 'WebPage'] },
+  { file: 'web/privacy.html', url: 'https://playpokergym.com/web/privacy', types: ['Organization', 'WebSite', 'WebPage'] },
   { file: 'public/guides/blackjack/index.html', url: 'https://playpokergym.com/guides/blackjack/', types: ['Article', 'BreadcrumbList', 'FAQPage', 'LearningResource'] },
   { file: 'public/guides/jacks-or-better/index.html', url: 'https://playpokergym.com/guides/jacks-or-better/', types: ['Article', 'BreadcrumbList', 'FAQPage', 'LearningResource'] },
   { file: 'public/guides/baccarat/index.html', url: 'https://playpokergym.com/guides/baccarat/', types: ['Article', 'BreadcrumbList', 'FAQPage', 'LearningResource'] },
@@ -50,6 +50,18 @@ test('every public page carries the discoverability basics', async () => {
     assert.equal(meta(html, 'name', 'twitter:card'), 'summary_large_image', `${page.file}: twitter card`);
     assert.equal((html.match(/<h1[\s>]/gi) ?? []).length, 1, `${page.file}: exactly one h1`);
     assert.ok(html.includes('application/ld+json'), `${page.file}: structured data`);
+  }
+});
+
+test('the public brand is Play Poker Gym with Poker Gym as the short form', async () => {
+  for (const page of pages) {
+    const html = await read(page.file);
+    assert.match(html, /<title>[^<]*Play Poker Gym[^<]*<\/title>/i, `${page.file}: title brand`);
+    assert.equal(meta(html, 'property', 'og:site_name'), 'Play Poker Gym', `${page.file}: og:site_name`);
+    const org = jsonLd(html).find((node) => node['@type'] === 'Organization');
+    assert.ok(org, `${page.file}: Organization`);
+    assert.equal(org.name, 'Play Poker Gym', `${page.file}: Organization name`);
+    assert.equal(org.alternateName, 'Poker Gym', `${page.file}: short-form alternateName`);
   }
 });
 
@@ -109,7 +121,7 @@ test('the sitemap lists every public page with a lastmod date', async () => {
 
 test('llms.txt is a concise, linked guide for assistants', async () => {
   const text = await read('public/llms.txt');
-  assert.match(text, /^# Poker Gym/);
+  assert.match(text, /^# Play Poker Gym/);
   assert.match(text, /^> /m);
   assert.match(text, /https:\/\/playpokergym\.com\/web\//);
   assert.match(text, /https:\/\/playpokergym\.com\/guides\/blackjack\//);
@@ -120,7 +132,7 @@ test('llms.txt is a concise, linked guide for assistants', async () => {
 
 test('llms-full.txt expands the facts and links back', async () => {
   const text = await read('public/llms-full.txt');
-  assert.match(text, /^# Poker Gym — full text for assistants/);
+  assert.match(text, /^# Play Poker Gym — full text for assistants/);
   assert.match(text, /## Games/);
   assert.match(text, /## FAQ/);
   assert.match(text, /Last updated: \d{4}-\d{2}-\d{2}/);

@@ -4,27 +4,27 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a1a14">
-<meta name="description" content="A free card-game trainer that coaches every decision in blackjack, video poker, baccarat and Hold’em. Daily Drill, mistake review, works offline, no signup.">
+<meta name="description" content="Play Poker Gym is a free four-game casino trainer that coaches every decision in blackjack, video poker, baccarat and Hold’em. Daily Drill, mistake review, works offline, no signup.">
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
-<meta name="author" content="Poker Gym">
-<title>Poker Gym — free card-game trainer</title>
+<meta name="author" content="Play Poker Gym">
+<title>Play Poker Gym — free four-game casino trainer</title>
 <link rel="canonical" href="https://playpokergym.com/web/">
 <link rel="sitemap" type="application/xml" href="/sitemap.xml">
 <meta property="og:locale" content="en_US">
-<meta property="og:site_name" content="Poker Gym">
-<meta property="og:title" content="Poker Gym — free card-game trainer">
-<meta property="og:description" content="A free card-game trainer that coaches every decision in blackjack, video poker, baccarat and Hold’em. Daily Drill, mistake review, works offline, no signup.">
+<meta property="og:site_name" content="Play Poker Gym">
+<meta property="og:title" content="Play Poker Gym — free four-game casino trainer">
+<meta property="og:description" content="Play Poker Gym is a free four-game casino trainer that coaches every decision in blackjack, video poker, baccarat and Hold’em. Daily Drill, mistake review, works offline, no signup.">
 <meta property="og:url" content="https://playpokergym.com/web/">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://playpokergym.com/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Poker Gym: free card-game trainer. A five-card hand and a green and red Daily Drill result grid.">
+<meta property="og:image:alt" content="Play Poker Gym: free four-game casino trainer. A five-card hand and a green and red Daily Drill result grid.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Poker Gym — free card-game trainer">
-<meta name="twitter:description" content="A free card-game trainer that coaches every decision in blackjack, video poker, baccarat and Hold’em. Daily Drill, mistake review, works offline, no signup.">
+<meta name="twitter:title" content="Play Poker Gym — free four-game casino trainer">
+<meta name="twitter:description" content="Play Poker Gym is a free four-game casino trainer that coaches every decision in blackjack, video poker, baccarat and Hold’em. Daily Drill, mistake review, works offline, no signup.">
 <meta name="twitter:image" content="https://playpokergym.com/og.png">
-<meta name="twitter:image:alt" content="Poker Gym: free card-game trainer. A five-card hand and a green and red Daily Drill result grid.">
+<meta name="twitter:image:alt" content="Play Poker Gym: free four-game casino trainer. A five-card hand and a green and red Daily Drill result grid.">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preload" href="fonts/Sora.woff2" as="font" type="font/woff2" crossorigin>
@@ -36,7 +36,8 @@
     {
       "@type": "Organization",
       "@id": "https://playpokergym.com/#organization",
-      "name": "Poker Gym",
+      "name": "Play Poker Gym",
+      "alternateName": "Poker Gym",
       "url": "https://playpokergym.com/",
       "logo": {
         "@type": "ImageObject",
@@ -49,14 +50,16 @@
       "@type": "WebSite",
       "@id": "https://playpokergym.com/#website",
       "url": "https://playpokergym.com/",
-      "name": "Poker Gym",
+      "name": "Play Poker Gym",
+      "alternateName": "Poker Gym",
       "inLanguage": "en",
       "publisher": {"@id": "https://playpokergym.com/#organization"}
     },
     {
       "@type": "WebApplication",
       "@id": "https://playpokergym.com/web/#app",
-      "name": "Poker Gym",
+      "name": "Play Poker Gym",
+      "alternateName": "Poker Gym",
       "url": "https://playpokergym.com/web/",
       "mainEntityOfPage": "https://playpokergym.com/web/",
       "applicationCategory": "EducationalApplication",
@@ -65,7 +68,7 @@
       "browserRequirements": "Requires JavaScript. Works offline after the first load.",
       "isAccessibleForFree": true,
       "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
-      "description": "The free playable Poker Gym app: five-hand coached sessions in blackjack, Jacks or Better video poker, baccarat and Texas Hold'em hand reading, plus a shared Daily Drill and spaced mistake review.",
+      "description": "The free playable app from Play Poker Gym: five-hand coached sessions in blackjack, Jacks or Better video poker, baccarat and Texas Hold'em hand reading, plus a shared Daily Drill and spaced mistake review.",
       "featureList": [
         "Coached five-hand sessions",
         "Shared Daily Drill",
@@ -87,7 +90,7 @@
 <div class="shell">
 
 <div class="topbar">
-  <span class="brand"><span class="brand-spade" aria-hidden="true">♠</span><span class="brand-copy"><b>POKER GYM</b><small>CARD TRAINER</small></span></span>
+  <span class="brand"><span class="brand-spade" aria-hidden="true">♠</span><span class="brand-copy"><b>POKER GYM</b><small>FOUR-GAME TRAINER</small></span></span>
   <button id="btnMap" class="pill-btn" type="button" hidden>HOME</button>
   <button id="btnTitle" class="pill-btn" type="button" hidden>START</button>
   <button id="btnSound" class="sound-toggle pill-btn" type="button" aria-pressed="true">SOUND</button>
@@ -234,7 +237,7 @@
     <div id="playerShare" class="window" hidden>
       <h2>Invite a Practice Partner</h2>
       <p class="hint">Share the free demo if it helped. Your progress, scores and save stay private.</p>
-      <textarea id="sharePreview" readonly rows="4" aria-label="Invitation to copy">Try Poker Gym: free five-hand card-game practice with coaching and mistake review. No signup, deposits or real-money wagering. https://playpokergym.com/web/?ref=invite</textarea>
+      <textarea id="sharePreview" readonly rows="4" aria-label="Invitation to copy">Try Play Poker Gym: free five-hand card-game practice with coaching and mistake review. No signup, deposits or real-money wagering. https://playpokergym.com/web/?ref=invite</textarea>
       <div class="row"><button id="btnShare" type="button" hidden>OPEN SHARE OPTIONS</button><button id="btnCopyShare" type="button">COPY INVITATION</button></div>
       <p id="shareStatus" class="hint" role="status">Nothing sent. Choose who receives it yourself.</p>
     </div>
@@ -264,7 +267,7 @@
       </div>
     </div>
 
-    <p class="hint tip-link" id="tipJar">Poker Gym is free. If it helped, you can tip on Ko-fi: <a href="https://ko-fi.com/playpokergym" target="_blank" rel="noopener">Support Poker Gym ☕</a> (optional, unlocks nothing).</p>
+    <p class="hint tip-link" id="tipJar">Play Poker Gym is free. If it helped, you can tip on Ko-fi: <a href="https://ko-fi.com/playpokergym" target="_blank" rel="noopener">Support Play Poker Gym ☕</a> (optional, unlocks nothing).</p>
 
     <details id="saveBackup">
       <summary>BACKUP · BACK UP OR RESTORE PROGRESS</summary>
@@ -408,7 +411,7 @@
   </div>
 </section>
 
-<p class="hint" style="text-align:center"><a href="privacy.html" target="_blank" rel="noopener">Privacy</a></p>
+<p class="hint" style="text-align:center"><a href="/web/privacy" target="_blank" rel="noopener">Privacy</a></p>
 </main>
 </div>
 <script src="posthog-loader.js"></script>
