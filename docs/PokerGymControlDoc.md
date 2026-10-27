@@ -5,6 +5,7 @@ The single shared record for Poker Gym coordination between Wes, Wren, ChatGPT, 
 ## Current focus (mutable — updated by whoever changes the focus; ControlDoc wins on conflict)
 
 - **Objective:** Increase D1 return rate for first-time players; validate via PostHog before any paywall work.
+- **Traffic mandate (Wes, Oct 27 evening):** Wren drives traffic to playpokergym.com through content and any other channel Wren judges valid. Boundaries stand: money, accounts, and sign ups need Wes per action approval; no personal Rolodex invites.
 - **Active experiment:** E1 comment prompt (Oct 26 – Nov 1) on v4 question-hook media, first post Oct 26 live, 0 comments so far; E2 format test (Oct 30 – Nov 8).
 - **Next decision point:** Oct 27 combined review (Wren findings filed Oct 27 afternoon, after the 12:30 PM due time); Nov 15 Pro-unlock gate review.
 - **Do not start:** no pricing/subscription work; no new schedulers. (Nov 1–8 batch hold lifted by Grok's Oct 27 review; renders start Oct 29.)
@@ -125,6 +126,8 @@ report at implementation: 103 retention-window visitors, D1 site 3/97, D1
 return-to-game 0/97, D7 return-to-game 0/14, status **fix retention**.
 
 ## Decision Log
+
+- **2026-10-27 evening CT (Wes, traffic mandate):** Wren owns driving traffic to playpokergym.com through content and any other channel Wren judges valid. Wes set his own traffic opinions aside under this order. Boundaries stand: money, accounts, and sign ups still need Wes per action approval; the personal Rolodex invite ban stands; the daily report remains the record and traffic numbers show up there each morning.
 
 - **2026-10-27 ~1:35 PM CT (OpenCode, Grok's software items 2–3 shipped, item 1 decided; Worker `a9482fad-7cb5-4d49-9f49-c270f17a71bc`):**
   - **Item 2, one reconciled visitor count — the gap was method, not the script.** `scripts/analytics-report.mjs` already applied `notTestClause()`; Wren's 101 was an unfiltered connector pull while the filtered epoch read 82. The report now prints an epoch line next to the raw count (`since epoch 2026-10-21: raw 102 · clean …`) plus one sentence saying the canonical visitor total is the clean number and an unfiltered pull includes the excluded profiles. No definition changed for this part.
@@ -429,6 +432,7 @@ October 21, 2026, 8:10 PM Central, first sync.
 - Instrumentation: new hand-level events (hand_dealt, decision_made, hand_complete) were confirmed landing in PostHog from a real, non-headless browser at 6:13 PM Central Oct 21, after the service worker fix (02150a1) and the hand-number fixes (ac6f409, 5f6e142, live version 6cead0fa). Headless Chromium tests get filtered as bots by PostHog and cannot verify delivery. Coverage across all visitors still depends on returning visitors picking up the new service worker, so Wren's coverage monitor is the right check. Source: my own test session plus PostHog queries.
 - E3: confirmed that the Oct 26 to 31 videos I rendered carry the comment pill only, with no follow end card. A follow end card can be added to the November batch on request.
 - Retention claim: agreed it stays a hypothesis until Wes's Oct 26 screenshots.
+
 
 
 
