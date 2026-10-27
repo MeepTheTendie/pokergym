@@ -66,6 +66,8 @@ function storageWarning() {
   el('saveStatus').textContent = 'PROGRESS IS NOT SAVING. Browser storage is blocked or full. You can still practise in this tab. Prepare a backup below before closing or reloading; open the standalone game if embedded storage is blocked.';
 }
 let profile = null;
+// Blocked storage (privacy modes, third-party iframes) throws on access; read as unset.
+function storedFlag(key) { try { return localStorage.getItem(key); } catch { return null; } }
 try { profile = sanitizeProfile(deserialize(localStorage.getItem(SAVE_KEY))); }
 catch { storageWarning(); }
 let pendingClass = null;
@@ -1393,7 +1395,7 @@ function renderPlay() {
       ? `RESULT: ${round.winLabel.toUpperCase()}. YOUR HOLD WAS ${round.holdBest ? 'BEST' : 'NOT BEST'}.`
       : `HOLDING ${round.holds.filter(Boolean).length} OF 5`;
     const hint = el('holdHint');
-    if (hint && !round.drawn && !holdHintShown && !localStorage.getItem('pg_hold_hint')) {
+    if (hint && !round.drawn && !holdHintShown && !storedFlag('pg_hold_hint')) {
       holdHintShown = true;
       hint.hidden = false;
       setTimeout(() => { hint.hidden = true; try { localStorage.setItem('pg_hold_hint', '1'); } catch {} }, 6000);
@@ -2562,7 +2564,7 @@ document.addEventListener('keydown', (e) => {
 // page load instead of two or three taps. The title screen (daily drill,
 // choose style, etc.) is still reachable from HOME.
 const returning = Boolean(profile);
-let lastVisitDay = profile ? localStorage.getItem('pg_last_visit_day') : null;
+let lastVisitDay = profile ? storedFlag('pg_last_visit_day') : null;
 if (profile && !lastVisitDay) {
   const sessionDays = (profile.sessions ?? []).map(s => {
     try { return localDayKey(new Date(s.completedAt)); } catch { return null; }
