@@ -25,7 +25,7 @@ if (files.length === 0) {
 }
 const r = spawnSync(process.execPath, ['--test', ...files], { encoding: 'utf8', stdio: ['inherit', 'pipe', 'inherit'] });
 process.stdout.write(r.stdout ?? '');
-const m = /^# tests (\d+)/m.exec(r.stdout ?? '');
+const m = /^(?:#|ℹ) tests (\d+)/m.exec(r.stdout ?? '');
 if (!m || Number(m[1]) === 0) {
   console.error('run-tests: the runner reported zero tests — failing.');
   process.exit(1);
