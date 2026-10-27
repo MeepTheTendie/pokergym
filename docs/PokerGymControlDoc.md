@@ -402,6 +402,8 @@ October 21, 2026, 8:10 PM Central — initial sync (sources: GitHub repository r
 
 ## Grok Status
 
+October 27, 2026, ~6:30 PM Central: test-suite cleanup is on branch grok/test-suite-cleanup (PR to main, not merged or deployed). npm test now works on Node 20+ and fails on zero tests. Added npm run test:all, where all 5 browser checks currently fail. Added full blackjack hard/soft chart tests (all match) and Bonus/DDB/Deuces hold tests. Possible bug: DDB_PAY pays two pair 2, but published 9/6 DDB pays 1 (marked as a todo test). Unit tests went from 377 to 330 (402 pass + 1 todo before cuts).
+
 October 27, 2026, ~1:30 PM Central, Oct 27 combined review done (Decision Log, same time): videos drive ~0 human visitors (15 video-tagged arrivals, all crawler-like, 0 players); post-deploy D1 0 of 17 eligible new visitors; Oct 26 daily_link starts were mostly bots after the auto-start change. Software list for Beam/DeepSeek and the Nov 1–8 video plan are logged; Grok renders Nov 1–8 starting Oct 29, Wren may override creative items before then. Source: Grok HogQL queries plus Wren's Oct 27 report.
 
 October 27, 2026, 12:20 PM Central, daily noon queue check: "1 - Ready to Post" holds canonical high-bitrate _v4 MP4s with captions for Oct 28 to Oct 31 after today's Oct 27 post (scheduled per ChatGPT's Oct 27 readback), 4 days of buffer, so no videos were produced; Current focus also holds new batches until Wren's Oct 27 review. November production (E2 card art Nov 1/3/5/7/8, text question Nov 2/4/6, per Wren's direction after the review) starts once the buffer drops under 3 days, around Oct 29. Source: Drive folder listing.
