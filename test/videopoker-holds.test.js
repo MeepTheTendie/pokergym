@@ -75,15 +75,19 @@ test('deuces-wild: two pair with no deuce keeps only one pair', () => {
   }
 });
 
-// POSSIBLE BUG (found Oct 27, 2026): src/games/videopoker.js DDB_PAY pays two
-// pair 2. Published 9/6 Double Double Bonus pays two pair 1 (that is what makes
-// it 9/6 at 98.98%). With the published table, aces up should hold only the
-// aces (independent brute force: AA 1.931 vs two pair 1.681 per coin). Marked
-// todo so the suite stays green until someone fixes the pay table; do NOT
-// change the expectation.
-test('double-double-bonus: aces up holds only the aces', { todo: 'DDB_PAY two pair is 2, published 9/6 DDB is 1' }, () => {
+// Regression (fixed Oct 27, 2026): DDB_PAY paid two pair 2; published 9/6 DDB
+// pays 1. With the correct table, aces up holds only the aces (independent
+// brute force: AA 1.931 vs two pair 1.681 per coin).
+test('double-double-bonus: aces up holds only the aces', () => {
   clearCache();
   const { hand, hold } = parse('*Ac *Ad 8s 8h Kc');
   const r = bestHold(hand, { variant: 'double-double-bonus' });
   assert.ok(r.optimal.some((h) => h.every((x, i) => x === hold[i])));
+});
+
+test('double-double-bonus pays two pair 1 (9/6 DDB), Bonus and Jacks pay 2', async () => {
+  const { variantById, WIN } = await import('../src/games/videopoker.js');
+  assert.equal(variantById('double-double-bonus').pay[WIN.TWO_PAIR], 1);
+  assert.equal(variantById('bonus-poker').pay[WIN.TWO_PAIR], 2);
+  assert.equal(variantById('jacks-or-better').pay[WIN.TWO_PAIR], 2);
 });
