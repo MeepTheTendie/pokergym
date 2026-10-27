@@ -158,6 +158,48 @@
   // (src/rpg/analytics.js). Nothing here changes how ref is parsed.
   window.__pgAttribution = ATTRIBUTION;
 
+  // Stable device identity. PostHog's own distinct_id lives in a cookie as well
+  // as localStorage, so clearing cookies splits one person into several. A plain
+  // localStorage id survives that, which makes "did this person come back" a
+  // question about one profile instead of several. There is no login, so this is
+  // device-level only: two devices are still two people. No PII is stored.
+  var PLAYER_KEY = 'pg_player_id_v1';
+  var FIRST_SEEN_KEY = 'pg_first_seen_v1';
+  var PLAYER_ID = '';
+  var FIRST_SEEN = '';
+  try {
+    PLAYER_ID = window.localStorage.getItem(PLAYER_KEY) || '';
+    if (!PLAYER_ID) {
+      PLAYER_ID = 'pg_' + (
+        window.crypto && typeof window.crypto.randomUUID === 'function'
+          ? window.crypto.randomUUID()
+          : Date.now().toString(36) + Math.random().toString(36).slice(2, 10)
+      );
+      window.localStorage.setItem(PLAYER_KEY, PLAYER_ID);
+    }
+    FIRST_SEEN = window.localStorage.getItem(FIRST_SEEN_KEY) || '';
+    if (!FIRST_SEEN) {
+      FIRST_SEEN = new Date().toISOString();
+      window.localStorage.setItem(FIRST_SEEN_KEY, FIRST_SEEN);
+    }
+  } catch (error) {
+    // Storage blocked: fall back to the SDK's anonymous distinct_id.
+    PLAYER_ID = '';
+  }
+
+  // The trainer calls this once the save is loaded, so the person profile knows
+  // the class, level and visit count without sending anything personal.
+  var identifyQueue = [];
+  window.pgIdentify = function (props) {
+    if (!PLAYER_ID) return;
+    var payload = props && typeof props === 'object' ? props : {};
+    if (window.__pgAnalyticsReady && window.posthog && typeof window.posthog.identify === 'function') {
+      window.posthog.identify(PLAYER_ID, payload);
+    } else {
+      identifyQueue.push(payload);
+    }
+  };
+
   // Any element can be marked data-track="event_name"; the event fires with the
   // path, the element's other data-* attributes, and its own text. Capture
   // phase so the click is recorded before the link navigates away.
@@ -187,6 +229,15 @@
       // Attribution travels with every event on this page and onward while the
       // identifier lasts, so source -> guide -> play is one funnel.
       window.posthog.register(ATTRIBUTION);
+      if (PLAYER_ID) {
+        window.posthog.identify(PLAYER_ID, {
+          pg_player_id: PLAYER_ID,
+          first_seen: FIRST_SEEN || null,
+          first_ref: ATTRIBUTION.first_ref || null,
+        });
+        for (var q = 0; q < identifyQueue.length; q++) window.posthog.identify(PLAYER_ID, identifyQueue[q]);
+        identifyQueue.length = 0;
+      }
       for (var i = 0; i < queue.length; i++) window.posthog.capture(queue[i][0], queue[i][1]);
       queue.length = 0;
     } catch (error) {

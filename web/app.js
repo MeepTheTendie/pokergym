@@ -2582,6 +2582,18 @@ analytics.openTrainer({
   returning,
   days_since_last_visit: daysSinceLastVisit,
 });
+// Attach the save state to the stable device id created by the loader, so
+// retention and funnel reports can segment by class, level and experience.
+// Everything here is game state; no name, email or device fingerprint is sent.
+if (typeof window.pgIdentify === 'function') {
+  window.pgIdentify({
+    trainer_class: profile?.classId ?? null,
+    level: profile ? levelFromXp(profile.xp).level : null,
+    hands_played: profile?.handsPlayed ?? 0,
+    returning,
+    days_since_last_visit: daysSinceLastVisit,
+  });
+}
 function startFromEntry() {
   const wantsDaily = Boolean(entryParams.daily);
   const wantsPractice = Boolean(requestedGym);

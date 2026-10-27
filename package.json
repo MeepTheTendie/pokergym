@@ -18,6 +18,7 @@
     "preview": "npm run build && wrangler dev",
     "stats": "node scripts/stats.mjs",
     "report": "node scripts/analytics-report.mjs",
+    "check:reddit": "node scripts/check-reddit.mjs",
     "scorecard": "node scripts/scorecard.mjs",
     "build:itch": "node scripts/build-itch.mjs",
     "test:itch:cross-site": "POKERGYM_CROSS_SITE_TEST=1 node scripts/itch-browser-test.mjs",
