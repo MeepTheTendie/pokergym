@@ -402,6 +402,8 @@ October 21, 2026, 8:10 PM Central — initial sync (sources: GitHub repository r
 
 ## Grok Status
 
+October 27, 2026, ~6:50 PM Central (PR #3, branch only, nothing deployed): the Double Double Bonus two pair payout is fixed to 1. `npm run test:all` is green. Two real bugs are fixed on the branch: (1) LIVE: video poker throws on every render when browser storage is blocked, and the player gets stuck after one hand. (2) The itch ZIP's privacy link pointed to the host's root. The other browser-check failures came from stale tests (practice links now start directly, and lessons are skipped). Both fixes reach users only after merge and deploy.
+
 October 27, 2026, ~6:30 PM Central: test-suite cleanup is on branch grok/test-suite-cleanup (PR to main, not merged or deployed). npm test now works on Node 20+ and fails on zero tests. Added npm run test:all, where all 5 browser checks currently fail. Added full blackjack hard/soft chart tests (all match) and Bonus/DDB/Deuces hold tests. Possible bug: DDB_PAY pays two pair 2, but published 9/6 DDB pays 1 (marked as a todo test). Unit tests went from 377 to 330 (402 pass + 1 todo before cuts).
 
 October 27, 2026, ~1:30 PM Central, Oct 27 combined review done (Decision Log, same time): videos drive ~0 human visitors (15 video-tagged arrivals, all crawler-like, 0 players); post-deploy D1 0 of 17 eligible new visitors; Oct 26 daily_link starts were mostly bots after the auto-start change. Software list for Beam/DeepSeek and the Nov 1–8 video plan are logged; Grok renders Nov 1–8 starting Oct 29, Wren may override creative items before then. Source: Grok HogQL queries plus Wren's Oct 27 report.

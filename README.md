@@ -78,4 +78,4 @@ One-time setup:
 - `npm test` runs the unit suite (`test/*.test.js`). It works on Node 20 and 22+, and it fails if no tests are found.
 - `npm run test:release` runs the build, asset and SEO checks.
 - `npm run test:all` runs both, then the headless browser checks: analytics, the itch embed, offline, and storage denied/quota. It needs Chrome or Chromium installed. It prints a pass/fail summary for each step.
-  As of Oct 27, 2026, all five browser checks fail against the current app on main. The analytics check fails on the privacy page title wait. The other four fail on the "Selected training is explained before starting" assertion (`#practiceInvitation` stays hidden). These are stale or real UI regressions to triage. They are not caused by the runner.
+  As of Oct 27, 2026, all steps pass on Node 20 with Google Chrome.
