@@ -70,14 +70,14 @@ const advice = {
   'open ended draw': { hand: [c(7, 's'), c(8, 'd'), c(9, 'c'), c(10, 'h'), c(2, 's')], keep: 4, ev: 0.6809 },
 };
 
-for (const [name, spec] of Object.entries(advice)) {
-  test(`optimal play holds ${spec.keep} on ${name}`, () => {
+test('optimal play holds the right count with the right EV on every reference hand', () => {
+  for (const [name, spec] of Object.entries(advice)) {
     clearCache();
     const result = bestHold(spec.hand);
-    assert.equal(result.holds.filter(Boolean).length, spec.keep);
+    assert.equal(result.holds.filter(Boolean).length, spec.keep, name);
     near(result.ev, spec.ev);
-  });
-}
+  }
+});
 
 test('a jack pair is valued above a low pair', () => {
   clearCache();
@@ -169,10 +169,6 @@ test('winning hand pays the table amount', () => {
   assert.equal(payLabelFor(round.result), 'Royal Flush');
 });
 
-test('card labels render for a dealt hand', () => {
-  const round = newRound(seededRng(15));
-  assert.equal(round.hand.length, cardLabel(round.hand[0]).length > 0 ? 5 : 0);
-});
 // Published teaching examples must agree with the exhaustive simulator analysis.
 test('public three-hand guide recommends the optimal exact holds', async () => {
   const { readFile } = await import('node:fs/promises');

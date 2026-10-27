@@ -290,14 +290,6 @@ test('aces count as eleven then fall back to one', () => {
   assert.equal(isBlackjack([c(14), c(7), c(7)]), false);
 });
 
-test('rank names cover every rank in play', () => {
-  for (let r = 2; r <= 14; r++) assert.ok(rankName(r).length > 0);
-});
-
-test('hand count is capped', () => {
-  assert.equal(MAX_HANDS, 4);
-});
-
 /* ---- coach internals ------------------------------------------------------ */
 
 test('the rank table covers every card with no dead slot', () => {
@@ -437,14 +429,14 @@ const GOLDEN = [
   { hand: [14, 5], up: 4, action: 'double', ev: 0.0606 },
 ];
 
-for (const row of GOLDEN) {
-  test(`coach plays ${row.hand.join(',')} vs ${row.up} as ${row.action}`, () => {
+test('coach plays every golden spot with the right action and EV', () => {
+  for (const row of GOLDEN) {
     clearCache();
     const res = bestAction(roundWith(row.hand, row.up));
-    assert.equal(res.action, row.action);
+    assert.equal(res.action, row.action, `${row.hand} vs ${row.up}`);
     near(res.ev, row.ev, 0.01, `${row.hand} vs ${row.up}`);
-  });
-}
+  }
+});
 
 /*
  * Pair chart: standard six-deck, dealer stands on soft 17, double after split

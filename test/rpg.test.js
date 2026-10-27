@@ -167,60 +167,66 @@ test('higher ranked hands are worth more XP', () => {
   assert.ok(junk >= 1);
 });
 
-test('every playable gym has a valid lesson', () => {
-  for (const gym of GYMS) {
-    const lesson = lessonFor(gym.game);
-    assert.ok(lesson, `${gym.game} has no lesson`);
-    assert.equal(lesson.gym, gym.id);
-    assert.ok(lesson.pages.length >= 8, `${gym.game} lesson is too short`);
-    for (const page of lesson.pages) {
-      assert.ok(page.who?.length > 0, `${gym.game} page missing speaker`);
-      assert.ok(page.text?.length > 20, `${gym.game} page text too short`);
+test('lessons: lookup, null for unknown game, intro/tips split', () => {
+  // every playable gym has a valid lesson
+  {
+    for (const gym of GYMS) {
+      const lesson = lessonFor(gym.game);
+      assert.ok(lesson, `${gym.game} has no lesson`);
+      assert.equal(lesson.gym, gym.id);
+      assert.ok(lesson.pages.length >= 8, `${gym.game} lesson is too short`);
+      for (const page of lesson.pages) {
+        assert.ok(page.who?.length > 0, `${gym.game} page missing speaker`);
+        assert.ok(page.text?.length > 20, `${gym.game} page text too short`);
+      }
     }
   }
-});
-
-test('lesson lookup returns null for an unknown game', () => {
-  assert.equal(lessonFor('keno'), null);
-});
-
-test('a lesson is marked done once and only once', () => {
-  const base = createProfile('scholar');
-  assert.equal(hasCompletedLesson(base, 'videopoker'), false);
-  const once = markLessonDone(base, 'videopoker');
-  assert.equal(hasCompletedLesson(once, 'videopoker'), true);
-  const twice = markLessonDone(once, 'videopoker');
-  assert.equal(twice.lessonsDone.length, 1);
-});
-
-test('completing one lesson does not mark the others', () => {
-  const p = markLessonDone(createProfile('dealer'), 'videopoker');
-  assert.equal(hasCompletedLesson(p, 'blackjack'), false);
-});
-
-test('markLessonDone does not mutate the original profile', () => {
-  const base = createProfile('scholar');
-  markLessonDone(base, 'videopoker');
-  assert.equal(base.lessonsDone.length, 0);
-});
-
-test('a brand new profile has completed no lessons', () => {
-  assert.deepEqual(createProfile('grinder').lessonsDone, []);
-});
-
-test('a lesson splits into a short intro and reusable tips', () => {
-  for (const game of ['videopoker', 'blackjack', 'baccarat', 'holdem']) {
-    const lesson = lessonFor(game);
-    const intro = lessonIntro(lesson);
-    const tips = lessonTips(lesson);
-    assert.equal(intro.length, LESSON_INTRO_PAGES);
-    assert.equal(intro.length + tips.length, lesson.pages.length);
-    assert.deepEqual(intro, lesson.pages.slice(0, LESSON_INTRO_PAGES));
-    assert.deepEqual(tips, lesson.pages.slice(LESSON_INTRO_PAGES));
-    assert.ok(tips.length >= 4, `${game} needs at least four tips`);
+  // lesson lookup returns null for an unknown game
+  {
+    assert.equal(lessonFor('keno'), null);
   }
-  assert.deepEqual(lessonIntro(null), []);
-  assert.deepEqual(lessonTips(null), []);
+  // a lesson splits into a short intro and reusable tips
+  {
+    for (const game of ['videopoker', 'blackjack', 'baccarat', 'holdem']) {
+      const lesson = lessonFor(game);
+      const intro = lessonIntro(lesson);
+      const tips = lessonTips(lesson);
+      assert.equal(intro.length, LESSON_INTRO_PAGES);
+      assert.equal(intro.length + tips.length, lesson.pages.length);
+      assert.deepEqual(intro, lesson.pages.slice(0, LESSON_INTRO_PAGES));
+      assert.deepEqual(tips, lesson.pages.slice(LESSON_INTRO_PAGES));
+      assert.ok(tips.length >= 4, `${game} needs at least four tips`);
+    }
+    assert.deepEqual(lessonIntro(null), []);
+    assert.deepEqual(lessonTips(null), []);
+  }
+});
+
+test('lessons: marked done once, independently, without mutation', () => {
+  // a lesson is marked done once and only once
+  {
+    const base = createProfile('scholar');
+    assert.equal(hasCompletedLesson(base, 'videopoker'), false);
+    const once = markLessonDone(base, 'videopoker');
+    assert.equal(hasCompletedLesson(once, 'videopoker'), true);
+    const twice = markLessonDone(once, 'videopoker');
+    assert.equal(twice.lessonsDone.length, 1);
+  }
+  // completing one lesson does not mark the others
+  {
+    const p = markLessonDone(createProfile('dealer'), 'videopoker');
+    assert.equal(hasCompletedLesson(p, 'blackjack'), false);
+  }
+  // markLessonDone does not mutate the original profile
+  {
+    const base = createProfile('scholar');
+    markLessonDone(base, 'videopoker');
+    assert.equal(base.lessonsDone.length, 0);
+  }
+  // a brand new profile has completed no lessons
+  {
+    assert.deepEqual(createProfile('grinder').lessonsDone, []);
+  }
 });
 
 test('save round-trips and rejects corrupt or stale data', () => {

@@ -117,22 +117,26 @@ test('refFromReferrer returns null for unknown/invalid input', () => {
   }
 });
 
-test('posthog-loader mirrors every REFERRER_REFS host and ref', () => {
-  const src = readFileSync(new URL('../web/posthog-loader.js', import.meta.url), 'utf8');
-  for (const [host, ref] of Object.entries(REFERRER_REFS)) {
-    assert.ok(src.includes(`'${host}'`), `loader missing host ${host}`);
-    assert.ok(src.includes(`'${ref}'`), `loader missing ref ${ref}`);
+test('posthog-loader referrer map exactly mirrors REFERRER_REFS', () => {
+  // posthog-loader mirrors every REFERRER_REFS host and ref
+  {
+    const src = readFileSync(new URL('../web/posthog-loader.js', import.meta.url), 'utf8');
+    for (const [host, ref] of Object.entries(REFERRER_REFS)) {
+      assert.ok(src.includes(`'${host}'`), `loader missing host ${host}`);
+      assert.ok(src.includes(`'${ref}'`), `loader missing ref ${ref}`);
+    }
+  }
+  // referrer map in posthog-loader exactly mirrors REFERRER_REFS
+  {
+    const src = readFileSync(new URL('../web/posthog-loader.js', import.meta.url), 'utf8');
+    const match = src.match(/var REFERRER_MAP\s*=\s*\{([\s\S]*?)\};/);
+    assert.ok(match, 'REFERRER_MAP not found in loader');
+    const pairs = [...match[1].matchAll(/'([^']+)'\s*:\s*'([^']+)'/g)];
+    const loaderMap = Object.fromEntries(pairs.map(m => [m[1], m[2]]));
+    assert.deepEqual(Object.keys(loaderMap).sort(), Object.keys(REFERRER_REFS).sort());
+    for (const [host, ref] of Object.entries(loaderMap)) {
+      assert.equal(REFERRER_REFS[host], ref, host);
+    }
   }
 });
 
-test('referrer map in posthog-loader exactly mirrors REFERRER_REFS', () => {
-  const src = readFileSync(new URL('../web/posthog-loader.js', import.meta.url), 'utf8');
-  const match = src.match(/var REFERRER_MAP\s*=\s*\{([\s\S]*?)\};/);
-  assert.ok(match, 'REFERRER_MAP not found in loader');
-  const pairs = [...match[1].matchAll(/'([^']+)'\s*:\s*'([^']+)'/g)];
-  const loaderMap = Object.fromEntries(pairs.map(m => [m[1], m[2]]));
-  assert.deepEqual(Object.keys(loaderMap).sort(), Object.keys(REFERRER_REFS).sort());
-  for (const [host, ref] of Object.entries(loaderMap)) {
-    assert.equal(REFERRER_REFS[host], ref, host);
-  }
-});

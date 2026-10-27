@@ -46,11 +46,9 @@ const cases = [
   ['not a straight when duplicated rank breaks run', [c(9, 's'), c(9, 'h'), c(7, 'd'), c(6, 'c'), c(5, 's')], CATEGORY.ONE_PAIR],
 ];
 
-for (const [name, hand, expected] of cases) {
-  test(`classifies ${name}`, () => {
-    assert.equal(evaluate5(hand).category, expected);
-  });
-}
+test('classifies every hand category', () => {
+  for (const [name, hand, expected] of cases) assert.equal(evaluate5(hand).category, expected, name);
+});
 
 test('wheel straight reports high card 5, not ace', () => {
   const r = evaluate5([c(14, 's'), c(5, 'h'), c(4, 'd'), c(3, 'c'), c(2, 's')]);
