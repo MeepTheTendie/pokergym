@@ -181,8 +181,9 @@ assert.equal(await evaluate('document.getElementById("scr-map").hidden'), false,
 assert.equal(await evaluate('localStorage.getItem("pokergym:save:v1")'), savedBeforeReview, 'Returning to map preserves completed session');
 
 // 6. ?practice=holdem link, 2 hands, then reload and resume from the map.
+// Since 72b258b (Oct 26) ?practice=<game> starts the session directly.
 await open(BASE + '?practice=holdem&ref=x');
-await run("$('btnStart').click(); await wait(80); await playHands(2); return true;");
+await run("await wait(80); await playHands(2); return true;");
 log = await events();
 expectCounts('practice link, 2 hands', log, { open_trainer: 1, game_start: 1, start_training: 1, session_complete: 0 });
 expectProps('practice link, 2 hands', props(log, 'game_start'), { game: 'holdem', ref: 'x' });
@@ -197,9 +198,9 @@ expectProps('resume session', props(log, 'game_start'), { game: 'holdem', resume
 // All four promoted practice links must lead to the advertised game in one tap.
 for (const game of ['blackjack', 'baccarat', 'videopoker', 'holdem']) {
   await open(BASE + '?practice=' + game + '&ref=youtube');
-  assert.equal(await evaluate('document.getElementById("scr-title").hidden'), false);
-  assert.equal(await evaluate('localStorage.getItem("pokergym:save:v1")'), null);
-  await run("$('btnStart').click(); await wait(80); await playHands(5); return true;");
+  assert.equal(await evaluate('document.getElementById("scr-title").hidden'), true, game + ' link skips the title');
+  assert.equal(await evaluate('document.getElementById("scr-battle").hidden'), false, game + ' link opens the game');
+  await run("await wait(80); await playHands(5); return true;");
   log = await events();
   expectCounts(game + ' promoted session', log, { open_trainer: 1, game_start: 1, start_training: 1, session_complete: 1, recap_view: 1, start_daily: 0 });
   expectProps(game + ' promoted session', props(log, 'game_start'), { game, ref: 'youtube' });
