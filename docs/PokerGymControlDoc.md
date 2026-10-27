@@ -9,8 +9,9 @@ The single shared record for Poker Gym coordination between Wes, Wren, ChatGPT, 
 - **Next decision point:** Oct 27 combined review (Wren findings due 12:30 PM CT); Nov 15 Pro-unlock gate review.
 - **Do not start:** new video batch before Oct 25 read; no pricing/subscription work; no new schedulers.
 - **Blocked on:** Wes — seller/payment-provider onboarding for any paid path.
-- **Latest instrumentation boundary:** 2026-10-25 deploy adds `run_kind` to `session_complete` and `daily_complete`; compare completion coverage only within the same side of that boundary.
-- **Last updated:** 2026-10-26 (Beam). Source: ControlDoc Decision Log 2026-10-26; Oct 25 daily report pulls.
+- **Latest instrumentation boundary:** 2026-10-26 deploy (`a18f1521`) adds a stable `pg_player_id_v1` device identity and `$identify` properties; retention before that deploy is cookie-scoped, after it is device-scoped, so do not compare across the boundary. The 2026-10-25 boundary still applies to `run_kind` on `session_complete` and `daily_complete`.
+- **Last updated:** 2026-10-26 (OpenCode). Source: ControlDoc Decision Log 2026-10-26; live Worker `a18f1521`; `npm run check:reddit`.
+- **Beam audit artifact:** `automation/artifacts/beam/operations-audit-2026-10-26.md` (read-only operations audit for Oct 13–26).
 
 ## How this document works
 
@@ -122,6 +123,8 @@ report at implementation: 103 retention-window visitors, D1 site 3/97, D1
 return-to-game 0/97, D7 return-to-game 0/14, status **fix retention**.
 
 ## Decision Log
+
+- **2026-10-26 (OpenCode, identity instrumentation + Reddit retention check; Worker `a18f1521-cbed-4a33-b4a6-8d32696dceb2`):** Shipped a stable device identity and a repeatable retention check. `web/posthog-loader.js` now creates `pg_player_id_v1` in localStorage (survives a cleared cookie, no PII) and calls `posthog.identify` with `pg_player_id`, `first_seen` and `first_ref`; `web/app.js` adds `trainer_class`, `level`, `hands_played`, `returning` and `days_since_last_visit` right after `open_trainer`. New `scripts/check-reddit.mjs` (`npm run check:reddit`) reports D1/D7 by first-touch source and marks each cohort mature or pending. **Measurement boundary: 2026-10-26** — retention before this deploy is cookie-scoped, after it is device-scoped, so do not compare across the boundary without saying so. Why: the launch read found 140 visitors → 74 opened the trainer → 38 started a hand → 17 completed a five-hand session, with 2 outside returners, both Reddit. Reddit D1 is 2/19 (10.5%, both played) vs direct 3/61 (4.9%, 1 played) and 0 everywhere else; 2 people is not a rate. **Funnel finding — do not auto-start:** of the 37 trainer-openers who never started a hand, 17 left in under 3 seconds, only 13 clicked anything, and none clicked START. The gap is bounce and bot traffic, not a broken CTA, so bare `/web/` still shows the title screen as decided on 2026-10-26. **Actions:** Wren — use the 2026-10-26 boundary and run `npm run check:reddit` after 2026-10-28, when the 15-person Oct 21 Reddit cohort reaches D7; treat D1 as unresolved until then. ChatGPT/Grok — do not claim the funnel is fixed or that Reddit retains; the open→start gap has no code fix yet. Verification: `npm test` 374/374; build clean; commit `b36e739`; Worker `a18f1521` live on both custom domains; production `/web/posthog-loader.js` contains the identity block; headless Chromium against `https://playpokergym.com/web/` returned `distinct_id = pg_c1803734-…`, matching `localStorage['pg_player_id_v1']`, with `pgIdentify` exposed. That check added one real pageview to production analytics — ignore a single direct `/web/` visit at 2026-10-26 ~22:54 CT. `npm run check:reddit` currently ends with "D7 is still maturing for 18 Reddit visitors. Next check: 2026-10-28 (15 people)." Source: HogQL over the launch window, code reads of `web/app.js` and `web/posthog-loader.js`, the new check script, and the live deploy.
 
 - **2026-10-26 (Beam, decision dashboard and scorecard retirement):** Shipped
   the one-screen decision dashboard `2263366` with the same Chicago-day and

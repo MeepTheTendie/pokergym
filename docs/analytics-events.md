@@ -18,6 +18,19 @@ snapshot (`?ref=`, a UTM tag, or the referrer fallback). The loader also sends:
 referrer is never turned into a platform guess; only explicit `?ref=`, UTM tags,
 or a known referrer host counts.
 
+## Identity (since 2026-10-26)
+
+The loader mints `pg_player_id_v1` once per browser, stores it in
+`localStorage`, and calls `posthog.identify` with it, so clearing cookies no
+longer splits one device into several people. The person also carries
+`first_seen` and `first_ref`. The trainer then updates that profile through
+`window.pgIdentify` on every load with `trainer_class`, `level`, `hands_played`,
+`returning`, and `days_since_last_visit`.
+
+This is **device** identity, not human identity: it does not link two devices,
+and no PII is sent. Retention measured before 2026-10-26 is cookie-scoped and
+is not comparable with retention measured after it.
+
 ## Trainer (/web/)
 
 `game_start`, `start_daily`, and the hand events carry `run_id` (unique per page
