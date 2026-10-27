@@ -6,7 +6,7 @@ import {
   funnelQuery, dailyDrillQuery, sourcePersonQuery, auditQuery, firstGameQuery, personDayQuery,
   aggregateSources, sourceLabel, computeRetention, returnRate, rates, dataWarnings,
   decisionStatus, formatRetention, formatRetentionSummary, formatSources, sampleStatus,
-  wilsonInterval,
+  wilsonInterval, windows, REPORT_EPOCH,
 } from '../scripts/analytics-report.mjs';
 
 const iso = d => d.toISOString();
@@ -302,4 +302,10 @@ test('source table prints a total row that matches the denominator', () => {
   ]);
   assert.match(text, /YouTube/);
   assert.match(text, /Unknown/);
+});
+
+test('the epoch audit starts at the reporting epoch, not a rolling window', () => {
+  assert.equal(REPORT_EPOCH, '2026-10-21');
+  const w = windows(new Date('2026-10-27T12:00:00Z'));
+  assert.deepEqual(w.epoch, { start: '2026-10-21', end: '2026-10-27' });
 });

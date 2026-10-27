@@ -86,7 +86,7 @@ compare a number from another report unless it uses the same definition.
 
 | Metric | Definition |
 |---|---|
-| Visitor | Unique `person_id` with at least one valid `$pageview` in the reporting window. |
+| Visitor | Unique `person_id` with at least one valid `$pageview` in the reporting window, after the exclusions below. |
 | Player | Unique visitor with at least one valid `game_start` in the window. |
 | Five-hand completer | Unique person with a valid `session_complete` (five finished hands). |
 | Five-hand completion rate | Five-hand completers divided by players. The report also prints total completions. |
@@ -99,6 +99,27 @@ compare a number from another report unless it uses the same definition.
 | D7 site return | Person with a valid `$pageview` on any day from first-touch day +1 through +7. Only shown for cohorts whose day +7 is fully complete. |
 | D7 return-to-game | Person with a `game_start` on any day from first-touch day +1 through +7. Only shown for cohorts whose day +7 is fully complete. |
 | First-touch source | The first valid `first_ref`, else the first non-empty `ref`, else `first_utm_source`/`utm_source` when it names a recognized platform, else `direct` when the earliest referrer is explicitly `$direct`, else `unknown`. One bucket per person, so rows reconcile to the visitor total. |
+
+### Excluded traffic
+
+Every count above applies `notTestClause()` from `scripts/stats.mjs`. It drops
+named probe events, known automation user agents and person ids, the internal
+test cohort, the `attribcheck` / `funnel-check` test refs, link-preview bots
+that reach the trainer within five minutes of a scheduled post, and — since
+2026-10-27 — a narrow headless-crawler shape.
+
+The crawler rule only fires when a profile's entire history is one pageview on
+one day, with no `game_start`, `start_daily`, `decision_made`, hand, recap,
+Daily or CTA event, **and** its fingerprint is a headless default: no
+`$browser`, an 800x600 screen, or a 2000x2000 screen. A real visitor on a small
+window who does anything at all survives.
+
+Unfiltered connector pulls count these profiles, which is the whole gap between
+the raw and filtered visitor numbers. As of 2026-10-27 the epoch read 102 raw,
+82 after the probe and unfurl rules, and 55 after the headless-crawler rule;
+none of the 27 removed profiles ever started a hand. The report prints raw and
+filtered side by side so the gap is never hidden. Exclusions change reported
+numbers, never collected events.
 
 Reporting days are **America/Chicago**, not UTC and not the PostHog project's
 UTC setting. `scripts/analytics-report.mjs` converts each Chicago midnight to

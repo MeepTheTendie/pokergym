@@ -247,3 +247,15 @@ test('guide campaign attribution excludes private queries, assets, cache fills a
     assert.equal(failedCtx.waits.length, 0);
   }
 });
+
+test('stats: a one-pageview profile with a headless fingerprint is excluded', () => {
+  const clause = notTestClause();
+  // No interaction and a default headless canvas is the whole profile, so the
+  // exclusion is narrow: pageviews=1 AND active_days=1 AND interactions=0.
+  assert.match(clause, /pageviews = 1/);
+  assert.match(clause, /active_days = 1/);
+  assert.match(clause, /interactions = 0/);
+  assert.match(clause, /browser_events = 0/);
+  assert.match(clause, /screen_width = 800 AND screen_height = 600/);
+  assert.match(clause, /screen_width = 2000 AND screen_height = 2000/);
+});

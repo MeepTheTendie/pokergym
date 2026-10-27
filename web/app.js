@@ -2570,7 +2570,13 @@ if (profile && !lastVisitDay) {
   const dailyDays = (profile.daily?.history ?? []).map(e => e?.key).filter(k => typeof k === 'string');
   if (profile.daily?.lastKey) dailyDays.push(profile.daily.lastKey);
   const all = [...sessionDays, ...dailyDays].sort();
-  lastVisitDay = all.length ? all[all.length - 1] : null;
+  // A save can exist before its first completed session or drill (someone who
+  // opened the trainer and left). Without this fallback those returning visits
+  // report a null gap, which is the exact shape seen on Oct 22-23. createdAt is
+  // written when the save is created, so it always has a day to compare.
+  let createdDay = null;
+  try { createdDay = profile.createdAt ? localDayKey(new Date(profile.createdAt)) : null; } catch { createdDay = null; }
+  lastVisitDay = all.length ? all[all.length - 1] : createdDay;
 }
 const daysSinceLastVisit = lastVisitDay ? dayGap(localDayKey(), lastVisitDay) : null;
 // Write the visit day on every load, not only when a save exists. Otherwise a

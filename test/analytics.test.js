@@ -308,3 +308,10 @@ test('progress bar is driven by JS, not a hardcoded three-green rule', () => {
   assert.match(app, /function updateBattlePips/);
   assert.match(app, /updateBattlePips\(\)/);
 });
+
+test('a returning save with no finished session still reports a visit gap', () => {
+  // Oct 22-23 opens carried returning=true with a null days_since_last_visit
+  // because the save had no completed session or drill to date it from.
+  assert.match(app, /createdDay = profile\.createdAt \? localDayKey\(new Date\(profile\.createdAt\)\)/);
+  assert.match(app, /lastVisitDay = all\.length \? all\[all\.length - 1\] : createdDay;/);
+});

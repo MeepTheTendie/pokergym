@@ -102,17 +102,39 @@ export function notTestClause() {
     AND (properties.first_ref IS NULL OR properties.first_ref NOT IN (${quoted(TEST_REFS)}))
     AND (properties.session_ref IS NULL OR properties.session_ref NOT IN (${quoted(TEST_REFS)}))
     AND (properties.$raw_user_agent IS NULL OR ${uaFilters})
+    -- One pass over people covers two exclusion rules: (a) link-preview unfurl
+    -- bots that land just after a scheduled post, and (b) a profile whose whole
+    -- history is one pageview, no interaction, and a headless-default
+    -- fingerprint (no browser, 800x600, or 2000x2000). Rule (b) keeps anyone
+    -- who started a hand, made a decision, clicked a CTA, or came back a
+    -- second day, so a real small-window visitor still counts.
     AND person_id NOT IN (
       SELECT person_id FROM (
-        SELECT person_id, argMin(event, timestamp) AS first_event, min(timestamp) AS first_ts
+        SELECT person_id, argMin(event, timestamp) AS first_event, min(timestamp) AS first_ts,
+          countIf(event = '$pageview') AS pageviews,
+          count(DISTINCT toDate(toTimeZone(timestamp, 'America/Chicago'))) AS active_days,
+          countIf(event IN ('game_start', 'start_training', 'decision_made', 'hand_complete', 'recap_tap', 'start_daily', 'daily_complete', 'share', 'feedback_submit', 'cta_click')) AS interactions,
+          countIf(properties.$browser IS NOT NULL) AS browser_events,
+          any(properties.$screen_width) AS screen_width,
+          any(properties.$screen_height) AS screen_height
         FROM events
         GROUP BY person_id
-      ) WHERE first_event IN ('$pageview', 'open_trainer')
+      )
+      WHERE (
+        first_event IN ('$pageview', 'open_trainer')
         AND toHour(first_ts) = ${UNFURL_POST_HOUR_UTC}
         AND toMinute(first_ts) <= ${UNFURL_POST_WINDOW_MINUTES}
         AND first_ts > toDateTime('2026-10-18')
         AND person_id IN (SELECT DISTINCT person_id FROM events WHERE event = 'open_trainer' AND properties.$viewport_width = 1366 AND properties.$viewport_height = 768 AND properties.$screen_width = 1920 AND properties.$screen_height = 1080 AND toHour(timestamp) = ${UNFURL_POST_HOUR_UTC} AND toMinute(timestamp) <= ${UNFURL_POST_WINDOW_MINUTES})
         AND person_id NOT IN (SELECT DISTINCT person_id FROM events WHERE event IN ('game_start', 'start_training', 'decision_made', 'hand_complete', 'recap_tap', 'start_daily', 'daily_complete', 'share'))
+      ) OR (
+        pageviews = 1
+        AND active_days = 1
+        AND interactions = 0
+        AND (browser_events = 0
+          OR (screen_width = 800 AND screen_height = 600)
+          OR (screen_width = 2000 AND screen_height = 2000))
+      )
     )`;
 }
 

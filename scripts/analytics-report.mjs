@@ -19,6 +19,10 @@ import { posthogKey, hogql, notTestClause, INTERNAL_COHORT_ID } from './stats.mj
 
 export const CHICAGO_TZ = 'America/Chicago';
 export const DAY_EXPR = `toDate(toTimeZone(timestamp, '${CHICAGO_TZ}'))`;
+// Reporting epoch in docs/analytics-events.md. Everything since launch is
+// measured from this Chicago day, so the epoch audit line answers "why does my
+// unfiltered connector pull read higher than the report" with the same window.
+export const REPORT_EPOCH = '2026-10-21';
 
 const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -655,7 +659,7 @@ export function formatRetentionSummary(overall = {}) {
 export function formatReport(data) {
   const {
     now, today, yesterday, yesterdayWindow, todayWindow, last7, prev7,
-    sources, sourcesToday, funnel, preInstrumentation, daily, dailyRepeat, retention, audit, auditToday, warnings,
+    sources, sourcesToday, funnel, preInstrumentation, daily, dailyRepeat, retention, audit, auditToday, auditEpoch, warnings,
     return7, returnPrev7, decision,
   } = data;
   const lines = [];
@@ -720,6 +724,12 @@ export function formatReport(data) {
   lines.push(`  last 14 completed days: raw pageviews ${audit.raw_pageviews ?? '—'} · clean ${audit.clean_pageviews ?? '—'} · excluded ${(audit.raw_pageviews ?? 0) - (audit.clean_pageviews ?? 0)} events`);
   lines.push(`  last 14 completed days: raw pageview people ${audit.raw_visitors} · clean ${audit.clean_visitors} · excluded ${audit.raw_visitors - audit.clean_visitors}`);
   lines.push(`  today (partial): raw pageview people ${auditToday.raw_visitors} · clean ${auditToday.clean_visitors} · excluded ${auditToday.raw_visitors - auditToday.clean_visitors}`);
+  if (auditEpoch) {
+    const epochRaw = Number(auditEpoch.raw_visitors ?? 0);
+    const epochClean = Number(auditEpoch.clean_visitors ?? 0);
+    lines.push(`  since epoch ${REPORT_EPOCH} (partial): raw pageview people ${epochRaw} · clean ${epochClean} · excluded ${epochRaw - epochClean}`);
+    lines.push('  canonical visitor counts are the clean numbers; an unfiltered connector or dashboard pull reads the raw number and therefore includes the excluded profiles listed above.');
+  }
   lines.push(`  matched by rule (may overlap): automation UA ${audit.automation_profiles} · internal/test cohort ${audit.cohort_profiles} · probe ref ${audit.probe_ref_profiles ?? 0} · probe event ${audit.probe_event_profiles ?? 0}`);
   lines.push('');
   lines.push('DATA QUALITY');
@@ -738,6 +748,7 @@ export function windows(now = new Date()) {
     last7: { start: addDays(yesterday, -6), end: yesterday },
     prev7: { start: addDays(yesterday, -13), end: addDays(yesterday, -7) },
     analysis: { start: addDays(today, -14), end: today },
+    epoch: { start: REPORT_EPOCH, end: today },
     retention: { start: addDays(today, -30), end: addDays(today, 1), matureBefore: yesterday },
     todayPartialEnd: addDays(today, 1),
   };
@@ -760,7 +771,7 @@ async function main() {
     q(windowTotalsQuery(w.last7.start, addDays(w.last7.end, 1))),
     q(windowTotalsQuery(w.prev7.start, addDays(w.prev7.end, 1))),
   ]);
-  const [sourcePeopleAll, windowPeople, todayPeople, firstGames, personDays, funnel, preInstrumentation, daily, dailyRepeatRows, audit, auditToday, analysisTotals] = await Promise.all([
+  const [sourcePeopleAll, windowPeople, todayPeople, firstGames, personDays, funnel, preInstrumentation, daily, dailyRepeatRows, audit, auditToday, auditEpoch, analysisTotals] = await Promise.all([
     q(sourcePersonQuery()),
     q(personWindowQuery(w.analysis.start, w.analysis.end)),
     q(personWindowQuery(w.today, w.todayPartialEnd, { partial: true, now })),
@@ -772,6 +783,7 @@ async function main() {
     q(dailyRepeatQuery(w.analysis.start, w.analysis.end)),
     q(auditQuery(w.analysis.start, w.analysis.end)),
     q(auditQuery(w.today, w.todayPartialEnd, { partial: true, now })),
+    q(auditQuery(w.epoch.start, w.todayPartialEnd, { partial: true, now })),
     q(windowTotalsQuery(w.analysis.start, w.analysis.end)),
   ]);
 
@@ -828,6 +840,7 @@ async function main() {
     decision,
     audit: audit[0] ?? { raw_visitors: 0, clean_visitors: 0, automation_profiles: 0, cohort_profiles: 0 },
     auditToday: auditToday[0] ?? { raw_visitors: 0, clean_visitors: 0, automation_profiles: 0, cohort_profiles: 0 },
+    auditEpoch: auditEpoch[0] ?? { raw_visitors: 0, clean_visitors: 0, automation_profiles: 0, cohort_profiles: 0 },
   };
   data.warnings = dataWarnings({
     sourceTotal: sources.total.visitors,
