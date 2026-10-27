@@ -10,9 +10,11 @@
 //
 // Auth: POSTHOG_PERSONAL_API_KEY, or the secret-tool entry used by stats.mjs.
 
-import { hogql, posthogKey } from './stats.mjs';
+import { hogql, notTestClause, posthogKey } from './stats.mjs';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+// Same reporting exclusions as npm run report, so the two tools cannot disagree.
+const clean = `(${notTestClause()})`;
 
 function chicagoDay(date = new Date()) {
   return new Intl.DateTimeFormat('en-CA', {
@@ -44,11 +46,7 @@ WITH touch AS (
     ) AS source
   FROM events
   WHERE event = '$pageview' AND timestamp >= now() - INTERVAL 30 DAY
-    AND person_id NOT IN (
-      SELECT DISTINCT person_id FROM events
-      WHERE timestamp >= now() - INTERVAL 30 DAY
-        AND properties.ref IN ('attribcheck', 'funnel-check')
-    )
+    AND ${clean}
   GROUP BY person_id
 ),
 activity AS (
@@ -57,6 +55,7 @@ activity AS (
     maxIf(1, event IN ('open_trainer', 'game_start')) AS played
   FROM events
   WHERE timestamp >= now() - INTERVAL 30 DAY
+    AND ${clean}
   GROUP BY person_id, day
 )
 SELECT
