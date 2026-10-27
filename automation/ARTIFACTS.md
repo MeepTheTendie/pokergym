@@ -7,7 +7,7 @@ Convention: `automation/artifacts/<agent>/<YYYY-MM-DD>-<slug>.md` (local, ignore
 
 | Date | Agent | File | Summary |
 |---|---|---|---|
-| (none yet) | | | |
+| 2026-10-26 | grok | `automation/artifacts/grok/2026-10-26-ops-audit.md` | Grok 14-day own-operations audit (Oct 13–26), read-only |
 
 Rules:
 - Update this index whenever you add an artifact.
