@@ -1,0 +1,455 @@
+// One entry per answer page. The page generator and the sitemap/llms builders
+// both read this list, so a page cannot exist without being indexed and linked.
+// Fields: slug, title, description, answer, why[2], cta[label,url],
+// related[[slug,label]], faq[[q,a]].
+export const scenarios = [
+  {
+    slug: 'baccarat-player-draws-on-five',
+    title: 'Baccarat: Player has 5 — does Player draw?',
+    description: 'Player draws on 0–5 and stands on 6–7. The third-card tableau in one minute, then practice free in Play Poker Gym.',
+    answer: 'Yes. Player draws on 0–5 and stands on 6–7.',
+    why: [
+      'The Player hand is mechanical: the first two cards decide it, with no judgement and no optional draw. A total of 5 is always a draw.',
+      'Banker is the hand with conditions. Banker draws on 0–5 unless the Player\u2019s third card changes the rule, which is why the printed tableau exists.',
+    ],
+    cta: ['Play five baccarat hands', '/web/?practice=baccarat&ref=guide'],
+    related: [['baccarat-banker-player-tie-edge', 'Banker, Player or Tie: which is cheapest?'], ['blackjack-88-vs-10-split', '8-8 against a 10: split or hit?']],
+    faq: [
+      ['Does Player ever stand on 5 in baccarat?', 'No. Player stands only on 6 and 7. Every total from 0 to 5 draws.'],
+      ['Is the Player bet better than Banker?', 'No. Banker has the lower house edge, about 1.06% against 1.24% for Player, before commission.'],
+    ],
+  },
+  {
+    slug: 'video-poker-pair-of-jacks-or-four-to-a-flush',
+    title: 'Jacks or Better: pair of jacks or 4-card flush?',
+    description: 'A high pair beats four to a flush in Jacks or Better. See why, then play the exact hand free in Play Poker Gym.',
+    answer: 'Hold the pair of jacks.',
+    why: [
+      'A high pair is a made paying hand. Four to a flush is only a draw: it completes about once in five attempts (9 of the 47 unseen cards).',
+      'That is the opposite of the low-pair decision. With a low pair against four to a flush, the flush draw is worth more because the pair pays nothing on its own.',
+    ],
+    cta: ['Play this exact hand', '/web/?drill=vp-jacks-flush&ref=guide'],
+    related: [['video-poker-two-pair-hold-both', 'Two pair: hold both or chase trips?'], ['blackjack-soft-18-vs-9', 'Soft 18 against a 9: hit or stand?']],
+    faq: [
+      ['Does a pair of jacks beat a flush draw in Jacks or Better?', 'Yes. The high pair already pays even money; four to a flush misses about 80% of the time.'],
+      ['What about a low pair against four to a flush?', 'Then keep the flush draw. A low pair pays nothing without improvement, and the draw is the stronger hold.'],
+    ],
+  },
+  {
+    slug: 'blackjack-88-vs-10-split',
+    title: '8-8 against a dealer 10: split or hit?',
+    description: 'Always split eights, even against a 10. The reason is simple: 16 is the worst hand in blackjack. Practice the exact deal free.',
+    answer: 'Split. Eights are the one pair you split against every dealer card.',
+    why: [
+      'Sixteen is the worst total in the game: you bust on any ten and you lose to every pat hand. Standing on 16 against a 10 loses most of the time.',
+      'Splitting turns one hopeless 16 into two hands that each start with an 8. Neither is a favourite, but both are better than the single 16 you would otherwise hold.',
+    ],
+    cta: ['Play this exact hand', '/web/?drill=bj-88-v10&ref=guide'],
+    related: [['blackjack-soft-18-vs-9', 'Soft 18 against a 9: hit or stand?'], ['video-poker-two-pair-hold-both', 'Two pair: hold both or chase trips?']],
+    faq: [
+      ['Do you always split eights?', 'Yes. Against every dealer upcard, splitting two 8s is better than hitting, standing or doubling a 16.'],
+      ['Should you split eights against a 10 when doubling is allowed?', 'Yes. The split is still correct; the alternative is standing on 16, which is the worst hand you can hold.'],
+    ],
+  },
+  {
+    slug: 'holdem-pocket-pair-flop-a-set',
+    title: 'Pocket pair: how often do you flop a set?',
+    description: 'About 11.8%, roughly one time in 8.5. The two-card maths, and a free Hold\u2019em hand-reading drill.',
+    answer: 'About 11.8% — roughly once in 8.5 flops.',
+    why: [
+      'Two of the 50 unseen cards make your set on the flop. The flop is three cards, so the chance at least one of them is yours is 1 \u2212 (48/50 \u00d7 47/49 \u00d7 46/48) \u2248 11.8%.',
+      'That number is why small pairs need implied odds. You miss most flops, so the pot has to pay enough when you do hit.',
+    ],
+    cta: ['Practice five Hold\u2019em hands', '/web/?practice=holdem&ref=guide'],
+    related: [['holdem-flush-draw-odds-by-the-river', 'Flush draw on the flop: how often do you get there?'], ['blackjack-88-vs-10-split', '8-8 against a 10: split or hit?']],
+    faq: [
+      ['What are the odds of flopping a set with a pocket pair?', 'About 11.8%, or roughly 1 in 8.5.'],
+      ['Does a set beat a flush draw?', 'A set is already a made hand. A flush draw on the flop completes by the river about 35% of the time.'],
+    ],
+  },
+  {
+    slug: 'baccarat-banker-player-tie-edge',
+    title: 'Baccarat: Banker, Player or Tie — lowest edge?',
+    description: 'Banker is about 1.06%, Player about 1.24%, Tie about 14.4% at 8:1. The three numbers, then practice free.',
+    answer: 'Banker, at about 1.06% house edge after the 5% commission.',
+    why: [
+      'Banker wins slightly more often than Player, which is why the casino takes a 5% commission on it. Even after that commission it keeps the lowest edge.',
+      'Player is close behind at roughly 1.24%. Tie looks tempting at 8:1, but the true chance is about 9.5%, so its edge is around 14.4%.',
+    ],
+    cta: ['Practice five baccarat hands', '/web/?practice=baccarat&ref=guide'],
+    related: [['baccarat-player-draws-on-five', 'Player has 5: does Player draw?'], ['blackjack-soft-18-vs-9', 'Soft 18 against a 9: hit or stand?']],
+    faq: [
+      ['What is the house edge on Banker in baccarat?', 'About 1.06% on the standard 5% commission.'],
+      ['Is the Tie bet ever worth it?', 'No. At 8:1 it needs a 11.1% hit rate to break even, and it lands about 9.5% of the time.'],
+    ],
+  },
+  {
+    slug: 'blackjack-soft-18-vs-9',
+    title: 'Soft 18 (A-7) against a 9: hit or stand?',
+    description: 'Hit soft 18 against a 9. The ace keeps the hand flexible, and standing loses more often. Play the exact deal free.',
+    answer: 'Hit.',
+    why: [
+      'Soft 18 is not a strong 18. Against a 9, standing gives the dealer two chances to make a pat hand that beats you.',
+      'Hitting cannot bust: the ace counts as one, so you keep a total even if you draw a ten. The flexibility is the whole point of the soft total.',
+    ],
+    cta: ['Play this exact hand', '/web/?drill=bj-soft18-v9&ref=guide'],
+    related: [['blackjack-88-vs-10-split', '8-8 against a 10: split or hit?'], ['video-poker-pair-of-jacks-or-four-to-a-flush', 'Jacks or Better: pair or flush draw?']],
+    faq: [
+      ['Do you hit soft 18 against a 9?', 'Yes. Basic strategy hits soft 18 against 9, 10 and ace, and stands against 2, 7 and 8.'],
+      ['Can you bust by hitting soft 18?', 'No. The ace drops to one, so the hand stays soft and cannot bust on the next card.'],
+    ],
+  },
+  {
+    slug: 'video-poker-two-pair-hold-both',
+    title: 'Video poker: two pair — hold both or chase trips?',
+    description: 'Hold both pairs. Two pair already pays; chasing trips throws away a paying hand for a long shot. Practice the exact deal free.',
+    answer: 'Hold both pairs.',
+    why: [
+      'Two pair pays 2-for-1 in Jacks or Better. Breaking it to chase trips turns a paying hand into a draw that completes rarely.',
+      'The full house is the only reason to keep both, and that happens by drawing to the two pair, not by discarding one of them.',
+    ],
+    cta: ['Play this exact hand', '/web/?drill=vp-two-pair&ref=guide'],
+    related: [['video-poker-pair-of-jacks-or-four-to-a-flush', 'Jacks or Better: pair or flush draw?'], ['holdem-flush-draw-odds-by-the-river', 'Flush draw on the flop: how often?']],
+    faq: [
+      ['Should you ever break two pair in Jacks or Better?', 'Not to chase trips or a straight. Holding both pairs keeps the paying hand and the full-house draw.'],
+      ['Do both pairs have to be high pairs?', 'No. Two pair pays regardless of rank, which is why it is kept over a low pair.'],
+    ],
+  },
+  {
+    slug: 'holdem-flush-draw-odds-by-the-river',
+    title: 'Flush draw on the flop: odds you hit by the river?',
+    description: 'About 35% with two cards to come. The 9-out maths, and a free Hold\u2019em drill to practise reading the board.',
+    answer: 'About 35% — roughly one time in three.',
+    why: [
+      'A flush draw on the flop has 9 outs. With two cards to come the chance of at least one is 1 \u2212 (38/47 \u00d7 37/46) \u2248 35%.',
+      'Calling a bet on the flop alone uses the one-card number, about 19%. The bigger figure only applies if you expect to see both cards.',
+    ],
+    cta: ['Practice five Hold\u2019em hands', '/web/?practice=holdem&ref=guide'],
+    related: [['holdem-pocket-pair-flop-a-set', 'Pocket pair: how often do you flop a set?'], ['video-poker-two-pair-hold-both', 'Two pair: hold both or chase trips?']],
+    faq: [
+      ['What are the odds of hitting a flush draw by the river?', 'About 35% with two cards to come, using 9 outs.'],
+      ['What are the odds on the turn alone?', 'About 19%, or roughly 1 in 5.2.'],
+    ],
+  },
+
+  {
+    slug: 'blackjack-16-vs-10-hit',
+    title: '16 against a dealer 10: hit or stand?',
+    description: 'Hit 16 against a 10. Standing cannot improve the hand, and the dealer makes 17 or better most of the time. Practice the exact deal free.',
+    answer: 'Hit. Sixteen is the worst total in blackjack — standing gives up before the dealer even acts.',
+    why: [
+      'You cannot win by standing on 16 against a 10 unless the dealer busts, and a 10 upcard busts less often than any other card.',
+      'Hitting gives you a chance to make 17 to 21. Some of those hands still lose, but the alternative loses more often.',
+    ],
+    cta: ['Play this exact hand', '/web/?drill=bj-16-v10&ref=guide'],
+    related: [['blackjack-88-vs-10-split', '8-8 against a 10: split or hit?'], ['blackjack-12-vs-2-stand', '12 against a 2: hit or stand?']],
+    faq: [
+      ['Should you ever stand on 16 against a 10?', 'Only if surrender is offered, and then surrender is better than hitting. Otherwise hit.'],
+      ['Does the count change the 16 decision?', 'At extreme true counts it can, but basic strategy assumes a fresh shoe and says hit.'],
+    ],
+  },
+  {
+    slug: 'blackjack-12-vs-2-stand',
+    title: '12 against a dealer 2: hit or stand?',
+    description: 'Stand on 12 against a 2. The dealer busts often enough from a 2 that you do not need to risk busting yourself. Practice free.',
+    answer: 'Stand. Against a 2 or a 3, let the dealer take the risk.',
+    why: [
+      'A dealer 2 or 3 is the weakest upcard. The dealer has to draw to 17 and will bust more often than from a 7 through ace.',
+      'Hitting 12 risks busting on any ten, and you already lose most of the hands where you bust. Standing keeps the dealer honest.',
+    ],
+    cta: ['Practice five blackjack hands', '/web/?practice=blackjack&ref=guide'],
+    related: [['blackjack-16-vs-10-hit', '16 against a 10: hit or stand?'], ['blackjack-11-vs-10-double', '11 against a 10: double or hit?']],
+    faq: [
+      ['Is 12 against a 2 really a stand?', 'Yes. Basic strategy stands on 12 against 2 and 3, and hits against 4 through 6 only in some rule sets — the safe rule is stand on 12 against 2 or 3.'],
+      ['What about 12 against a 7?', 'Hit. The dealer is likely to make a pat hand, so standing on 12 gives up.'],
+    ],
+  },
+  {
+    slug: 'blackjack-11-vs-10-double',
+    title: '11 against a dealer 10: double or hit?',
+    description: 'Double 11 against a 10 when doubling is allowed. You are a favourite to make a strong hand and the extra bet is +EV. Practice free.',
+    answer: 'Double, if the table allows it. Otherwise hit.',
+    why: [
+      'Eleven is the best doubling total. Any ten, jack, queen or king makes 21, and an ace makes a soft 22 that plays as 12.',
+      'The dealer 10 is strong, which is exactly why you want the extra unit in while you still have the edge on the next card.',
+    ],
+    cta: ['Practice five blackjack hands', '/web/?practice=blackjack&ref=guide'],
+    related: [['blackjack-10-vs-9-double', '10 against a 9: double or hit?'], ['blackjack-16-vs-10-hit', '16 against a 10: hit or stand?']],
+    faq: [
+      ['Do you double 11 against an ace?', 'In most rule sets you hit 11 against an ace, because the dealer is less likely to bust and the ace is a strong upcard.'],
+      ['Double or hit if doubles are restricted?', 'Hit. The decision is still profitable, just not doubled.'],
+    ],
+  },
+  {
+    slug: 'blackjack-10-vs-9-double',
+    title: '10 against a dealer 9: double or hit?',
+    description: 'Double 10 against a 9. The extra bet is worth it against every upcard except a 10 or ace. Practice the decision free.',
+    answer: 'Double against a 9. Hit against a 10 or an ace.',
+    why: [
+      'Ten against a 9 is close, and the double is what makes it profitable: you are betting more on a hand that is slightly ahead.',
+      'Against a 10 or ace the dealer is too strong, so the same total is a hit rather than a double.',
+    ],
+    cta: ['Practice five blackjack hands', '/web/?practice=blackjack&ref=guide'],
+    related: [['blackjack-11-vs-10-double', '11 against a 10: double or hit?'], ['blackjack-55-vs-6-double', '5-5 against a 6: split or double?']],
+    faq: [
+      ['Do you double 10 against every card?', 'No. Double against 2 through 9; hit against 10 and ace.'],
+      ['Does the double change if the dealer hits soft 17?', 'Only at the margins. 10 against 9 stays a double in common rule sets.'],
+    ],
+  },
+  {
+    slug: 'blackjack-soft-18-vs-3-double',
+    title: 'Soft 18 (A-7) against a 3: double or stand?',
+    description: 'Double soft 18 against a 3 through 6, stand against 2, 7 and 8, hit against 9, 10 and ace. Practice the exact decision free.',
+    answer: 'Double against a 3. Stand against a 2, 7 or 8; hit against 9, 10 or ace.',
+    why: [
+      'Against a weak dealer card, soft 18 is an opportunity: the ace means you cannot bust, so the extra bet costs little.',
+      'Against a 9 or better the hand is not strong enough to stand, so the same total turns into a hit.',
+    ],
+    cta: ['Play this exact hand', '/web/?drill=bj-soft18-v10&ref=guide'],
+    related: [['blackjack-soft-18-vs-9', 'Soft 18 against a 9: hit or stand?'], ['blackjack-12-vs-2-stand', '12 against a 2: hit or stand?']],
+    faq: [
+      ['Why is soft 18 different from hard 18?', 'The ace can drop to one, so hitting cannot bust you. That makes drawing and doubling far safer than with a hard total.'],
+      ['What if doubling is not allowed?', 'Stand against 2 through 8 and hit against 9, 10 and ace.'],
+    ],
+  },
+  {
+    slug: 'blackjack-99-vs-7-stand',
+    title: '9-9 against a dealer 7: split or stand?',
+    description: 'Stand on 9-9 against a 7. Splitting eights and nines is not automatic — the dealer card decides. Practice the exact deal free.',
+    answer: 'Stand. Split 9s against 2 through 6, 8 and 9; stand against 7, 10 and ace.',
+    why: [
+      'Eighteen is a strong total, and a 7 is the dealer card where 18 performs best relative to two new hands starting at 9.',
+      'Splitting throws away a made 18 to chase two hands that each need work. Against a 7 the maths says keep the 18.',
+    ],
+    cta: ['Play this exact hand', '/web/?drill=bj-99-v7&ref=guide'],
+    related: [['blackjack-88-vs-10-split', '8-8 against a 10: split or hit?'], ['blackjack-1010-vs-6-stand', '10-10 against a 6: split or stand?']],
+    faq: [
+      ['Do you always split nines?', 'No. Stand against 7, 10 and ace; split against 2–6, 8 and 9.'],
+      ['Why split 9s against a 9?', 'Because 18 pushes or loses to the dealer’s likely 19, while two hands starting on 9 have more room to improve.'],
+    ],
+  },
+  {
+    slug: 'blackjack-55-vs-6-double',
+    title: '5-5 against a 6: split or double?',
+    description: 'Never split fives. A pair of fives is a hard 10, and against a 6 it is a double. Practice the exact decision free.',
+    answer: 'Double. Never split fives — 5-5 is a hard 10, not a pair worth splitting.',
+    why: [
+      'Splitting fives turns a strong 10 into two hands starting on 5, each of which needs two good cards to become anything.',
+      'Against a 6 the dealer is likely to bust, so doubling the 10 puts more money on the best hand at the table.',
+    ],
+    cta: ['Practice five blackjack hands', '/web/?practice=blackjack&ref=guide'],
+    related: [['blackjack-1010-vs-6-stand', '10-10 against a 6: split or stand?'], ['blackjack-10-vs-9-double', '10 against a 9: double or hit?']],
+    faq: [
+      ['Do you ever split fives?', 'No. Treat 5-5 as a hard 10 and use the hard-total strategy.'],
+      ['What about 5-5 against a 10?', 'Double 10 against 2–9; against a 10 the same total is a hit.'],
+    ],
+  },
+  {
+    slug: 'blackjack-1010-vs-6-stand',
+    title: '10-10 against a 6: split or stand?',
+    description: 'Never split tens. Twenty is the second-best hand in the game; splitting it trades a winner for two uncertain hands. Practice free.',
+    answer: 'Stand. Never split tens, whatever the dealer shows.',
+    why: [
+      'Twenty beats every dealer total except 21, and the dealer busts often from a 6. Splitting gives that away.',
+      'The only reason to split is to improve a weak total. Twenty is not weak, so the split loses money in every count you will meet.',
+    ],
+    cta: ['Play this exact hand', '/web/?drill=bj-tt-v6&ref=guide'],
+    related: [['blackjack-55-vs-6-double', '5-5 against a 6: split or double?'], ['blackjack-99-vs-7-stand', '9-9 against a 7: split or stand?']],
+    faq: [
+      ['Is splitting tens ever correct?', 'Only at extreme positive counts in a counting system, and even then it is marginal. Basic strategy never splits tens.'],
+      ['What if the dealer shows a 6?', 'Stand. A 6 is the dealer’s worst card and 20 is already the winner most of the time.'],
+    ],
+  },
+  {
+    slug: 'video-poker-96-pay-table',
+    title: 'What does 9/6 mean in Jacks or Better?',
+    description: '9/6 means nine coins for a full house and six for a flush at a five-coin bet. That is the pay table to look for. Practice free.',
+    answer: 'Nine for a full house and six for a flush, per five coins wagered. It is the best common Jacks or Better table.',
+    why: [
+      'The full-house and flush payouts set the game’s return. Dropping to 8/5 costs about 0.5% and turns a near-break-even game into a worse one.',
+      'At 9/6 the long-run return is about 99.5% with perfect play. No other Jacks or Better variant available to casual players is kinder.',
+    ],
+    cta: ['Practice five video poker hands', '/web/?practice=videopoker&ref=guide'],
+    related: [['video-poker-pair-of-jacks-or-four-to-a-flush', 'Pair of jacks or four to a flush?'], ['video-poker-two-pair-hold-both', 'Two pair: hold both or chase trips?']],
+    faq: [
+      ['Is 9/6 the same as 9/6/4?', 'The extra number usually refers to the straight payout. Check the whole table, not just the first two numbers.'],
+      ['What is the return of 9/6 Jacks or Better?', 'About 99.54% with perfect play, which is why the strategy matters more than the luck.'],
+    ],
+  },
+  {
+    slug: 'video-poker-trips-or-flush-draw',
+    title: 'Three of a kind or four to a flush?',
+    description: 'Hold the three of a kind. It already pays and redraws into a full house; the flush draw is a long shot by comparison. Practice free.',
+    answer: 'Hold the three of a kind.',
+    why: [
+      'Trips pays 3-for-1 as it stands and has two cards to improve into a full house or four of a kind.',
+      'Four to a flush completes roughly one time in five. That is a fair draw, but not enough to give up a paying hand for it.',
+    ],
+    cta: ['Practice five video poker hands', '/web/?practice=videopoker&ref=guide'],
+    related: [['video-poker-two-pair-hold-both', 'Two pair: hold both or chase trips?'], ['video-poker-96-pay-table', 'What does 9/6 mean?']],
+    faq: [
+      ['Do you ever break trips?', 'No. Three of a kind is the strongest non-premium hold in Jacks or Better.'],
+      ['What if the trips are low?', 'Rank does not matter for trips. Hold them anyway.'],
+    ],
+  },
+  {
+    slug: 'baccarat-player-six-stands',
+    title: 'Baccarat: Player has 6 — does Player draw?',
+    description: 'Player stands on 6 and 7, and draws on 0 to 5. No judgement, no optional draw. Practice free in Play Poker Gym.',
+    answer: 'No. Player stands on 6 and on 7.',
+    why: [
+      'The Player hand has no choices: 0–5 draws, 6–7 stands. It is the simplest rule in the game.',
+      'Only Banker has conditional third-card rules, which is why the tableau looks complicated and the Player side does not.',
+    ],
+    cta: ['Practice five baccarat hands', '/web/?practice=baccarat&ref=guide'],
+    related: [['baccarat-player-draws-on-five', 'Player has 5: does Player draw?'], ['baccarat-banker-player-tie-edge', 'Banker, Player or Tie: lowest edge?']],
+    faq: [
+      ['Does Player ever draw on 6?', 'No. Six and seven stand.'],
+      ['Does the Player bet have a lower edge than Banker?', 'No. Banker is about 1.06%, Player about 1.24%.'],
+    ],
+  },
+  {
+    slug: 'holdem-flush-draw-turn-odds',
+    title: 'Flush draw on the turn: odds you hit?',
+    description: 'About 19.6% with one card to come: 9 outs from 46 unseen cards. The one-card number, and a free Hold’em drill.',
+    answer: 'About 19.6% — roughly one time in five.',
+    why: [
+      'On the turn you have seen six cards: your two, the board’s four, and the turn. That leaves 46 unseen, nine of which make your flush.',
+      'The 35% figure belongs to the flop, when two cards are still to come. Use 19.6% when the bet is only for the river.',
+    ],
+    cta: ['Practice five Hold’em hands', '/web/?practice=holdem&ref=guide'],
+    related: [['holdem-flush-draw-odds-by-the-river', 'Flush draw on the flop: odds by the river?'], ['holdem-open-ended-straight-draw-odds', 'Open-ended straight draw: odds?']],
+    faq: [
+      ['Is 9 outs the same for a flush draw on the turn?', 'Yes, assuming no other cards of your suit are dead in other players’ hands that you know about.'],
+      ['How do pot odds compare?', 'A 19.6% draw needs pot odds of about 4:1 to call on the turn.'],
+    ],
+  },
+  {
+    slug: 'holdem-open-ended-straight-draw-odds',
+    title: 'Open-ended straight draw on the flop: odds?',
+    description: 'About 31.5% by the river with eight outs. The two-card maths, and a free Hold’em hand-reading drill.',
+    answer: 'About 31.5% by the river with two cards to come.',
+    why: [
+      'An open-ended draw has eight outs: four cards on each end. With two cards to come, 1 − (39/47 × 38/46) ≈ 31.5%.',
+      'On the turn alone it is about 17.4%, because one card of the 46 left completes it eight times.',
+    ],
+    cta: ['Practice five Hold’em hands', '/web/?practice=holdem&ref=guide'],
+    related: [['holdem-gutshot-odds', 'Gutshot: odds by the river?'], ['holdem-flush-draw-odds-by-the-river', 'Flush draw on the flop: odds?']],
+    faq: [
+      ['How many outs does an open-ended straight draw have?', 'Eight: four on each end of the straight.'],
+      ['Do you use 4 and 2 to estimate?', 'Yes. Multiply outs by four on the flop and by two on the turn for a close approximation.'],
+    ],
+  },
+  {
+    slug: 'holdem-gutshot-odds',
+    title: 'Gutshot straight draw: odds you hit by the river?',
+    description: 'About 16.5% with four outs and two cards to come. The numbers behind the weakest common draw, plus free practice.',
+    answer: 'About 16.5% by the river — four outs with two cards to come.',
+    why: [
+      'A gutshot fills only through one rank, so it has four outs rather than eight. That halves the open-ended number.',
+      'On the turn it is about 8.7%, which is why chasing a gutshot to a single bet is usually a losing habit.',
+    ],
+    cta: ['Practice five Hold’em hands', '/web/?practice=holdem&ref=guide'],
+    related: [['holdem-open-ended-straight-draw-odds', 'Open-ended straight draw: odds?'], ['holdem-flush-draw-turn-odds', 'Flush draw on the turn: odds?']],
+    faq: [
+      ['Is a gutshot worth calling?', 'Only when the pot odds or implied odds justify four outs. On the turn that needs a big pot.'],
+      ['What is the 4-and-2 rule for a gutshot?', 'Four outs × 4 ≈ 16% on the flop, × 2 ≈ 8% on the turn.'],
+    ],
+  },
+  {
+    slug: 'holdem-ak-vs-pocket-pair',
+    title: 'AK against a pocket pair: who is ahead?',
+    description: 'The pair is ahead, roughly 55–57% to 43–45%. It is a race, not a coin flip in the pair’s favour by much. Practice free.',
+    answer: 'The pocket pair is ahead, roughly 55–57% against 43–45%.',
+    why: [
+      'The pair already has a made hand. AK has to improve, but it has six outs to a pair and two cards to come plus the board’s help.',
+      'The closer the pair is to the aces and kings in your hand, the less room AK has. QQ against AK is worse for the ace-king than 22 is.',
+    ],
+    cta: ['Practice five Hold’em hands', '/web/?practice=holdem&ref=guide'],
+    related: [['holdem-pocket-pair-flop-a-set', 'Pocket pair: how often do you flop a set?'], ['holdem-open-ended-straight-draw-odds', 'Open-ended straight draw: odds?']],
+    faq: [
+      ['Is AK a coin flip against a pair?', 'Roughly. The pair is about 55–57%, so it is close but not even.'],
+      ['Why does the pair’s rank matter?', 'Because a pair of queens or kings blocks some of the cards AK needs, while low pairs leave more outs.'],
+    ],
+  },
+  {
+    slug: 'free-blackjack-trainer',
+    title: 'Free blackjack trainer with no signup',
+    description: 'Play five-hand blackjack sessions with coaching on every decision. No account, no download, no real money. Free in your browser.',
+    answer: 'Yes — Play Poker Gym is a free blackjack trainer in the browser. No signup, no download, no real money.',
+    why: [
+      'Each session is five hands. Every decision is graded against basic strategy, and the coach explains the ones you miss.',
+      'Progress, mistake records and the daily drill are stored in your browser, not on an account, so there is nothing to sign up for.',
+    ],
+    cta: ['Start a five-hand session', '/web/?practice=blackjack&ref=guide'],
+    related: [['free-video-poker-trainer', 'Free video poker trainer'], ['free-daily-poker-drill', 'Free daily poker drill']],
+    faq: [
+      ['Is it really free?', 'Yes. No payment, no ads, no account, and no real-money wagering.'],
+      ['Does it work on a phone?', 'Yes. It runs in the browser and can be added to your home screen.'],
+    ],
+  },
+  {
+    slug: 'free-video-poker-trainer',
+    title: 'Free video poker trainer with no signup',
+    description: 'Practise Jacks or Better holds with exact feedback on every card. No account, no download, no real money. Free in your browser.',
+    answer: 'Yes — Play Poker Gym coaches Jacks or Better holds for free, with no signup and no download.',
+    why: [
+      'Each hand is graded against 9/6 Jacks or Better. The coach shows the correct hold and why the one you chose loses value.',
+      'Five-hand sessions keep the practice short, and the daily drill mixes video poker with the other three games.',
+    ],
+    cta: ['Start a five-hand session', '/web/?practice=videopoker&ref=guide'],
+    related: [['video-poker-96-pay-table', 'What does 9/6 mean?'], ['free-blackjack-trainer', 'Free blackjack trainer']],
+    faq: [
+      ['Which pay table does it use?', '9/6 Jacks or Better, the standard pay table to learn first.'],
+      ['Can I practise a specific hand?', 'Yes. The scenario guides link to the exact hand, and you can replay a drill any time.'],
+    ],
+  },
+  {
+    slug: 'free-baccarat-practice',
+    title: 'Free baccarat practice with no signup',
+    description: 'Learn the third-card tableau with short scored rounds. No account, no download, no real money. Free in your browser.',
+    answer: 'Yes — Play Poker Gym runs free baccarat practice rounds with the standard tableau and scored questions.',
+    why: [
+      'Baccarat has almost no decisions, so the skill is knowing the rules and the odds. The practice asks the questions that matter: does Player draw, what does Banker do, which bet is cheapest.',
+      'Every answer is graded, and the odds panel stays on screen so you are never guessing from memory alone.',
+    ],
+    cta: ['Start a five-hand session', '/web/?practice=baccarat&ref=guide'],
+    related: [['baccarat-player-draws-on-five', 'Player has 5: does Player draw?'], ['baccarat-banker-player-tie-edge', 'Banker, Player or Tie: lowest edge?']],
+    faq: [
+      ['Is baccarat practice useful if the game has no decisions?', 'Yes, for learning the tableau and the house edge, which is what separates a cheap bet from an expensive one.'],
+      ['Does it use real money?', 'No. There are no deposits and no wagering.'],
+    ],
+  },
+  {
+    slug: 'free-holdem-trainer',
+    title: "Free Hold'em trainer with no signup",
+    description: "Read the board, pick your best five and get graded on every hand. No account, no download, no real money. Free in your browser.",
+    answer: "Yes — Play Poker Gym drills Hold'em hand-reading for free, with no signup and no download.",
+    why: [
+      'The drill is about reading five cards correctly: playing the board, choosing a kicker, and spotting straights that use one hole card.',
+      'Every selection is graded, so the mistakes you repeat are the ones you see again in the next session.',
+    ],
+    cta: ['Start a five-hand session', '/web/?practice=holdem&ref=guide'],
+    related: [['holdem-flush-draw-odds-by-the-river', 'Flush draw: odds by the river?'], ['free-daily-poker-drill', 'Free daily poker drill']],
+    faq: [
+      ["Is this a poker odds trainer or a hand-reading trainer?", "Hand reading first: choosing the best five from seven cards. The odds guides cover the maths separately."],
+      ['Does it teach betting strategy?', 'No. It grades hand selection and the odds behind common draws, not bet sizing.'],
+    ],
+  },
+  {
+    slug: 'free-daily-poker-drill',
+    title: 'Free daily poker drill',
+    description: 'One short scored set a day across blackjack, video poker, baccarat and Hold’em. No signup, no download, no real money.',
+    answer: 'Yes — Play Poker Gym publishes a free daily drill: five decisions across the four games, scored, with a streak.',
+    why: [
+      'The drill is the same for everyone that day, so you can compare scores and come back tomorrow for a new set.',
+      'It takes a couple of minutes, and the streak is the reason to return rather than a notification you have to opt into.',
+    ],
+    cta: ['Play today’s drill', '/web/?daily=1&ref=guide'],
+    related: [['free-blackjack-trainer', 'Free blackjack trainer'], ['free-video-poker-trainer', 'Free video poker trainer']],
+    faq: [
+      ['Is the daily drill different every day?', 'Yes. Each Chicago calendar day has its own set.'],
+      ['Do I need an account for the streak?', 'No. The streak is stored in your browser with the rest of your progress.'],
+    ],
+  },
+];

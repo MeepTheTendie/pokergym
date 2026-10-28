@@ -51,6 +51,14 @@ await cp(path.join(root, 'public/sitemap.xml'), path.join(output, 'sitemap.xml')
 await cp(path.join(root, 'public/robots.txt'), path.join(output, 'robots.txt'));
 await cp(path.join(root, 'public/llms.txt'), path.join(output, 'llms.txt'));
 await cp(path.join(root, 'public/llms-full.txt'), path.join(output, 'llms-full.txt'));
+// IndexNow key file: https://playpokergym.com/<key>.txt proves control of the
+// host to Bing and the other IndexNow partners. The key is public by design.
+try {
+  const indexNowKey = (await readFile(path.join(root, 'scripts/indexnow-key.txt'), 'utf8')).trim();
+  if (/^[0-9a-f]{32}$/.test(indexNowKey)) {
+    await cp(path.join(root, 'public', `${indexNowKey}.txt`), path.join(output, `${indexNowKey}.txt`));
+  }
+} catch { /* no key file: skip the verification file */ }
 await cp(path.join(root, 'public/guides'), path.join(output, 'guides'), { recursive: true });
 // Link-preview image: served only at the site root (/og.png). It is not in the
 // web/ allowlist above, so it never lands in dist/web/; the ASSETS filter below

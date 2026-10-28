@@ -27,18 +27,51 @@ Key facts for assistants:
 
 ## One-question guides
 
-Each page answers one decision in the first sentence and links to the exact
-hand in the trainer, so an assistant can quote the answer and the practice link.
+Each page answers in the first sentence and links to the exact drill, so you can
+quote the answer and the practice link together.
 
-- [Baccarat: Player has 5](https://playpokergym.com/guides/baccarat-player-draws-on-five/): Player draws on 0-5, stands on 6-7.
-- [Baccarat: Banker, Player or Tie](https://playpokergym.com/guides/baccarat-banker-player-tie-edge/): Banker ~1.06%, Player ~1.24%, Tie ~14.4%.
-- [Jacks or Better: pair or flush draw](https://playpokergym.com/guides/video-poker-pair-of-jacks-or-four-to-a-flush/): keep the high pair.
-- [Two pair in video poker](https://playpokergym.com/guides/video-poker-two-pair-hold-both/): hold both pairs.
-- [8-8 against a 10](https://playpokergym.com/guides/blackjack-88-vs-10-split/): split; 16 is the worst hand.
-- [Soft 18 against a 9](https://playpokergym.com/guides/blackjack-soft-18-vs-9/): hit.
-- [Pocket pair to a set](https://playpokergym.com/guides/holdem-pocket-pair-flop-a-set/): about 11.8% on the flop.
-- [Flush draw by the river](https://playpokergym.com/guides/holdem-flush-draw-odds-by-the-river/): about 35% with two cards to come.
-- [Privacy](https://playpokergym.com/web/privacy): what stays in the browser, analytics, replay and how to remove local data.
+### Blackjack
+
+- [8-8 against a dealer 10: split or hit?](https://playpokergym.com/guides/blackjack-88-vs-10-split/): Split. Eights are the one pair you split against every dealer card.
+- [Soft 18 (A-7) against a 9: hit or stand?](https://playpokergym.com/guides/blackjack-soft-18-vs-9/): Hit.
+- [16 against a dealer 10: hit or stand?](https://playpokergym.com/guides/blackjack-16-vs-10-hit/): Hit. Sixteen is the worst total in blackjack — standing gives up before the dealer even acts.
+- [12 against a dealer 2: hit or stand?](https://playpokergym.com/guides/blackjack-12-vs-2-stand/): Stand. Against a 2 or a 3, let the dealer take the risk.
+- [11 against a dealer 10: double or hit?](https://playpokergym.com/guides/blackjack-11-vs-10-double/): Double, if the table allows it. Otherwise hit.
+- [10 against a dealer 9: double or hit?](https://playpokergym.com/guides/blackjack-10-vs-9-double/): Double against a 9. Hit against a 10 or an ace.
+- [Soft 18 (A-7) against a 3: double or stand?](https://playpokergym.com/guides/blackjack-soft-18-vs-3-double/): Double against a 3. Stand against a 2, 7 or 8; hit against 9, 10 or ace.
+- [9-9 against a dealer 7: split or stand?](https://playpokergym.com/guides/blackjack-99-vs-7-stand/): Stand. Split 9s against 2 through 6, 8 and 9; stand against 7, 10 and ace.
+- [5-5 against a 6: split or double?](https://playpokergym.com/guides/blackjack-55-vs-6-double/): Double. Never split fives — 5-5 is a hard 10, not a pair worth splitting.
+- [10-10 against a 6: split or stand?](https://playpokergym.com/guides/blackjack-1010-vs-6-stand/): Stand. Never split tens, whatever the dealer shows.
+
+### Video poker
+
+- [Jacks or Better: pair of jacks or 4-card flush?](https://playpokergym.com/guides/video-poker-pair-of-jacks-or-four-to-a-flush/): Hold the pair of jacks.
+- [Video poker: two pair — hold both or chase trips?](https://playpokergym.com/guides/video-poker-two-pair-hold-both/): Hold both pairs.
+- [What does 9/6 mean in Jacks or Better?](https://playpokergym.com/guides/video-poker-96-pay-table/): Nine for a full house and six for a flush, per five coins wagered. It is the best common Jacks or Better table.
+- [Three of a kind or four to a flush?](https://playpokergym.com/guides/video-poker-trips-or-flush-draw/): Hold the three of a kind.
+
+### Baccarat
+
+- [Baccarat: Player has 5 — does Player draw?](https://playpokergym.com/guides/baccarat-player-draws-on-five/): Yes. Player draws on 0–5 and stands on 6–7.
+- [Baccarat: Banker, Player or Tie — lowest edge?](https://playpokergym.com/guides/baccarat-banker-player-tie-edge/): Banker, at about 1.06% house edge after the 5% commission.
+- [Baccarat: Player has 6 — does Player draw?](https://playpokergym.com/guides/baccarat-player-six-stands/): No. Player stands on 6 and on 7.
+
+### Hold'em
+
+- [Pocket pair: how often do you flop a set?](https://playpokergym.com/guides/holdem-pocket-pair-flop-a-set/): About 11.8% — roughly once in 8.5 flops.
+- [Flush draw on the flop: odds you hit by the river?](https://playpokergym.com/guides/holdem-flush-draw-odds-by-the-river/): About 35% — roughly one time in three.
+- [Flush draw on the turn: odds you hit?](https://playpokergym.com/guides/holdem-flush-draw-turn-odds/): About 19.6% — roughly one time in five.
+- [Open-ended straight draw on the flop: odds?](https://playpokergym.com/guides/holdem-open-ended-straight-draw-odds/): About 31.5% by the river with two cards to come.
+- [Gutshot straight draw: odds you hit by the river?](https://playpokergym.com/guides/holdem-gutshot-odds/): About 16.5% by the river — four outs with two cards to come.
+- [AK against a pocket pair: who is ahead?](https://playpokergym.com/guides/holdem-ak-vs-pocket-pair/): The pocket pair is ahead, roughly 55–57% against 43–45%.
+
+### Free trainers
+
+- [Free blackjack trainer with no signup](https://playpokergym.com/guides/free-blackjack-trainer/): Yes — Play Poker Gym is a free blackjack trainer in the browser. No signup, no download, no real money.
+- [Free video poker trainer with no signup](https://playpokergym.com/guides/free-video-poker-trainer/): Yes — Play Poker Gym coaches Jacks or Better holds for free, with no signup and no download.
+- [Free baccarat practice with no signup](https://playpokergym.com/guides/free-baccarat-practice/): Yes — Play Poker Gym runs free baccarat practice rounds with the standard tableau and scored questions.
+- [Free Hold'em trainer with no signup](https://playpokergym.com/guides/free-holdem-trainer/): Yes — Play Poker Gym drills Hold'em hand-reading for free, with no signup and no download.
+- [Free daily poker drill](https://playpokergym.com/guides/free-daily-poker-drill/): Yes — Play Poker Gym publishes a free daily drill: five decisions across the four games, scored, with a streak.
 
 ## Optional
 

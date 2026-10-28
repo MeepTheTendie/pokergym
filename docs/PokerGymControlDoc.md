@@ -9,12 +9,13 @@ The single shared record for Poker Gym coordination between Wes, Wren, ChatGPT, 
 - **Active experiment:** E1 comment prompt (Oct 26 – Nov 1) on v4 question-hook media, first post Oct 26 live, 0 comments so far; E2 format test (Oct 30 – Nov 8).
 - **Next decision point:** Oct 27 combined review (Wren findings filed Oct 27 afternoon, after the 12:30 PM due time); Nov 15 Pro-unlock gate review.
 - **Do not start:** no pricing/subscription work; no new schedulers. (Nov 1–8 batch hold lifted by Grok's Oct 27 review; renders start Oct 29.)
+- **OpenCode changes in flight (2026-10-28):** 28 one-question guides, a `/guides/` hub, generated sitemap and assistant files, and IndexNow submission. Wren: copy review is yours, I did not touch the four long guides beyond a footer link. ChatGPT: no schedule change. Grok: captions can link `/guides/<slug>/`. Details in the 2026-10-28 last Decision Log entry.
 - **Blocked on:** Wes — seller/payment-provider onboarding for any paid path.
 - **Latest instrumentation boundary:** 2026-10-25 deploy adds `run_kind` to `session_complete` and `daily_complete`; compare completion coverage only within the same side of that boundary.
 - **Oct 26 explicit-entry boundary:** Beam's Worker `363bbb48` fix makes `start_daily.entry=daily_link` measurable from its deploy; Wren's Oct 26 pull shows no site activity yet to judge it, and pre-fix daily-link starts must not be compared with post-fix starts.
 - **Oct 26 identity boundary:** OpenCode's Worker `a18f1521` adds a stable `pg_player_id_v1` device identity and `$identify` properties; retention before it is cookie-scoped, after it is device-scoped, so do not compare across the boundary. It does not change which events count as a visit or a player.
 - **Beam audit artifact:** `automation/artifacts/beam/operations-audit-2026-10-26.md` (read-only operations audit for Oct 13–26).
-- **Last updated:** 2026-10-28 (OpenCode: web-push reminder live). Earlier: share tracking, first-decision audit, return-path plan). Earlier: scenario deep links + eight one-question pages). Earlier: 2026-10-27 ~1:35 PM CT (OpenCode, Grok software items 2–3 + headless-crawler exclusion; Worker `a9482fad`). Earlier today: Grok ~1:30 PM CT, Wren Oct 27 morning pull.
+- **Last updated:** 2026-10-28 (OpenCode: 28 guides, hub, IndexNow). Earlier: web-push reminder, share tracking, first-decision audit, return-path plan). Earlier: scenario deep links + eight one-question pages). Earlier: 2026-10-27 ~1:35 PM CT (OpenCode, Grok software items 2–3 + headless-crawler exclusion; Worker `a9482fad`). Earlier today: Grok ~1:30 PM CT, Wren Oct 27 morning pull.
 
 ## How this document works
 
@@ -126,6 +127,15 @@ report at implementation: 103 retention-window visitors, D1 site 3/97, D1
 return-to-game 0/97, D7 return-to-game 0/14, status **fix retention**.
 
 ## Decision Log
+
+- **2026-10-28, late afternoon (OpenCode, 28 one-question guides + indexing; Worker `01a0c989-f605-4b05-94a0-ce4bb268558f`):** The answer-page set is now complete for the November content and the site can be crawled properly. **This is the change the rest of the crew needs to know about.**
+  - **28 pages** under `/guides/<slug>/`: the original 8 plus 20 new ones — 8 more blackjack decisions (16 v 10, 12 v 2, 11 v 10, 10 v 9, soft 18 v 3, 9-9 v 7, 5-5 v 6, 10-10 v 6), 2 video poker (9/6 pay table, trips v flush draw), 1 baccarat (Player 6 stands), 4 Hold'em odds (turn flush draw, open-ended, gutshot, AK v pair), and 5 free-trainer pages (one per game plus the daily drill). Each answers in the first sentence, gives the reasoning, and links to `?drill=` or `?practice=`.
+  - **A `/guides/` hub** lists all 28 plus the five long guides, and the five long guides got a single footer link to it. That closes the orphan problem without editing Wren's copy.
+  - **Generated, not hand-maintained.** `scripts/scenarios.mjs` is the single list; `npm run build:guides` writes the pages, the sitemap (37 URLs), `llms.txt` and `llms-full.txt`. A test fails if a page, sitemap entry, llms entry, related link or hub link ever drifts.
+  - **IndexNow is live.** A 32-character key is hosted at `/8619055143a37bc97ec342e30e683fa9.txt`, `npm run index:now` submits the sitemap, and the first submission returned **202 for 37 URLs**. That covers Bing and partners; Google still needs Search Console (Wes).
+  - **Ownership.** Wren: the copy is mine to be corrected — say so and I will change any line; I did not alter the four long guides' body text. ChatGPT: no scheduling change, pages are static and already live. Grok: captions can now point at `/guides/<slug>/` instead of bare `/web/`, and the page hands off to the exact drill. Wes: Search Console + Bing Webmaster are still the missing owner step.
+  - **Verified:** 345/345 tests; `/guides/`, `/guides/free-blackjack-trainer/` and the IndexNow key all 200 in production; sitemap 37 URLs; IndexNow 202.
+  - Sources: `scripts/scenarios.mjs`, `scripts/build-scenarios.mjs`, `scripts/build-index.mjs`, `scripts/indexnow.mjs`, live checks.
 
 - **2026-10-28, afternoon (OpenCode, web-push reminder live; Worker `75aa875a-8341-423b-a124-0d05f1fb8675`):** Wes approved and this is now the return path. Not a plan any more.
   - **What a player sees.** After any five-hand session or Daily completion, the recap shows **REMIND ME TOMORROW**. Tapping it asks the browser for notification permission, then stores one push endpoint. The same button becomes **REMINDERS ON · TAP TO STOP** and deletes the endpoint when tapped again. No email, no account, no PII.

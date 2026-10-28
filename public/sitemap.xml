@@ -1,19 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://playpokergym.com/</loc><lastmod>2026-10-26</lastmod><priority>1.0</priority></url>
-  <url><loc>https://playpokergym.com/web/</loc><lastmod>2026-10-26</lastmod><priority>0.9</priority></url>
-  <url><loc>https://playpokergym.com/guides/blackjack/</loc><lastmod>2026-10-26</lastmod><priority>0.8</priority></url>
-  <url><loc>https://playpokergym.com/guides/jacks-or-better/</loc><lastmod>2026-10-26</lastmod><priority>0.8</priority></url>
-  <url><loc>https://playpokergym.com/guides/baccarat/</loc><lastmod>2026-10-26</lastmod><priority>0.8</priority></url>
-  <url><loc>https://playpokergym.com/guides/holdem-best-five/</loc><lastmod>2026-10-26</lastmod><priority>0.8</priority></url>
-  <url><loc>https://playpokergym.com/guides/weekly-01/</loc><lastmod>2026-10-26</lastmod><priority>0.7</priority></url>
-  <url><loc>https://playpokergym.com/web/privacy</loc><lastmod>2026-10-26</lastmod><priority>0.3</priority></url>
+  <url><loc>https://playpokergym.com/</loc><lastmod>2026-10-28</lastmod><priority>1</priority></url>
+  <url><loc>https://playpokergym.com/web/</loc><lastmod>2026-10-28</lastmod><priority>0.9</priority></url>
+  <url><loc>https://playpokergym.com/guides/</loc><lastmod>2026-10-28</lastmod><priority>0.8</priority></url>
+  <url><loc>https://playpokergym.com/web/privacy</loc><lastmod>2026-10-28</lastmod><priority>0.3</priority></url>
+  <url><loc>https://playpokergym.com/guides/blackjack/</loc><lastmod>2026-10-28</lastmod><priority>0.8</priority></url>
+  <url><loc>https://playpokergym.com/guides/jacks-or-better/</loc><lastmod>2026-10-28</lastmod><priority>0.8</priority></url>
+  <url><loc>https://playpokergym.com/guides/baccarat/</loc><lastmod>2026-10-28</lastmod><priority>0.8</priority></url>
+  <url><loc>https://playpokergym.com/guides/holdem-best-five/</loc><lastmod>2026-10-28</lastmod><priority>0.8</priority></url>
+  <url><loc>https://playpokergym.com/guides/weekly-01/</loc><lastmod>2026-10-28</lastmod><priority>0.8</priority></url>
   <url><loc>https://playpokergym.com/guides/baccarat-player-draws-on-five/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
-  <url><loc>https://playpokergym.com/guides/baccarat-banker-player-tie-edge/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
   <url><loc>https://playpokergym.com/guides/video-poker-pair-of-jacks-or-four-to-a-flush/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
-  <url><loc>https://playpokergym.com/guides/video-poker-two-pair-hold-both/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
   <url><loc>https://playpokergym.com/guides/blackjack-88-vs-10-split/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
-  <url><loc>https://playpokergym.com/guides/blackjack-soft-18-vs-9/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
   <url><loc>https://playpokergym.com/guides/holdem-pocket-pair-flop-a-set/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/baccarat-banker-player-tie-edge/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/blackjack-soft-18-vs-9/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/video-poker-two-pair-hold-both/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
   <url><loc>https://playpokergym.com/guides/holdem-flush-draw-odds-by-the-river/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/blackjack-16-vs-10-hit/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/blackjack-12-vs-2-stand/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/blackjack-11-vs-10-double/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/blackjack-10-vs-9-double/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/blackjack-soft-18-vs-3-double/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/blackjack-99-vs-7-stand/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/blackjack-55-vs-6-double/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/blackjack-1010-vs-6-stand/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/video-poker-96-pay-table/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/video-poker-trips-or-flush-draw/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/baccarat-player-six-stands/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/holdem-flush-draw-turn-odds/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/holdem-open-ended-straight-draw-odds/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/holdem-gutshot-odds/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/holdem-ak-vs-pocket-pair/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/free-blackjack-trainer/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/free-video-poker-trainer/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/free-baccarat-practice/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/free-holdem-trainer/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
+  <url><loc>https://playpokergym.com/guides/free-daily-poker-drill/</loc><lastmod>2026-10-28</lastmod><priority>0.7</priority></url>
 </urlset>
