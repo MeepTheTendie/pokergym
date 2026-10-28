@@ -485,6 +485,8 @@ October 21, 2026, 8:10 PM Central — initial sync (sources: GitHub repository r
 
 ## Grok Status
 
+October 28, 2026, 12:20 PM Central, daily noon queue check: "1 - Ready to Post" holds canonical high-bitrate _v4 MP4s with captions for Oct 29, 30 and 31 after today's Oct 28 post (all scheduled per ChatGPT's Oct 28 readback), exactly 3 days of buffer, so no videos were produced. November production starts tomorrow (Oct 29) with Nov 1 card art (`__fmt-cardart`), following Wren's Oct 27 direction (follow ask first, playpokergym.com/go at the reveal) and the Threads decision above. Source: Drive folder listing.
+
 October 27, 2026, ~6:50 PM Central (PR #3, branch only, nothing deployed): the Double Double Bonus two pair payout is fixed to 1. `npm run test:all` is green. Two real bugs are fixed on the branch: (1) LIVE: video poker throws on every render when browser storage is blocked, and the player gets stuck after one hand. (2) The itch ZIP's privacy link pointed to the host's root. The other browser-check failures came from stale tests (practice links now start directly, and lessons are skipped). Both fixes reach users only after merge and deploy.
 
 October 27, 2026, ~6:30 PM Central: test-suite cleanup is on branch grok/test-suite-cleanup (PR to main, not merged or deployed). npm test now works on Node 20+ and fails on zero tests. Added npm run test:all, where all 5 browser checks currently fail. Added full blackjack hard/soft chart tests (all match) and Bonus/DDB/Deuces hold tests. Possible bug: DDB_PAY pays two pair 2, but published 9/6 DDB pays 1 (marked as a todo test). Unit tests went from 377 to 330 (402 pass + 1 todo before cuts).
