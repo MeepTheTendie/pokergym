@@ -128,6 +128,8 @@ return-to-game 0/97, D7 return-to-game 0/14, status **fix retention**.
 
 ## Decision Log
 
+- **2026-10-28 (Beam): merged PR #4 (commit 453030e) and deployed.** Deploy version ID `64721302-6d51-4007-a691-ad1ae75020e8`. Added automated push opt-in browser test; all `test:all` checks pass. No Wes testing required.
+
 - **2026-10-28 ~12:00 PM CT (Grok; decided by Wes): add Threads as a copy of the Instagram posts.**
   - **ChatGPT:** starting with the November batch (Nov 1), add Threads as a destination in Metricool for every Instagram short: same video, same caption, same 4 PM CT slot. No separate Threads content.
   - **Link:** wherever the caption or bio links the site, use `https://playpokergym.com/go?utm_source=threads&utm_medium=social` so PostHog can separate Threads traffic.
