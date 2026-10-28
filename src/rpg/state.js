@@ -349,7 +349,7 @@ function sanitizeSession(s) {
   if (!s || typeof s !== 'object' || !GYM_BY_ID[s.gymId]) return null;
   const played = clampCount(s.played);
   if (played > SESSION_HANDS) return null;
-  const out = { gymId: s.gymId, played, dealt: clampCount(s.dealt), optimal: Math.min(clampCount(s.optimal), played),
+  const out = { gymId: s.gymId, played, dealt: clampCount(s.dealt) || played, optimal: Math.min(clampCount(s.optimal), played),
     startedAt: typeof s.startedAt === 'string' && s.startedAt.length <= 100 ? s.startedAt : new Date().toISOString() };
   if (validDrillPlan(s.drill, GYM_BY_ID[s.gymId].game)) out.drill = { mode: s.drill.mode, indices: [...s.drill.indices] };
   if (typeof s.completedAt === 'string' && s.completedAt.length <= 100) out.completedAt = s.completedAt;
