@@ -15,7 +15,7 @@ The single shared record for Poker Gym coordination between Wes, Wren, ChatGPT, 
 - **Oct 26 explicit-entry boundary:** Beam's Worker `363bbb48` fix makes `start_daily.entry=daily_link` measurable from its deploy; Wren's Oct 26 pull shows no site activity yet to judge it, and pre-fix daily-link starts must not be compared with post-fix starts.
 - **Oct 26 identity boundary:** OpenCode's Worker `a18f1521` adds a stable `pg_player_id_v1` device identity and `$identify` properties; retention before it is cookie-scoped, after it is device-scoped, so do not compare across the boundary. It does not change which events count as a visit or a player.
 - **Beam audit artifact:** `automation/artifacts/beam/operations-audit-2026-10-26.md` (read-only operations audit for Oct 13–26).
-- **Last updated:** 2026-10-28 (OpenCode: 28 guides, hub, IndexNow). Earlier: web-push reminder, share tracking, first-decision audit, return-path plan). Earlier: scenario deep links + eight one-question pages). Earlier: 2026-10-27 ~1:35 PM CT (OpenCode, Grok software items 2–3 + headless-crawler exclusion; Worker `a9482fad`). Earlier today: Grok ~1:30 PM CT, Wren Oct 27 morning pull.
+- **Last updated:** 2026-10-28 (OpenCode: first-hand nudge). Earlier: 28 guides, hub, IndexNow, web-push reminder, share tracking, first-decision audit, return-path plan). Earlier: scenario deep links + eight one-question pages). Earlier: 2026-10-27 ~1:35 PM CT (OpenCode, Grok software items 2–3 + headless-crawler exclusion; Worker `a9482fad`). Earlier today: Grok ~1:30 PM CT, Wren Oct 27 morning pull.
 
 ## How this document works
 
@@ -127,6 +127,14 @@ report at implementation: 103 retention-window visitors, D1 site 3/97, D1
 return-to-game 0/97, D7 return-to-game 0/14, status **fix retention**.
 
 ## Decision Log
+
+- **2026-10-28, evening (OpenCode, first-hand nudge live; Worker `1781074f-3534-4a81-8f1a-a114d0aab7eb`):**
+  - **Why.** Eleven people have started a Daily Drill and **one has finished it**. Ten never made a single decision on hand 1. The one clearly human zero-decision starter (Lebanon, Oct 27) sat for 50 seconds, clicked three times and left. Median time from deal to first decision is 10s, p90 25s — dead air the page was not using.
+  - **What.** Six seconds after hand 1 is dealt, if nothing has been pressed, the legal controls pulse and one line appears above them: "YOUR CALL — tap HIT, STAND, DOUBLE or SPLIT" (per-game copy for video poker, baccarat and Hold'em). It clears on the first decision, fires **once per device**, is skipped when the tab is hidden, and honours `prefers-reduced-motion`. New `first_nudge` event carries `game` and `mode`; time-to-first-decision already measures whether it worked.
+  - **Daily progress label.** Checked before changing anything: it already reads `DAILY DRILL #n · HAND 1/5` with five pips. No change needed, and the nudge now covers the daily's first hand because the coach is deliberately hidden there.
+  - **Verified in production:** hidden at 3s, visible with the pulse at 7.5s, cleared by a decision, and does not reappear on reload. Daily mode confirmed with the nudge and the hand label together. 346/346 tests.
+  - **Not changed:** the share card for five-hand sessions (still the next product gap at 0 shares from 14 completers) and the copy of the long guides.
+  - Sources: `web/app.js`, `web/index.html`, `web/styles.css`, headless Chromium against production.
 
 - **2026-10-28, late afternoon (OpenCode, 28 one-question guides + indexing; Worker `01a0c989-f605-4b05-94a0-ce4bb268558f`):** The answer-page set is now complete for the November content and the site can be crawled properly. **This is the change the rest of the crew needs to know about.**
   - **28 pages** under `/guides/<slug>/`: the original 8 plus 20 new ones — 8 more blackjack decisions (16 v 10, 12 v 2, 11 v 10, 10 v 9, soft 18 v 3, 9-9 v 7, 5-5 v 6, 10-10 v 6), 2 video poker (9/6 pay table, trips v flush draw), 1 baccarat (Player 6 stands), 4 Hold'em odds (turn flush draw, open-ended, gutshot, AK v pair), and 5 free-trainer pages (one per game plus the daily drill). Each answers in the first sentence, gives the reasoning, and links to `?drill=` or `?practice=`.

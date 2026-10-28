@@ -54,6 +54,7 @@ visible in the data rather than implied by the event name.
 | `recap_tap` | A button on the end-of-run recap is tapped. | `button`: `daily_drill`, `play_again`, `replay_daily`, `challenge`, `review_mistakes`, `install`; `run_id`, `event_version` |
 | `share` | A result is shared. | `channel`: `native`, `copy`, `challenge`; `surface`: `recap`, `recap_daily`, `daily`, `invite` |
 | `push_opt_in` | The recap reminder button is used. | `result`: `subscribed`, `unsubscribed`, `denied`, `dismissed`, `error`; `surface` |
+| `first_nudge` | The one-time first-hand nudge appears (6s after hand 1 with no decision). | `game`; `mode` |
 | `feedback_submit` | The feedback form is submitted. | `clarity`, `returnInterest` |
 
 A completion only fires for a live start in the same page load, so every

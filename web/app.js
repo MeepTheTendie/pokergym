@@ -138,6 +138,12 @@ let holdHintShown = false; // one-time first-hand hint for video poker holds
 let drillMode = null; // 'master' | 'weak' | null — a rigged five-hand drill session
 let drillHands = [];
 let drillLabel = ''; // the situation name for the current drill hand
+// The first hand is where a new player either acts or leaves. If nothing has
+// been pressed six seconds after hand 1 is dealt, point at the legal controls
+// once per device. It never fires again, and the first decision clears it.
+const FIRST_NUDGE_KEY = 'pg_first_nudge_v1';
+const FIRST_NUDGE_DELAY_MS = 6000;
+let firstNudgeTimer = null;
 const entryParams = parseEntryParams(location.search);
 // A scenario link (?drill=<id>) names one authored hand, so a guide or video
 // can land on the exact decision it promised instead of a random deal.
@@ -165,6 +171,7 @@ let decisionsThisHand = 0;
 function handToken() { return dailyMode ? (dailyRun?.token ?? null) : sessionToken; }
 function handMode() { return dailyMode ? 'daily' : shortSession ? (drillMode ?? 'session') : 'challenge'; }
 function trackDecision(action) {
+  clearFirstNudge();
   decisionsThisHand += 1;
   // The first decision marks the hand as started by the player; later
   // blackjack actions are counted in hand_complete.decisions instead.
@@ -1708,9 +1715,48 @@ function renderBattle() {
   updateBattlePips();
 }
 
+/* ---------------- first-hand nudge ---------------- */
+function clearFirstNudge() {
+  if (firstNudgeTimer) { clearTimeout(firstNudgeTimer); firstNudgeTimer = null; }
+  document.getElementById('firstNudge')?.setAttribute('hidden', '');
+  for (const id of ['rowActions', 'rowBet', 'rowPick']) document.getElementById(id)?.classList.remove('nudge');
+  document.getElementById('btnDraw')?.classList.remove('nudge');
+}
+
+function scheduleFirstNudge() {
+  if (handNumber !== 1) return;
+  try { if (localStorage.getItem(FIRST_NUDGE_KEY)) return; } catch { /* storage blocked */ }
+  firstNudgeTimer = setTimeout(() => {
+    firstNudgeTimer = null;
+    // Re-check at fire time: the hand can settle, or a decision can land, first.
+    if (handNumber !== 1 || handDone || decisionsThisHand > 0) return;
+    if (document.visibilityState !== 'visible') return;
+    const copy = {
+      blackjack: 'YOUR CALL — tap HIT, STAND, DOUBLE or SPLIT.',
+      videopoker: 'TAP THE CARDS TO HOLD, THEN PRESS DRAW.',
+      baccarat: 'PICK BANKER, PLAYER OR TIE.',
+      holdem: 'TAP YOUR BEST FIVE, THEN CONFIRM 5.',
+    }[gameId];
+    if (!copy) return;
+    const line = document.getElementById('firstNudge');
+    if (!line) return;
+    line.textContent = copy;
+    line.hidden = false;
+    const row = gameId === 'blackjack' ? document.getElementById('rowActions')
+      : gameId === 'baccarat' ? document.getElementById('rowBet')
+      : gameId === 'holdem' ? document.getElementById('rowPick')
+      : document.getElementById('btnDraw');
+    row?.classList.add('nudge');
+    try { localStorage.setItem(FIRST_NUDGE_KEY, '1'); } catch { /* storage blocked */ }
+    window.trackEvent?.('first_nudge', { game: gameId, mode: handMode() });
+    firstNudgeTimer = setTimeout(clearFirstNudge, 9000);
+  }, FIRST_NUDGE_DELAY_MS);
+}
+
 /* ---------------- battle: one hand in, one hand out ---------------- */
 function startHand() {
   cancelAutoAdvance();
+  clearFirstNudge();
   analytics.handStarted({ game: gameId, mode: dailyMode ? 'daily' : shortSession ? 'session' : 'challenge', entry: trainerEntry });
   handNumber += 1;
   decisionsThisHand = 0;
@@ -1778,6 +1824,8 @@ function startHand() {
       ? `${drillMode === 'weak' ? 'WEAK-SPOT DRILL' : 'MASTER DRILL'} · ${drillLabel || TRAINING_LABEL[gameId]} · ${profile.activeSession?.played ?? 0}/${SESSION_HANDS}`
       : introductory ? `FIRST PRACTICE · ${introductory.label}`
       : shortSession ? `FIVE HANDS · ${profile.activeSession.played}/${SESSION_HANDS} DONE` : `${canPractice(profile, gymId) ? 'PRACTICE' : 'GYM CHALLENGE'} · ${handsWon}/${HANDS_TO_WIN} GOOD PLAYS`;
+
+  scheduleFirstNudge();
 
   // A natural settles before anybody gets to touch anything.
   if (gameId === 'blackjack' && round.settled) settleBlackjack();

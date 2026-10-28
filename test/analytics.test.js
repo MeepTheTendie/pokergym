@@ -325,3 +325,16 @@ test('a returning save with no finished session still reports a visit gap', () =
   assert.match(app, /createdDay = profile\.createdAt \? localDayKey\(new Date\(profile\.createdAt\)\)/);
   assert.match(app, /lastVisitDay = all\.length \? all\[all\.length - 1\] : createdDay;/);
 });
+
+test('the first-hand nudge is one-time, legal-button only, and clears on a decision', () => {
+  assert.match(app, /const FIRST_NUDGE_KEY = 'pg_first_nudge_v1'/);
+  assert.match(app, /function scheduleFirstNudge/);
+  assert.match(app, /if \(handNumber !== 1 \|\| handDone \|\| decisionsThisHand > 0\) return;/);
+  assert.match(app, /document\.visibilityState !== 'visible'/);
+  assert.match(app, /trackEvent\?\.\('first_nudge'/);
+  assert.match(app, /row\?\.classList\.add\('nudge'\)/);
+  const html = read('../web/index.html');
+  assert.match(html, /id="firstNudge"/);
+  const css = read('../web/styles.css');
+  assert.match(css, /prefers-reduced-motion[\s\S]*nudge/);
+});
