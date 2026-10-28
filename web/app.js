@@ -2233,7 +2233,7 @@ function renderSessionSummary(session, daily = null) {
   } else {
     const unsupported = document.createElement('p');
     unsupported.className = 'hint';
-    unsupported.textContent = 'This browser cannot show website notifications. You can still download a calendar reminder below.';
+    unsupported.textContent = 'This browser can’t send notifications here. Add to Home Screen to get reminders. You can still download a calendar reminder below.';
     reminders.appendChild(unsupported);
   }
 

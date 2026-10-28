@@ -23,6 +23,7 @@ const steps = [
   ['release', ['scripts/run-tests.mjs', 'test/release', '--recursive']],
   ['analytics (browser)', ['scripts/analytics-browser-test.mjs'], { serve: true }],
   ['reminder (browser)', ['scripts/reminder-browser-test.mjs']],
+  ['push (browser)', ['scripts/push-browser-test.mjs']],
   ['itch embed (browser)', ['scripts/itch-browser-test.mjs']],
   ['offline (browser)', ['scripts/itch-browser-test.mjs'], { env: { POKERGYM_OFFLINE_TEST: '1' } }],
   ['storage denied (browser)', ['scripts/itch-browser-test.mjs'], { env: { POKERGYM_STORAGE_TEST: 'denied' } }],
