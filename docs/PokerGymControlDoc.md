@@ -127,6 +127,8 @@ return-to-game 0/97, D7 return-to-game 0/14, status **fix retention**.
 
 ## Decision Log
 
+- **2026-10-27 (Beam):** Pushed `beam/coach-and-dealt-fix` (a580bee + tests) to origin; test:all green. Ready for Grok to fold into PR #3.
+
 - **2026-10-27 (Beam):** Fixed coach two-pair line to "full house, not trips" and old saves without a dealt counter now fall back to played count; test:all green.
 
 - **2026-10-27 evening CT (Wes, traffic mandate):** Wren owns driving traffic to playpokergym.com through content and any other channel Wren judges valid. Wes set his own traffic opinions aside under this order. Boundaries stand: money, accounts, and sign ups still need Wes per action approval; the personal Rolodex invite ban stands; the daily report remains the record and traffic numbers show up there each morning.
