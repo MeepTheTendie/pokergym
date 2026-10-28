@@ -209,3 +209,19 @@ test('old saves without a dealt counter fall back to played count', async () => 
   const zeroSave = { ...p, activeSession: { ...p.activeSession, played: 0, dealt: 0 } };
   assert.equal(sanitizeProfile(zeroSave).activeSession.dealt, 0);
 });
+
+test('a named scenario opens its own drill plan, once, in the right game', async () => {
+  const { findDrill, drillPlanStartingWith, drillBank } = await import('../src/rpg/drills.js');
+  for (const id of ['bj-88-v10', 'bj-soft18-v9', 'vp-jacks-flush', 'vp-two-pair']) {
+    const found = findDrill(id);
+    assert.ok(found, id);
+    const plan = drillPlanStartingWith({}, found.game, id);
+    assert.ok(plan, id);
+    assert.equal(plan.mode, 'master');
+    assert.equal(plan.indices.length, 5);
+    assert.equal(new Set(plan.indices).size, 5);
+    assert.equal(plan.indices[0], drillBank(found.game).findIndex(d => d.id === id));
+  }
+  assert.equal(findDrill('nope'), null);
+  assert.equal(drillPlanStartingWith({}, 'blackjack', 'nope'), null);
+});

@@ -54,12 +54,12 @@ test('parseEntryParams: d values', () => {
 });
 
 test('parseEntryParams: missing params', () => {
-  assert.deepEqual(parseEntryParams(''), { ref: 'none', day: null, practice: null, daily: false });
-  assert.deepEqual(parseEntryParams(undefined), { ref: 'none', day: null, practice: null, daily: false });
+  assert.deepEqual(parseEntryParams(''), { ref: 'none', day: null, practice: null, drill: null, daily: false });
+  assert.deepEqual(parseEntryParams(undefined), { ref: 'none', day: null, practice: null, drill: null, daily: false });
 });
 
 test('parseEntryParams: ref and practice together', () => {
-  assert.deepEqual(parseEntryParams('?ref=share&d=9&practice=blackjack'), { ref: 'share', day: 9, practice: 'blackjack', daily: false });
+  assert.deepEqual(parseEntryParams('?ref=share&d=9&practice=blackjack'), { ref: 'share', day: 9, practice: 'blackjack', drill: null, daily: false });
   assert.equal(parseEntryParams('?ref=Evil').ref, 'other');
 });
 
@@ -83,6 +83,8 @@ test('?daily=1 is a supported Daily Drill entry param and is stripped from the a
   assert.equal(DAILY_ENTRY_URL, '/web/?daily=1');
   assert.equal(parseEntryParams('?daily=1').daily, true);
   assert.equal(parseEntryParams('?daily=yes').daily, false);
+  assert.equal(parseEntryParams('?drill=bj-88-v10').drill, 'bj-88-v10');
+  assert.equal(parseEntryParams('').drill, null);
   assert.equal(parseEntryParams('').daily, false);
   assert.equal(parseEntryParams('?daily=1').ref, 'none');
   assert.equal(cleanEntrySearch('?daily=1&practice=blackjack'), '?practice=blackjack');

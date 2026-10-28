@@ -31,7 +31,7 @@ import {
 import { parseEntryParams, isSharedDayCurrent, cleanEntrySearch, buildDailyShareText, shareUrl, inviteUrl } from '../src/rpg/links.js';
 import { keyAction, shouldIgnoreKey } from '../src/rpg/keys.js';
 import { createAnalytics } from '../src/rpg/analytics.js';
-import { captureDrillPlan, restoreDrillPlan, BLACKJACK_DRILLS, DRILL_HANDS, DRILL_GAMES } from '../src/rpg/drills.js';
+import { captureDrillPlan, restoreDrillPlan, BLACKJACK_DRILLS, DRILL_HANDS, DRILL_GAMES, findDrill, drillPlanStartingWith } from '../src/rpg/drills.js';
 import { drawArt, drawTrainerBack } from './characters.js';
 import audio from './audio.js?v=20261017-vegas1';
 import haptics from './haptics.js';
@@ -138,7 +138,10 @@ let drillMode = null; // 'master' | 'weak' | null — a rigged five-hand drill s
 let drillHands = [];
 let drillLabel = ''; // the situation name for the current drill hand
 const entryParams = parseEntryParams(location.search);
-let requestedGym = GYMS.find(gym => gym.game === entryParams.practice) ?? null;
+// A scenario link (?drill=<id>) names one authored hand, so a guide or video
+// can land on the exact decision it promised instead of a random deal.
+let requestedDrill = entryParams.drill ? findDrill(entryParams.drill) : null;
+let requestedGym = GYMS.find(gym => gym.game === (entryParams.practice ?? requestedDrill?.game)) ?? null;
 // A shared Daily Drill link (?d=<n>) highlights today's drill when n is within
 // one day of today's number; otherwise it is ignored silently. ref is read only
 // to strip it: it is never stored (no localStorage, cookie or sessionStorage).
@@ -147,7 +150,7 @@ let sharedDaily = entryParams.daily || isSharedDayCurrent(entryParams.day, daily
 const dailyLinkEntry = entryParams.daily ? 'daily_link' : sharedDaily ? 'share_link' : null;
 // The entry source for this page load, carried onto run-level events so starts
 // and completions can be split by daily link, practice link, or direct.
-const trainerEntry = dailyLinkEntry ?? (entryParams.practice ? 'practice_link' : 'direct');
+const trainerEntry = dailyLinkEntry ?? (requestedDrill ? 'drill_link' : entryParams.practice ? 'practice_link' : 'direct');
 // One meaning per event; see docs/analytics-events.md. The ref tag is the
 // loader's snapshot (it also covers referrer fallback), else the parsed ?ref=.
 const analytics = createAnalytics({
@@ -386,11 +389,22 @@ function initTitle() {
 }
 function enterTraining() {
   if (requestedGym) {
-    const gym = GYM_BY_ID[profile.activeSession?.gymId] ?? requestedGym;
+    // A named scenario always wins over a resumed session, so the link cannot
+    // land on a different game than the one it promised.
+    const gym = requestedDrill && requestedGym
+      ? requestedGym
+      : GYM_BY_ID[profile.activeSession?.gymId] ?? requestedGym;
+    const scenario = requestedDrill && requestedDrill.game === gym.game ? requestedDrill : null;
     requestedGym = null;
-    profile = beginSession(profile, gym.id);
+    if (scenario) {
+      // A scenario link always opens fresh on the promised hand, even when an
+      // unfinished session exists, so the page and the deal cannot disagree.
+      profile = { ...profile, activeSession: { gymId: gym.id, played: 0, optimal: 0, dealt: 0, startedAt: new Date().toISOString() } };
+    } else {
+      profile = beginSession(profile, gym.id);
+    }
     save();
-    startGym(gym, true);
+    startGym(gym, true, scenario ? 'master' : null);
     return;
   }
   renderMap(); show('scr-map');
@@ -1126,7 +1140,15 @@ function startGym(gym, sprint = false, mode = null) {
     if (!canTrain(profile, gym.id) || profile.activeSession?.gymId !== gym.id) return;
   } else if (!canBattle(profile, gym.id) && !canPractice(profile, gym.id)) return;
   shortSession = sprint;
-  if (sprint && mode && !profile.activeSession.drill) {
+  const scenario = requestedDrill && requestedDrill.game === gym.game ? requestedDrill.drill.id : null;
+  const targeted = scenario ? drillPlanStartingWith(profile, gym.game, scenario) : null;
+  if (targeted) {
+    // The named scenario opens the five-hand set; the rest continues the
+    // normal rotation so the drill still covers other situations.
+    profile = { ...profile, activeSession: { ...profile.activeSession, drill: targeted } };
+    save();
+    requestedDrill = null;
+  } else if (sprint && mode && !profile.activeSession.drill) {
     const drill = captureDrillPlan(profile, gym.game, mode);
     if (drill) {
       profile = { ...profile, activeSession: { ...profile.activeSession, drill } };

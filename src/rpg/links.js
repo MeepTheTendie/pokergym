@@ -102,6 +102,7 @@ export function parseEntryParams(search) {
     ref: classifyRef(params.get('ref')),
     day: parseDay(params.get('d')),
     practice: params.get('practice') || null,
+    drill: params.get('drill') || null,
     daily: params.get('daily') === '1',
   };
 }

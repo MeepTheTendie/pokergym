@@ -14,7 +14,7 @@ The single shared record for Poker Gym coordination between Wes, Wren, ChatGPT, 
 - **Oct 26 explicit-entry boundary:** Beam's Worker `363bbb48` fix makes `start_daily.entry=daily_link` measurable from its deploy; Wren's Oct 26 pull shows no site activity yet to judge it, and pre-fix daily-link starts must not be compared with post-fix starts.
 - **Oct 26 identity boundary:** OpenCode's Worker `a18f1521` adds a stable `pg_player_id_v1` device identity and `$identify` properties; retention before it is cookie-scoped, after it is device-scoped, so do not compare across the boundary. It does not change which events count as a visit or a player.
 - **Beam audit artifact:** `automation/artifacts/beam/operations-audit-2026-10-26.md` (read-only operations audit for Oct 13–26).
-- **Last updated:** 2026-10-27 ~1:35 PM CT (OpenCode, Grok software items 2–3 + headless-crawler exclusion; Worker `a9482fad`). Earlier today: Grok ~1:30 PM CT, Wren Oct 27 morning pull.
+- **Last updated:** 2026-10-28 (OpenCode, scenario deep links + eight one-question pages). Earlier: 2026-10-27 ~1:35 PM CT (OpenCode, Grok software items 2–3 + headless-crawler exclusion; Worker `a9482fad`). Earlier today: Grok ~1:30 PM CT, Wren Oct 27 morning pull.
 
 ## How this document works
 
@@ -126,6 +126,14 @@ report at implementation: 103 retention-window visitors, D1 site 3/97, D1
 return-to-game 0/97, D7 return-to-game 0/14, status **fix retention**.
 
 ## Decision Log
+
+- **2026-10-28 (OpenCode, scenario deep links + one-question pages; Worker `bb26454b-6af5-4e49-ac22-030f81bb2554`):** Shipped the acquisition piece discussed after Reddit went quiet, and it is the only code change today.
+  - **Wes decision recorded:** no paid ads until the product proves it can generate revenue. Not revisited here.
+  - **`?drill=<scenario id>`** opens one named authored hand as the first of five, then continues the normal rotation. `entry=drill_link` is now a documented entry value. Two authored hands were added — `bj-88-v10` (eights against a ten) and `vp-jacks-flush` (pair of jacks with four to a flush) — because the existing bank had the *opposite* low-pair decision and no 8-8 vs 10. Every existing hand is unchanged; ids were added to each.
+  - **Eight one-question pages** under `/guides/<slug>/`, one per Nov 1–8 video question: answer in the first sentence, the maths, then a CTA that loads the exact hand or the five-hand practice. Sitemap is 16 URLs; `llms.txt` now lists them with their answers so assistants can quote both.
+  - **Ownership / handoffs.** Wren: the pages answer Wren's content questions, but copy and any edits to the *existing* four guides are Wren's call — I did not touch them; the obvious next step is internal links from each game guide to its scenario pages. ChatGPT: no scheduling change; the pages need no QA beyond the 200s already checked. Grok: the Nov captions can point at `/guides/<slug>/` instead of bare `/web/`, and the matching `/web/?drill=<id>` is the link that lands on the promised hand.
+  - **Verified:** 333/333 tests; headless Chromium on production shows `?drill=bj-88-v10` → EIGHTS AGAINST A TEN and `?drill=vp-two-pair` → TWO PAIR, including overriding an unfinished session from another game; all eight pages return 200.
+  - Sources: `src/rpg/drills.js`, `src/rpg/links.js`, `web/app.js`, `scripts/build-scenarios.mjs`, live checks.
 
 - **2026-10-27 (Beam):** PR #3 merged to main (e84eaf3) and deployed (Cloudflare 4516d344); coach-line and old-save fallback shipped, test:all green.
 

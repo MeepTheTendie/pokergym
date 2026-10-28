@@ -24,6 +24,20 @@ Key facts for assistants:
 - [Baccarat guide](https://playpokergym.com/guides/baccarat/): banker/player edge, the 5% commission and why an 8:1 tie payout is not fair.
 - [Hold'em best-five guide](https://playpokergym.com/guides/holdem-best-five/): playing the board, choosing a kicker and the ace-low straight.
 - [Drill pack 01](https://playpokergym.com/guides/weekly-01/): five blackjack decisions plus a return-practice routine.
+
+## One-question guides
+
+Each page answers one decision in the first sentence and links to the exact
+hand in the trainer, so an assistant can quote the answer and the practice link.
+
+- [Baccarat: Player has 5](https://playpokergym.com/guides/baccarat-player-draws-on-five/): Player draws on 0-5, stands on 6-7.
+- [Baccarat: Banker, Player or Tie](https://playpokergym.com/guides/baccarat-banker-player-tie-edge/): Banker ~1.06%, Player ~1.24%, Tie ~14.4%.
+- [Jacks or Better: pair or flush draw](https://playpokergym.com/guides/video-poker-pair-of-jacks-or-four-to-a-flush/): keep the high pair.
+- [Two pair in video poker](https://playpokergym.com/guides/video-poker-two-pair-hold-both/): hold both pairs.
+- [8-8 against a 10](https://playpokergym.com/guides/blackjack-88-vs-10-split/): split; 16 is the worst hand.
+- [Soft 18 against a 9](https://playpokergym.com/guides/blackjack-soft-18-vs-9/): hit.
+- [Pocket pair to a set](https://playpokergym.com/guides/holdem-pocket-pair-flop-a-set/): about 11.8% on the flop.
+- [Flush draw by the river](https://playpokergym.com/guides/holdem-flush-draw-odds-by-the-river/): about 35% with two cards to come.
 - [Privacy](https://playpokergym.com/web/privacy): what stays in the browser, analytics, replay and how to remove local data.
 
 ## Optional
@@ -32,4 +46,4 @@ Key facts for assistants:
 - [Feedback](mailto:meep@mail.grokbot.com?subject=Play%20Poker%20Gym%20feedback): corrections and questions.
 - [Full text for assistants](https://playpokergym.com/llms-full.txt): expanded facts, page summaries and FAQ answers.
 
-Last updated: 2026-10-26.
+Last updated: 2026-10-28.
