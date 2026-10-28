@@ -344,6 +344,17 @@ export const SOURCE_LABELS = Object.freeze({
   direct: 'Direct',
   unknown: 'Unknown',
   other: 'Other',
+  // AI assistants tag outbound citations with utm_source, not a referrer.
+  // Without these labels the whole channel hides inside "Other".
+  'chatgpt.com': 'ChatGPT',
+  'www.chatgpt.com': 'ChatGPT',
+  'chat.openai.com': 'ChatGPT',
+  openai: 'ChatGPT',
+  'perplexity.ai': 'Perplexity',
+  'www.perplexity.ai': 'Perplexity',
+  'claude.ai': 'Claude',
+  'gemini.google.com': 'Gemini',
+  'copilot.microsoft.com': 'Copilot',
 });
 
 export function sourceLabel(raw) {

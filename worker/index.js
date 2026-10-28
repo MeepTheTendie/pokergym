@@ -132,6 +132,10 @@ export default {
       do {
         const page = await env.PUSH_SUBS.list({ cursor, limit: 500 });
         for (const key of page.keys) {
+          // Only device subscriptions are sent to. Other keys (the VAPID
+          // backup at meta:vapid) must never be treated as a subscription and
+          // pruned by the invalid-record branch.
+          if (!key.name.startsWith('sub:')) continue;
           const raw = await env.PUSH_SUBS.get(key.name);
           if (!raw) continue;
           let record;

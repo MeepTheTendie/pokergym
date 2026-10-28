@@ -121,6 +121,9 @@ test('source rows are one bucket per person and reconcile to the total', () => {
   assert.equal(rows.find(r => r.source === 'YouTube').returned, 1);
   assert.equal(sourceLabel('reels'), 'Instagram');
   assert.equal(sourceLabel('ig'), 'Instagram');
+  assert.equal(sourceLabel('chatgpt.com'), 'ChatGPT');
+  assert.equal(sourceLabel('perplexity.ai'), 'Perplexity');
+  assert.equal(sourceLabel('claude.ai'), 'Claude');
   assert.equal(sourceLabel('fb'), 'Facebook');
   assert.equal(sourceLabel('twitter'), 'X');
   assert.equal(sourceLabel('yt'), 'YouTube');
