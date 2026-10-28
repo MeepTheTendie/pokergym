@@ -41,7 +41,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
         else:
             super().do_GET()
-http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
+# The default listen backlog (5) drops connections when the service worker
+# precaches ~60 assets while the page loads its modules, which made the
+# offline/storage runs flaky. A real host does not have that limit.
+class Server(http.server.ThreadingHTTPServer):
+    request_queue_size = 256
+Server(('127.0.0.1', 18997), Handler).serve_forever()
 `);
   children.push(spawn('python3', [path.join(temp, 'server.py'), temp], { stdio: 'ignore' }));
   children.push(spawn('chromium', ['--headless=new', '--no-sandbox', '--disable-dev-shm-usage', `--user-data-dir=${path.join(temp, 'chrome')}`, '--remote-debugging-port=19397', 'about:blank'], { stdio: 'ignore' }));
@@ -103,31 +108,38 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
     assert.equal(await guideEval('document.querySelector(".cta").pathname'), '/web/', 'Guide links to playable demo');
     const targetGame = { baccarat: 'baccarat', blackjack: 'blackjack', 'jacks-or-better': 'videopoker', 'holdem-best-five': 'holdem' }[guide];
     assert.equal(await guideEval('new URL(document.querySelector(".cta").href).searchParams.get("practice")'), targetGame);
-    await guideEval('localStorage.clear(); document.querySelector(".cta").click()');
+    // Since 72b258b (Oct 26) ?practice=<game> starts that game's five-hand
+    // session directly for new and returning visitors; there is no title-screen
+    // invitation step any more.
+    const expectedGym = { baccarat: 'villaoak', blackjack: 'countyfair', videopoker: 'pokergym', holdem: 'riverstone' }[targetGame];
+    const activeGym = 'JSON.parse(localStorage.getItem("pokergym:save:v1") || "null")?.activeSession?.gymId ?? null';
+    // Let a just-installed offline worker finish activating before navigating.
+    // Navigating while it was mid-activation intermittently failed one module
+    // load (net::ERR_FAILED) and left the trainer unbooted. Not reproduced
+    // outside this local test server; see the Oct 27 note in the control doc.
     for (let i = 0; i < 100; i++) {
-      if (await guideEval('Boolean(document.getElementById("btnNew")?.onclick) && !document.getElementById("practiceInvitation").hidden')) break;
+      if (await guideEval('!navigator.serviceWorker || navigator.serviceWorker.controller?.state === "activated" || !window.isSecureContext')) break;
       await sleep(100);
     }
-    assert.equal(await guideEval('document.getElementById("practiceInvitation").hidden'), false, 'Selected training is explained before starting');
-    await guideEval('document.getElementById("btnNew").click(); document.querySelector(".class-card").click(); document.getElementById("btnBecome").click()');
-    assert.equal(await guideEval('document.getElementById("scr-lesson").hidden'), false, 'Guide starts its own lesson after trainer selection');
-    const expectedGym = { baccarat: 'villaoak', blackjack: 'countyfair', videopoker: 'pokergym', holdem: 'riverstone' }[targetGame];
+    await guideEval('localStorage.clear(); document.querySelector(".cta").click()');
+    for (let i = 0; i < 100; i++) {
+      if (await guideEval(`(${activeGym}) === ${JSON.stringify(expectedGym)} && document.getElementById("scr-title").hidden`)) break;
+      await sleep(100);
+    }
+    assert.equal(await guideEval(activeGym), expectedGym, 'Guide link starts its own five-hand session');
+    assert.equal(await guideEval('document.getElementById("scr-title").hidden'), true, 'Guide link skips the title screen');
     const started = await guideEval('JSON.parse(localStorage.getItem("pokergym:save:v1"))');
-    assert.equal(started.activeSession.gymId, expectedGym);
     assert.equal(started.activeSession.played, 0);
     const preserved = { ...started, activeSession: { gymId: targetGame === 'holdem' ? 'countyfair' : 'riverstone', played: 2, optimal: 1, startedAt: '2026-10-07T00:00:00.000Z' } };
     await guideEval(`localStorage.setItem('pokergym:save:v1', ${JSON.stringify(JSON.stringify(preserved))}); location.reload()`);
     for (let i = 0; i < 100; i++) {
-      if (await guideEval('Boolean(document.getElementById("btnContinue")?.onclick) && !document.getElementById("btnContinue").disabled')) break;
+      if (await guideEval('Boolean(document.getElementById("btnMap")?.onclick) && document.getElementById("scr-title").hidden')) break;
       await sleep(100);
     }
-    assert.ok(await guideEval('document.getElementById("practiceInvitation").textContent.includes("UNFINISHED")'));
-    await guideEval('document.getElementById("btnContinue").click()');
-    assert.deepEqual(await guideEval('JSON.parse(localStorage.getItem("pokergym:save:v1")).activeSession'), preserved.activeSession, 'Guide preserves and resumes another unfinished session');
-    assert.equal(await guideEval('document.getElementById("scr-lesson").hidden'), false);
+    // sanitize adds a `dealt` counter (ac6f409); everything else must be untouched.
+    const { dealt: _dealt, ...resumed } = await guideEval('JSON.parse(localStorage.getItem("pokergym:save:v1")).activeSession');
+    assert.deepEqual(resumed, preserved.activeSession, 'Guide preserves and resumes another unfinished session');
     assert.ok(await guideEval('document.documentElement.scrollWidth <= innerWidth'));
-    await guideEval('document.getElementById("btnMap").click(); document.getElementById("btnContinue").click()');
-    assert.equal(await guideEval('document.getElementById("scr-map").hidden'), false, 'Invitation consumed once; ordinary navigation remains available');
     await guideEval('localStorage.clear()');
     console.log(`PASS: ${guide} phone guide opens targeted five-hand lesson; unfinished other-game session is preserved and resumed.`);
     }
@@ -201,7 +213,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
       return { fits: doc.documentElement.scrollWidth <= frame.clientWidth,
         returnPath: new URL(doc.querySelector('nav a').href).pathname,
         expectedPath: new URL('index.html', document.baseURI).pathname,
-        scripts: doc.scripts.length,
+        scripts: [...doc.scripts].filter((s) => s.type !== 'application/ld+json').length, // JSON-LD (dac7923) is data, not code
         controls: doc.body.textContent.includes('close Play Poker Gym tabs') && doc.body.textContent.includes('Delete any backup copies separately') };
     })()`);
     assert.equal(result.fits, true, 'Privacy guidance fits a 390px phone');
@@ -298,7 +310,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   assert.equal(await evaluate('document.querySelector("[data-gym=riverstone]").disabled'), true, 'Badge journey still requires earlier badges');
   if (blockedStorage) {
     assert.equal(await evaluate('document.getElementById("saveStatus").hidden'), false, 'Storage failure is visible');
-    await evaluate('document.querySelector("[data-session-gym=pokergym]").click(); document.getElementById("btnSkip").click()');
+    await evaluate('document.querySelector("[data-session-gym=pokergym]").click(); if (!document.getElementById("scr-lesson").hidden) document.getElementById("btnSkip").click()');
     // The coach still opens with blocked storage; a coached hand earns no
     // session credit, so play it through first, then complete five clean hands.
     await evaluate('document.getElementById("btnAsk").click()');
@@ -340,8 +352,8 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Backup controls fit phone');
   await evaluate('document.getElementById("saveBackup").open = false');
   await evaluate('document.querySelector("#gymList button:not(:disabled)").click()');
-  assert.equal(await evaluate('document.getElementById("scr-lesson").hidden'), false);
-  await evaluate('document.getElementById("btnSkip").click()');
+  // Since 0035be8 (Oct 19) gyms skip the lesson screen and go straight to play.
+  await evaluate('if (!document.getElementById("scr-lesson").hidden) document.getElementById("btnSkip").click()');
   assert.equal(await evaluate('document.getElementById("scr-battle").hidden'), false);
   await evaluate('document.getElementById("btnAsk").click()');
   const saved = await evaluate('localStorage.getItem("pokergym:save:v1")');
@@ -381,7 +393,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
   assert.equal(await evaluate('document.getElementById("scr-map").hidden'), false);
   if (offlineTest) {
     await checkPrivacy();
-    await evaluate('document.querySelector("#gymList button:not(:disabled)").click(); document.getElementById("btnSkip").click(); document.getElementById("btnAsk").click()');
+    await evaluate('document.querySelector("#gymList button:not(:disabled)").click(); if (!document.getElementById("scr-lesson").hidden) document.getElementById("btnSkip").click(); document.getElementById("btnAsk").click()');
     assert.equal(await evaluate('document.getElementById("scr-battle").hidden'), false, 'Offline lesson, battle and coach work');
   }
   // Exercise persisted notebook UI with a representative missed decision.
@@ -630,8 +642,7 @@ http.server.ThreadingHTTPServer(('127.0.0.1', 18997), Handler).serve_forever()
       window.retryTestRandom = Math.random; Math.random = seededRng(7);
     })()`);
     await evaluate(`document.querySelector('[data-session-gym=${gym}]').click()`);
-    assert.equal(await evaluate('document.getElementById("scr-lesson").hidden'), false, `${gym} introduces its own lesson`);
-    await evaluate('document.getElementById("btnSkip").click()');
+    await evaluate('if (!document.getElementById("scr-lesson").hidden) document.getElementById("btnSkip").click()');
     assert.equal(await evaluate('document.getElementById("scr-battle").hidden'), false);
     if (gym === 'countyfair' || gym === 'riverstone') await evaluate('Math.random = window.retryTestRandom; delete window.retryTestRandom');
     for (let step = 0; step < 20; step++) {

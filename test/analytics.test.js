@@ -236,47 +236,57 @@ test('no ref means no ref property; a throwing sink never breaks play', () => {
 
 const app = read('../web/app.js');
 
-test('app.js sends trainer lifecycle events only through the tracker', () => {
-  for (const name of Object.values(EVENTS)) {
-    assert.doesNotMatch(app, new RegExp(`trackEvent\\?\\.\\('${name}'`), `${name} bypasses src/rpg/analytics.js`);
+test('app.js wires every trainer event through the tracker, once, in the right place', () => {
+  // open_trainer is fired before any game_start for a fresh visitor (78a345f)
+  {
+    const openIdx = app.indexOf('analytics.openTrainer(');
+    const ifIdx = app.indexOf('if (profile) { renderMap(); show(\'scr-map\'); }');
+    assert.ok(openIdx > -1 && ifIdx > -1, 'expected markers present');
+    assert.ok(openIdx < ifIdx, 'openTrainer must precede the profile/start block');
   }
-  assert.equal(app.match(/analytics\.openTrainer\(/g)?.length, 1);
-  assert.equal(app.match(/analytics\.startDaily\(/g)?.length, 1);
-  assert.equal(app.match(/analytics\.gameStart\(/g)?.length, 1);
-  assert.equal(app.match(/analytics\.handStarted\(/g)?.length, 1);
-  assert.equal(app.match(/analytics\.handDealt\(/g)?.length, 1);
-  assert.equal(app.match(/analytics\.decisionMade\(/g)?.length, 1);
-  assert.equal(app.match(/analytics\.handComplete\(/g)?.length, 1);
-  assert.equal(app.match(/analytics\.sessionComplete\(/g)?.length, 1);
-  assert.equal(app.match(/analytics\.dailyComplete\(/g)?.length, 1);
-});
-
-test('completions declare the five-hand meaning and the hand stages are wired', () => {
-  assert.match(app, /analytics\.sessionComplete\(sessionToken, \{ correct: session\.optimal, hands: SESSION_HANDS \}\)/);
-  assert.match(app, /analytics\.dailyComplete\(run\.token, \{ correct: tally, number: run\.number, scored: run\.scored, hands: DAILY_HANDS \}\)/);
-  const settle = app.slice(app.indexOf('function settleHand('), app.indexOf('function settleDailyHand('));
-  assert.match(settle, /analytics\.handComplete\(/);
-  const hand = app.slice(app.indexOf('function startHand('), app.indexOf('function startHand(') + 3000);
-  assert.match(hand, /analytics\.handDealt\(/);
-});
-
-test('start_daily lives inside startDaily, after its re-entry guard', () => {
-  const body = app.slice(app.indexOf('function startDaily('), app.indexOf('function loadDailyHand('));
-  assert.ok(body.indexOf('if (!profile || dailyMode) return;') < body.indexOf('analytics.startDaily('));
-});
-
-test('every Daily Drill entry path names itself', () => {
-  const calls = [...app.matchAll(/(?<![.\w])startDaily\(([^)]*)\)/g)].map((m) => m[1]).filter((arg) => !arg.startsWith('entry ='));
-  assert.deepEqual(calls.sort(), ["'daily_link'", "'map'", "'map_resume'", "'recap'", "'replay'", "'replay'", 'entry'].sort());
-  assert.match(app, /const entry = sharedDaily \? \(dailyLinkEntry \?\? 'title'\) : 'title';/);
-  assert.match(app, /entryParams\.daily \? 'daily_link' : sharedDaily \? 'share_link' : null/);
-});
-
-test('game_start fires in startGym and start_training in startHand', () => {
-  const gym = app.slice(app.indexOf('function startGym('), app.indexOf('function typewriter('));
-  assert.match(gym, /analytics\.gameStart\(/);
-  const hand = app.slice(app.indexOf('function startHand('), app.indexOf('function startHand(') + 200);
-  assert.match(hand, /analytics\.handStarted\(/);
+  // app.js sends trainer lifecycle events only through the tracker
+  {
+    for (const name of Object.values(EVENTS)) {
+      assert.doesNotMatch(app, new RegExp(`trackEvent\\?\\.\\('${name}'`), `${name} bypasses src/rpg/analytics.js`);
+    }
+    assert.equal(app.match(/analytics\.openTrainer\(/g)?.length, 1);
+    assert.equal(app.match(/analytics\.startDaily\(/g)?.length, 1);
+    assert.equal(app.match(/analytics\.gameStart\(/g)?.length, 1);
+    assert.equal(app.match(/analytics\.handStarted\(/g)?.length, 1);
+    assert.equal(app.match(/analytics\.handDealt\(/g)?.length, 1);
+    assert.equal(app.match(/analytics\.decisionMade\(/g)?.length, 1);
+    assert.equal(app.match(/analytics\.handComplete\(/g)?.length, 1);
+    assert.equal(app.match(/analytics\.sessionComplete\(/g)?.length, 1);
+    assert.equal(app.match(/analytics\.dailyComplete\(/g)?.length, 1);
+  }
+  // completions declare the five-hand meaning and the hand stages are wired
+  {
+    assert.match(app, /analytics\.sessionComplete\(sessionToken, \{ correct: session\.optimal, hands: SESSION_HANDS \}\)/);
+    assert.match(app, /analytics\.dailyComplete\(run\.token, \{ correct: tally, number: run\.number, scored: run\.scored, hands: DAILY_HANDS \}\)/);
+    const settle = app.slice(app.indexOf('function settleHand('), app.indexOf('function settleDailyHand('));
+    assert.match(settle, /analytics\.handComplete\(/);
+    const hand = app.slice(app.indexOf('function startHand('), app.indexOf('function startHand(') + 3000);
+    assert.match(hand, /analytics\.handDealt\(/);
+  }
+  // start_daily lives inside startDaily, after its re-entry guard
+  {
+    const body = app.slice(app.indexOf('function startDaily('), app.indexOf('function loadDailyHand('));
+    assert.ok(body.indexOf('if (!profile || dailyMode) return;') < body.indexOf('analytics.startDaily('));
+  }
+  // every Daily Drill entry path names itself
+  {
+    const calls = [...app.matchAll(/(?<![.\w])startDaily\(([^)]*)\)/g)].map((m) => m[1]).filter((arg) => !arg.startsWith('entry ='));
+    assert.deepEqual(calls.sort(), ["'daily_link'", "'map'", "'map_resume'", "'recap'", "'replay'", "'replay'", 'entry'].sort());
+    assert.match(app, /const entry = sharedDaily \? \(dailyLinkEntry \?\? 'title'\) : 'title';/);
+    assert.match(app, /entryParams\.daily \? 'daily_link' : sharedDaily \? 'share_link' : null/);
+  }
+  // game_start fires in startGym and start_training in startHand
+  {
+    const gym = app.slice(app.indexOf('function startGym('), app.indexOf('function typewriter('));
+    assert.match(gym, /analytics\.gameStart\(/);
+    const hand = app.slice(app.indexOf('function startHand('), app.indexOf('function startHand(') + 200);
+    assert.match(hand, /analytics\.handStarted\(/);
+  }
 });
 
 test('landing clicks do not reuse in-app event names', () => {

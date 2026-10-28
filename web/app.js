@@ -66,6 +66,8 @@ function storageWarning() {
   el('saveStatus').textContent = 'PROGRESS IS NOT SAVING. Browser storage is blocked or full. You can still practise in this tab. Prepare a backup below before closing or reloading; open the standalone game if embedded storage is blocked.';
 }
 let profile = null;
+// Blocked storage (privacy modes, third-party iframes) throws on access; read as unset.
+function storedFlag(key) { try { return localStorage.getItem(key); } catch { return null; } }
 try { profile = sanitizeProfile(deserialize(localStorage.getItem(SAVE_KEY))); }
 catch { storageWarning(); }
 let pendingClass = null;
@@ -1146,7 +1148,7 @@ function startGym(gym, sprint = false, mode = null) {
   gameId = gym.game;
   handsWon = 0;
   handsAtGym = 0;
-  handNumber = shortSession ? (profile.activeSession?.dealt ?? profile.activeSession?.played ?? 0) : 0;
+  handNumber = shortSession ? (profile.activeSession?.dealt || profile.activeSession?.played || 0) : 0;
   decisionsThisHand = 0;
   awaitingBadge = false;
   sessionBest = 0;
@@ -1393,7 +1395,7 @@ function renderPlay() {
       ? `RESULT: ${round.winLabel.toUpperCase()}. YOUR HOLD WAS ${round.holdBest ? 'BEST' : 'NOT BEST'}.`
       : `HOLDING ${round.holds.filter(Boolean).length} OF 5`;
     const hint = el('holdHint');
-    if (hint && !round.drawn && !holdHintShown && !localStorage.getItem('pg_hold_hint')) {
+    if (hint && !round.drawn && !holdHintShown && !storedFlag('pg_hold_hint')) {
       holdHintShown = true;
       hint.hidden = false;
       setTimeout(() => { hint.hidden = true; try { localStorage.setItem('pg_hold_hint', '1'); } catch {} }, 6000);
@@ -1790,7 +1792,7 @@ function settleHand({ optimal, difficulty, line, review }) {
   if (!optimal && review) profile = recordMistake(profile, { game: gameId, ...review });
   if (optimal && !coached) handsWon++;
   if (shortSession && profile?.activeSession) {
-    profile = { ...profile, activeSession: { ...profile.activeSession, dealt: (profile.activeSession.dealt ?? 0) + 1 } };
+    profile = { ...profile, activeSession: { ...profile.activeSession, dealt: (profile.activeSession.dealt || 0) + 1 } };
   }
   if (shortSession && !coached) {
     if (optimal) sessionBest = Math.max(sessionBest, profile.streak);
@@ -2370,7 +2372,7 @@ function reasonFor(kept, variant = vpVariant()) {
   if (groups.includes(4)) return 'FOUR OF A KIND PAYS. HOLD IT ALL.';
   if (groups.includes(3)) return 'THREE OF A KIND. HOLD THE TRIPS, DRAW TWO.';
   if (!pairPays && pairs > 0) return 'NO PAIR PAYS. HOLDING FOR THE DRAW.';
-  if (pairs === 2) return 'TWO PAIR. HOLD BOTH FOR FOUR SHOTS AT TRIPS.';
+  if (pairs === 2) return 'TWO PAIR. HOLD BOTH FOR FOUR SHOTS AT A FULL HOUSE.';
   if (pairs === 1) {
     const r = Number(Object.keys(counts).find((k) => counts[k] === 2));
     return r >= 11
@@ -2562,7 +2564,7 @@ document.addEventListener('keydown', (e) => {
 // page load instead of two or three taps. The title screen (daily drill,
 // choose style, etc.) is still reachable from HOME.
 const returning = Boolean(profile);
-let lastVisitDay = profile ? localStorage.getItem('pg_last_visit_day') : null;
+let lastVisitDay = profile ? storedFlag('pg_last_visit_day') : null;
 if (profile && !lastVisitDay) {
   const sessionDays = (profile.sessions ?? []).map(s => {
     try { return localDayKey(new Date(s.completedAt)); } catch { return null; }

@@ -72,3 +72,10 @@ One-time setup:
    `secret-tool store --label='PostHog (pokergym stats)' service posthog-personal-api-key account pokergym`
    Alternatively export `POSTHOG_PERSONAL_API_KEY` for one run. Set `POSTHOG_PROJECT_ID` only if the project is not `670990`.
 3. The account id is read from `.wrangler/cache/wrangler-account.json` (created by any wrangler command) or `CLOUDFLARE_ACCOUNT_ID`.
+
+## Tests
+
+- `npm test` runs the unit suite (`test/*.test.js`). It works on Node 20 and 22+, and it fails if no tests are found.
+- `npm run test:release` runs the build, asset and SEO checks.
+- `npm run test:all` runs both, then the headless browser checks: analytics, the itch embed, offline, and storage denied/quota. It needs Chrome or Chromium installed. It prints a pass/fail summary for each step.
+  As of Oct 27, 2026, all steps pass on Node 20 with Google Chrome.

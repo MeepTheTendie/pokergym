@@ -73,7 +73,7 @@ export const WIN_LABEL = {
 // Pay per hand, indexed by WIN code.
 const JOB_PAY = [0, 0, 1, 2, 3, 4, 6, 9, 25, 0, 0, 0, 0, 0, 50, 250, 0, 0, 0];
 const BONUS_PAY = [0, 0, 1, 2, 3, 4, 5, 8, 0, 25, 40, 80, 40, 80, 50, 250, 0, 0, 0];
-const DDB_PAY = [0, 0, 1, 2, 3, 4, 6, 9, 0, 50, 80, 160, 160, 400, 50, 250, 0, 0, 0];
+const DDB_PAY = [0, 0, 1, 1, 3, 4, 6, 9, 0, 50, 80, 160, 160, 400, 50, 250, 0, 0, 0];
 // Full-pay Deuces Wild: no pair pays, a wild royal is not a natural royal, and
 // four deuces out-pays a straight flush.
 const DEUCES_PAY = [0, 0, 0, 0, 1, 2, 2, 3, 5, 0, 0, 0, 0, 0, 9, 250, 15, 25, 200];
@@ -128,6 +128,9 @@ export const VARIANTS = [
     name: 'Double Double Bonus',
     short: 'DDB',
     ratio: '9/6',
+    // Published 9/6 DDB return (two pair pays 1). Like the other variants'
+    // figures it assumes the max-coin royal (800 per credit); this trainer pays
+    // 250, so it is a reference figure, not this table's exact return.
     expectedReturn: 0.9898,
     minPairRank: 11,
     quadTiers: true,

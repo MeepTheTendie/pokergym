@@ -32,7 +32,9 @@ try {
   await writeFile(path.join(staging, 'web/weekly-score.js'),
     await readFile(path.join(root, 'public/guides/weekly-01/score.js')));
   const game = await readFile(path.join(staging, 'web/index.html'), 'utf8');
-  const portableGame = game.replace('<p class="hint" id="offlineStatus"',
+  // The game links the cloud's extensionless /web/privacy; inside the ZIP that
+  // absolute path points at the host's root, so link the bundled file instead.
+  const portableGame = game.replace(/href="\/web\/privacy"/g, 'href="privacy.html"').replace('<p class="hint" id="offlineStatus"',
     '<p class="hint" style="text-align:center;"><a id="portableWeeklySample" href="weekly-sample.html" target="_blank" rel="noopener">TRY THE FIVE-DECISION WEEKLY SAMPLE</a></p><details id="portableGuides"><summary>THREE-DECISION LEARNING GUIDES</summary>' + guides.map(guide => `<p><a href="guide-${guide}.html" target="_blank" rel="noopener">${{blackjack: 'Blackjack', baccarat: 'Baccarat', 'jacks-or-better': 'Jacks or Better', 'holdem-best-five': 'Hold’em best five'}[guide]}</a></p>`).join('') + '</details><p class="hint" id="offlineStatus"');
   await writeFile(path.join(staging, 'web/index.html'), portableGame.replace('<link rel="manifest" href="manifest.webmanifest">', ''));
   // Keep module-relative assets intact; the entry point must be at the ZIP root.

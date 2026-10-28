@@ -198,3 +198,14 @@ test('session dealt counter is tracked and survives sanitize', async () => {
   const restored2 = sanitizeProfile({ ...p, activeSession: { ...p.activeSession, dealt: 2 } });
   assert.equal(restored2.activeSession.dealt, 2);
 });
+
+test('old saves without a dealt counter fall back to played count', async () => {
+  const { createProfile, beginSession, sanitizeProfile } = await import('../src/rpg/state.js');
+  let p = beginSession(createProfile('scholar'), 'countyfair');
+  const withPlayed = { ...p, activeSession: { ...p.activeSession, played: 3, dealt: 0 } };
+  assert.equal(sanitizeProfile(withPlayed).activeSession.dealt, 3);
+  const { dealt, ...noDealt } = withPlayed.activeSession;
+  assert.equal(sanitizeProfile({ ...p, activeSession: noDealt }).activeSession.dealt, 3);
+  const zeroSave = { ...p, activeSession: { ...p.activeSession, played: 0, dealt: 0 } };
+  assert.equal(sanitizeProfile(zeroSave).activeSession.dealt, 0);
+});
