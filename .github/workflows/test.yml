@@ -11,7 +11,13 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
-      - run: npm test
+      - run: npm ci
+      - name: Provide chromium on PATH
+        run: |
+          sudo ln -sf "$(command -v google-chrome)" /usr/local/bin/chromium
+          chromium --version
+      - name: Full test suite (unit + release + browser checks)
+        run: npm run test:all
       - name: Install Bend
         run: curl -fsSL https://bend-lang.com/install.sh | sh
       - name: Verify Bend reference
