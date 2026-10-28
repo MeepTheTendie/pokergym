@@ -14,7 +14,7 @@ The single shared record for Poker Gym coordination between Wes, Wren, ChatGPT, 
 - **Oct 26 explicit-entry boundary:** Beam's Worker `363bbb48` fix makes `start_daily.entry=daily_link` measurable from its deploy; Wren's Oct 26 pull shows no site activity yet to judge it, and pre-fix daily-link starts must not be compared with post-fix starts.
 - **Oct 26 identity boundary:** OpenCode's Worker `a18f1521` adds a stable `pg_player_id_v1` device identity and `$identify` properties; retention before it is cookie-scoped, after it is device-scoped, so do not compare across the boundary. It does not change which events count as a visit or a player.
 - **Beam audit artifact:** `automation/artifacts/beam/operations-audit-2026-10-26.md` (read-only operations audit for Oct 13–26).
-- **Last updated:** 2026-10-28 (OpenCode: share tracking, first-decision audit, return-path plan). Earlier: scenario deep links + eight one-question pages). Earlier: 2026-10-27 ~1:35 PM CT (OpenCode, Grok software items 2–3 + headless-crawler exclusion; Worker `a9482fad`). Earlier today: Grok ~1:30 PM CT, Wren Oct 27 morning pull.
+- **Last updated:** 2026-10-28 (OpenCode: web-push reminder live). Earlier: share tracking, first-decision audit, return-path plan). Earlier: scenario deep links + eight one-question pages). Earlier: 2026-10-27 ~1:35 PM CT (OpenCode, Grok software items 2–3 + headless-crawler exclusion; Worker `a9482fad`). Earlier today: Grok ~1:30 PM CT, Wren Oct 27 morning pull.
 
 ## How this document works
 
@@ -126,6 +126,16 @@ report at implementation: 103 retention-window visitors, D1 site 3/97, D1
 return-to-game 0/97, D7 return-to-game 0/14, status **fix retention**.
 
 ## Decision Log
+
+- **2026-10-28, afternoon (OpenCode, web-push reminder live; Worker `75aa875a-8341-423b-a124-0d05f1fb8675`):** Wes approved and this is now the return path. Not a plan any more.
+  - **What a player sees.** After any five-hand session or Daily completion, the recap shows **REMIND ME TOMORROW**. Tapping it asks the browser for notification permission, then stores one push endpoint. The same button becomes **REMINDERS ON · TAP TO STOP** and deletes the endpoint when tapped again. No email, no account, no PII.
+  - **What runs.** One Cron Trigger (`0 14 * * *` = 09:00 CT in winter, 08:00 in summer) sends a single reminder, "Today's drill is ready", opening `/web/?daily=1&ref=push`. Dead endpoints are deleted on 404/410 so the list cannot rot. Copy says "a reminder", never a fixed time, so DST is not a broken promise.
+  - **What was built.** `worker/push.js` (VAPID ES256 JWT + RFC 8291 aes128gcm encryption, no dependencies), `POST /push/subscribe` and `/push/unsubscribe`, KV namespace `PUSH_SUBS` (`32215925edb84e618d897411ff9b9394`), service-worker `push`/`notificationclick` handlers, `web/push.js`, a privacy-page disclosure, `ref=push` and a `push_opt_in` event.
+  - **Verified:** 342/342 tests, including an independent RFC 8291 decrypt of our own payload, VAPID signature verification, and a 410 delete of a dead subscription; production `POST /push/subscribe` 200, invalid payload 400, unsubscribe 200, KV empty afterwards; headless Chromium reports the service worker active and `pushSupported()` true.
+  - **Not verified, needs Wes:** actual delivery to a real device. Headless cannot receive a push. Tap the recap button once on a phone or desktop: the confirmation is tomorrow's 09:00 CT notification. If it does not arrive, the likely causes are permission denied at OS level or a stale service worker.
+  - **Ops:** the VAPID private key is a Worker secret and a copy sits at `~/.config/pokergym/vapid.json` (outside the repo, mode 600). **If that key is lost, every existing subscription breaks and must be re-collected.**
+  - **Known limits:** one broadcast per day to every subscriber, no per-person timing and no "already played today" suppression. That is deliberate for v1; the data will show whether the reminder helps before any of it is personalised.
+  - Sources: `worker/push.js`, `worker/index.js`, `web/push.js`, `scripts/offline-worker.js`, live endpoint checks, `npm test`.
 
 - **2026-10-28, afternoon (OpenCode, share tracking + first-decision audit; Worker `874badca-4426-4d7b-8326-997cade8e39a`):**
   - **Share loop measured honestly.** It was never broken: the recap's CHALLENGE A FRIEND already copies on desktop and the Daily result has an image card. **Zero `share` events from 14 five-hand completers**, i.e. nobody presses it. Fixed the one real hole: the Daily copy path copied without emitting `share`. Both paths now emit `share` with `channel` (native/copy) and `surface` (recap, recap_daily, daily), so the next read can tell a missing button from a missing intent.

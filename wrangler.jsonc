@@ -24,5 +24,15 @@
   },
   "analytics_engine_datasets": [
     { "binding": "VISITS", "dataset": "pokergym_visits" }
-  ]
+  ],
+  // Web-push subscriptions, one KV entry per device. No PII: the endpoint and
+  // the two public keys the push service issued. Delete on 404/410.
+  "kv_namespaces": [
+    { "binding": "PUSH_SUBS", "id": "32215925edb84e618d897411ff9b9394" }
+  ],
+  // 14:00 UTC = 09:00 America/Chicago in winter, 08:00 in summer. The copy is
+  // deliberately "a reminder", so the DST shift is not a promise we break.
+  "triggers": {
+    "crons": ["0 14 * * *"]
+  }
 }

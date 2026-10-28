@@ -35,6 +35,7 @@ import { captureDrillPlan, restoreDrillPlan, BLACKJACK_DRILLS, DRILL_HANDS, DRIL
 import { drawArt, drawTrainerBack } from './characters.js';
 import audio from './audio.js?v=20261017-vegas1';
 import haptics from './haptics.js';
+import { pushSupported, currentSubscription, enablePush, disablePush } from './push.js';
 
 const SAVE_KEY = 'pokergym:save:v1';
 const HANDS_TO_WIN = 10;
@@ -2090,6 +2091,27 @@ function renderSessionSummary(session, daily = null) {
     } catch (e) { /* user cancelled */ }
   };
   actions.appendChild(challenge);
+  // The return path: one notification a day, no email and no account. The
+  // button doubles as the off switch so opting out is one tap, not a hunt.
+  if (pushSupported()) {
+    const remind = document.createElement('button');
+    remind.type = 'button';
+    remind.textContent = 'REMIND ME TOMORROW';
+    remind.onclick = async () => {
+      const existing = await currentSubscription();
+      remind.disabled = true;
+      const result = existing ? await disablePush() : await enablePush();
+      remind.disabled = false;
+      window.trackEvent?.('push_opt_in', { result, surface: 'recap' });
+      remind.textContent = result === 'subscribed'
+        ? 'REMINDERS ON \u00b7 TAP TO STOP'
+        : 'REMIND ME TOMORROW';
+    };
+    actions.appendChild(remind);
+    currentSubscription().then(sub => {
+      if (sub) remind.textContent = 'REMINDERS ON \u00b7 TAP TO STOP';
+    });
+  }
   box.appendChild(actions);
 
   if (missed > 0) {

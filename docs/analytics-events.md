@@ -52,7 +52,8 @@ visible in the data rather than implied by the event name.
 | `time_to_first_decision` | The first player decision in a run is made. | `ms` (milliseconds from deal to decision), `game`, `mode`, `run_id`, `run_kind`, `entry`, `event_version` |
 | `recap_view` | The end-of-run recap is shown after a five-hand session **or a completed Daily Drill**. | `daily_done`, `missed`, `run_id`, `run_kind` (`session`/`daily`), `event_version` |
 | `recap_tap` | A button on the end-of-run recap is tapped. | `button`: `daily_drill`, `play_again`, `replay_daily`, `challenge`, `review_mistakes`, `install`; `run_id`, `event_version` |
-| `share` | A result is shared. | `channel`: `native`, `copy`, `challenge` |
+| `share` | A result is shared. | `channel`: `native`, `copy`, `challenge`; `surface`: `recap`, `recap_daily`, `daily`, `invite` |
+| `push_opt_in` | The recap reminder button is used. | `result`: `subscribed`, `unsubscribed`, `denied`, `dismissed`, `error`; `surface` |
 | `feedback_submit` | The feedback form is submitted. | `clarity`, `returnInterest` |
 
 A completion only fires for a live start in the same page load, so every

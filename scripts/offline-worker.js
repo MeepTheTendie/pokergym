@@ -45,3 +45,37 @@ self.addEventListener('fetch', event => {
     return await cache.match(asset) || fetch(event.request);
   })());
 });
+
+// Web push: the daily drill reminder. The payload is JSON from the Worker;
+// a malformed payload still shows a generic reminder rather than nothing.
+self.addEventListener('push', event => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch { data = {}; }
+  const title = typeof data.title === 'string' && data.title ? data.title : 'Play Poker Gym';
+  const body = typeof data.body === 'string' && data.body ? data.body : 'Today\u2019s drill is ready.';
+  const url = typeof data.url === 'string' && data.url.startsWith('/') ? data.url : '/web/?daily=1&ref=push';
+  event.waitUntil(self.registration.showNotification(title, {
+    body,
+    tag: typeof data.tag === 'string' ? data.tag : 'daily-drill',
+    icon: '/web/icon-192.png',
+    badge: '/web/icon-192.png',
+    data: { url },
+  }));
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const url = event.notification.data && typeof event.notification.data.url === 'string'
+    ? event.notification.data.url
+    : '/web/?daily=1&ref=push';
+  event.waitUntil((async () => {
+    const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const client of windows) {
+      if ('focus' in client) {
+        if ('navigate' in client) await client.navigate(url).catch(() => {});
+        return client.focus();
+      }
+    }
+    if (self.clients.openWindow) return self.clients.openWindow(url);
+  })());
+});

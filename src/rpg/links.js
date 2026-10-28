@@ -16,6 +16,7 @@ export const PUBLISHED_REFS = Object.freeze([
   'reddit', 'playmygame', 'webgames',
   'sideproject', 'hn', 'videopoker',
   'instagram', 'facebook',
+  'push', 'guide',
 ]);
 
 // Host -> ref fallback for visitors who arrive without a ?ref= tag. Keys are

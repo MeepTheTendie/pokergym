@@ -259,3 +259,65 @@ test('stats: a one-pageview profile with a headless fingerprint is excluded', ()
   assert.match(clause, /screen_width = 800 AND screen_height = 600/);
   assert.match(clause, /screen_width = 2000 AND screen_height = 2000/);
 });
+
+function kvStub() {
+  const map = new Map();
+  return {
+    map,
+    async put(key, value) { map.set(key, value); },
+    async get(key) { return map.get(key) ?? null; },
+    async delete(key) { map.delete(key); },
+    async list() { return { keys: [...map.keys()].map(name => ({ name })), list_complete: true }; },
+  };
+}
+
+test('push subscription is validated and stored, then removable', async () => {
+  const pair = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
+  const raw = Buffer.from(await crypto.subtle.exportKey('raw', pair.publicKey)).toString('base64url');
+  const body = JSON.stringify({ endpoint: 'https://push.example.test/send/abc', keys: { p256dh: raw, auth: Buffer.alloc(16, 7).toString('base64url') } });
+  const e = { ...env(), PUSH_SUBS: kvStub() };
+  const c = ctx();
+
+  const ok = await worker.fetch(new Request('https://playpokergym.com/push/subscribe', { method: 'POST', body }), e, c);
+  assert.equal(ok.status, 200);
+  assert.equal(e.PUSH_SUBS.map.size, 1);
+  const stored = JSON.parse([...e.PUSH_SUBS.map.values()][0]);
+  assert.equal(stored.endpoint, 'https://push.example.test/send/abc');
+  assert.equal(stored.keys.p256dh, raw);
+
+  const bad = await worker.fetch(new Request('https://playpokergym.com/push/subscribe', { method: 'POST', body: JSON.stringify({ endpoint: 'http://x', keys: {} }) }), e, c);
+  assert.equal(bad.status, 400);
+
+  const gone = await worker.fetch(new Request('https://playpokergym.com/push/unsubscribe', { method: 'POST', body: JSON.stringify({ endpoint: 'https://push.example.test/send/abc' }) }), e, c);
+  assert.equal(gone.status, 200);
+  assert.equal(e.PUSH_SUBS.map.size, 0);
+});
+
+test('push subscribe reports unavailable when the KV binding is missing', async () => {
+  const res = await worker.fetch(new Request('https://playpokergym.com/push/subscribe', { method: 'POST', body: '{}' }), env(), ctx());
+  assert.equal(res.status, 503);
+});
+
+test('the daily sender deletes a subscription the push service reports gone', async () => {
+  const pair = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
+  const raw = Buffer.from(await crypto.subtle.exportKey('raw', pair.publicKey)).toString('base64url');
+  const kv = kvStub();
+  await kv.put('sub:one', JSON.stringify({
+    endpoint: 'https://push.example.test/send/gone',
+    keys: { p256dh: raw, auth: Buffer.alloc(16, 1).toString('base64url') },
+  }));
+  const signer = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+  const jwk = await crypto.subtle.exportKey('jwk', signer.privateKey);
+  const pub = Buffer.from(await crypto.subtle.exportKey('raw', signer.publicKey)).toString('base64url');
+  const e = { PUSH_SUBS: kv, VAPID_PRIVATE_KEY: jwk.d, VAPID_PUBLIC_KEY: pub, VAPID_SUBJECT: 'mailto:t@e.com' };
+  const original = globalThis.fetch;
+  globalThis.fetch = async () => new Response('', { status: 410 });
+  try {
+    const c = ctx();
+    await worker.scheduled({}, e, c);
+    await Promise.all(c.waits);
+  } finally {
+    globalThis.fetch = original;
+  }
+  assert.equal(kv.map.size, 0);
+});

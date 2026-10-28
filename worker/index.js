@@ -5,6 +5,56 @@
 import { countBucket, dataPoint } from './count.js';
 import { isIngestPath, proxyPostHog } from './proxy.js';
 import { SECURITY_HEADERS } from './security.js';
+import { sendPush, subscriptionId, validSubscription } from './push.js';
+
+// One reminder a day, 09:00 America/Chicago in winter / 08:00 in summer.
+// The copy says "a reminder", never "every day at a time", so DST is harmless.
+const PUSH_PAYLOAD = JSON.stringify({
+  title: 'Play Poker Gym',
+  body: 'Today\u2019s drill is ready \u2014 four games, five hands each.',
+  url: '/web/?daily=1&ref=push',
+  tag: 'daily-drill',
+});
+
+function pushJson(body, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      'content-type': 'application/json; charset=utf-8',
+      'cache-control': 'no-store',
+      ...SECURITY_HEADERS,
+    },
+  });
+}
+
+async function readJson(request, limit = 4096) {
+  const text = await request.text();
+  if (text.length > limit) return null;
+  try { return JSON.parse(text); } catch { return null; }
+}
+
+async function subscribe(request, env) {
+  if (!env.PUSH_SUBS) return pushJson({ ok: false, error: 'unavailable' }, 503);
+  const body = await readJson(request);
+  if (!body || !validSubscription(body)) return pushJson({ ok: false, error: 'invalid' }, 400);
+  const id = await subscriptionId(body.endpoint);
+  const record = {
+    endpoint: body.endpoint,
+    keys: { p256dh: body.keys.p256dh, auth: body.keys.auth },
+    created: new Date().toISOString(),
+  };
+  await env.PUSH_SUBS.put(`sub:${id}`, JSON.stringify(record));
+  return pushJson({ ok: true });
+}
+
+async function unsubscribe(request, env) {
+  if (!env.PUSH_SUBS) return pushJson({ ok: false, error: 'unavailable' }, 503);
+  const body = await readJson(request);
+  const endpoint = body && typeof body.endpoint === 'string' ? body.endpoint : '';
+  if (!endpoint || endpoint.length > 1024) return pushJson({ ok: false, error: 'invalid' }, 400);
+  await env.PUSH_SUBS.delete(`sub:${await subscriptionId(endpoint)}`);
+  return pushJson({ ok: true });
+}
 
 // Re-emit the asset response with the shared security headers. The worker runs
 // first for the HTML entry pages, where Cloudflare does not apply _headers.
@@ -34,6 +84,14 @@ export default {
         return new Response('analytics proxy unavailable', { status: 502 });
       }
     }
+    // Web push: the only return path that does not need a platform's
+    // permission. Same-origin POSTs from the recap; no PII is stored.
+    if (url.pathname === '/push/subscribe' && request.method === 'POST') {
+      return subscribe(request, env);
+    }
+    if (url.pathname === '/push/unsubscribe' && request.method === 'POST') {
+      return unsubscribe(request, env);
+    }
     // Keep every visitor on one save/install origin. Redirect the whole www
     // host to the bare domain so browser-local saves and visitor counts do
     // not split across two origins.
@@ -55,5 +113,43 @@ export default {
       }
     }
     return secure(response);
+  },
+
+  // Daily reminder. Dead subscriptions are deleted on 404/410 so the list
+  // does not rot; any other failure is logged and retried the next day.
+  async scheduled(event, env, ctx) {
+    if (!env.PUSH_SUBS || !env.VAPID_PRIVATE_KEY || !env.VAPID_PUBLIC_KEY) return;
+    const vapid = {
+      publicKey: env.VAPID_PUBLIC_KEY,
+      privateKey: env.VAPID_PRIVATE_KEY,
+      subject: env.VAPID_SUBJECT || 'mailto:meep@mail.grokbot.com',
+    };
+    const run = (async () => {
+      let cursor;
+      let sent = 0;
+      let dead = 0;
+      let failed = 0;
+      do {
+        const page = await env.PUSH_SUBS.list({ cursor, limit: 500 });
+        for (const key of page.keys) {
+          const raw = await env.PUSH_SUBS.get(key.name);
+          if (!raw) continue;
+          let record;
+          try { record = JSON.parse(raw); } catch { await env.PUSH_SUBS.delete(key.name); continue; }
+          if (!validSubscription(record)) { await env.PUSH_SUBS.delete(key.name); continue; }
+          try {
+            const status = await sendPush(record, PUSH_PAYLOAD, vapid);
+            if (status === 404 || status === 410) { await env.PUSH_SUBS.delete(key.name); dead++; }
+            else if (status >= 200 && status < 300) sent++;
+            else failed++;
+          } catch {
+            failed++;
+          }
+        }
+        cursor = page.list_complete ? undefined : page.cursor;
+      } while (cursor);
+      console.log(`push: sent ${sent}, dead ${dead}, failed ${failed}`);
+    })();
+    if (ctx && ctx.waitUntil) ctx.waitUntil(run); else await run();
   },
 };

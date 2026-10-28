@@ -9,7 +9,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
 test('PUBLISHED_REFS is exactly the published list', () => {
-  assert.deepEqual([...PUBLISHED_REFS], ['share', 'invite', 'youtube', 'tiktok', 'reels', 'x', 'reddit', 'playmygame', 'webgames', 'sideproject', 'hn', 'videopoker', 'instagram', 'facebook']);
+  assert.deepEqual([...PUBLISHED_REFS], ['share', 'invite', 'youtube', 'tiktok', 'reels', 'x', 'reddit', 'playmygame', 'webgames', 'sideproject', 'hn', 'videopoker', 'instagram', 'facebook', 'push', 'guide']);
   assert.ok(Object.isFrozen(PUBLISHED_REFS));
 });
 
