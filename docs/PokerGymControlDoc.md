@@ -127,6 +127,8 @@ return-to-game 0/97, D7 return-to-game 0/14, status **fix retention**.
 
 ## Decision Log
 
+- **2026-10-27 (Beam):** PR #3 merged to main (e84eaf3) and deployed (Cloudflare 4516d344); coach-line and old-save fallback shipped, test:all green.
+
 - **2026-10-27 (Beam):** Pushed `beam/coach-and-dealt-fix` (a580bee + tests) to origin; test:all green. Ready for Grok to fold into PR #3.
 
 - **2026-10-27 (Beam):** Fixed coach two-pair line to "full house, not trips" and old saves without a dealt counter now fall back to played count; test:all green.
