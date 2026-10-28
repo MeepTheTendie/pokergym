@@ -292,6 +292,24 @@ FROM (
 )`;
 }
 
+// People who started a hand but never made a single decision. Not excluded —
+// a real visitor can bounce on the first hand — but their count is the honest
+// size of the auto-start/bot suspicion, so it is printed next to the audit.
+// decision_made only exists from 2026-10-21 23:13 UTC, so earlier starts are
+// out of scope or they would all look like silent drops.
+export function zeroDecisionQuery(startDay, endDayExclusive, { partial = false, now = new Date() } = {}) {
+  const range = partial ? dayClause(startDay, { partial: true, now }) : rangeClause(startDay, endDayExclusive);
+  return `SELECT count() AS people FROM (
+  SELECT person_id
+  FROM events
+  WHERE ${range} AND ${clean}
+    AND timestamp >= toDateTime('2026-10-21 23:13:00')
+  GROUP BY person_id
+  HAVING countIf(event IN ('game_start', 'start_daily')) > 0
+    AND countIf(event = 'decision_made') = 0
+)`;
+}
+
 export function auditQuery(startDay, endDayExclusive, { partial = false, now = new Date() } = {}) {
   const range = partial ? dayClause(startDay, { partial: true, now }) : rangeClause(startDay, endDayExclusive);
   return `SELECT
@@ -659,7 +677,7 @@ export function formatRetentionSummary(overall = {}) {
 export function formatReport(data) {
   const {
     now, today, yesterday, yesterdayWindow, todayWindow, last7, prev7,
-    sources, sourcesToday, funnel, preInstrumentation, daily, dailyRepeat, retention, audit, auditToday, auditEpoch, warnings,
+    sources, sourcesToday, funnel, preInstrumentation, daily, dailyRepeat, retention, audit, auditToday, auditEpoch, zeroDecision, warnings,
     return7, returnPrev7, decision,
   } = data;
   const lines = [];
@@ -733,6 +751,7 @@ export function formatReport(data) {
   lines.push(`  matched by rule (may overlap): automation UA ${audit.automation_profiles} · internal/test cohort ${audit.cohort_profiles} · probe ref ${audit.probe_ref_profiles ?? 0} · probe event ${audit.probe_event_profiles ?? 0}`);
   lines.push('');
   lines.push('DATA QUALITY');
+  if (zeroDecision) lines.push(`  ${zeroDecision} people started a hand but never made a decision (possible auto-start bots or instant bounces; counted, not excluded)`);
   lines.push(warnings.length ? warnings.map(w => `  ! ${w}`).join('\n') : '  OK — every source row reconciles to the visitor denominator');
   return lines.join('\n');
 }
@@ -771,7 +790,7 @@ async function main() {
     q(windowTotalsQuery(w.last7.start, addDays(w.last7.end, 1))),
     q(windowTotalsQuery(w.prev7.start, addDays(w.prev7.end, 1))),
   ]);
-  const [sourcePeopleAll, windowPeople, todayPeople, firstGames, personDays, funnel, preInstrumentation, daily, dailyRepeatRows, audit, auditToday, auditEpoch, analysisTotals] = await Promise.all([
+  const [sourcePeopleAll, windowPeople, todayPeople, firstGames, personDays, funnel, preInstrumentation, daily, dailyRepeatRows, audit, auditToday, auditEpoch, zeroDecision, analysisTotals] = await Promise.all([
     q(sourcePersonQuery()),
     q(personWindowQuery(w.analysis.start, w.analysis.end)),
     q(personWindowQuery(w.today, w.todayPartialEnd, { partial: true, now })),
@@ -784,6 +803,7 @@ async function main() {
     q(auditQuery(w.analysis.start, w.analysis.end)),
     q(auditQuery(w.today, w.todayPartialEnd, { partial: true, now })),
     q(auditQuery(w.epoch.start, w.todayPartialEnd, { partial: true, now })),
+    q(zeroDecisionQuery(w.analysis.start, w.analysis.end)),
     q(windowTotalsQuery(w.analysis.start, w.analysis.end)),
   ]);
 
@@ -841,6 +861,7 @@ async function main() {
     audit: audit[0] ?? { raw_visitors: 0, clean_visitors: 0, automation_profiles: 0, cohort_profiles: 0 },
     auditToday: auditToday[0] ?? { raw_visitors: 0, clean_visitors: 0, automation_profiles: 0, cohort_profiles: 0 },
     auditEpoch: auditEpoch[0] ?? { raw_visitors: 0, clean_visitors: 0, automation_profiles: 0, cohort_profiles: 0 },
+    zeroDecision: Number(zeroDecision[0]?.people ?? 0),
   };
   data.warnings = dataWarnings({
     sourceTotal: sources.total.visitors,

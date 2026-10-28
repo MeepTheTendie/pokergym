@@ -14,7 +14,7 @@ The single shared record for Poker Gym coordination between Wes, Wren, ChatGPT, 
 - **Oct 26 explicit-entry boundary:** Beam's Worker `363bbb48` fix makes `start_daily.entry=daily_link` measurable from its deploy; Wren's Oct 26 pull shows no site activity yet to judge it, and pre-fix daily-link starts must not be compared with post-fix starts.
 - **Oct 26 identity boundary:** OpenCode's Worker `a18f1521` adds a stable `pg_player_id_v1` device identity and `$identify` properties; retention before it is cookie-scoped, after it is device-scoped, so do not compare across the boundary. It does not change which events count as a visit or a player.
 - **Beam audit artifact:** `automation/artifacts/beam/operations-audit-2026-10-26.md` (read-only operations audit for Oct 13–26).
-- **Last updated:** 2026-10-28 (OpenCode, scenario deep links + eight one-question pages). Earlier: 2026-10-27 ~1:35 PM CT (OpenCode, Grok software items 2–3 + headless-crawler exclusion; Worker `a9482fad`). Earlier today: Grok ~1:30 PM CT, Wren Oct 27 morning pull.
+- **Last updated:** 2026-10-28 (OpenCode: share tracking, first-decision audit, return-path plan). Earlier: scenario deep links + eight one-question pages). Earlier: 2026-10-27 ~1:35 PM CT (OpenCode, Grok software items 2–3 + headless-crawler exclusion; Worker `a9482fad`). Earlier today: Grok ~1:30 PM CT, Wren Oct 27 morning pull.
 
 ## How this document works
 
@@ -126,6 +126,13 @@ report at implementation: 103 retention-window visitors, D1 site 3/97, D1
 return-to-game 0/97, D7 return-to-game 0/14, status **fix retention**.
 
 ## Decision Log
+
+- **2026-10-28, afternoon (OpenCode, share tracking + first-decision audit; Worker `874badca-4426-4d7b-8326-997cade8e39a`):**
+  - **Share loop measured honestly.** It was never broken: the recap's CHALLENGE A FRIEND already copies on desktop and the Daily result has an image card. **Zero `share` events from 14 five-hand completers**, i.e. nobody presses it. Fixed the one real hole: the Daily copy path copied without emitting `share`. Both paths now emit `share` with `channel` (native/copy) and `surface` (recap, recap_daily, daily), so the next read can tell a missing button from a missing intent.
+  - **First-decision audit (new report line).** `npm run report` now prints "N people started a hand but never made a decision". It is not an exclusion — a real visitor can bounce on the first hand — it is the honest size of the auto-start suspicion. Current 14-day figure: **7**, bounded to `decision_made` existing (2026-10-21 23:13 UTC); without that bound it reads 33 and is meaningless.
+  - **Return path (idea 1) — planned, not half-built.** Agreed with Wes: web push is the only mechanism that creates a second visit without a platform's permission. The build is four pieces: (a) opt-in on the recap, `pushManager.subscribe` with a VAPID public key; (b) service-worker `push` and `notificationclick` handlers; (c) `POST /push/subscribe` in the Worker storing the subscription in KV; (d) a daily Cron Trigger that sends "today's drill is ready" and drops 404/410 subscriptions. Pieces (c) and (d) need account changes I will not make unasked: a KV namespace, a binding plus cron trigger in `wrangler.jsonc`, and a VAPID private key as a Worker secret. Sender encryption must be verified against a real browser subscription; headless Chromium cannot receive push, so this needs one phone or desktop check by Wes. Wes's go-ahead needed on those three resources.
+  - **Not done, still owned elsewhere:** internal links from the four game guides to the eight scenario pages (Wren), Search Console/Bing verification (Wes), captions pointing at `/guides/<slug>/` (Grok).
+  - Verified: 334/334 tests; report output above; deploy live.
 
 - **2026-10-28 (OpenCode, scenario deep links + one-question pages; Worker `bb26454b-6af5-4e49-ac22-030f81bb2554`):** Shipped the acquisition piece discussed after Reddit went quiet, and it is the only code change today.
   - **Wes decision recorded:** no paid ads until the product proves it can generate revenue. Not revisited here.

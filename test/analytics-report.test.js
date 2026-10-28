@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   CHICAGO_TZ, DAY_EXPR, DECISION_THRESHOLDS, addDays, chicagoDayKey, chicagoMidnightUtc,
   chicagoOffsetMinutes, rangeClause, dayClause, windowTotalsQuery, personWindowQuery,
-  funnelQuery, dailyDrillQuery, sourcePersonQuery, auditQuery, firstGameQuery, personDayQuery,
+  funnelQuery, dailyDrillQuery, sourcePersonQuery, auditQuery, zeroDecisionQuery, firstGameQuery, personDayQuery,
   aggregateSources, sourceLabel, computeRetention, returnRate, rates, dataWarnings,
   decisionStatus, formatRetention, formatRetentionSummary, formatSources, sampleStatus,
   wilsonInterval, windows, REPORT_EPOCH,
@@ -308,4 +308,11 @@ test('the epoch audit starts at the reporting epoch, not a rolling window', () =
   assert.equal(REPORT_EPOCH, '2026-10-21');
   const w = windows(new Date('2026-10-27T12:00:00Z'));
   assert.deepEqual(w.epoch, { start: '2026-10-21', end: '2026-10-27' });
+});
+
+test('the zero-decision audit ignores starts before decision_made existed', () => {
+  const sql = zeroDecisionQuery('2026-10-14', '2026-10-28');
+  assert.match(sql, /2026-10-21 23:13:00/);
+  assert.match(sql, /decision_made/);
+  assert.match(sql, /HAVING/);
 });

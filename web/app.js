@@ -724,6 +724,7 @@ async function shareDaily(text, useShare, results = null, number = null, games =
     } else {
       await navigator.clipboard.writeText(text);
       status.textContent = 'Result copied. Nothing sent; paste it where you choose.';
+      window.trackEvent?.('share', { channel: 'copy', surface: 'daily' });
     }
   } catch (error) {
     status.textContent = error?.name === 'AbortError'
@@ -2080,11 +2081,12 @@ function renderSessionSummary(session, daily = null) {
     try {
       if (typeof navigator.share === 'function') {
         await navigator.share({ title: 'Play Poker Gym Challenge', text });
+        window.trackEvent?.('share', { channel: 'native', surface: daily ? 'recap_daily' : 'recap' });
       } else {
         await navigator.clipboard.writeText(text);
+        window.trackEvent?.('share', { channel: 'copy', surface: daily ? 'recap_daily' : 'recap' });
       }
       analytics.recapTap({ button: 'challenge', run_id: recapRunId });
-      window.trackEvent?.('share', { channel: daily ? 'daily' : 'challenge' });
     } catch (e) { /* user cancelled */ }
   };
   actions.appendChild(challenge);
