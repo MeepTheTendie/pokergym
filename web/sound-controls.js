@@ -6,7 +6,7 @@ import { isHapticsEnabled, toggleHaptics } from './haptics.js';
 const button = document.getElementById('btnSound');
 function render() {
   const on = !audio.isMuted();
-  button.textContent = on ? 'SND ON' : 'SND OFF';
+  button.textContent = on ? 'Sound on' : 'Sound off';
   button.setAttribute('aria-pressed', String(on));
   button.setAttribute('aria-label', on ? 'Mute sound' : 'Enable sound');
   button.title = on ? 'Sound is on. Press to mute.' : 'Sound is off. Press to enable.';
@@ -19,7 +19,7 @@ button.onclick = () => {
 const hapticButton = document.getElementById('btnHaptics');
 function renderHaptics() {
   const on = isHapticsEnabled();
-  hapticButton.textContent = on ? 'HAPTICS ON' : 'HAPTICS OFF';
+  hapticButton.textContent = on ? 'Haptics on' : 'Haptics off';
   hapticButton.setAttribute('aria-pressed', String(on));
   hapticButton.setAttribute('aria-label', on ? 'Disable haptics' : 'Enable haptics');
   hapticButton.title = on ? 'Haptics on. Press to disable.' : 'Haptics off. Press to enable.';

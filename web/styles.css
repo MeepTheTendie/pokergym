@@ -119,8 +119,8 @@ h1, h2, h3 {
   display: block;
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: 1.6px;
-  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  text-transform: none;
   color: var(--dim);
   margin-top: 2px;
 }
@@ -201,10 +201,10 @@ textarea { width: 100%; resize: vertical; }
 }
 .window > h2,
 .section-header > h2 {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 800;
-  letter-spacing: 1.3px;
-  text-transform: uppercase;
+  letter-spacing: -0.1px;
+  text-transform: none;
   color: var(--gold);
   margin: 0 0 10px;
 }
@@ -258,8 +258,8 @@ textarea { width: 100%; resize: vertical; }
   white-space: nowrap;
   font-size: 11px;
   font-weight: 800;
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  text-transform: none;
   color: var(--gold);
 }
 .title-art canvas.title-trainer {
@@ -338,10 +338,10 @@ textarea { width: 100%; resize: vertical; }
 }
 .today-hero-copy { flex: 1; min-width: 0; }
 .today-hero-copy > h2 {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
-  letter-spacing: 1.4px;
-  text-transform: uppercase;
+  letter-spacing: 0.1px;
+  text-transform: none;
   color: var(--gold);
   margin: 0 0 4px;
 }
@@ -440,10 +440,10 @@ textarea { width: 100%; resize: vertical; }
   padding: 4px 2px 10px;
 }
 .world-heading h2 {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 800;
-  letter-spacing: 1.3px;
-  text-transform: uppercase;
+  letter-spacing: -0.1px;
+  text-transform: none;
   color: var(--gold);
 }
 .world-heading span { font-size: 11px; color: var(--dim); }
@@ -654,10 +654,10 @@ img.badge {
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--dim);
   margin-bottom: 8px;
 }
@@ -696,10 +696,10 @@ img.badge {
 .dialogue p { margin: 6px 0 0; font-size: 15px; line-height: 1.5; }
 .coach-eyebrow {
   display: block;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  text-transform: none;
   color: var(--gold);
   margin-bottom: 2px;
 }
@@ -764,10 +764,10 @@ img.badge {
   width: 100%;
 }
 .battle-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--gold);
 }
 .battle-pips {
@@ -827,10 +827,10 @@ img.badge {
   border-top: 1px solid var(--border);
 }
 .variant-label {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--dim);
 }
 #variantSelect {
@@ -930,10 +930,10 @@ img.badge {
 .zone-head {
   margin: 0 0 8px;
   text-align: center;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--dim);
 }
 .zone-head b { color: var(--gold); }
@@ -963,10 +963,10 @@ img.badge {
   padding: 6px 0;
   display: flex;
   align-items: center;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--gold);
 }
 summary:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
@@ -989,6 +989,85 @@ summary:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
   border-radius: 10px;
   text-align: center;
 }
+
+/* Two reminder choices with different outcomes: one browser notification,
+   one downloaded calendar file. The push action is the only gold button here. */
+.recap-reminders {
+  margin: 16px 0 4px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.recap-reminders h3 {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 6px;
+}
+.recap-reminders > .hint { margin: 0 0 12px; }
+.reminder-option {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  margin-top: 10px;
+  background: rgba(10, 26, 20, 0.45);
+}
+.reminder-option h4 {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 4px;
+}
+.reminder-option .hint { margin: 0 0 10px; }
+.reminder-push {
+  border-color: var(--border-gold);
+  background: linear-gradient(165deg, rgba(212, 168, 67, 0.12), rgba(10, 26, 20, 0.55));
+}
+.reminder-push-button {
+  width: 100%;
+  font-size: 15px;
+}
+.reminder-push-button.is-on {
+  background: linear-gradient(180deg, #38cf7a, #1f9b55);
+  color: #06140c;
+  border-color: #52e391;
+}
+.reminder-status {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  border: 1px solid var(--border);
+  background: rgba(13, 31, 24, 0.9);
+  color: var(--text);
+}
+.reminder-status.is-on {
+  border-color: rgba(52, 208, 123, 0.65);
+  background: rgba(39, 174, 96, 0.16);
+}
+.reminder-status.is-error {
+  border-color: rgba(231, 76, 60, 0.65);
+  background: rgba(192, 57, 43, 0.16);
+}
+.calendar-download {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--surface-2), #13271e);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+}
+.calendar-download:hover { border-color: #386650; }
+.calendar-download:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 
 /* ---------- review ---------- */
 .review-entry { border-bottom: 1px solid var(--border); padding: 14px 0; }

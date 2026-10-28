@@ -90,11 +90,11 @@
 <div class="shell">
 
 <div class="topbar">
-  <span class="brand"><span class="brand-spade" aria-hidden="true">♠</span><span class="brand-copy"><b>POKER GYM</b><small>FOUR-GAME TRAINER</small></span></span>
-  <button id="btnMap" class="pill-btn" type="button" hidden>HOME</button>
-  <button id="btnTitle" class="pill-btn" type="button" hidden>START</button>
-  <button id="btnSound" class="sound-toggle pill-btn" type="button" aria-pressed="true">SOUND</button>
-  <button id="btnHaptics" class="sound-toggle pill-btn" type="button" aria-pressed="true">HAPTICS</button>
+  <span class="brand"><span class="brand-spade" aria-hidden="true">♠</span><span class="brand-copy"><b>Poker Gym</b><small>Four-game trainer</small></span></span>
+  <button id="btnMap" class="pill-btn" type="button" hidden>Home</button>
+  <button id="btnTitle" class="pill-btn" type="button" hidden>Start</button>
+  <button id="btnSound" class="sound-toggle pill-btn" type="button" aria-pressed="true">Sound</button>
+  <button id="btnHaptics" class="sound-toggle pill-btn" type="button" aria-pressed="true">Haptics</button>
 </div>
 
 <p class="window hint" id="saveStatus" role="status" hidden></p>
@@ -103,33 +103,33 @@
 
 <!-- ============ TITLE ============ -->
 <section id="scr-title" class="screen">
-  <div class="title-art"><canvas id="titleTrainer" class="title-trainer" width="96" height="96" aria-hidden="true"></canvas><span class="title-league">TRAIN · PLAY · REVIEW</span></div>
+  <div class="title-art"><canvas id="titleTrainer" class="title-trainer" width="96" height="96" aria-hidden="true"></canvas><span class="title-league">Train · play · review</span></div>
   <div class="window title-menu">
     <h1><span>Poker</span> <span>Gym</span></h1>
-    <p class="hint">Train your card sense.<br>One hand at a time.</p>
+    <p class="hint">Learn the right play in blackjack, video poker, baccarat, and Hold’em.<br>Five hands at a time, with a coach who explains every decision.</p>
     <p id="practiceInvitation" class="hint" hidden></p>
     <div id="trainerCard" class="hint" hidden></div>
     <p id="playStreakLine" class="hint" hidden></p>
     <div class="row" style="flex-direction:column; gap:10px;">
-      <button id="btnStart" class="primary">START TRAINING</button>
-      <button id="btnContinue">CONTINUE</button>
-      <button id="btnDaily" hidden>DAILY DRILL</button>
-      <button id="btnPracticeMisses" hidden>PRACTICE MISSES</button>
-      <button id="btnNew">CHOOSE STYLE</button>
+      <button id="btnStart" class="primary">Start training</button>
+      <button id="btnContinue">Continue where I left off</button>
+      <button id="btnDaily" hidden>Play today’s Daily Drill</button>
+      <button id="btnPracticeMisses" hidden>Practice my mistakes</button>
+      <button id="btnNew">Choose a playing style</button>
     </div>
   </div>
-  <p class="hint" style="text-align:center;">Free. No signup. No real money.</p>
+  <p class="hint" style="text-align:center;">Free to play. No signup, no deposits, no real money.</p>
   <p class="hint" id="offlineStatus" role="status" style="text-align:center;"></p>
-  <div style="text-align:center;"><button id="btnInstall" type="button" hidden>INSTALL APP</button></div>
+  <div style="text-align:center;"><button id="btnInstall" type="button" hidden>Install app</button></div>
   <p class="hint" id="installStatus" role="status" style="text-align:center;"></p>
-  <p class="hint" id="installHelp" hidden style="text-align:center;">Plays in any browser. To keep it handy, use your browser's install or add-to-home-screen option. iPhone: tap Share, then Add to Home Screen. Clearing site data removes your save.</p>
+  <p class="hint" id="installHelp" hidden style="text-align:center;">Plays in any browser. To keep it handy, use your browser’s install or add-to-home-screen option. On iPhone, tap Share, then Add to Home Screen. Clearing site data removes your save.</p>
 </section>
 
 <!-- ============ CLASS SELECT ============ -->
 <section id="scr-class" class="screen" hidden>
   <div class="window">
-    <h2>Choose Your Style</h2>
-    <p class="hint" style="margin:0 0 10px;">Your class decides your first gym and your stronger stat. You can change it later.</p>
+    <h2>Choose your playing style</h2>
+    <p class="hint" style="margin:0 0 10px;">Your style decides the first game you play and which stat starts strongest. You can change it later.</p>
     <div class="class-grid" id="classGrid"></div>
   </div>
   <div class="window" id="classDetail" hidden>
@@ -137,8 +137,8 @@
     <p class="hint" id="classDetailText" style="margin:0 0 8px;"></p>
     <div class="badge-list" id="classDetailStats"></div>
     <div class="row">
-      <button id="btnBack">BACK</button>
-      <button id="btnBecome" class="primary">BECOME THIS</button>
+      <button id="btnBack">Back</button>
+      <button id="btnBecome" class="primary">Choose this style</button>
     </div>
   </div>
 </section>
@@ -148,9 +148,10 @@
   <div class="window today-hero" id="todayCard">
     <div class="today-hero-head">
       <div class="today-hero-copy">
-        <h2>Today's Training</h2>
-        <p class="today-hero-title">Can you get 5/5?</p>
+        <h2>Today’s Daily Drill</h2>
+        <p class="today-hero-title">Can you get 5 out of 5?</p>
         <p class="hint" id="todayState">Your next step.</p>
+        <p class="hint today-explainer">Five hands, one from each game. The coach grades every decision and explains the best play afterwards.</p>
       </div>
       <div class="today-hero-art" aria-hidden="true">
         <span class="mini-card mini-card-back"><span>A</span><i>♠</i></span>
@@ -168,32 +169,32 @@
     <textarea id="dailySharePreview" readonly rows="4" hidden aria-label="Daily result to copy"></textarea>
     <p id="dailyShareStatus" class="hint" role="status" hidden>Nothing sent. Choose who receives it yourself.</p>
     <details id="dailyHistory">
-      <summary>DAILY RECORD</summary>
+      <summary>Daily record</summary>
       <div id="dailyHistoryContent"></div>
-      <p class="hint">First completed attempt per day. Replays do not change this record. Saved in this browser and included in your backup.</p>
+      <p class="hint">Your first completed attempt each day counts. Replays do not change this record. It is saved in this browser and included in your backup.</p>
     </details>
   </div>
 
   <div class="world-panel">
-    <div class="world-heading"><h2>Choose a Gym</h2><span>Pick a game. Play five hands. Earn the badge.</span></div>
+    <div class="world-heading"><h2>Choose a game</h2><span>Play five hands. Earn the badge.</span></div>
     <div class="overworld"><div id="gymList"></div></div>
-    <p class="map-caption">Pick a game. Play five hands. Earn the badge.</p>
+    <p class="map-caption">Pick any game. The coach explains the best play as you go.</p>
   </div>
 
   <div class="window">
     <div class="section-header">
-      <h2>Five-Hand Training</h2>
-      <span class="section-sub">Play any game now</span>
+      <h2>Practice five hands</h2>
+      <span class="section-sub">Any game, any time</span>
     </div>
-    <p class="hint">Play any game now. The coach explains every decision. Unfinished sessions resume where you left off.</p>
+    <p class="hint">Pick a game and play five hands. The coach explains every decision, and an unfinished session resumes where you left off.</p>
     <div id="shortSessions" aria-live="polite"></div>
-    <p class="hint">Last seven results. Saved in this browser only.</p>
+    <p class="hint">Your last seven results, saved in this browser.</p>
   </div>
 
   <div class="window trainer-card">
     <div class="section-header">
-      <h2>Your Trainer</h2>
-      <span class="trainer-streak-badge"><span class="streak-flame" aria-hidden="true">🔥</span> <small>BEST STREAK</small> <b id="bestStreak">0</b></span>
+      <h2>Your trainer</h2>
+      <span class="trainer-streak-badge"><span class="streak-flame" aria-hidden="true">🔥</span> <small>Best streak</small> <b id="bestStreak">0</b></span>
     </div>
     <div class="dlg">
       <canvas class="sprite" id="sprite" width="48" height="48" aria-hidden="true"></canvas>
@@ -212,70 +213,70 @@
   <div class="window badge-case">
     <div class="section-header">
       <h2>Badges</h2>
-      <span class="section-sub">Earn a badge for each game</span>
+      <span class="section-sub">Earn one for each game</span>
     </div>
     <div class="badge-list" id="badgeList"></div>
   </div>
 
   <div class="window">
     <div class="section-header">
-      <h2>Practice Record</h2>
+      <h2>Practice record</h2>
       <span class="section-sub">Correct decisions, not lucky wins</span>
     </div>
     <div id="practiceSummary" aria-live="polite"></div>
-    <p class="hint" style="margin:8px 0 0;">Correct decisions, not lucky wins. Tracking starts with your next hand.</p>
+    <p class="hint" style="margin:8px 0 0;">This tracks whether you made the best decision, even when the cards go against you. Tracking starts with your next hand.</p>
   </div>
 
   <details class="window" id="mapMore">
-    <summary>MORE · REVIEW, SHARE, BACKUP</summary>
+    <summary>More: review, share, and backup</summary>
 
-    <h2>Review Mistakes</h2>
-    <p class="hint">Missed decisions come back on a spaced schedule. Answer before revealing; retries stay separate from game accuracy.</p>
-    <div class="row"><button id="btnReview" type="button">ALL CAUGHT UP</button></div>
-    <p id="reviewScheduleSummary" class="hint">SPACED RECALL: A MISS IS DUE TODAY, THEN 2, 4, 8 AND 16 DAYS AFTER CORRECT RETRIES. A MISS SENDS IT BACK TO TOMORROW. CORRECT REVIEWS ADD A SMALL DECISION SCORE BONUS; NO XP. SAVED ONLY IN THIS BROWSER.</p>
+    <h2>Review mistakes</h2>
+    <p class="hint">Missed decisions come back on a spaced schedule. Answer before revealing, then check the explanation. Review retries stay separate from your game accuracy.</p>
+    <div class="row"><button id="btnReview" type="button">All caught up</button></div>
+    <p id="reviewScheduleSummary" class="hint">A missed decision comes back the same day, then 2, 4, 8, and 16 days after each correct retry. Another miss sends it back to tomorrow. Correct reviews add a small decision-score bonus, but no XP. This list is saved only in this browser.</p>
 
     <div id="playerShare" class="window" hidden>
-      <h2>Invite a Practice Partner</h2>
-      <p class="hint">Share the free demo if it helped. Your progress, scores and save stay private.</p>
+      <h2>Invite a practice partner</h2>
+      <p class="hint">Share the free trainer if it helped. Your progress, scores, and save stay private.</p>
       <textarea id="sharePreview" readonly rows="4" aria-label="Invitation to copy">Try Play Poker Gym: free five-hand card-game practice with coaching and mistake review. No signup, deposits or real-money wagering. https://playpokergym.com/web/?ref=invite</textarea>
-      <div class="row"><button id="btnShare" type="button" hidden>OPEN SHARE OPTIONS</button><button id="btnCopyShare" type="button">COPY INVITATION</button></div>
+      <div class="row"><button id="btnShare" type="button" hidden>Open share options</button><button id="btnCopyShare" type="button">Copy invitation</button></div>
       <p id="shareStatus" class="hint" role="status">Nothing sent. Choose who receives it yourself.</p>
     </div>
     <div id="playerFeedback" class="window" hidden>
-      <h2>Help Shape Your Next Session</h2>
-      <p class="hint">YOU FINISHED FIVE HANDS. WHAT WOULD MAKE YOU COME BACK?</p>
-      <p class="hint"><a href="https://github.com/MeepTheTendie/pokergym/issues/1" target="_blank" rel="noopener noreferrer">SHARE FEEDBACK ON GITHUB</a> — OPTIONAL PUBLIC THREAD; GITHUB ACCOUNT REQUIRED. OMIT PERSONAL DETAILS AND SAVE BACKUPS. EMAIL IS ALSO AVAILABLE BELOW.</p>
+      <h2>Help shape the next session</h2>
+      <p class="hint">You finished five hands. What would make you come back?</p>
+      <p class="hint"><a href="https://github.com/MeepTheTendie/pokergym/issues/1" target="_blank" rel="noopener noreferrer">Share feedback on GitHub</a> — optional public thread; a GitHub account is required. Omit personal details and save backups. Email is also available below.</p>
       <form id="feedbackForm">
         <label>Was the first session clear?
-          <select id="feedbackClarity" required><option value="">CHOOSE</option><option value="clear">CLEAR</option><option value="confusing">CONFUSING</option></select>
+          <select id="feedbackClarity" required><option value="">Choose</option><option value="clear">Clear</option><option value="confusing">Confusing</option></select>
         </label>
         <label>Would you return for short training?
-          <select id="feedbackReturn" required><option value="">CHOOSE</option><option value="yes">YES</option><option value="maybe">MAYBE</option><option value="no">NO</option></select>
+          <select id="feedbackReturn" required><option value="">Choose</option><option value="yes">Yes</option><option value="maybe">Maybe</option><option value="no">No</option></select>
         </label>
-        <p class="hint">NOTHING IS SENT UNTIL YOU SUBMIT THE DRAFT YOURSELF. THE GAME STAYS FREE.</p>
+        <p class="hint">Nothing is sent until you submit the draft yourself. The game stays free.</p>
         <label>What was confusing or missing? (optional)
           <textarea id="feedbackNote" maxlength="400" rows="3" placeholder="Please avoid personal or payment details."></textarea>
         </label>
-        <button type="submit">PREPARE FEEDBACK</button>
+        <button type="submit">Prepare feedback</button>
       </form>
       <div id="feedbackDraft" hidden>
-        <p class="hint">NOT SENT. REVIEW THE DRAFT BELOW, THEN CHOOSE GITHUB OR EMAIL. NO GAME SAVE OR PLAYER PROFILE IS INCLUDED.</p>
+        <p class="hint">Not sent. Review the draft below, then choose GitHub or email. No game save or player profile is included.</p>
         <textarea id="feedbackPreview" readonly rows="8" aria-label="Feedback draft"></textarea>
-        <p><a id="feedbackGithub" href="#" target="_blank" rel="noopener noreferrer">OPEN GITHUB DRAFT</a> — PUBLIC; GITHUB ACCOUNT REQUIRED. OPENING SHARES THESE ANSWERS WITH GITHUB IN THE LINK. REVIEW THERE AND SUBMIT YOURSELF. OMIT PERSONAL DETAILS.</p>
-        <a id="feedbackEmail" href="#">OPEN EMAIL DRAFT</a>
-        <p class="hint">EMAIL REVEALS YOUR EMAIL ADDRESS TO THE OWNER. YOU CAN ALSO COPY THE DRAFT TO THE EXISTING GITHUB THREAD OR EMAIL MEEP@MAIL.GROKBOT.COM. PREPARING THIS FORM DOES NOT UPLOAD ANYTHING.</p>
+        <p><a id="feedbackGithub" href="#" target="_blank" rel="noopener noreferrer">Open GitHub draft</a> — public; a GitHub account is required. Opening the link shares these answers with GitHub. Review there and submit yourself. Omit personal details.</p>
+        <a id="feedbackEmail" href="#">Open email draft</a>
+        <p class="hint">Email reveals your email address to the owner. You can also copy the draft to the existing GitHub thread or email meep@mail.grokbot.com. Preparing this form does not upload anything.</p>
       </div>
     </div>
 
     <p class="hint tip-link" id="tipJar">Play Poker Gym is free. If it helped, you can tip on Ko-fi: <a href="https://ko-fi.com/playpokergym" target="_blank" rel="noopener">Support Play Poker Gym ☕</a> (optional, unlocks nothing).</p>
 
     <details id="saveBackup">
-      <summary>BACKUP · BACK UP OR RESTORE PROGRESS</summary>
+      <summary>Backup: save or restore progress</summary>
       <p class="hint">Copy the text below into a private note. Progress is stored only in this browser; nothing is uploaded or cloud synced. Unfinished hands are redealt.</p>
-      <label for="backupText">PROGRESS BACKUP</label>
+      <label for="backupText">Progress backup</label>
       <textarea id="backupText" rows="4" maxlength="100000" spellcheck="false"></textarea>
-      <div class="row"><button id="btnBackup" type="button">PREPARE BACKUP</button><button id="btnRestore" type="button">CHECK BACKUP</button></div>
-      <button id="btnConfirmRestore" type="button" hidden>REPLACE LOCAL PROGRESS</button>
+      <div class="row"><button id="btnBackup" type="button">Prepare backup</button><button id="btnRestore" type="button">Check backup</button></div>
+      <button id="btnConfirmRestore" type="button" hidden>Replace local progress</button>
       <p id="backupStatus" class="hint" role="status"></p>
     </details>
   </details>
@@ -284,9 +285,9 @@
 <!-- ============ REVIEW ============ -->
 <section id="scr-review" class="screen" hidden>
   <div class="window">
-    <h2>Review Mistakes</h2>
+    <h2>Review mistakes</h2>
     <div id="reviewSummary" class="hint" aria-live="polite"></div>
-    <div class="row"><button id="btnReviewDone" type="button">BACK TO MAP</button></div>
+    <div class="row"><button id="btnReviewDone" type="button">Back to home</button></div>
   </div>
   <div class="window" id="reviewCard"></div>
 </section>
@@ -297,7 +298,7 @@
     <h2 id="lessonTitle">How to Play</h2>
     <div class="tutbar" id="lessonBar"></div>
     <div class="statusbox">
-      <div class="row1"><span>PAGE</span><span id="lessonPage">1/14</span></div>
+      <div class="row1"><span>Page</span><span id="lessonPage">1/14</span></div>
       <div class="gauge"><i id="lessonGauge" style="width:7%"></i></div>
     </div>
     <div class="dialogue" id="lessonBox" role="button" tabindex="0" aria-labelledby="lessonWho lessonText">
@@ -307,8 +308,8 @@
       <span class="prompt" id="lessonPrompt">▼</span>
     </div>
     <div class="row">
-      <button id="btnSkip" data-key="ESC" class="primary">SKIP LESSON</button>
-      <button id="btnLessonNext" data-key="ENTER" class="primary">NEXT</button>
+      <button id="btnSkip" data-key="ESC" class="primary">Skip lesson</button>
+      <button id="btnLessonNext" data-key="ENTER" class="primary">Next</button>
     </div>
   </div>
 </section>
@@ -318,7 +319,7 @@
   <div class="battle-stage">
   <div class="scene">
     <div class="scene-progress">
-      <span class="battle-label">GYM CHALLENGE</span>
+      <span class="battle-label">Gym challenge</span>
       <div class="battle-pips" aria-hidden="true">
         <i></i><i></i><i></i><i></i><i></i>
       </div>
@@ -330,20 +331,20 @@
 
   <div class="window master-coach-card">
     <div class="dialogue" id="masterBox" role="button" tabindex="0" aria-labelledby="masterName masterLine">
-      <span class="coach-eyebrow">YOUR COACH</span>
-      <span class="nameplate" id="masterName">MASTER ROYALE</span>
+      <span class="coach-eyebrow">Your coach</span>
+      <span class="nameplate" id="masterName">Master Royale</span>
       <p id="masterLine">&nbsp;</p>
       <span class="prompt" id="masterPrompt">▼</span>
     </div>
 
     <div class="statusbox">
-      <div class="row1"><span id="masterLabel">MASTER ROYALE</span><span id="handGrade">JUNK</span></div>
+      <div class="row1"><span id="masterLabel">Master Royale</span><span id="handGrade">Junk</span></div>
       <div class="gauge"><i id="potentialBar" style="width:0%"></i></div>
       <p class="hint" id="potentialText" style="margin:6px 0 0;">Hand potential</p>
     </div>
 
     <div class="row" id="rowVariant" hidden>
-      <label class="hint variant-label" for="variantSelect">PAY TABLE</label>
+      <label class="hint variant-label" for="variantSelect">Pay table</label>
       <select id="variantSelect"></select>
     </div>
   </div>
@@ -351,50 +352,50 @@
 
   <div class="battle-talk">
   <div class="window" id="tipBox" hidden>
-    <h2>Coach Tip</h2>
+    <h2>Coach tip</h2>
     <p id="tipText" class="hint" style="margin:0;"></p>
   </div>
   </div>
 
   <div class="battle-table">
   <div class="window hand-panel">
-    <h2 id="handTitle">Your Hand</h2>
+    <h2 id="handTitle">Your hand</h2>
     <div id="zones"></div>
     <div class="row battle-action-bar">
-      <button id="btnAsk" data-key="C">ASK COACH</button>
-      <button id="btnDeal" data-key="D" class="primary">DEAL</button>
-      <button id="btnDraw" data-key="D">DRAW</button>
+      <button id="btnAsk" data-key="C">Ask coach</button>
+      <button id="btnDeal" data-key="D" class="primary">Deal</button>
+      <button id="btnDraw" data-key="D">Draw</button>
     </div>
     <div class="row" id="rowActions" hidden>
-      <button id="btnHit" data-key="H">HIT</button>
-      <button id="btnStand" data-key="S" class="primary">STAND</button>
-      <button id="btnDouble" data-key="D">DOUBLE</button>
-      <button id="btnSplit" data-key="P">SPLIT</button>
+      <button id="btnHit" data-key="H">Hit</button>
+      <button id="btnStand" data-key="S" class="primary">Stand</button>
+      <button id="btnDouble" data-key="D">Double</button>
+      <button id="btnSplit" data-key="P">Split</button>
     </div>
     <div class="row" id="rowBet" hidden>
-      <button id="btnBanker" class="primary">BANKER</button>
-      <button id="btnPlayer">PLAYER</button>
-      <button id="btnTie">TIE</button>
+      <button id="btnBanker" class="primary">Banker</button>
+      <button id="btnPlayer">Player</button>
+      <button id="btnTie">Tie</button>
     </div>
     <div class="row" id="rowPick" hidden>
-      <button id="btnClear" data-key="X">CLEAR</button>
-      <button id="btnConfirm" data-key="ENTER" class="primary">CONFIRM 5</button>
+      <button id="btnClear" data-key="X">Clear</button>
+      <button id="btnConfirm" data-key="ENTER" class="primary">Confirm five</button>
     </div>
     <p class="hint first-nudge" id="firstNudge" hidden role="status"></p>
-    <p class="hint" id="holdHint" hidden style="margin:8px 0 0; text-align:center;">Tap cards to hold them, then press DRAW.</p>
+    <p class="hint" id="holdHint" hidden style="margin:8px 0 0; text-align:center;">Tap the cards you want to keep, then press Draw.</p>
     <p class="hint" id="pays" style="margin:8px 0 0; text-align:center;"></p>
   </div>
   </div>
 
   <div class="battle-side">
   <div class="window" id="coachPanel" hidden>
-    <h2>Why This Was Right</h2>
+    <h2>Why this was the right play</h2>
     <div class="dialogue" style="background:var(--surface-2); margin-bottom:0;">
       <p id="advice" style="margin:0;"></p>
     </div>
     <div class="row">
-      <button id="btnWhy" data-key="W">WHY?</button>
-      <button id="btnApply" data-key="A" class="primary">APPLY PLAY</button>
+      <button id="btnWhy" data-key="W">Why?</button>
+      <button id="btnApply" data-key="A" class="primary">Apply play</button>
     </div>
     <p class="hint" id="why" hidden style="margin:8px 0 0;"></p>
   </div>
@@ -402,11 +403,11 @@
   <div class="window" id="sessionSummary" hidden></div>
 
   <div class="row" id="battleEndRow" hidden>
-    <button id="btnNext" class="primary" data-key="ENTER">CONTINUE</button>
+    <button id="btnNext" class="primary" data-key="ENTER">Continue</button>
   </div>
 
   <details class="window payout-panel">
-    <summary id="paytableTitle">PAY TABLE</summary>
+    <summary id="paytableTitle">Pay table</summary>
     <div class="paytable" id="paytable"></div>
   </details>
   </div>

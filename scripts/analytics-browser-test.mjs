@@ -164,7 +164,7 @@ expectProps('start training', props(log, 'session_complete'), { game: 'blackjack
 const savedBeforeReview = await evaluate('localStorage.getItem("pokergym:save:v1")');
 assert.ok(JSON.parse(savedBeforeReview).mistakes.length > 0, 'Session saved an actual mistake');
 await run(`
-  const review = [...$('sessionSummary').querySelectorAll('button')].find(b => b.textContent === 'REVIEW MISTAKES');
+  const review = [...$('sessionSummary').querySelectorAll('button')].find(b => b.textContent === 'Review my mistakes');
   if (!review) throw new Error('Missing direct recap review');
   review.click();
   return true;

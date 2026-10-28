@@ -236,7 +236,7 @@ export const MASTERY_TIERS = [
   { rank: 'silver', threshold: 0.8 },
   { rank: 'gold', threshold: 0.9 },
 ];
-export const MASTERY_LABEL = { bronze: 'BRONZE', silver: 'SILVER', gold: 'GOLD' };
+export const MASTERY_LABEL = { bronze: 'Bronze', silver: 'Silver', gold: 'Gold' };
 
 export function masteryRank(profile, game) {
   const recent = profile?.practice?.[game]?.recent;

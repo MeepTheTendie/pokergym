@@ -234,10 +234,10 @@ function betSelectQuiz() {
   const evs = sideEvs();
   return {
     type: 'select',
-    prompt: 'FULL SHOE BACCARAT WITH 5% BANKER COMMISSION. WHICH SIDE HAS THE LOWEST HOUSE EDGE?',
+    prompt: 'Full-shoe baccarat with a 5% banker commission. Which side has the lowest house edge?',
     options: ['BANKER', 'PLAYER', 'TIE'],
     correct: 'BANKER',
-    reason: `BANKER ${pct(evs.banker)} HOUSE EDGE. PLAYER ${pct(evs.player)}. TIE ${pct(evs.tie)}. BANKER LOSES THE LEAST.`,
+    reason: `Banker ${pct(evs.banker)} house edge. Player ${pct(evs.player)}. Tie ${pct(evs.tie)}. Banker loses the least.`,
     deal: true,
   };
 }
@@ -249,10 +249,10 @@ function commissionQuiz(r01) {
   const low = foundDistractor(r01, won, distractor);
   return {
     type: 'commission',
-    prompt: `YOU WIN A BANKER BET OF ${bet} UNITS WITH A 5% COMMISSION TAKEN. HOW MANY UNITS DO YOU KEEP FROM THE WINNINGS, NOT COUNTING YOUR ORIGINAL STAKE?`,
+    prompt: `You win a banker bet of ${bet} units with a 5% commission taken. How many units do you keep from the winnings, not counting your original stake?`,
     options: [units(won), units(low), units(distractor)],
     correct: units(won),
-    reason: `${bet} × 0.95 = ${won}. BANKER PAYS 0.95:1 AFTER THE 5% COMMISSION, NOT 1:1. STILL THE BEST BET AT -1.06% HOUSE EDGE.`,
+    reason: `${bet} × 0.95 = ${won}. Banker pays 0.95:1 after the 5% commission, not 1:1. It is still the best bet at a -1.06% house edge.`,
     deal: false,
   };
 }
@@ -262,11 +262,11 @@ function tieOddQuiz(r01) {
   const worthwhile = odds >= 10;
   return {
     type: 'tieodds',
-    prompt: `PROMO: TIE PAYS ${odds}:1 ON AN OTHERWISE STANDARD GAME. IS THE TIE BET A WORTHWHILE PLAY AT THAT PRICE?`,
+    prompt: `Promo: tie pays ${odds}:1 on an otherwise standard game. Is the tie bet worthwhile at that price?`,
     options: ['YES, WORTHWHILE', 'NO, STILL LOSING'],
     correct: worthwhile ? 'YES, WORTHWHILE' : 'NO, STILL LOSING',
-    reason: `TIE LANDS ON 9.52% OF HANDS AND BREAKS EVEN AT ${tieBreakEven().toFixed(1)}:1. AT ${odds}:1 IT IS ${
-      worthwhile ? 'SLIGHTLY POSITIVE EXPECTED VALUE.' : 'STILL A LOSING BET.'}`,
+    reason: `Tie lands on 9.52% of hands and breaks even at ${tieBreakEven().toFixed(1)}:1. At ${odds}:1 it is ${
+      worthwhile ? 'slightly positive expected value.' : 'still a losing bet.'}`,
     deal: false,
   };
 }

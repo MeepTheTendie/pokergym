@@ -50,9 +50,9 @@ try {
   };
   assert.equal(await evaluate('Boolean(document.getElementById("btnNew").onclick)'), false, 'Atlas should still be blocked');
   await tap('btnSound');
-  assert.equal(await evaluate('document.getElementById("btnSound").textContent'), 'SND OFF');
+  assert.equal(await evaluate('document.getElementById("btnSound").textContent'), 'Sound off');
   await tap('btnSound');
-  assert.equal(await evaluate('document.getElementById("btnSound").textContent'), 'SND ON');
+  assert.equal(await evaluate('document.getElementById("btnSound").textContent'), 'Sound on');
   assert.equal(await evaluate('testAudio.status().context'), 'running');
   console.log('Sound control works while artwork download is stalled.');
   assert.ok(pausedImage, 'Character download was not intercepted');
@@ -71,7 +71,7 @@ try {
   }
   console.log('Live audio RMS:', rms); assert.ok(rms > 0.001, 'Music output is silent');
   await tap('btnSound'); assert.equal(await evaluate('testAudio.status().muted'), true);
-  assert.equal(await evaluate('document.getElementById("btnSound").textContent'), 'SND OFF');
+  assert.equal(await evaluate('document.getElementById("btnSound").textContent'), 'Sound off');
   const silentRms = await evaluate(`(() => { const data = new Float32Array(testMeter.fftSize); testMeter.getFloatTimeDomainData(data); return Math.sqrt(data.reduce((sum, v) => sum + v*v, 0)/data.length); })()`);
   console.log('Muted output RMS:', silentRms);
   assert.ok(silentRms < 0.00001, 'Sound off does not silence output');
@@ -81,7 +81,7 @@ try {
   console.log('Unmute after audio interruption:', status);
   assert.equal(status.context, 'running', 'Sound button failed to resume interrupted audio');
   assert.equal(status.playing, true);
-  assert.equal(await evaluate('document.getElementById("btnSound").textContent'), 'SND ON');
+  assert.equal(await evaluate('document.getElementById("btnSound").textContent'), 'Sound on');
   for (let i = 0; i < 4; i++) {
     await tap('btnSound');
     const off = i % 2 === 0;

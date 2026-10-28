@@ -93,7 +93,7 @@ try {
   assert.equal(await evaluate('localStorage.getItem("pokergym:save:v1")'), null, 'Fresh visitor has no profile');
   await evaluate('document.getElementById("btnStart").click()');
   await waitFor('!document.getElementById("scr-battle").hidden && !document.getElementById("btnHit").disabled && document.getElementById("battleEndRow").hidden');
-  assert.match(await evaluate('document.querySelector(".battle-label").textContent'), /FIRST PRACTICE.*HARD NINE AGAINST A TWO/, 'First hand is explicitly authored practice');
+  assert.match(await evaluate('document.querySelector(".battle-label").textContent'), /First practice.*Hard nine against a two/, 'First hand is explicitly authored practice');
   const firstDecisionMs = Date.now() - firstDecisionStarted;
   assert.ok(firstDecisionMs < 15000, 'First actionable decision reached within fifteen seconds using one tap');
   await evaluate('document.getElementById("btnStand").click()');
@@ -117,7 +117,7 @@ try {
   const resumedHands = await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).activeSession.played');
   assert.ok(resumedHands >= 1 && resumedHands <= 2, 'Resume retains the completed hand; a newly dealt blackjack may settle naturally');
   const resumedSave = await evaluate('localStorage.getItem("pokergym:save:v1")');
-  assert.doesNotMatch(await evaluate('document.querySelector(".battle-label").textContent'), /FIRST PRACTICE/, 'Later hands use ordinary practice');
+  assert.doesNotMatch(await evaluate('document.querySelector(".battle-label").textContent'), /First practice/, 'Later hands use ordinary practice');
   const packShortcut = data.shortcuts.find(shortcut => shortcut.url === '/guides/weekly-01/');
   assert.ok(packShortcut, 'Weekly sample has an app shortcut');
   await send('Network.setCacheDisabled', { cacheDisabled: true });

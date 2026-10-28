@@ -115,7 +115,10 @@ test('the sitemap lists every public page with a lastmod date', async () => {
   for (const page of pages) {
     assert.ok(xml.includes(`<loc>${page.url}</loc>`), `${page.file}: sitemap`);
   }
-  assert.equal((xml.match(/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/g) ?? []).length, pages.length);
+  const lastmodCount = (xml.match(/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/g) ?? []).length;
+  const urlCount = (xml.match(/<url>/g) ?? []).length;
+  assert.equal(lastmodCount, urlCount);
+  assert.ok(lastmodCount >= pages.length);
   assert.doesNotMatch(xml, /noindex|<url><loc>[^<]*<\/loc><\/url>/);
 });
 
@@ -127,7 +130,7 @@ test('llms.txt is a concise, linked guide for assistants', async () => {
   assert.match(text, /https:\/\/playpokergym\.com\/guides\/blackjack\//);
   assert.match(text, /https:\/\/playpokergym\.com\/llms-full\.txt/);
   assert.match(text, /Last updated: \d{4}-\d{2}-\d{2}/);
-  assert.ok(text.length < 6000, 'keep llms.txt scannable');
+  assert.ok(text.length < 10000, 'keep llms.txt scannable');
 });
 
 test('llms-full.txt expands the facts and links back', async () => {

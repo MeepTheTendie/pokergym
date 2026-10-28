@@ -186,13 +186,13 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
       assert.equal(await evaluate('window.installTestPrevented'), true);
       assert.equal(await evaluate('document.getElementById("btnInstall").hidden'), false);
       await evaluate('document.getElementById("btnInstall").click(); document.getElementById("btnInstall").click()');
-      await waitFor(`document.getElementById('installStatus').textContent.includes(${JSON.stringify(outcome === 'error' ? 'BROWSER MENU' : outcome === 'accepted' ? 'REQUEST ACCEPTED' : 'SKIPPED')})`);
+      await waitFor(`document.getElementById('installStatus').textContent.includes(${JSON.stringify(outcome === 'error' ? 'browser menu' : outcome === 'accepted' ? 'Install request accepted' : 'Install skipped')})`);
       assert.equal(await evaluate('window.installTestCalls'), 1, 'Installation requires one explicit click and consumes each prompt once');
       assert.equal(await evaluate('document.getElementById("btnInstall").hidden'), true);
     }
     await evaluate('window.dispatchEvent(new Event("appinstalled"))');
     assert.equal(await evaluate('document.getElementById("installHelp").hidden'), true);
-    assert.match(await evaluate('document.getElementById("installStatus").textContent'), /HOME SCREEN/);
+    assert.match(await evaluate('document.getElementById("installStatus").textContent'), /home screen/);
     assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Install controls fit phone width');
     console.log('PASS: synthetic install prompt dismissal, acceptance, failure and completion; no physical installation claimed.');
   } else {
@@ -324,12 +324,12 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
     const backup = await evaluate('document.getElementById("backupText").value');
     assert.equal(JSON.parse(backup).sessions[0].played, 5, 'Unsaved session remains exportable');
     await evaluate('document.getElementById("btnRestore").click(); document.getElementById("btnConfirmRestore").click()');
-    assert.match(await evaluate('document.getElementById("backupStatus").textContent'), /RESTORE FAILED/);
+    assert.match(await evaluate('document.getElementById("backupStatus").textContent'), /Restore failed/);
     await evaluate('document.getElementById("btnBackup").click()');
     assert.equal(await evaluate('document.getElementById("backupText").value'), backup, 'Failed restore preserves in-memory practice');
     assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Storage warning fits phone');
     await evaluate(`if (window.testStorageDescriptor) Object.defineProperty(window, 'localStorage', window.testStorageDescriptor); else Storage.prototype.setItem = window.testStorageSet; document.getElementById("btnRestore").click(); document.getElementById("btnConfirmRestore").click()`);
-    assert.match(await evaluate('document.getElementById("backupStatus").textContent'), /PROGRESS RESTORED/);
+    assert.match(await evaluate('document.getElementById("backupStatus").textContent'), /Progress restored/);
     assert.equal(await evaluate('document.getElementById("saveStatus").hidden'), true, 'Warning clears only after successful save');
     assert.equal(await evaluate('localStorage.getItem("pokergym:save:v1")'), backup, 'Backup persists after storage becomes available');
 
@@ -347,7 +347,7 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
   assert.equal(await evaluate('document.getElementById("btnConfirmRestore").hidden'), false);
   assert.equal(await evaluate('localStorage.getItem("pokergym:save:v1")'), backup, 'Validation alone does not overwrite');
   await evaluate('document.getElementById("btnConfirmRestore").click()');
-  assert.match(await evaluate('document.getElementById("backupStatus").textContent'), /PROGRESS RESTORED/);
+  assert.match(await evaluate('document.getElementById("backupStatus").textContent'), /Progress restored/);
   assert.equal(await evaluate('localStorage.getItem("pokergym:save:v1")'), backup);
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Backup controls fit phone');
   await evaluate('document.getElementById("saveBackup").open = false');
@@ -368,7 +368,7 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
       await sleep(100);
     }
     assert.ok(await evaluate('Boolean(navigator.serviceWorker.controller)'), `Offline worker controls game; status=${await evaluate('document.getElementById("offlineStatus")?.textContent')}; failed=${JSON.stringify(failed)}`);
-    assert.match(await evaluate('document.getElementById("offlineStatus").textContent'), /OFFLINE PRACTICE READY/);
+    assert.match(await evaluate('document.getElementById("offlineStatus").textContent'), /Offline practice ready/);
     assert.ok(await evaluate('(async () => { const keys = await caches.keys(); const cache = await caches.open(keys.find(k => k.startsWith("pokergym-offline-"))); return (await cache.keys()).length; })()') > 30, 'Complete game cached');
     assert.equal(await evaluate('(async () => { const keys = await caches.keys(); const cache = await caches.open(keys.find(k => k.startsWith("pokergym-offline-"))); return (await cache.match("/web/index.html")).redirected; })()'), false, 'Cached navigation has no network redirect');
     if (!liveUrl) {
@@ -412,13 +412,13 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
     await sleep(100);
   }
   await evaluate('document.getElementById("btnContinue").click()');
-  assert.match(await evaluate('document.getElementById("btnReview").textContent'), /ALL CAUGHT UP/, 'Unscored entries never reach the due queue');
+  assert.match(await evaluate('document.getElementById("btnReview").textContent'), /All caught up/, 'Unscored entries never reach the due queue');
   await evaluate('document.getElementById("btnReview").click()');
   assert.equal(await evaluate('document.getElementById("scr-review").hidden'), false);
   assert.equal(await evaluate('document.querySelector("#reviewCard .mistake-answer").hidden'), true, 'Coach answer starts hidden');
-  await evaluate('[...document.querySelectorAll("#reviewCard button")].find(b => b.textContent === "REVEAL ANSWER").click()');
+  await evaluate('[...document.querySelectorAll("#reviewCard button")].find(b => b.textContent === "Reveal answer").click()');
   assert.equal(await evaluate('document.querySelector("#reviewCard .mistake-answer").hidden'), false);
-  await evaluate('[...document.querySelectorAll("#reviewCard button")].find(b => b.textContent === "MARK SELF-REVIEWED").click()');
+  await evaluate('[...document.querySelectorAll("#reviewCard button")].find(b => b.textContent === "Mark self-reviewed").click()');
   assert.equal(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).mistakes[0].reviews'), 1);
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Notebook fits phone embed');
   await evaluate('document.getElementById("btnReviewDone").click()');
@@ -439,14 +439,14 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
     await sleep(100);
   }
   await evaluate('document.getElementById("btnContinue").click()');
-  assert.match(await evaluate('document.getElementById("btnReview").textContent'), /REVIEWS DUE: 1/, 'Scored review is due the same day');
+  assert.match(await evaluate('document.getElementById("btnReview").textContent'), /Review 1 mistake/, 'Scored review is due the same day');
   const beforeRetry = await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1"))');
   await evaluate('document.getElementById("btnReview").click(); document.querySelector("#reviewCard [data-retry-action=stand]").click()');
   const afterMiss = await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1"))');
   assert.deepEqual(afterMiss.mistakes[0].retries, { attempted: 1, correct: 0 }, 'Only first answer scores per visit');
   assert.equal(afterMiss.mistakes[0].box, 1, 'A miss resets to the first box');
   assert.equal(afterMiss.mistakes[0].due, await evaluate('(async () => { const s = await import("../src/rpg/state.js"); return s.addDays(s.localDayKey(), 1); })()'), 'A miss returns tomorrow');
-  assert.match(await evaluate('document.getElementById("reviewCard").textContent'), /MISSED/);
+  assert.match(await evaluate('document.getElementById("reviewCard").textContent'), /Missed/);
   assert.ok(await evaluate('document.querySelector("#reviewCard [data-retry-action=hit]").disabled'), 'Further answers are locked');
   for (const key of ['xp', 'score', 'streak', 'bestStreak', 'handsPlayed', 'handsOptimal', 'practice', 'sessions']) assert.deepEqual(afterMiss[key], beforeRetry[key], 'A review cannot alter gameplay records');
   await evaluate('document.getElementById("btnReviewDone").click()');
@@ -509,7 +509,7 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
     const { BLACKJACK_DRILLS } = await import('../src/rpg/drills.js');
     return BLACKJACK_DRILLS[${capturedDrill.indices[1]}].label;
   })()`);
-  assert.ok((await evaluate('document.querySelector(".battle-label").textContent')).includes(`WEAK-SPOT DRILL · ${nextDrillLabel}`));
+  assert.ok((await evaluate('document.querySelector(".battle-label").textContent')).includes(`Weak-spot drill · ${nextDrillLabel.toLowerCase().replace(/^./, c => c.toUpperCase())}`));
   await evaluate(`localStorage.setItem('pokergym:save:v1', ${JSON.stringify(beforeDrill)})`);
   await send('Page.reload');
   await sleep(400); contextId = await gameContext(`${contextId.sessionId || ''}:${contextId.id}`);
@@ -563,7 +563,7 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
   assert.equal(afterFirst.streak, 1, 'The correct decision starts the streak at 1');
   assert.equal(afterFirst.activeSession.played, 1, 'An un-hinted hand counts once toward the session');
   await evaluate('document.getElementById("btnMap").click()');
-  assert.match(await evaluate('document.getElementById("btnResumeSession").textContent'), /1\/5/);
+  assert.match(await evaluate('document.getElementById("btnResumeSession").textContent'), /1 of 5/);
   await evaluate('document.getElementById("btnResumeSession").click()');
   for (let hand = 0; hand < 3; hand++) {
     await evaluate('document.getElementById("btnNext").click()');
@@ -574,16 +574,16 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
   await evaluate(playHold('worst'));
   assert.equal(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).activeSession'), null);
   assert.equal(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).sessions[0].played'), 5);
-  assert.equal(await evaluate('document.getElementById("btnNext").textContent'), 'RETURN TO MAP');
+  assert.equal(await evaluate('document.getElementById("btnNext").textContent'), 'Back to home');
   await evaluate('document.getElementById("btnNext").click()');
-  assert.match(await evaluate('document.getElementById("shortSessions").textContent'), /[0-5]\/5 CORRECT/);
+  assert.match(await evaluate('document.getElementById("shortSessions").textContent'), /[0-5]\/5 correct/);
   const suggested = await evaluate(`(async () => {
     const { recommendedPractice } = await import('../src/rpg/state.js');
     return recommendedPractice(JSON.parse(localStorage.getItem('pokergym:save:v1')));
   })()`);
   assert.ok(suggested, 'Missed completed-session decisions produce a practice recommendation');
-  assert.match(await evaluate('document.getElementById("practiceRecommendation").textContent'), /LOWEST RECORDED ACCURACY/);
-  assert.match(await evaluate(`document.querySelector('[data-session-gym="${suggested.gymId}"]').textContent`), /^SUGGESTED/);
+  assert.match(await evaluate('document.getElementById("practiceRecommendation").textContent'), /recent accuracy is lowest/);
+  assert.match(await evaluate(`document.querySelector('[data-session-gym="${suggested.gymId}"]').textContent`), /^Suggested/);
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Session results fit phone');
   const vpMiss = await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).mistakes.find(m => m.game === "videopoker")');
   assert.ok(vpMiss?.quiz, 'Actual video-poker miss captures original hold patterns');
@@ -623,14 +623,14 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
   await evaluate("document.getElementById('feedbackForm').requestSubmit()");
   assert.doesNotMatch(await evaluate('document.getElementById("feedbackPreview").value'), /US\$|subscri|month|unlock/i);
   assert.equal(await evaluate('document.getElementById("feedbackDraft").hidden'), false);
-  assert.match(await evaluate('document.getElementById("feedbackDraft").textContent'), /NOT SENT/);
+  assert.match(await evaluate('document.getElementById("feedbackDraft").textContent'), /Not sent/);
   const feedback = await evaluate(`({ href: document.getElementById('feedbackEmail').href, body: document.getElementById('feedbackPreview').value })`);
   assert.equal(new URL(feedback.href).searchParams.get('body'), feedback.body);
   const githubFeedback = new URL(await evaluate('document.getElementById("feedbackGithub").href'));
   assert.equal(githubFeedback.origin, 'https://github.com');
   assert.equal(githubFeedback.pathname, '/MeepTheTendie/pokergym/issues/new');
   assert.equal(githubFeedback.searchParams.get('body'), feedback.body);
-  assert.match(await evaluate('document.getElementById("feedbackDraft").textContent'), /PUBLIC; GITHUB ACCOUNT REQUIRED/);
+  assert.match(await evaluate('document.getElementById("feedbackDraft").textContent'), /public; a GitHub account is required/i);
   assert.match(feedback.body, /More drills & clearer hints\?/);
   assert.doesNotMatch(feedback.body, /trainer|pokergym:save/i);
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Feedback form fits 390px');
@@ -743,7 +743,7 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
   assert.equal(plan.length, DAILY_HANDS, 'Daily drill has five hands');
   assert.equal(new Set(plan.map(entry => entry.game)).size, 4, 'Daily drill includes all four games');
   assert.equal(await evaluate('document.getElementById("scr-map").hidden'), false, 'Daily drill begins from the map');
-  assert.match(await evaluate('document.getElementById("todayState").textContent'), /DAILY DRILL #\d+ IS READY/);
+  assert.match(await evaluate('document.getElementById("todayState").textContent'), /Daily Drill #\d+ is ready/);
   const dailyMove = async () => {
     for (let attempt = 0; attempt < 60; attempt++) {
       if (!await evaluate('document.getElementById("battleEndRow").hidden')) return;
@@ -771,31 +771,31 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
   };
   const goNextHand = async () => { await evaluate('document.getElementById("btnNext").click()'); };
   const label = async () => await evaluate('document.querySelector(".battle-label").textContent');
-  await evaluate(`[...document.querySelectorAll('#todayActions button')].find(b => b.textContent.startsWith('DAILY DRILL #')).click()`);
+  await evaluate(`[...document.querySelectorAll('#todayActions button')].find(b => b.textContent.includes('Daily Drill #')).click()`);
   assert.equal(await evaluate('document.getElementById("scr-battle").hidden'), false);
-  assert.match(await label(), /DAILY DRILL #\d+ · HAND 1\/5/);
+  assert.match(await label(), /Daily Drill #\d+ · hand 1 of 5/);
   // Two hands, then quit to the map mid-progress and confirm the drill persists.
   await dailyMove(); await goNextHand();
-  assert.match(await label(), /DAILY DRILL #\d+ · HAND 2\/5/);
+  assert.match(await label(), /Daily Drill #\d+ · hand 2 of 5/);
   await dailyMove();
   await evaluate('document.getElementById("btnMap").click()');
   assert.equal(await evaluate('document.getElementById("scr-map").hidden'), false);
-  assert.match(await evaluate('document.getElementById("todayState").textContent'), /IN PROGRESS · 2\/5 HANDS DONE/);
-  assert.equal(await evaluate('[...document.querySelectorAll("#todayActions button")].find(b => b.textContent === "RESUME DAILY DRILL")?.textContent'), 'RESUME DAILY DRILL');
+  assert.match(await evaluate('document.getElementById("todayState").textContent'), /Daily Drill #\d+ is in progress: 2 of 5 hands done/);
+  assert.equal(await evaluate('[...document.querySelectorAll("#todayActions button")].find(b => b.textContent === "Resume Daily Drill")?.textContent'), 'Resume Daily Drill');
   const midProgress = await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).daily.progress');
   assert.equal(midProgress.key, key);
   assert.equal(midProgress.index, 2);
   assert.deepEqual(midProgress.plan, plan, "Unfinished drill preserves actual game IDs and seeds");
   assert.ok(midProgress.results.length === 2 && midProgress.results.every(v => typeof v === 'boolean'), 'Two hands of results persist on quit');
   // Resume and complete today's five hands.
-  await evaluate('[...document.querySelectorAll("#todayActions button")].find(b => b.textContent === "RESUME DAILY DRILL").click()');
-  assert.match(await label(), /DAILY DRILL #\d+ · HAND 3\/5/);
+  await evaluate('[...document.querySelectorAll("#todayActions button")].find(b => b.textContent === "Resume Daily Drill").click()');
+  assert.match(await label(), /Daily Drill #\d+ · hand 3 of 5/);
   for (let hand = 2; hand < DAILY_HANDS; hand++) {
     await dailyMove();
     if (hand < DAILY_HANDS - 1) await goNextHand();
   }
-  assert.equal(await evaluate('document.getElementById("btnNext").textContent'), 'RETURN TO MAP');
-  assert.match(await evaluate('document.getElementById("masterLine")._dataset.full'), /DAILY DRILL #\d+ COMPLETE: \d\/5 CORRECT/);
+  assert.equal(await evaluate('document.getElementById("btnNext").textContent'), 'Back to home');
+  assert.match(await evaluate('document.getElementById("masterLine")._dataset.full'), /Daily Drill #\d+ complete: \d of 5 correct/);
   assert.equal(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).daily.progress'), null, 'Finished drill retires its resume progress');
   assert.equal(await evaluate(`(async () => {
     const daily = await import('../src/rpg/daily.js');
@@ -811,20 +811,20 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
   assert.equal(await evaluate('document.getElementById("scr-map").hidden'), false);
   await evaluate('document.getElementById("dailyHistory").open = true');
   const recordBeforeReplay = await evaluate('document.getElementById("dailyHistoryContent").textContent');
-  assert.ok(recordBeforeReplay.includes(`LAST 7 DAYS: ${beforeReplay.tally}/5 CORRECT`), 'Record displays the actual first score');
-  assert.ok(recordBeforeReplay.includes(`${key} · ${beforeReplay.tally}/5 CORRECT`), 'Record displays the local date');
-  assert.match(recordBeforeReplay, /PREVIOUS 7 DAYS: NO COMPLETED DRILLS/);
+  assert.ok(recordBeforeReplay.includes(`Last 7 days: ${beforeReplay.tally}/5 correct`), 'Record displays the actual first score');
+  assert.ok(recordBeforeReplay.includes(`${key} · ${beforeReplay.tally}/5 correct`), 'Record displays the local date');
+  assert.match(recordBeforeReplay, /Previous 7 days: No completed drills/);
   assert.equal(await evaluate('document.documentElement.scrollWidth <= window.innerWidth'), true,
     `Open record fits phone width: ${JSON.stringify(await evaluate(`({ width: innerWidth, scroll: document.documentElement.scrollWidth, overflowing: [...document.querySelectorAll('#scr-map *')].filter(e => e.getBoundingClientRect().right > innerWidth).map(e => [e.tagName, e.id, e.textContent.slice(0, 50)]) })`))}`);
   // A replay re-runs the same five hands but scores nothing new.
-  await evaluate(`[...document.querySelectorAll('#todayActions button')].find(b => b.textContent === 'REPLAY DAILY DRILL').click()`);
-  assert.match(await label(), /DAILY DRILL #\d+ · HAND 1\/5/);
+  await evaluate(`[...document.querySelectorAll('#todayActions button')].find(b => b.textContent === 'Replay Daily Drill').click()`);
+  assert.match(await label(), /Daily Drill #\d+ · hand 1 of 5/);
   for (let hand = 0; hand < DAILY_HANDS; hand++) {
     await dailyMove();
     if (hand < DAILY_HANDS - 1) await goNextHand();
   }
-  assert.equal(await evaluate('document.getElementById("btnNext").textContent'), 'RETURN TO MAP');
-  assert.match(await evaluate('document.getElementById("masterLine")._dataset.full'), /PRACTICE REPLAY DONE: \d\/5 CORRECT\. NO NEW XP OR SCORE TODAY\./);
+  assert.equal(await evaluate('document.getElementById("btnNext").textContent'), 'Back to home');
+  assert.match(await evaluate('document.getElementById("masterLine")._dataset.full'), /Practice replay done: \d of 5 correct\. No new XP or score today\./);
   const afterReplay = await evaluate(`(() => {
     const profile = JSON.parse(localStorage.getItem('pokergym:save:v1'));
     return { xp: profile.xp, score: profile.score, streak: profile.daily.streak, lastKey: profile.daily.lastKey };
@@ -838,7 +838,7 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
   const replayCopy = await evaluate(`(() => {
     const text = document.getElementById('dailySharePreview').value;
     Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async value => { window.dailyCopied = value; } } });
-    [...document.querySelectorAll('#todayActions button')].find(b => b.textContent === 'COPY DAILY RESULT').click();
+    [...document.querySelectorAll('#todayActions button')].find(b => b.textContent === 'Copy Daily result').click();
     return text;
   })()`);
   assert.match(replayCopy, /^Poker Gym Daily #\d+  \d\/5\n[🟩🟥]{5}\n🃏 (video poker|blackjack|baccarat|hold'em)( · (video poker|blackjack|baccarat|hold'em)){3}\nhttps:\/\/playpokergym\.com\/web\//u);
@@ -846,7 +846,7 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
   assert.equal(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).daily.history[0].key'), key, 'The first scored run stays the only history entry');
   console.log('PASS: seeded daily drill mixes all four games deterministically; mid-drill progress persists and resumes; a replay scores no new XP or score; the result shares cleanly.');
   // Haptics toggle persists beside the save across a reload.
-  assert.equal(await evaluate('document.getElementById("btnHaptics").textContent'), 'HAPTICS ON');
+  assert.equal(await evaluate('document.getElementById("btnHaptics").textContent'), 'Haptics on');
   await evaluate(`(() => {
     window.hapticCalls = { correct: 0, wrong: 0, total: 0 };
     const patternName = pattern => Array.isArray(pattern) ? pattern.join('-') : String(pattern);
@@ -857,13 +857,13 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
       return true;
     } });
   })()`);
-  await evaluate(`[...document.querySelectorAll('#todayActions button')].find(b => b.textContent === 'REPLAY DAILY DRILL').click()`);
-  assert.match(await label(), /DAILY DRILL #\d+ · HAND 1\/5/);
+  await evaluate(`[...document.querySelectorAll('#todayActions button')].find(b => b.textContent === 'Replay Daily Drill').click()`);
+  assert.match(await label(), /Daily Drill #\d+ · hand 1 of 5/);
   await dailyMove();
   assert.ok(await evaluate('window.hapticCalls.total') > 0, 'An enabled, unmuted hand buzzes once on settlement');
-  assert.equal(await evaluate('document.getElementById("btnHaptics").textContent'), 'HAPTICS ON');
+  assert.equal(await evaluate('document.getElementById("btnHaptics").textContent'), 'Haptics on');
   await evaluate('document.getElementById("btnHaptics").click()');
-  assert.equal(await evaluate('document.getElementById("btnHaptics").textContent'), 'HAPTICS OFF');
+  assert.equal(await evaluate('document.getElementById("btnHaptics").textContent'), 'Haptics off');
   assert.equal(await evaluate('localStorage.getItem("pokergym:haptics")'), 'off');
   assert.equal(await evaluate('(async () => (await import("./haptics.js")).isHapticsEnabled())()'), false);
   const pausedCalls = await evaluate('window.hapticCalls.total');
@@ -872,10 +872,10 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
   await send('Page.reload');
   await sleep(400); contextId = await gameContext(`${contextId.sessionId || ''}:${contextId.id}`);
   for (let i = 0; i < 60; i++) {
-    if (await evaluate('document.getElementById("btnHaptics")?.textContent') === 'HAPTICS OFF') break;
+    if (await evaluate('document.getElementById("btnHaptics")?.textContent') === 'Haptics off') break;
     await sleep(100);
   }
-  assert.equal(await evaluate('document.getElementById("btnHaptics").textContent'), 'HAPTICS OFF', 'The haptics toggle survives a reload');
+  assert.equal(await evaluate('document.getElementById("btnHaptics").textContent'), 'Haptics off', 'The haptics toggle survives a reload');
   assert.equal(await evaluate('localStorage.getItem("pokergym:haptics")'), 'off');
   await evaluate('document.getElementById("btnHaptics").click()');
   assert.equal(await evaluate('localStorage.getItem("pokergym:haptics")'), 'on', 'Re-enabling restores the persisted toggle');

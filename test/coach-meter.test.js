@@ -7,9 +7,9 @@ const src = readFileSync(new URL('../web/app.js', import.meta.url), 'utf8');
 test('coach meter stays neutral before an action or coach request', () => {
   // Blackjack, baccarat and video poker must all gate the recommendation
   // behind acted/coachedHand/handDone.
-  assert.match(src, /if \(!coachedHand && !acted\) \{\s*\n\s*el\('handGrade'\)\.textContent = 'YOUR CALL'/);
-  assert.match(src, /if \(!handDone && !coachedHand && !acted\) \{\s*\n\s*el\('handGrade'\)\.textContent = 'YOUR CALL'/);
-  assert.match(src, /if \(!handDone && !coachedHand && !acted\) \{\s*\n\s*el\('handGrade'\)\.textContent = 'YOUR CALL'/);
+  assert.match(src, /if \(!coachedHand && !acted\) \{\s*\n\s*el\('handGrade'\)\.textContent = 'Your call'/);
+  assert.match(src, /if \(!handDone && !coachedHand && !acted\) \{\s*\n\s*el\('handGrade'\)\.textContent = 'Your call'/);
+  assert.match(src, /if \(!handDone && !coachedHand && !acted\) \{\s*\n\s*el\('handGrade'\)\.textContent = 'Your call'/);
 });
 
 test('showCoach reveals the meter on demand', () => {

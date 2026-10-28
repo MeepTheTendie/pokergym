@@ -5,9 +5,9 @@ export const STATS = {
 };
 
 export const STAT_LABEL = {
-  focus: 'FOCUS',
-  nerve: 'NERVE',
-  read: 'READ',
+  focus: 'Focus',
+  nerve: 'Nerve',
+  read: 'Read',
 };
 
 export const CLASSES = [

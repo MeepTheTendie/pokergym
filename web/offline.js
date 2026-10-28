@@ -12,7 +12,7 @@ if (status && window.top === window && document.querySelector('link[rel="manifes
     installPrompt = undefined;
     installButton.hidden = true;
     document.getElementById('installHelp').hidden = true;
-    installStatus.textContent = 'OPEN FROM YOUR APPS OR HOME SCREEN FOR QUICK PRACTICE';
+    installStatus.textContent = 'Open from your apps or home screen for quick practice.';
   };
   if (standalone()) installed();
   window.addEventListener('beforeinstallprompt', event => {
@@ -31,14 +31,14 @@ if (status && window.top === window && document.querySelector('link[rel="manifes
       await prompt.prompt();
       const choice = await prompt.userChoice;
       if (!installationComplete && !standalone()) installStatus.textContent = choice.outcome === 'accepted'
-        ? 'INSTALL REQUEST ACCEPTED · FOLLOW YOUR BROWSER TO FINISH'
-        : 'INSTALL SKIPPED · YOU CAN KEEP PRACTICING HERE';
+        ? 'Install request accepted. Follow your browser to finish.'
+        : 'Install skipped. You can keep practicing here.';
     } catch {
-      if (!installationComplete) installStatus.textContent = 'USE YOUR BROWSER MENU TO INSTALL · YOU CAN KEEP PRACTICING HERE';
+      if (!installationComplete) installStatus.textContent = 'Use your browser menu to install. You can keep practicing here.';
     }
   });
   if ('serviceWorker' in navigator && window.isSecureContext) {
-    status.textContent = 'DOWNLOADING OFFLINE PRACTICE…';
+    status.textContent = 'Downloading offline practice…';
     // The worker script sits at the site root so it controls more than /web/:
     // index.html imports its game modules from /src/, which a /web/-scoped
     // worker could never intercept. Drop any pre-root worker registration
@@ -52,19 +52,19 @@ if (status && window.top === window && document.querySelector('link[rel="manifes
         const installing = registration.installing;
         installing?.addEventListener('statechange', () => {
           if (installing.state === 'redundant' && !navigator.serviceWorker.controller) {
-            status.textContent = 'OFFLINE DOWNLOAD INCOMPLETE · REOPEN ONLINE TO RETRY';
+            status.textContent = 'Offline download incomplete. Reopen online to retry.';
           }
         });
         await navigator.serviceWorker.ready;
         const update = () => {
           if (navigator.serviceWorker.controller) {
-            status.textContent = 'OFFLINE PRACTICE READY · SAVE STAYS IN THIS BROWSER';
+            status.textContent = 'Offline practice ready. Your save stays in this browser.';
           }
         };
         navigator.serviceWorker.addEventListener('controllerchange', update);
         update();
-      }).catch(() => { status.textContent = 'OFFLINE DOWNLOAD UNAVAILABLE · YOU CAN STILL PLAY ONLINE'; });
+      }).catch(() => { status.textContent = 'Offline download unavailable. You can still play online.'; });
   } else {
-    status.textContent = 'PLAY ONLINE · SAVE STAYS IN THIS BROWSER';
+    status.textContent = 'Play online. Your save stays in this browser.';
   }
 }

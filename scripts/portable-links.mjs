@@ -6,6 +6,8 @@ export const GUIDES = ['jacks-or-better', 'blackjack', 'holdem-best-five', 'bacc
 
 export function localLinks(html, guides = GUIDES) {
   return html
+    .replace(/href="\/sitemap.xml"/g, 'href="index.html"')
+    .replace(/href="\/guides\/"/g, 'href="index.html#portableGuides"')
     .replace(/href="\/guides\/weekly-01\/"/g, 'href="weekly-sample.html"')
     .replace(/href="\/guides\/([a-z-]+)\/"/g, (_, guide) => {
       if (!guides.includes(guide)) throw new Error(`Unbundled guide: ${guide}`);

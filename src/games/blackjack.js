@@ -335,12 +335,12 @@ function settleLine(round) {
 
 export function outcomeLabel(round) {
   switch (round.outcome) {
-    case 'blackjack': return 'BLACKJACK';
-    case 'win': return 'YOU WIN';
-    case 'push': return 'PUSH';
-    case 'lose': return 'YOU LOSE';
-    case 'partial': return 'SPLIT: UP AND DOWN';
-    default: return 'ROUND OVER';
+    case 'blackjack': return 'Blackjack';
+    case 'win': return 'You win';
+    case 'push': return 'Push';
+    case 'lose': return 'You lose';
+    case 'partial': return 'Split: one hand up, one down';
+    default: return 'Round over';
   }
 }
 

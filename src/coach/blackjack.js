@@ -38,10 +38,10 @@ import {
  */
 
 export const ACTION_LABEL = {
-  hit: 'HIT',
-  stand: 'STAND',
-  double: 'DOUBLE',
-  split: 'SPLIT',
+  hit: 'Hit',
+  stand: 'Stand',
+  double: 'Double',
+  split: 'Split',
 };
 
 export const MAX_SPLIT_DEPTH = 3;

@@ -149,10 +149,10 @@ await evaluate(`(() => {
 await waitFor('window.__vpReplies.length === 3');
 await evaluate('document.getElementById("btnAsk").click()');
 const expected = await evaluate('window.__vpReplies[2].data.result.ev.toFixed(3)');
-assert.ok((await evaluate('document.getElementById("advice").textContent')).includes('AVERAGE RETURN ' + expected + ' PER HAND.'), 'Pending worker uses synchronous coaching for the current table');
+assert.ok((await evaluate('document.getElementById("advice").textContent')).includes('Average return: ' + expected + ' per hand.'), 'Pending worker uses synchronous coaching for the current table');
 // Distinct sentinel makes this deterministic even when two tables share an EV.
 await evaluate('window.__vpReplies[1].data.result.ev = -123; releaseVp(2); releaseVp(1); document.getElementById("btnAsk").click()');
-assert.ok((await evaluate('document.getElementById("advice").textContent')).includes('AVERAGE RETURN ' + expected + ' PER HAND.'), 'Coach keeps newest table answer after stale reply');
+assert.ok((await evaluate('document.getElementById("advice").textContent')).includes('Average return: ' + expected + ' per hand.'), 'Coach keeps newest table answer after stale reply');
 console.log('Pay-table changes recompute coaching; stale replies cannot replace current advice.');
 
 // Carry a nondefault practice selection into the shared Daily Drill.
@@ -170,7 +170,7 @@ for (let i = 0; i < 5; i++) {
 assert.equal(await evaluate('document.getElementById("rowVariant").hidden'), false, 'Daily includes video poker');
 assert.equal(await evaluate('document.getElementById("variantSelect").disabled'), true, 'Daily table is fixed');
 assert.equal(await evaluate('document.getElementById("variantSelect").value'), original, 'Daily shows its actual default table');
-assert.ok((await evaluate('document.getElementById("paytableTitle").textContent')).includes('JACKS OR BETTER'), 'Daily odds panel shows the default table');
+assert.ok((await evaluate('document.getElementById("paytableTitle").textContent')).includes('Jacks or Better'), 'Daily odds panel shows the default table');
 const before = await evaluate('window.__vpJobs.length');
 await evaluate(`(() => {
   const select = document.getElementById('variantSelect');
