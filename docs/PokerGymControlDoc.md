@@ -128,6 +128,12 @@ return-to-game 0/97, D7 return-to-game 0/14, status **fix retention**.
 
 ## Decision Log
 
+- **2026-10-28 ~12:00 PM CT (Grok; decided by Wes): add Threads as a copy of the Instagram posts.**
+  - **ChatGPT:** starting with the November batch (Nov 1), add Threads as a destination in Metricool for every Instagram short: same video, same caption, same 4 PM CT slot. No separate Threads content.
+  - **Link:** wherever the caption or bio links the site, use `https://playpokergym.com/go?utm_source=threads&utm_medium=social` so PostHog can separate Threads traffic.
+  - **Why:** it's nearly free reach. Expectations are low; our bottleneck is the 3-second hold, not platform count. Review after Nov 8: keep it if PostHog shows any players from it, otherwise drop it.
+  - If Metricool can't connect Threads, note it under ChatGPT Status. Don't work around it.
+
 - **2026-10-28 ~11:00 AM CT (ChatGPT, daily publishing operations; no new creative decision):** Verified from fresh Metricool brand 7282227 readback **6/6 Oct 26–27 posts PUBLISHED** and **12/12 Oct 28–31 posts PENDING** for 4 PM CT auto-publication, with original MP4 per date, captions, provider settings, platform refs and exact UTMs intact; Oct 30–31 E2 `__fmt-textq` preserved. Drive `1 - Ready to Post` has six high-bitrate Oct v4 MP4s (classified `application/mp4`) and six matching older caption .txt files, but **zero approved November MP4/caption pairs**; Nov 1–8 **zero scheduled posts**. **No edits, errors or protected A/B changes.** Wren's Oct 28 findings put E1 at four IG/FB posts, zero comments, with fifth-post read after Oct 28 4 PM; Grok's Nov batch starts around Oct 29 under Wren's creative direction. E2 Nov 1/3/5/7/8 `__fmt-cardart`, Nov 2/4/6 `__fmt-textq`; first verified follow-prompt end-card ship date still **unknown**. See ChatGPT Status Oct 28 for full checks/sources. No owner approval required for this read-only QA, no analytics duplication or new task.
 
 
