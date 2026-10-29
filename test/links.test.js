@@ -54,12 +54,13 @@ test('parseEntryParams: d values', () => {
 });
 
 test('parseEntryParams: missing params', () => {
-  assert.deepEqual(parseEntryParams(''), { ref: 'none', day: null, practice: null, drill: null, daily: false });
-  assert.deepEqual(parseEntryParams(undefined), { ref: 'none', day: null, practice: null, drill: null, daily: false });
+  assert.deepEqual(parseEntryParams(''), { ref: 'none', day: null, practice: null, drill: null, daily: false, sh: null });
+  assert.deepEqual(parseEntryParams(undefined), { ref: 'none', day: null, practice: null, drill: null, daily: false, sh: null });
 });
 
 test('parseEntryParams: ref and practice together', () => {
-  assert.deepEqual(parseEntryParams('?ref=share&d=9&practice=blackjack'), { ref: 'share', day: 9, practice: 'blackjack', drill: null, daily: false });
+  assert.deepEqual(parseEntryParams('?ref=share&d=9&practice=blackjack'), { ref: 'share', day: 9, practice: 'blackjack', drill: null, daily: false, sh: null });
+  assert.deepEqual(parseEntryParams('?ref=share&d=9&sh=abc123'), { ref: 'share', day: 9, practice: null, drill: null, daily: false, sh: 'abc123' });
   assert.equal(parseEntryParams('?ref=Evil').ref, 'other');
 });
 

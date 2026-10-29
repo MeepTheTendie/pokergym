@@ -8,6 +8,9 @@ Every event below also carries `ref` (this visit's channel tag, e.g. `youtube`,
 `x`, `share`) when the visit has one. It comes from the loader's attribution
 snapshot (`?ref=`, a UTM tag, or the referrer fallback). The loader also sends:
 
+- `display_mode` — a super property on every event: `standalone` or `browser`.
+- First-touch `utm_source`, `utm_medium`, `utm_campaign`, `utm_content` are set once as person properties (`$set_once`), so they survive later visits.
+
 - `first_ref`, `first_utm_*` — the **first** source ever seen for this browser.
   Written once to `localStorage` and never overwritten by a later visit.
 - `session_ref` — the source for the current 30-minute session, kept across
@@ -53,7 +56,14 @@ visible in the data rather than implied by the event name.
 | `recap_view` | The end-of-run recap is shown after a five-hand session **or a completed Daily Drill**. | `daily_done`, `missed`, `run_id`, `run_kind` (`session`/`daily`), `event_version` |
 | `recap_tap` | A button on the end-of-run recap is tapped. | `button`: `daily_drill`, `play_again`, `replay_daily`, `challenge`, `review_mistakes`, `install`; `run_id`, `event_version` |
 | `share` | A result is shared. | `channel`: `native`, `copy`, `challenge`; `surface`: `recap`, `recap_daily`, `daily`, `invite` |
+| `share_click` | A share action is invoked. | `game`, `channel` (`native`, `copy`, `x`, `facebook`…), `share_id` (short random id). Every share link carries `?ref=share&sh=<share_id>`. |
+| `share_arrival` | The trainer or landing loads with `ref=share`. | `sh` (the share id). Fires on load and registers `ref`/`sh` as first-touch person properties. |
 | `push_opt_in` | The recap reminder button is used. | `result`: `subscribed`, `unsubscribed`, `denied`, `dismissed`, `error`; `surface` |
+| `push_prompt_shown` | The push opt-in UI is shown. | `surface` |
+| `push_subscribe` | A push subscription attempt resolves. | `result`: `granted`, `denied`, or `unsupported`; `surface` |
+| `push_unsubscribe` | A push subscription is removed. | `surface` |
+| `push_open` | The app loads with `ref=push`. | (none) |
+| `a2hs_installed` | The app is installed to the home screen (`appinstalled`). | `display_mode` |
 | `first_nudge` | The one-time first-hand nudge appears (6s after hand 1 with no decision). | `game`; `mode` |
 | `feedback_submit` | The feedback form is submitted. | `clarity`, `returnInterest` |
 

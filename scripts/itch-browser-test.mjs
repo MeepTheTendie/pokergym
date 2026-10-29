@@ -842,7 +842,8 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
     return text;
   })()`);
   assert.match(replayCopy, /^Poker Gym Daily #\d+  \d\/5\n[🟩🟥]{5}\n🃏 (video poker|blackjack|baccarat|hold'em)( · (video poker|blackjack|baccarat|hold'em)){3}\nhttps:\/\/playpokergym\.com\/web\//u);
-  assert.equal(await evaluate('window.dailyCopied'), replayCopy, 'Share copies the same seeded result text');
+  const copiedText = await evaluate('window.dailyCopied');
+  assert.equal(copiedText.replace(/&sh=\w+/, ''), replayCopy.replace(/&sh=\w+/, ''), 'Share copies the same seeded result text');
   assert.equal(await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1")).daily.history[0].key'), key, 'The first scored run stays the only history entry');
   console.log('PASS: seeded daily drill mixes all four games deterministically; mid-drill progress persists and resumes; a replay scores no new XP or score; the result shares cleanly.');
   // Haptics toggle persists beside the save across a reload.
