@@ -17,7 +17,7 @@ await mkdir(path.join(output, 'web'), { recursive: true });
 const files = ['index.html', 'app.js', 'audio.js', 'sound-controls.js', 'haptics.js', 'vp-coach-worker.js',
   'characters.js', 'styles.css', 'manifest.webmanifest',
   'icon.svg', 'icon-maskable.svg', 'offline.js', 'feedback.js', 'privacy.html',
-  'posthog-loader.js', 'push.js'];
+  'posthog-loader.js', 'push.js', 'landing.js'];
 for (const file of files) await cp(path.join(root, 'web', file), path.join(output, 'web', file));
 for (const folder of ['assets', 'fonts']) {
   await mkdir(path.join(output, 'web', folder), { recursive: true });

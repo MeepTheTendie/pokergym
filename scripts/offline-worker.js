@@ -48,12 +48,26 @@ self.addEventListener('fetch', event => {
 
 // Web push: the daily drill reminder. The payload is JSON from the Worker;
 // a malformed payload still shows a generic reminder rather than nothing.
+function safePushUrl(value) {
+  const fallback = '/web/?daily=1&ref=push';
+  if (typeof value !== 'string') return fallback;
+  try {
+    const url = new URL(value, self.location.origin);
+    // Accept only same-origin navigation. In particular, reject protocol-
+    // relative values such as //example.com that also start with `/`.
+    if (url.origin !== self.location.origin) return fallback;
+    return `${url.pathname}${url.search}${url.hash}` || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 self.addEventListener('push', event => {
   let data = {};
   try { data = event.data ? event.data.json() : {}; } catch { data = {}; }
   const title = typeof data.title === 'string' && data.title ? data.title : 'Play Poker Gym';
   const body = typeof data.body === 'string' && data.body ? data.body : 'Today\u2019s drill is ready.';
-  const url = typeof data.url === 'string' && data.url.startsWith('/') ? data.url : '/web/?daily=1&ref=push';
+  const url = safePushUrl(data.url);
   event.waitUntil(self.registration.showNotification(title, {
     body,
     tag: typeof data.tag === 'string' ? data.tag : 'daily-drill',
@@ -65,9 +79,7 @@ self.addEventListener('push', event => {
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  const url = event.notification.data && typeof event.notification.data.url === 'string'
-    ? event.notification.data.url
-    : '/web/?daily=1&ref=push';
+  const url = safePushUrl(event.notification.data && event.notification.data.url);
   event.waitUntil((async () => {
     const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     for (const client of windows) {

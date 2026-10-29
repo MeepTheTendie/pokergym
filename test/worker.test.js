@@ -274,7 +274,7 @@ function kvStub() {
 test('push subscription is validated and stored, then removable', async () => {
   const pair = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
   const raw = Buffer.from(await crypto.subtle.exportKey('raw', pair.publicKey)).toString('base64url');
-  const body = JSON.stringify({ endpoint: 'https://push.example.test/send/abc', keys: { p256dh: raw, auth: Buffer.alloc(16, 7).toString('base64url') } });
+  const body = JSON.stringify({ endpoint: 'https://fcm.googleapis.com/fcm/send/abc', keys: { p256dh: raw, auth: Buffer.alloc(16, 7).toString('base64url') } });
   const e = { ...env(), PUSH_SUBS: kvStub() };
   const c = ctx();
 
@@ -282,13 +282,20 @@ test('push subscription is validated and stored, then removable', async () => {
   assert.equal(ok.status, 200);
   assert.equal(e.PUSH_SUBS.map.size, 1);
   const stored = JSON.parse([...e.PUSH_SUBS.map.values()][0]);
-  assert.equal(stored.endpoint, 'https://push.example.test/send/abc');
+  assert.equal(stored.endpoint, 'https://fcm.googleapis.com/fcm/send/abc');
   assert.equal(stored.keys.p256dh, raw);
 
   const bad = await worker.fetch(new Request('https://playpokergym.com/push/subscribe', { method: 'POST', body: JSON.stringify({ endpoint: 'http://x', keys: {} }) }), e, c);
   assert.equal(bad.status, 400);
+  const arbitrary = await worker.fetch(new Request('https://playpokergym.com/push/subscribe', { method: 'POST', body: JSON.stringify({ endpoint: 'https://attacker.example/send/abc', keys: { p256dh: raw, auth: Buffer.alloc(16, 7).toString('base64url') } }) }), e, c);
+  assert.equal(arbitrary.status, 400);
+  const oversized = await worker.fetch(new Request('https://playpokergym.com/push/subscribe', {
+    method: 'POST', headers: { 'content-length': '5000' }, body: 'x',
+  }), e, c);
+  assert.equal(oversized.status, 400);
+  assert.equal(e.PUSH_SUBS.map.size, 1);
 
-  const gone = await worker.fetch(new Request('https://playpokergym.com/push/unsubscribe', { method: 'POST', body: JSON.stringify({ endpoint: 'https://push.example.test/send/abc' }) }), e, c);
+  const gone = await worker.fetch(new Request('https://playpokergym.com/push/unsubscribe', { method: 'POST', body: JSON.stringify({ endpoint: 'https://fcm.googleapis.com/fcm/send/abc' }) }), e, c);
   assert.equal(gone.status, 200);
   assert.equal(e.PUSH_SUBS.map.size, 0);
 });
@@ -303,7 +310,7 @@ test('the daily sender deletes a subscription the push service reports gone', as
   const raw = Buffer.from(await crypto.subtle.exportKey('raw', pair.publicKey)).toString('base64url');
   const kv = kvStub();
   await kv.put('sub:one', JSON.stringify({
-    endpoint: 'https://push.example.test/send/gone',
+    endpoint: 'https://fcm.googleapis.com/fcm/send/gone',
     keys: { p256dh: raw, auth: Buffer.alloc(16, 1).toString('base64url') },
   }));
   const signer = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);

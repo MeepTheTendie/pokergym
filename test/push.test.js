@@ -46,7 +46,7 @@ async function fakeSubscription() {
     pair,
     publicRaw,
     subscription: {
-      endpoint: 'https://push.example.test/send/abc123',
+      endpoint: 'https://fcm.googleapis.com/fcm/send/abc123',
       keys: { p256dh: b64urlEncode(publicRaw), auth: b64urlEncode(auth) },
     },
     auth,
@@ -63,10 +63,13 @@ test('base64url round-trips binary without padding', () => {
 test('a valid subscription needs https and a 65-byte p256dh', async () => {
   const { subscription } = await fakeSubscription();
   assert.equal(validSubscription(subscription), true);
-  assert.equal(validSubscription({ ...subscription, endpoint: 'http://push.example.test/x' }), false);
+  assert.equal(validSubscription({ ...subscription, endpoint: 'http://fcm.googleapis.com/x' }), false);
+  assert.equal(validSubscription({ ...subscription, endpoint: 'https://evil.example/fcm/send/x' }), false);
+  assert.equal(validSubscription({ ...subscription, endpoint: 'https://fcm.googleapis.com.evil.example/x' }), false);
+  assert.equal(validSubscription({ ...subscription, endpoint: 'https://fcm.googleapis.com:8443/x' }), false);
   assert.equal(validSubscription({ ...subscription, keys: { ...subscription.keys, p256dh: 'AAAA' } }), false);
   assert.equal(validSubscription(null), false);
-  assert.notEqual(await subscriptionId(subscription.endpoint), await subscriptionId('https://push.example.test/other'));
+  assert.notEqual(await subscriptionId(subscription.endpoint), await subscriptionId('https://fcm.googleapis.com/fcm/send/other'));
 });
 
 test('payload encryption matches the receiving side of RFC 8291', async () => {

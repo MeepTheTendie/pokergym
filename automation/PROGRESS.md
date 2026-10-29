@@ -1765,3 +1765,23 @@ Verification: npm test passed 386/386. Local and live new browser suite passed: 
 Access/limits: no blocking access gap for this change. Used Wrangler skill and installed CLI help/current Cloudflare command and authorization documentation; existing authenticated Workers write access verified without reading credential files or values. Physical Android installation remains unverified. No subscriptions, pricing questions, paid services/ad spend, unsolicited messages, new goals/schedulers/subagents, unrelated deletions, system config or automation runner/timer/service/model/permission changes. Reports local; no owner notification claimed.
 
 Next action: review the first complete post-entry-fix cohort or voluntary player feedback for Daily completion/second-day practice; fix an evidenced learning obstacle before adding further return prompts. The existing general analytics browser suite still contains obsolete title-click expectations for auto-start links and needs updating alongside the next relevant behavior change.
+
+## 2026-10-29 — production hardening and game-flow fixes
+
+Outcome: deployed Worker `5009b9fa-b70e-4e94-9f3e-88fcb9d89296` to https://playpokergym.com/. The release fixes scoring/state bugs found in the security and logic review and hardens the edge paths that can be reached without an account. No new product claims, pricing, marketing, or external messages.
+
+Changes:
+- Daily Drill now clears any stale drill mode/bank before dealing, so a previous Master/Weak drill cannot replace the seeded daily hands.
+- Opening the coach during a Daily hand is blocked; if it is reached through a stale path anyway, the hand is practice-only, does not move the daily forward, and replays the same seeded hand.
+- Natural blackjack hands are dealt through before they reach the player, because a natural has no decision to grade. The settle path also refuses to award a free correct decision if a malformed drill ever produces one.
+- Restore now runs the strict backup reader and then `sanitizeProfile()` before writing or replacing the live save.
+- Review “Reveal answer” now exposes the Next control, so a scored review cannot dead-end.
+- A targeted drill started without an active session now creates a real session with a gym id.
+- The landing hero click moved from an inline script to `/web/landing.js`, so it is allowed by `script-src 'self'`.
+- Push subscriptions are limited to known browser push-service hosts; sender fetches have a 10-second timeout and reject redirects.
+- Push JSON bodies are streamed with a hard 4 KiB cap; ingest rejects non-SDK methods and declared bodies over 2 MiB; service-worker notification URLs must resolve same-origin, rejecting protocol-relative `//host` values.
+- Added regression checks for the daily/drill guards, natural handling, restore sanitization, push-host validation, ingest limits, and service-worker URL handling.
+
+Verification: `npm run test:all` passed all nine steps: 351 unit tests, 15 release tests, analytics browser flows, reminder/push browser checks, itch embed, offline reload, denied-storage and quota runs. Live checks: landing page includes `/web/landing.js`, live `app.js` contains the fixes, `/web/landing.js` returns 200, an invalid push host returns 400, and `PUT /ingest/` returns 405. The earlier quota run exposed a timing-only install-prompt assertion; it passed on rerun and the final full suite was green.
+
+Limits: the documented blackjack hit-table approximation is unchanged. The PostHog proxy is still a same-origin analytics relay, now method- and declared-size-limited; it is not an authenticated boundary, and chunked bodies without a `Content-Length` are not capped by the proxy. Real-device push delivery remains unverified. No player feedback, retention lift, or revenue is claimed.

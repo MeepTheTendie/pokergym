@@ -31,6 +31,23 @@ function concat(...parts) {
   return out;
 }
 
+// Browser push services are a small, well-known set. Storing an arbitrary
+// HTTPS endpoint would turn the daily cron into an SSRF probe and let anyone
+// fill KV with arbitrary URLs, so only these hosts (and their service
+// subdomains) are accepted.
+const PUSH_ENDPOINT_HOSTS = [
+  'fcm.googleapis.com',                 // Chrome, Chromium, Edge, Brave, Samsung
+  'updates.push.services.mozilla.com',  // Firefox
+  'push.services.mozilla.com',          // older Firefox
+  'notify.windows.com',                 // Edge / Windows Notification Service
+  'web.push.apple.com',                 // Safari
+];
+
+function allowedPushHost(host) {
+  const name = String(host).toLowerCase();
+  return PUSH_ENDPOINT_HOSTS.some((allowed) => name === allowed || name.endsWith(`.${allowed}`));
+}
+
 /** A stored subscription must be a real https endpoint with both keys. */
 export function validSubscription(value) {
   if (!value || typeof value !== 'object') return false;
@@ -38,6 +55,9 @@ export function validSubscription(value) {
   let url;
   try { url = new URL(value.endpoint); } catch { return false; }
   if (url.protocol !== 'https:') return false;
+  if (url.username || url.password) return false;
+  if (url.port && url.port !== '443') return false;
+  if (!allowedPushHost(url.hostname)) return false;
   const keys = value.keys;
   if (!keys || typeof keys !== 'object') return false;
   if (typeof keys.p256dh !== 'string' || typeof keys.auth !== 'string') return false;
@@ -123,16 +143,26 @@ export async function vapidToken(endpoint, privateKey, subject, now = Math.floor
 export async function sendPush(subscription, payload, { publicKey, privateKey, subject }, fetchImpl = fetch) {
   const body = await encryptPayload(subscription, payload);
   const token = await vapidToken(subscription.endpoint, privateKey, subject, undefined, publicKey);
-  const response = await fetchImpl(subscription.endpoint, {
-    method: 'POST',
-    headers: {
-      Authorization: `vapid t=${token}, k=${publicKey}`,
-      'Content-Encoding': 'aes128gcm',
-      'Content-Type': 'application/octet-stream',
-      TTL: '86400',
-      Urgency: 'normal',
-    },
-    body,
-  });
-  return response.status;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+  try {
+    const response = await fetchImpl(subscription.endpoint, {
+      method: 'POST',
+      headers: {
+        Authorization: `vapid t=${token}, k=${publicKey}`,
+        'Content-Encoding': 'aes128gcm',
+        'Content-Type': 'application/octet-stream',
+        TTL: '86400',
+        Urgency: 'normal',
+      },
+      body,
+      // Push services answer directly. Refuse redirects so a compromised or
+      // misconfigured endpoint cannot bounce the signed request elsewhere.
+      redirect: 'error',
+      signal: controller.signal,
+    });
+    return response.status;
+  } finally {
+    clearTimeout(timer);
+  }
 }

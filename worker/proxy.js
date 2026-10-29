@@ -34,8 +34,20 @@ export function upstreamRequest(requestUrl, region = POSTHOG_REGION) {
 // it from the target URL; cookies and authorization are stripped because
 // PostHog sets none of its own and forwarding them only leaks origin state.
 // A 10s timeout keeps a hung upstream from holding the worker invocation.
+const MAX_INGEST_BYTES = 2 * 1024 * 1024;
+const INGEST_METHODS = new Set(['GET', 'POST', 'OPTIONS']);
+
 export async function proxyPostHog(request, region = POSTHOG_REGION) {
   const { url, isAsset } = upstreamRequest(request.url, region);
+  if (!isAsset && !INGEST_METHODS.has(request.method)) {
+    return new Response('method not allowed', { status: 405 });
+  }
+  if (!isAsset) {
+    const declared = Number(request.headers.get('content-length'));
+    if (Number.isFinite(declared) && declared > MAX_INGEST_BYTES) {
+      return new Response('payload too large', { status: 413 });
+    }
+  }
   const headers = new Headers(request.headers);
   headers.delete('host');
   headers.delete('cookie');

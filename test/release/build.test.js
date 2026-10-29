@@ -52,6 +52,8 @@ test('public build contains its module graph without repository or diagnostic fi
   }
   const worker = await readFile(path.join(root, 'sw.js'), 'utf8');
   assert.match(worker, /pokergym-offline-[a-f0-9]{20}/);
+  assert.match(worker, /function safePushUrl/, 'push navigation must be origin-checked');
+  assert.match(worker, /url\.origin !== self\.location\.origin/);
   const assets = JSON.parse(worker.match(/const ASSETS = (\[[^\n]+\]);/)[1]);
   for (const asset of assets) {
     assert.match(asset, /^\/(?:web|src|guides\/weekly-01)\//, 'Only public game files are cached');

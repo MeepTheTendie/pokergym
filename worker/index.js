@@ -28,9 +28,39 @@ function pushJson(body, status = 200) {
 }
 
 async function readJson(request, limit = 4096) {
-  const text = await request.text();
-  if (text.length > limit) return null;
-  try { return JSON.parse(text); } catch { return null; }
+  // Reject an oversized declared body before touching the stream, then enforce
+  // the same cap while reading so a missing or lying Content-Length cannot
+  // force the isolate to buffer an arbitrarily large request.
+  const declared = Number(request.headers.get('content-length'));
+  if (Number.isFinite(declared) && declared > limit) return null;
+  if (!request.body) return null;
+  const reader = request.body.getReader();
+  const chunks = [];
+  let total = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+      total += value.byteLength;
+      if (total > limit) {
+        await reader.cancel().catch(() => {});
+        return null;
+      }
+      chunks.push(value);
+    }
+  } catch {
+    return null;
+  } finally {
+    try { reader.releaseLock(); } catch { /* already released */ }
+  }
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  try { return JSON.parse(new TextDecoder().decode(bytes)); } catch { return null; }
 }
 
 async function subscribe(request, env) {

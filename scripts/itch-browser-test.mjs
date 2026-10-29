@@ -331,7 +331,7 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
     await evaluate(`if (window.testStorageDescriptor) Object.defineProperty(window, 'localStorage', window.testStorageDescriptor); else Storage.prototype.setItem = window.testStorageSet; document.getElementById("btnRestore").click(); document.getElementById("btnConfirmRestore").click()`);
     assert.match(await evaluate('document.getElementById("backupStatus").textContent'), /Progress restored/);
     assert.equal(await evaluate('document.getElementById("saveStatus").hidden'), true, 'Warning clears only after successful save');
-    assert.equal(await evaluate('localStorage.getItem("pokergym:save:v1")'), backup, 'Backup persists after storage becomes available');
+    assert.deepEqual(JSON.parse(await evaluate('localStorage.getItem("pokergym:save:v1")')), JSON.parse(backup), 'Backup persists after storage becomes available');
 
     assert.deepEqual(errors, []);
     assert.deepEqual(failed.filter(url => !url.endsWith('/favicon.ico')), []);
@@ -348,7 +348,12 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
   assert.equal(await evaluate('localStorage.getItem("pokergym:save:v1")'), backup, 'Validation alone does not overwrite');
   await evaluate('document.getElementById("btnConfirmRestore").click()');
   assert.match(await evaluate('document.getElementById("backupStatus").textContent'), /Progress restored/);
-  assert.equal(await evaluate('localStorage.getItem("pokergym:save:v1")'), backup);
+  const restoredSplit = JSON.parse(await evaluate('localStorage.getItem("pokergym:save:v1")'));
+  const sanitizedBackup = JSON.parse(await evaluate(`(async () => {
+    const { sanitizeProfile } = await import('../src/rpg/state.js');
+    return JSON.stringify(sanitizeProfile(JSON.parse(${JSON.stringify(backup)})));
+  })()`));
+  assert.deepEqual(restoredSplit, sanitizedBackup);
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Backup controls fit phone');
   await evaluate('document.getElementById("saveBackup").open = false');
   await evaluate('document.querySelector("#gymList button:not(:disabled)").click()');

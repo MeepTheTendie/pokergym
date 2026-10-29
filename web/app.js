@@ -213,7 +213,11 @@ el('btnRestore').onclick = () => {
   pendingRestore = null;
   el('btnConfirmRestore').hidden = true;
   try {
-    pendingRestore = readBackup(el('backupText').value);
+    // readBackup validates the external shape; sanitizeProfile is still the
+    // authority that strips unknown keys and normalizes every field before it
+    // can become the live save.
+    pendingRestore = sanitizeProfile(readBackup(el('backupText').value));
+    if (!pendingRestore) throw new Error('Invalid backup');
     el('backupStatus').textContent = `Valid backup: ${CLASS_BY_ID[pendingRestore.classId].name}, ${pendingRestore.handsPlayed} hands, ${pendingRestore.badges.length} badges. Confirm to replace local progress.`;
     el('btnConfirmRestore').hidden = false;
   } catch { el('backupStatus').textContent = 'Invalid or unsupported backup. Your progress is unchanged.'; }
@@ -222,9 +226,11 @@ el('btnConfirmRestore').onclick = () => {
   if (!pendingRestore) return;
   try {
     // Persist successfully before replacing the in-memory profile.
-    localStorage.setItem(SAVE_KEY, serialize(pendingRestore));
+    const restored = sanitizeProfile(pendingRestore);
+    if (!restored) throw new Error('Invalid backup');
+    localStorage.setItem(SAVE_KEY, serialize(restored));
     el('saveStatus').hidden = true;
-    profile = pendingRestore; pendingRestore = null; round = null; shortSession = false;
+    profile = restored; pendingRestore = null; round = null; shortSession = false;
     el('btnConfirmRestore').hidden = true;
     el('btnContinue').disabled = false;
     renderMap(); show('scr-map');
@@ -1100,6 +1106,8 @@ function renderReviewEntry(container, row, scoredDue) {
       for (const child of choices.children) child.disabled = true;
       answer.hidden = false;
       reviewed.hidden = false;
+      result.textContent = 'Answer revealed · no score for this review.';
+      next.hidden = false;
     };
     block.append(choices, revealAnswer, result, answer, reviewed, next);
   } else {
@@ -1133,6 +1141,10 @@ function startDaily(entry = 'other') {
   save();
   dailyMode = true;
   shortSession = false;
+  // Never let a drill-mode deal leak into the Daily Drill. The daily owns its
+  // own seeded plan, and a stale drill bank would quietly replace those hands.
+  drillMode = null;
+  drillHands = [];
   tutorialTips = [];
   handsWon = 0;
   handsAtGym = index;
@@ -1169,7 +1181,14 @@ function startGym(gym, sprint = false, mode = null) {
   const targeted = scenario ? drillPlanStartingWith(profile, gym.game, scenario) : null;
   if (targeted) {
     // The named scenario opens the five-hand set; the rest continues the
-    // normal rotation so the drill still covers other situations.
+    // normal rotation so the drill still covers other situations. A challenge
+    // can enter this branch without a saved session, so create one with a real
+    // gym id rather than persisting a drill-only object.
+    if (!profile.activeSession || profile.activeSession.gymId !== gym.id) {
+      profile = { ...profile, activeSession: {
+        gymId: gym.id, played: 0, optimal: 0, dealt: 0, startedAt: new Date().toISOString(),
+      } };
+    }
     profile = { ...profile, activeSession: { ...profile.activeSession, drill: targeted } };
     save();
     requestedDrill = null;
@@ -1808,8 +1827,15 @@ function startHand() {
     });
     vpKickoff(round);
   } else if (gameId === 'blackjack') {
-    round = newBjRound(rng ?? Math.random,
-      drilled?.player ? { player: drilled.player, dealer: [drilled.dealer, drilled.hole] } : undefined);
+    const rigged = drilled?.player
+      ? { player: drilled.player, dealer: [drilled.dealer, drilled.hole] }
+      : undefined;
+    const deal = () => newBjRound(rng ?? Math.random, rigged);
+    round = deal();
+    // A natural is settled by the rules before the player has any choice. It is
+    // not a decision, so it must not become a free correct hand; deal through
+    // it instead. Daily's seeded stream stays deterministic for every player.
+    for (let skip = 0; !rigged && round.settled && skip < 100; skip++) round = deal();
   } else if (gameId === 'baccarat') {
     round = { quiz: quizFor(rng ?? Math.random) };
   } else {
@@ -1871,7 +1897,7 @@ function settleHand({ optimal, difficulty, line, review }) {
 
   const coached = coachedHand;
 
-  if (dailyMode) return settleDailyHand({ optimal, difficulty, line, review });
+  if (dailyMode) return settleDailyHand({ optimal, difficulty, line, review, coached });
 
   // A coached hand is a learning rep: it earns XP and practice history but
   // never a point, a streak step, or a place on the exam card. That is the
@@ -2362,8 +2388,28 @@ function renderSessionSummary(session, daily = null) {
   box.hidden = false;
 }
 
-function settleDailyHand({ optimal, difficulty, line, review }) {
+function settleDailyHand({ optimal, difficulty, line, review, coached = false }) {
   const run = dailyRun;
+  if (coached) {
+    // The Daily is a clean read. If the coach is ever opened through a stale
+    // control or keyboard path, the hand is practice only; replay the same
+    // seeded hand without recording a result or moving the daily forward.
+    save();
+    renderBattle();
+    el('battleEndRow').hidden = false;
+    const full = `${line} Coach used — this Daily hand does not count. Try the same hand again.`;
+    el('masterLine')._dataset = { full };
+    el('masterPrompt').hidden = false;
+    typewriter(el('masterLine'), full);
+    advice = null;
+    el('coachPanel').hidden = true;
+    el('why').hidden = true;
+    el('btnNext').textContent = 'Try hand again';
+    audio.sfx(optimal ? 'win' : 'lose');
+    haptics.buzz(optimal ? 'correct' : 'wrong', audio.isMuted());
+    flashScene(optimal);
+    return;
+  }
   if (run.scored) {
     const applied = applyResult(profile, { optimal, difficulty, game: GYM_BY_ID[gymId].game });
     profile = applied.profile;
@@ -2494,8 +2540,20 @@ function bjAct(action) {
 }
 
 function settleBlackjack() {
+  // Defensive fallback for a natural that slipped past the pre-deal filter
+  // (for example from a malformed authored drill). A hand with no decision
+  // never scores; deal again instead.
+  if (!decisions.length) {
+    if (drillMode) {
+      // Authored drills are validated to avoid naturals. If one is ever
+      // malformed, settle it without a score rather than looping forever.
+      settleHand({ optimal: false, difficulty: 1, line: outcomeLabel(round) });
+      return;
+    }
+    startHand();
+    return;
+  }
   settleHand({
-    // A round with no decision at all (a natural) cannot be played wrong.
     optimal: decisions.every((d) => d.optimal),
     review: decisions.find(d => !d.optimal)?.review,
     // handDifficulty reads a hand category, which blackjack rounds do not have
@@ -2655,7 +2713,7 @@ function buildAdvice() {
 }
 
 function showCoach() {
-  if (handDone) return;
+  if (handDone || dailyMode) return;
   advice = buildAdvice();
   if (!advice) return;
   el('advice').textContent = advice.text;

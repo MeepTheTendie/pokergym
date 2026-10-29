@@ -27,6 +27,30 @@ test('ingest requests map to the right PostHog host', () => {
   assert.equal(upstreamRequest('https://playpokergym.com/ingest/e/', 'xx').url, 'https://us.i.posthog.com/e/');
 });
 
+test('ingest rejects write methods outside the SDK contract and oversized bodies', async () => {
+  let calls = 0;
+  const original = globalThis.fetch;
+  globalThis.fetch = async () => { calls++; return new Response('proxied'); };
+  const env = {
+    ASSETS: { fetch() { throw new Error('ingest must never touch assets'); } },
+  };
+  try {
+    const put = await worker.fetch(new Request('https://playpokergym.com/ingest/e/', {
+      method: 'PUT', body: 'x',
+    }), env, {});
+    assert.equal(put.status, 405);
+    const large = await worker.fetch(new Request('https://playpokergym.com/ingest/e/', {
+      method: 'POST',
+      headers: { 'content-length': String(2 * 1024 * 1024 + 1) },
+      body: 'x',
+    }), env, {});
+    assert.equal(large.status, 413);
+    assert.equal(calls, 0);
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
 test('worker proxies /ingest/* without counting or touching assets', async () => {
   const calls = [];
   const served = [];

@@ -354,10 +354,5 @@ footer{border-top:1px solid var(--border);color:var(--dim);font-size:13px;paddin
 </footer>
 <div class="sticky-cta"><a class="cta" href="/web/" data-track="cta_click" data-cta="start_training" data-location="sticky_mobile">Play your first hand →</a></div>
 <script src="/web/posthog-loader.js"></script>
-<script>
-document.querySelector('.hero')?.addEventListener('click', (e) => {
-  if (e.target.closest('a, button')) return;
-  window.location.href = '/web/';
-});
-</script>
+<script src="/web/landing.js" defer></script>
 </body></html>
