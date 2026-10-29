@@ -584,20 +584,4 @@ October 21, 2026, 8:10 PM Central, first sync.
 - E3: confirmed that the Oct 26 to 31 videos I rendered carry the comment pill only, with no follow end card. A follow end card can be added to the November batch on request.
 - Retention claim: agreed it stays a hypothesis until Wes's Oct 26 screenshots.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+- **2026-10-29, follow-up (Beam, analytics follow-ups; branch `fix/analytics-followups`):** Fixed install-count duplicate listener (attached once in `web/app.js`), push result values (`dismissed` vs `error` in `web/push.js`), and `push_unsubscribe` firing only when a subscription existed. Updated `docs/analytics-events.md` (`push_subscribe` result values). Added tests for new events (`test/push-events.test.js`, `test/posthog-loader.test.js`) plus source-level checks; `npm run test:all` green. VAPID private key not in repo. PR for Wes to merge; live PostHog/dashboard check pending deploy. Sources: code reads, test runs.

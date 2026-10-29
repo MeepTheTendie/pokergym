@@ -57,7 +57,7 @@ export async function enablePush() {
       return 'denied';
     }
     if (answer !== 'granted') {
-      window.trackEvent?.('push_subscribe', { result: 'denied' });
+      window.trackEvent?.('push_subscribe', { result: 'dismissed' });
       return 'dismissed';
     }
     const reg = await registration();
@@ -74,13 +74,13 @@ export async function enablePush() {
     });
     if (!response.ok) {
       await sub.unsubscribe().catch(() => {});
-      window.trackEvent?.('push_subscribe', { result: 'denied' });
+      window.trackEvent?.('push_subscribe', { result: 'error' });
       return 'error';
     }
     window.trackEvent?.('push_subscribe', { result: 'granted' });
     return 'subscribed';
   } catch {
-    window.trackEvent?.('push_subscribe', { result: 'denied' });
+    window.trackEvent?.('push_subscribe', { result: 'error' });
     return 'error';
   }
 }
@@ -92,7 +92,6 @@ export async function disablePush() {
     const reg = await registration();
     const sub = await reg.pushManager.getSubscription();
     if (!sub) {
-      window.trackEvent?.('push_unsubscribe');
       return 'unsubscribed';
     }
     const { endpoint } = sub.toJSON();
