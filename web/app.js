@@ -2057,6 +2057,8 @@ function nextReminderLabel(now = new Date()) {
   }
 }
 
+let appInstalledListenerAttached = false;
+
 function renderSessionSummary(session, daily = null) {
   const box = el('sessionSummary');
   if (!box || (!session && !daily)) return;
@@ -2336,9 +2338,12 @@ function renderSessionSummary(session, daily = null) {
       const syncInstall = () => { installBtn.hidden = !existing || existing.hidden; };
       window.addEventListener('beforeinstallprompt', syncInstall, { once: false });
     }
-    window.addEventListener('appinstalled', () => {
-      window.trackEvent?.('a2hs_installed', { display_mode: window.__pgAttribution?.display_mode || 'browser' });
-    });
+    if (!appInstalledListenerAttached) {
+      appInstalledListenerAttached = true;
+      window.addEventListener('appinstalled', () => {
+        window.trackEvent?.('a2hs_installed', { display_mode: window.__pgAttribution?.display_mode || 'browser' });
+      });
+    }
   }
 
   const dismiss = document.createElement('button');

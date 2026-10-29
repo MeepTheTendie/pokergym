@@ -60,7 +60,7 @@ visible in the data rather than implied by the event name.
 | `share_arrival` | The trainer or landing loads with `ref=share`. | `sh` (the share id). Fires on load and registers `ref`/`sh` as first-touch person properties. |
 | `push_opt_in` | The recap reminder button is used. | `result`: `subscribed`, `unsubscribed`, `denied`, `dismissed`, `error`; `surface` |
 | `push_prompt_shown` | The push opt-in UI is shown. | `surface` |
-| `push_subscribe` | A push subscription attempt resolves. | `result`: `granted`, `denied`, or `unsupported`; `surface` |
+| `push_subscribe` | A push subscription attempt resolves. | `result`: `granted`, `denied`, `dismissed`, `error`, or `unsupported`; `surface` |
 | `push_unsubscribe` | A push subscription is removed. | `surface` |
 | `push_open` | The app loads with `ref=push`. | (none) |
 | `a2hs_installed` | The app is installed to the home screen (`appinstalled`). | `display_mode` |
