@@ -46,11 +46,20 @@ export function permission() {
  * 'error' so the caller can report one honest outcome.
  */
 export async function enablePush() {
-  if (!pushSupported()) return 'error';
+  if (!pushSupported()) {
+    window.trackEvent?.('push_subscribe', { result: 'unsupported' });
+    return 'error';
+  }
   try {
     const answer = await Notification.requestPermission();
-    if (answer === 'denied') return 'denied';
-    if (answer !== 'granted') return 'dismissed';
+    if (answer === 'denied') {
+      window.trackEvent?.('push_subscribe', { result: 'denied' });
+      return 'denied';
+    }
+    if (answer !== 'granted') {
+      window.trackEvent?.('push_subscribe', { result: 'denied' });
+      return 'dismissed';
+    }
     const reg = await registration();
     const existing = await reg.pushManager.getSubscription();
     const sub = existing ?? await reg.pushManager.subscribe({
@@ -65,10 +74,13 @@ export async function enablePush() {
     });
     if (!response.ok) {
       await sub.unsubscribe().catch(() => {});
+      window.trackEvent?.('push_subscribe', { result: 'denied' });
       return 'error';
     }
+    window.trackEvent?.('push_subscribe', { result: 'granted' });
     return 'subscribed';
   } catch {
+    window.trackEvent?.('push_subscribe', { result: 'denied' });
     return 'error';
   }
 }
@@ -79,7 +91,10 @@ export async function disablePush() {
   try {
     const reg = await registration();
     const sub = await reg.pushManager.getSubscription();
-    if (!sub) return 'unsubscribed';
+    if (!sub) {
+      window.trackEvent?.('push_unsubscribe');
+      return 'unsubscribed';
+    }
     const { endpoint } = sub.toJSON();
     await sub.unsubscribe();
     await fetch('/push/unsubscribe', {
@@ -87,6 +102,7 @@ export async function disablePush() {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ endpoint }),
     }).catch(() => {});
+    window.trackEvent?.('push_unsubscribe');
     return 'unsubscribed';
   } catch {
     return 'error';

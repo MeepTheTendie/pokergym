@@ -28,7 +28,7 @@ import {
   dailyKey, dailyPlan, dailyNumber, seededRng as dailySeedRng, DAILY_HANDS, dayGap,
   DAILY_GAME_LABEL, dailySummary, dailySession, formatDailyCountdown,
 } from '../src/rpg/daily.js';
-import { parseEntryParams, isSharedDayCurrent, cleanEntrySearch, buildDailyShareText, shareUrl, inviteUrl } from '../src/rpg/links.js';
+import { parseEntryParams, isSharedDayCurrent, cleanEntrySearch, buildDailyShareText, shareUrl, inviteUrl, newShareId } from '../src/rpg/links.js';
 import { keyAction, shouldIgnoreKey } from '../src/rpg/keys.js';
 import { createAnalytics } from '../src/rpg/analytics.js';
 import { captureDrillPlan, restoreDrillPlan, BLACKJACK_DRILLS, DRILL_HANDS, DRILL_GAMES, findDrill, drillPlanStartingWith } from '../src/rpg/drills.js';
@@ -544,8 +544,10 @@ el('btnBecome').onclick = () => {
 el('btnShare').hidden = typeof navigator.share !== 'function';
 el('btnShare').onclick = async () => {
   try {
+    const shareId = newShareId();
     await navigator.share({ title: 'Play Poker Gym — free training demo', text: el('sharePreview').value });
     window.trackEvent?.('share', { channel: 'native' });
+    window.trackEvent?.('share_click', { game: 'invite', channel: 'native', share_id: shareId });
     el('shareStatus').textContent = 'Share options closed. Delivery is handled by your chosen app.';
   } catch (error) {
     el('shareStatus').textContent = error.name === 'AbortError'
@@ -555,8 +557,10 @@ el('btnShare').onclick = async () => {
 };
 el('btnCopyShare').onclick = async () => {
   try {
+    const shareId = newShareId();
     await navigator.clipboard.writeText(el('sharePreview').value);
     window.trackEvent?.('share', { channel: 'copy' });
+    window.trackEvent?.('share_click', { game: 'invite', channel: 'copy', share_id: shareId });
     el('shareStatus').textContent = 'Invitation copied. Nothing sent; paste it where you choose.';
   } catch {
     el('sharePreview').focus();
@@ -706,15 +710,18 @@ function renderDailyHistory(history, key) {
   for (const row of summary.entries) line(`${row.key} · ${row.correct}/${DAILY_HANDS} correct`);
 }
 
-function dailyShareText(key, results, number) {
+function dailyShareText(key, results, number, _unused = null, shareId = null) {
   const plan = dailyPlan(key);
   const games = [...new Set(plan.map(entry => DAILY_GAME_LABEL[entry.game]))];
-  return buildDailyShareText({ number, results, total: DAILY_HANDS, games });
+  return buildDailyShareText({ number, results, total: DAILY_HANDS, games, shareId });
 }
 
 async function shareDaily(text, useShare, results = null, number = null, games = null) {
   const status = el('dailyShareStatus');
   const preview = el('dailySharePreview');
+  const shareId = newShareId();
+  const url = number ? shareUrl(number, shareId) : null;
+  const textWithId = url && text ? text.replace(/https:\/\/playpokergym\.com\/web\/\?ref=share&d=\d+/, url) : text;
   try {
     if (useShare && typeof navigator.share === 'function') {
       if (results && number && typeof navigator.canShare === 'function') {
@@ -724,21 +731,24 @@ async function shareDaily(text, useShare, results = null, number = null, games =
           if (blob) {
             const file = new File([blob], 'poker-gym-daily.png', { type: 'image/png' });
             if (navigator.canShare({ files: [file] })) {
-              await navigator.share({ title: 'Poker Gym Daily', text, files: [file] });
+              await navigator.share({ title: 'Poker Gym Daily', text: textWithId, files: [file] });
               status.textContent = 'Share options closed. Delivery is handled by your chosen app.';
               window.trackEvent?.('share', { channel: 'daily', format: 'image' });
+              window.trackEvent?.('share_click', { game: 'daily', channel: 'native', share_id: shareId });
               return;
             }
           }
         } catch { /* fall through to text share */ }
       }
-      await navigator.share({ title: 'Poker Gym Daily', text });
+      await navigator.share({ title: 'Poker Gym Daily', text: textWithId });
       status.textContent = 'Share options closed. Delivery is handled by your chosen app.';
       window.trackEvent?.('share', { channel: 'daily', format: 'text' });
+      window.trackEvent?.('share_click', { game: 'daily', channel: 'native', share_id: shareId });
     } else {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(textWithId);
       status.textContent = 'Result copied. Nothing sent; paste it where you choose.';
       window.trackEvent?.('share', { channel: 'copy', surface: 'daily' });
+      window.trackEvent?.('share_click', { game: 'daily', channel: 'copy', share_id: shareId });
     }
   } catch (error) {
     status.textContent = error?.name === 'AbortError'
@@ -2155,16 +2165,19 @@ function renderSessionSummary(session, daily = null) {
   challenge.textContent = 'Challenge a friend';
   challenge.onclick = async () => {
     const dayNum = dailyNumber(dailyKey());
+    const shareId = newShareId();
     const text = daily
-      ? dailyShareText(daily.key, daily.results, daily.number)
-      : `Play Poker Gym: ${correct}/${SESSION_HANDS} correct in ${GYM_BY_ID[gymId]?.name ?? 'training'}. Beat my score on Daily Drill #${dayNum}: ${shareUrl(dayNum)}`;
+      ? dailyShareText(daily.key, daily.results, daily.number, null, shareId)
+      : `Play Poker Gym: ${correct}/${SESSION_HANDS} correct in ${GYM_BY_ID[gymId]?.name ?? 'training'}. Beat my score on Daily Drill #${dayNum}: ${shareUrl(dayNum, shareId)}`;
     try {
       if (typeof navigator.share === 'function') {
         await navigator.share({ title: 'Play Poker Gym Challenge', text });
         window.trackEvent?.('share', { channel: 'native', surface: daily ? 'recap_daily' : 'recap' });
+        window.trackEvent?.('share_click', { game: daily ? 'daily' : (GYM_BY_ID[gymId]?.game ?? 'session'), channel: 'native', share_id: shareId });
       } else {
         await navigator.clipboard.writeText(text);
         window.trackEvent?.('share', { channel: 'copy', surface: daily ? 'recap_daily' : 'recap' });
+        window.trackEvent?.('share_click', { game: daily ? 'daily' : (GYM_BY_ID[gymId]?.game ?? 'session'), channel: 'copy', share_id: shareId });
       }
       analytics.recapTap({ button: 'challenge', run_id: recapRunId });
     } catch (e) { /* user cancelled */ }
@@ -2185,6 +2198,7 @@ function renderSessionSummary(session, daily = null) {
   reminders.appendChild(remindIntro);
 
   if (pushSupported()) {
+    window.trackEvent?.('push_prompt_shown', { surface: 'recap' });
     const pushBox = document.createElement('div');
     pushBox.className = 'reminder-option reminder-push';
     const pushTitle = document.createElement('h4');
@@ -2322,6 +2336,9 @@ function renderSessionSummary(session, daily = null) {
       const syncInstall = () => { installBtn.hidden = !existing || existing.hidden; };
       window.addEventListener('beforeinstallprompt', syncInstall, { once: false });
     }
+    window.addEventListener('appinstalled', () => {
+      window.trackEvent?.('a2hs_installed', { display_mode: window.__pgAttribution?.display_mode || 'browser' });
+    });
   }
 
   const dismiss = document.createElement('button');

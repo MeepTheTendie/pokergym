@@ -73,8 +73,15 @@ export function classifyRef(value) {
 export const DAILY_ENTRY_URL = '/web/?daily=1';
 
 // The daily-result link: attributable (ref=share) and deep-linked (d=number).
-export function shareUrl(number) {
-  return `${APP_URL}?ref=share&d=${number}`;
+// Every share link carries a short random share_id (sh) so arrivals can be
+// attributed to the specific share that brought them.
+export function newShareId() {
+  return Math.random().toString(36).slice(2, 10);
+}
+
+export function shareUrl(number, shareId = null) {
+  const base = `${APP_URL}?ref=share&d=${number}`;
+  return shareId ? `${base}&sh=${encodeURIComponent(shareId)}` : base;
 }
 
 export function inviteUrl() {
@@ -82,9 +89,9 @@ export function inviteUrl() {
 }
 
 // Builds the copyable Daily Drill result. Format is unchanged apart from the URL.
-export function buildDailyShareText({ number, results, total, games }) {
+export function buildDailyShareText({ number, results, total, games, shareId = null }) {
   const tally = results.filter(v => v).length;
-  return `Poker Gym Daily #${number}  ${tally}/${total}\n${results.map(ok => ok ? '🟩' : '🟥').join('')}\n🃏 ${games.join(' · ')}\n${shareUrl(number)}`;
+  return `Poker Gym Daily #${number}  ${tally}/${total}\n${results.map(ok => ok ? '🟩' : '🟥').join('')}\n🃏 ${games.join(' · ')}\n${shareUrl(number, shareId)}`;
 }
 
 // A daily number is a positive safe integer written as plain digits.
@@ -105,6 +112,7 @@ export function parseEntryParams(search) {
     practice: params.get('practice') || null,
     drill: params.get('drill') || null,
     daily: params.get('daily') === '1',
+    sh: params.get('sh') || null,
   };
 }
 
@@ -121,6 +129,7 @@ export function cleanEntrySearch(search) {
   params.delete('ref');
   params.delete('d');
   params.delete('daily');
+  params.delete('sh');
   const rest = params.toString();
   return rest ? `?${rest}` : '';
 }

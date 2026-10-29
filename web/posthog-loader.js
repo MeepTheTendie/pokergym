@@ -70,7 +70,7 @@
   try {
     var params = new URLSearchParams(window.location.search);
     var entry = {};
-    SOURCE_KEYS.concat(['d', 'practice']).forEach(function (key) {
+    SOURCE_KEYS.concat(['d', 'practice', 'sh']).forEach(function (key) {
       var value = params.get(key);
       if (value) entry[key] = String(value).slice(0, 100);
     });
@@ -125,6 +125,10 @@
     var first = readStore(window.localStorage, FIRST_KEY);
     if (!first || typeof first !== 'object') {
       first = sourceOnly(entry);
+      if (entry.sh) first.sh = String(entry.sh).slice(0, 100);
+      writeStore(window.localStorage, FIRST_KEY, first);
+    } else if (!first.sh && entry.sh) {
+      first.sh = String(entry.sh).slice(0, 100);
       writeStore(window.localStorage, FIRST_KEY, first);
     }
     // Current-session source: kept across internal navigation, renewed after
@@ -151,11 +155,20 @@
       var sourceKey = SOURCE_KEYS[s];
       if (sourceKey !== 'ref' && first[sourceKey]) ATTRIBUTION['first_' + sourceKey] = first[sourceKey];
     }
+    if (first.sh) ATTRIBUTION.first_sh = first.sh;
+    // Fire arrival events for tagged entry links (queued until the SDK loads).
+    if (entry.ref === 'share') window.trackEvent('share_arrival', { sh: entry.sh || null, ref: 'share' });
+    if (entry.ref === 'push') window.trackEvent('push_open', { ref: 'push' });
   } catch (error) {
     // Analytics must never break a page.
   }
   // Read-only copy for the trainer, which adds `ref` to its own events
   // (src/rpg/analytics.js). Nothing here changes how ref is parsed.
+  var DISPLAY_MODE = 'browser';
+  try {
+    if ((window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true) DISPLAY_MODE = 'standalone';
+  } catch (e) { /* ignore */ }
+  ATTRIBUTION.display_mode = DISPLAY_MODE;
   window.__pgAttribution = ATTRIBUTION;
 
   // Stable device identity. PostHog's own distinct_id lives in a cookie as well
@@ -230,10 +243,20 @@
       // identifier lasts, so source -> guide -> play is one funnel.
       window.posthog.register(ATTRIBUTION);
       if (PLAYER_ID) {
+        var setOnce = {};
+        if (ATTRIBUTION.first_utm_source) setOnce.utm_source = ATTRIBUTION.first_utm_source;
+        if (ATTRIBUTION.first_utm_medium) setOnce.utm_medium = ATTRIBUTION.first_utm_medium;
+        if (ATTRIBUTION.first_utm_campaign) setOnce.utm_campaign = ATTRIBUTION.first_utm_campaign;
+        if (ATTRIBUTION.first_utm_content) setOnce.utm_content = ATTRIBUTION.first_utm_content;
+        if (ATTRIBUTION.first_ref === 'share') {
+          setOnce.ref = 'share';
+          if (ATTRIBUTION.first_sh) setOnce.sh = ATTRIBUTION.first_sh;
+        }
         window.posthog.identify(PLAYER_ID, {
           pg_player_id: PLAYER_ID,
           first_seen: FIRST_SEEN || null,
           first_ref: ATTRIBUTION.first_ref || null,
+          $set_once: setOnce,
         });
         for (var q = 0; q < identifyQueue.length; q++) window.posthog.identify(PLAYER_ID, identifyQueue[q]);
         identifyQueue.length = 0;
