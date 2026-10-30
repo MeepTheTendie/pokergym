@@ -43,7 +43,7 @@ visible in the data rather than implied by the event name.
 
 | Event | Fires when | Properties |
 |---|---|---|
-| `open_trainer` | The trainer page loads. Once per page load. | `entry`: `daily_link` (`?daily=1`), `share_link` (`?d=<n>` share grid), `practice_link` (`?practice=`), `drill_link` (`?drill=<scenario id>`, opens that authored hand first), `direct`; `returning`: has a local save; `days_since_last_visit`: days since the last local visit when a save exists |
+| `open_trainer` | The trainer page loads. Once per page load. | `entry`: `daily_link` (`?daily=1`), `share_link` (`?d=<n>` share grid), `practice_link` (`?practice=`), `drill_link` (`?drill=<scenario id>`, opens that authored hand first), `direct`; `returning`: has a local save; `days_since_last_visit`: days since the last local visit when a save exists; `preview`: true when the page loads hidden (bot-suspect load; it will not auto-start) |
 | `start_training` | The first hand of the page load is dealt (any mode). Once per page load. | `game`; `mode`: `daily`, `session`, `challenge`; `entry` |
 | `game_start` | A five-hand session, drill, or gym challenge begins, including a resumed one. Not fired for Daily Drill hands. | `game`: `blackjack`, `videopoker`, `baccarat`, `holdem`; `mode`: `session`, `master`, `weak` (drills), `challenge`; `resumed`; `entry`; `run_id` |
 | `hand_dealt` | A hand is dealt inside a live `game_start`/`start_daily` run. | `run_id`, `run_kind` (`session`/`daily`), `game`, `mode`, `entry`, `hand_index` (1-based), `hand_total` (5 for sessions/daily, 10 for a challenge), `event_version` |
@@ -71,6 +71,13 @@ A completion only fires for a live start in the same page load, so every
 `session_complete` has a `game_start` and every `daily_complete` a
 `start_daily`. Gym challenges (`mode: challenge`) have hand events but no
 `session_complete`; they are an exam, not a five-hand session.
+
+Explicit entry links (`?daily=1`, `?practice=`, and drill links) render the
+promised title preview first. The run starts only when the page is visible and
+either the first intentional tap/key arrives or 1.5 seconds of visibility
+passes. A hidden load never starts a run and carries `preview: true` on
+`open_trainer`. Hidden-preview profiles stay out of visitor totals unless a
+real interaction follows.
 
 `decision_made` is deliberately a **stage**, not every action. A blackjack hand
 can contain several actions; `hand_complete.decisions` is the count. This keeps
@@ -121,10 +128,12 @@ that reach the trainer within five minutes of a scheduled post, and — since
 2026-10-27 — a narrow headless-crawler shape.
 
 The crawler rule only fires when a profile's entire history is one pageview on
-one day, with no `game_start`, `start_daily`, `decision_made`, hand, recap,
-Daily or CTA event, **and** its fingerprint is a headless default: no
-`$browser`, an 800x600 screen, or a 2000x2000 screen. A real visitor on a small
-window who does anything at all survives.
+one day, with no real interaction, **and** its fingerprint is a headless
+default: no `$browser`, an 800x600, 1366x1400, or 2000x2000 screen. Real
+interactions are decisions, finished hands/runs, recap/CTA taps, shares, or
+feedback. Auto-fired `start_daily`/`start_training`/`hand_dealt` events alone
+do not rescue a crawler-shaped profile. A real visitor on a small window who
+does anything at all survives.
 
 Unfiltered connector pulls count these profiles, which is the whole gap between
 the raw and filtered visitor numbers. As of 2026-10-27 the epoch read 102 raw,

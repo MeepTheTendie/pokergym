@@ -164,6 +164,10 @@ const dailyLinkEntry = entryParams.daily ? 'daily_link' : sharedDaily ? 'share_l
 // The entry source for this page load, carried onto run-level events so starts
 // and completions can be split by daily link, practice link, or direct.
 const trainerEntry = dailyLinkEntry ?? (requestedDrill ? 'drill_link' : entryParams.practice ? 'practice_link' : 'direct');
+// Explicit entry links wait for a visible page before auto-starting. A real
+// visitor gets the promised run after 1.5 s of visibility or on the first
+// intentional tap/key; a hidden or inputless crawler never starts one.
+const ENTRY_START_DELAY_MS = 1500;
 // One meaning per event; see docs/analytics-events.md. The ref tag is the
 // loader's snapshot (it also covers referrer fallback), else the parsed ?ref=.
 const analytics = createAnalytics({
@@ -2848,10 +2852,12 @@ const daysSinceLastVisit = lastVisitDay ? dayGap(localDayKey(), lastVisitDay) : 
 // first-time visitor who comes back tomorrow still reports days_since_last_visit
 // as null, and the retention report cannot measure the gap.
 try { localStorage.setItem('pg_last_visit_day', localDayKey()); } catch {}
+const preview = document.visibilityState !== 'visible';
 analytics.openTrainer({
   entry: trainerEntry,
   returning,
   days_since_last_visit: daysSinceLastVisit,
+  ...(preview ? { preview: true } : {}),
 });
 // Attach the save state to the stable device id created by the loader, so
 // retention and funnel reports can segment by class, level and experience.
@@ -2869,18 +2875,78 @@ function startFromEntry() {
   const wantsDaily = Boolean(entryParams.daily);
   const wantsPractice = Boolean(requestedGym);
   if (!wantsDaily && !wantsPractice) return false;
-  if (!profile) {
-    profile = createProfile(DEFAULT_CLASS);
-    profile.createdAt = new Date().toISOString();
-    save();
-    applyPalette(DEFAULT_CLASS);
+
+  let started = false;
+  let canceled = false;
+  let timer = null;
+
+  const clearTimer = () => {
+    if (timer) clearTimeout(timer);
+    timer = null;
+  };
+  const cleanup = () => {
+    clearTimer();
+    document.removeEventListener('pointerdown', onInput, true);
+    document.removeEventListener('keydown', onInput, true);
+    document.removeEventListener('visibilitychange', scheduleStart);
+  };
+  const begin = () => {
+    if (started || canceled) return;
+    if (document.visibilityState !== 'visible') {
+      // A hidden load is a preview, not a play. Wait for visibilitychange.
+      clearTimer();
+      return;
+    }
+    started = true;
+    cleanup();
+    if (!profile) {
+      profile = createProfile(DEFAULT_CLASS);
+      profile.createdAt = new Date().toISOString();
+      save();
+      applyPalette(DEFAULT_CLASS);
+    }
+    if (wantsDaily) {
+      sharedDaily = false;
+      startDaily('daily_link');
+    } else {
+      enterTraining();
+    }
+  };
+  const scheduleStart = () => {
+    if (started || canceled) return;
+    clearTimer();
+    if (document.visibilityState === 'visible') {
+      timer = setTimeout(begin, ENTRY_START_DELAY_MS);
+    }
+  };
+  const isControl = target => Boolean(target?.closest?.(
+    'button, a, input, select, textarea, summary, label, [role="button"]',
+  ));
+  function onInput(event) {
+    if (started || canceled) return;
+    if (event.type === 'keydown') {
+      // Let the browser handle navigation/modifier keys and controls. A normal
+      // key on the page itself is an intentional start.
+      if (event.key === 'Tab' || event.key === 'Escape' || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (isControl(event.target)) { canceled = true; cleanup(); return; }
+    } else if (isControl(event.target)) {
+      // A real button/link has its own action; do not race it with auto-start.
+      canceled = true;
+      cleanup();
+      return;
+    }
+    begin();
   }
-  if (wantsDaily) {
-    sharedDaily = false;
-    startDaily('daily_link');
-  } else {
-    enterTraining();
-  }
+
+  // Show the promised entry as a preview while the visibility/input gate is
+  // pending. The title screen already makes the Daily or practice action clear.
+  if (profile) { renderMap(); show('scr-map'); }
+  else { initTitle(); }
+
+  document.addEventListener('pointerdown', onInput, { capture: true, passive: true });
+  document.addEventListener('keydown', onInput, true);
+  document.addEventListener('visibilitychange', scheduleStart);
+  scheduleStart();
   return true;
 }
 if (!startFromEntry()) {

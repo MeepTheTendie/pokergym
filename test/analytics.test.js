@@ -21,6 +21,23 @@ test('open_trainer fires once per page load', () => {
   assert.deepEqual(last('open_trainer'), { entry: 'daily_link', returning: false, ref: 'youtube' });
 });
 
+test('open_trainer can tag a hidden bot-suspect preview', () => {
+  const { a, last } = harness();
+  a.openTrainer({ entry: 'daily_link', returning: false, preview: true });
+  assert.deepEqual(last('open_trainer'), { entry: 'daily_link', returning: false, preview: true, ref: 'youtube' });
+});
+
+test('explicit entry waits for visibility and the first input', () => {
+  const app = read('../web/app.js');
+  assert.match(app, /const ENTRY_START_DELAY_MS = 1500/);
+  assert.match(app, /const preview = document\.visibilityState !== 'visible'/);
+  assert.match(app, /\.\.\.\(preview \? \{ preview: true \} : \{\}\)/);
+  assert.match(app, /addEventListener\('pointerdown', onInput/);
+  assert.match(app, /addEventListener\('keydown', onInput/);
+  assert.match(app, /addEventListener\('visibilitychange', scheduleStart/);
+  assert.match(app, /setTimeout\(begin, ENTRY_START_DELAY_MS\)/);
+});
+
 test('start_training fires on the first hand only, whatever the mode', () => {
   const { a, count, last } = harness();
   a.handStarted({ game: 'baccarat', mode: 'daily' });
