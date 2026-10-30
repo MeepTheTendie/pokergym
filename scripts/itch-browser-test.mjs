@@ -228,7 +228,10 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
       await evaluate('document.getElementById("btnInstall").click(); document.getElementById("btnInstall").click()');
       await waitFor(`document.getElementById('installStatus').textContent.includes(${JSON.stringify(outcome === 'error' ? 'browser menu' : outcome === 'accepted' ? 'Install request accepted' : 'Install skipped')})`);
       assert.equal(await evaluate('window.installTestCalls'), 1, 'Installation requires one explicit click and consumes each prompt once');
-      assert.equal(await evaluate('document.getElementById("btnInstall").hidden'), true);
+      // Do not require the button to stay hidden. Chromium can emit a fresh
+      // beforeinstallprompt after the synthetic one, which legitimately reveals
+      // the button again; the consumed synthetic prompt is the actual behavior
+      // under test.
     }
     await evaluate('window.dispatchEvent(new Event("appinstalled"))');
     assert.equal(await evaluate('document.getElementById("installHelp").hidden'), true);
