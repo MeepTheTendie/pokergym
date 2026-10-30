@@ -70,6 +70,15 @@ async function open(url, { fresh = true } = {}) {
   }
   await sleep(200);
 }
+async function startVisibleEntry() {
+  // Exercise the first-input path instead of waiting out the 1.5 s timer.
+  await evaluate('document.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }))');
+  for (let i = 0; i < 30; i++) {
+    if (await evaluate('!document.getElementById("scr-battle").hidden')) return;
+    await sleep(100);
+  }
+  throw new Error('Entry did not start after first input');
+}
 
 const helpers = `
   window.$ = (id) => document.getElementById(id);
@@ -118,9 +127,12 @@ function expectProps(flow, got, want) {
   for (const [k, v] of Object.entries(want)) if (got[k] !== v) failures.push(`${flow}: ${k}=${JSON.stringify(got[k])}, expected ${JSON.stringify(v)}`);
 }
 
-// 1. ?daily=1 deep link, new visitor, one visible title action, full run.
+// 1. ?daily=1 deep link, new visitor: the visible preview auto-starts after
+// ~1.5 s, without a title-screen click, then plays a full run.
 await open(BASE + '?daily=1&ref=youtube');
-await run("$('btnDaily').click(); await wait(80); await playHands(5); return true;");
+await sleep(1600);
+assert.equal(await evaluate('document.getElementById("scr-battle").hidden'), false, 'visible daily link auto-starts');
+await run("await playHands(5); return true;");
 let log = await events();
 expectCounts('daily=1 link', log, { open_trainer: 1, start_daily: 1, start_training: 1, daily_complete: 1, game_start: 0, session_complete: 0 });
 expectProps('daily=1 link', props(log, 'open_trainer'), { entry: 'daily_link', ref: 'youtube' });
@@ -181,9 +193,11 @@ assert.equal(await evaluate('document.getElementById("scr-map").hidden'), false,
 assert.equal(await evaluate('localStorage.getItem("pokergym:save:v1")'), savedBeforeReview, 'Returning to map preserves completed session');
 
 // 6. ?practice=holdem link, 2 hands, then reload and resume from the map.
-// Since 72b258b (Oct 26) ?practice=<game> starts the session directly.
+// Since 72b258b (Oct 26) ?practice=<game> starts the session directly, now
+// behind the visible/input gate.
 await open(BASE + '?practice=holdem&ref=x');
-await run("await wait(80); await playHands(2); return true;");
+await startVisibleEntry();
+await run("await playHands(2); return true;");
 log = await events();
 expectCounts('practice link, 2 hands', log, { open_trainer: 1, game_start: 1, start_training: 1, session_complete: 0 });
 expectProps('practice link, 2 hands', props(log, 'game_start'), { game: 'holdem', ref: 'x' });
@@ -198,9 +212,10 @@ expectProps('resume session', props(log, 'game_start'), { game: 'holdem', resume
 // All four promoted practice links must lead to the advertised game in one tap.
 for (const game of ['blackjack', 'baccarat', 'videopoker', 'holdem']) {
   await open(BASE + '?practice=' + game + '&ref=youtube');
+  await startVisibleEntry();
   assert.equal(await evaluate('document.getElementById("scr-title").hidden'), true, game + ' link skips the title');
   assert.equal(await evaluate('document.getElementById("scr-battle").hidden'), false, game + ' link opens the game');
-  await run("await wait(80); await playHands(5); return true;");
+  await run("await playHands(5); return true;");
   log = await events();
   expectCounts(game + ' promoted session', log, { open_trainer: 1, game_start: 1, start_training: 1, session_complete: 1, recap_view: 1, start_daily: 0 });
   expectProps(game + ' promoted session', props(log, 'game_start'), { game, ref: 'youtube' });

@@ -257,7 +257,13 @@ test('stats: a one-pageview profile with a headless fingerprint is excluded', ()
   assert.match(clause, /interactions = 0/);
   assert.match(clause, /browser_events = 0/);
   assert.match(clause, /screen_width = 800 AND screen_height = 600/);
+  assert.match(clause, /screen_width = 1366 AND screen_height = 1400/);
   assert.match(clause, /screen_width = 2000 AND screen_height = 2000/);
+  assert.match(clause, /preview_opens > 0/);
+  assert.match(clause, /properties\.preview = true/);
+  // Auto-fired play events must not make a headless profile look human.
+  assert.match(clause, /countIf\(event IN \('decision_made', 'hand_complete', 'session_complete', 'daily_complete', 'recap_view', 'recap_tap', 'share', 'feedback_submit', 'cta_click'\)\) AS interactions/);
+  assert.doesNotMatch(clause, /countIf\(event IN \([^)]*'start_daily'[^)]*\)\) AS interactions/);
 });
 
 function kvStub() {

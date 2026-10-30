@@ -104,16 +104,21 @@ export function notTestClause() {
     AND (properties.$raw_user_agent IS NULL OR ${uaFilters})
     -- One pass over people covers two exclusion rules: (a) link-preview unfurl
     -- bots that land just after a scheduled post, and (b) a profile whose whole
-    -- history is one pageview, no interaction, and a headless-default
-    -- fingerprint (no browser, 800x600, or 2000x2000). Rule (b) keeps anyone
-    -- who started a hand, made a decision, clicked a CTA, or came back a
-    -- second day, so a real small-window visitor still counts.
+    -- history is one pageview, no real interaction, and a headless-default
+    -- fingerprint (no browser, 800x600, 1366x1400, or 2000x2000). Rule (b)
+    -- keeps anyone who made a decision, finished a hand/run, clicked a CTA,
+    -- shared, or came back a second day. Auto-fired start_daily/hand_dealt
+    -- events alone do not make a profile human.
     AND person_id NOT IN (
       SELECT person_id FROM (
         SELECT person_id, argMin(event, timestamp) AS first_event, min(timestamp) AS first_ts,
           countIf(event = '$pageview') AS pageviews,
           count(DISTINCT toDate(toTimeZone(timestamp, 'America/Chicago'))) AS active_days,
-          countIf(event IN ('game_start', 'start_training', 'decision_made', 'hand_complete', 'recap_tap', 'start_daily', 'daily_complete', 'share', 'feedback_submit', 'cta_click')) AS interactions,
+          -- Do not treat an auto-fired start_daily/start_training/hand_dealt as
+          -- proof of a human. A real interaction is a decision, a finished
+          -- hand/run, a recap/CTA tap, a share, or feedback.
+          countIf(event IN ('decision_made', 'hand_complete', 'session_complete', 'daily_complete', 'recap_view', 'recap_tap', 'share', 'feedback_submit', 'cta_click')) AS interactions,
+          countIf(event = 'open_trainer' AND properties.preview = true) AS preview_opens,
           countIf(properties.$browser IS NOT NULL) AS browser_events,
           any(properties.$screen_width) AS screen_width,
           any(properties.$screen_height) AS screen_height
@@ -133,7 +138,13 @@ export function notTestClause() {
         AND interactions = 0
         AND (browser_events = 0
           OR (screen_width = 800 AND screen_height = 600)
+          OR (screen_width = 1366 AND screen_height = 1400)
           OR (screen_width = 2000 AND screen_height = 2000))
+      ) OR (
+        -- A load that starts hidden is a preview, not a play. It stays
+        -- excluded unless the person later makes a real interaction.
+        preview_opens > 0
+        AND interactions = 0
       )
     )`;
 }
