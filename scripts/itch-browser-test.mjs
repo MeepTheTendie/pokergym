@@ -51,7 +51,9 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
   children.push(spawn('python3', [path.join(temp, 'server.py'), temp], { stdio: 'ignore' }));
   children.push(spawn('chromium', ['--headless=new', '--no-sandbox', '--disable-dev-shm-usage', `--user-data-dir=${path.join(temp, 'chrome')}`, '--remote-debugging-port=19397', 'about:blank'], { stdio: 'ignore' }));
   let page;
-  for (let i = 0; i < 60 && !page; i++) {
+  // Parallel CI jobs can make Chromium's first launch slower than the old 6 s
+  // window. Wait up to 20 s before declaring the browser unavailable.
+  for (let i = 0; i < 200 && !page; i++) {
     try { page = (await (await fetch('http://127.0.0.1:19397/json/list')).json()).find(t => t.type === 'page'); } catch {}
     if (!page) await sleep(100);
   }
