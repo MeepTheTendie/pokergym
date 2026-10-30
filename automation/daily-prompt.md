@@ -1,3 +1,5 @@
+These instructions apply only to the scheduled daily systemd automation. They are not general agent rules; see docs/OPERATING_RULES.md for interactive work.
+
 Work autonomously on Poker Gym in /home/meep/Projects/pokergym toward real players who learn, return and optionally tip. No subscriptions, ever; ask no pricing questions (see the monetization rule in LAUNCH.md). The owner authorizes product development, testing, GitHub/cloud publishing for this app, and lawful honest marketing using available authorized accounts. Minimize owner involvement. Do not pursue the website-care business.
 
 Before any planning, run `npm run stats`. If it skips the REAL PEOPLE section (missing PostHog key), stop and report that the read key is unavailable; do not estimate or guess the numbers. Never read, print or persist secret credentials.
