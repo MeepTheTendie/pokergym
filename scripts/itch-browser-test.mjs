@@ -60,6 +60,12 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
   await new Promise(resolve => { ws.onopen = resolve; });
   let id = 0;
   const pending = new Map(), contexts = new Map(), errors = [], failed = [];
+  // A reload cancels requests that were already in flight. Chromium reports
+  // those as net::ERR_ABORTED after the new document has started, which is not
+  // an application error. Ignore aborts while a reload is in progress and for a
+  // short settling window afterwards.
+  let reloadInFlight = false;
+  let ignoreAbortedUntil = 0;
   ws.onmessage = event => {
     const msg = JSON.parse(event.data);
     if (pending.has(msg.id)) {
@@ -80,11 +86,43 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
     if (msg.method === 'Runtime.executionContextDestroyed') contexts.delete(`${msg.sessionId || ''}:${msg.params.executionContextId}`);
     if (msg.method === 'Runtime.exceptionThrown') errors.push(msg.params.exceptionDetails.exception?.description ?? msg.params.exceptionDetails.text);
     if (msg.method === 'Network.responseReceived' && msg.params.response.status >= 400) failed.push(msg.params.response.url);
-    if (msg.method === 'Network.loadingFailed') failed.push(msg.params.errorText);
+    if (msg.method === 'Network.loadingFailed') {
+      const abortedByReload = msg.params.errorText === 'net::ERR_ABORTED'
+        && (reloadInFlight || Date.now() < ignoreAbortedUntil);
+      if (!abortedByReload) failed.push(msg.params.errorText);
+    }
   };
   const send = (method, params = {}, sessionId) => new Promise((resolve, reject) => {
     const next = ++id; pending.set(next, { resolve, reject }); ws.send(JSON.stringify({ id: next, method, params, sessionId }));
   });
+  async function reloadAndWait(previousContextId) {
+    const loaded = new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        ws.removeEventListener('message', onMessage);
+        reject(new Error('Page reload did not finish'));
+      }, 15000);
+      function onMessage(event) {
+        const msg = JSON.parse(event.data);
+        if (msg.method !== 'Page.loadEventFired') return;
+        clearTimeout(timer);
+        ws.removeEventListener('message', onMessage);
+        resolve();
+      }
+      ws.addEventListener('message', onMessage);
+    });
+    reloadInFlight = true;
+    try {
+      await send('Page.reload');
+      await loaded;
+      // Let the last cancelled requests and the new execution context land
+      // before the caller starts evaluating against the reloaded page.
+      await sleep(500);
+    } finally {
+      reloadInFlight = false;
+      ignoreAbortedUntil = Date.now() + 1500;
+    }
+    return gameContext(previousContextId);
+  }
   await send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: false, flatten: true });
   await send('Runtime.enable'); await send('Page.enable'); await send('Network.enable');
   await send('Network.setCacheDisabled', { cacheDisabled: true });
@@ -875,8 +913,7 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
   const pausedCalls = await evaluate('window.hapticCalls.total');
   await goNextHand(); await dailyMove();
   assert.equal(await evaluate('window.hapticCalls.total'), pausedCalls, 'A disabled toggle silences the next hand');
-  await send('Page.reload');
-  await sleep(400); contextId = await gameContext(`${contextId.sessionId || ''}:${contextId.id}`);
+  contextId = await reloadAndWait(`${contextId.sessionId || ''}:${contextId.id}`);
   for (let i = 0; i < 60; i++) {
     if (await evaluate('document.getElementById("btnHaptics")?.textContent') === 'Haptics off') break;
     await sleep(100);
