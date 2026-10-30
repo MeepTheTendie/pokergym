@@ -29,6 +29,10 @@
     "test:storage:quota": "POKERGYM_STORAGE_TEST=quota node scripts/itch-browser-test.mjs",
     "test:analytics": "node scripts/analytics-browser-test.mjs",
     "test:all": "node scripts/test-all.mjs",
+    "test:unit-release": "node scripts/test-all.mjs unit-release",
+    "test:browser-core": "node scripts/test-all.mjs browser-core",
+    "test:browser-offline": "node scripts/test-all.mjs browser-offline",
+    "test:browser-storage": "node scripts/test-all.mjs browser-storage",
     "index:now": "node scripts/indexnow.mjs",
     "build:guides": "node scripts/build-scenarios.mjs && node scripts/build-index.mjs"
   },

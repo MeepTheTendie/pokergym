@@ -1,23 +1,91 @@
 name: tests
+
 on:
-  push:
   pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
-  test:
+  unit-release:
+    name: unit + release
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
           node-version: '24'
-          package-manager-cache: false
+          cache: npm
+      - run: npm ci
+      - run: npm run test:unit-release
+
+  browser-core:
+    name: browser core
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
       - run: npm ci
       - name: Provide chromium on PATH
         run: |
           sudo ln -sf "$(command -v google-chrome)" /usr/local/bin/chromium
           chromium --version
-      - name: Full test suite (unit + release + browser checks)
-        run: npm run test:all
+      - run: npm run test:browser-core
+
+  browser-offline:
+    name: browser offline
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Provide chromium on PATH
+        run: |
+          sudo ln -sf "$(command -v google-chrome)" /usr/local/bin/chromium
+          chromium --version
+      - run: npm run test:browser-offline
+
+  browser-storage:
+    name: browser storage
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Provide chromium on PATH
+        run: |
+          sudo ln -sf "$(command -v google-chrome)" /usr/local/bin/chromium
+          chromium --version
+      - run: npm run test:browser-storage
+
+  bend:
+    name: bend
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
       - name: Install Bend
         run: curl -fsSL https://bend-lang.com/install.sh | sh
       - name: Verify Bend reference
@@ -28,3 +96,12 @@ jobs:
           npm run bend:verify
           npm run bend:verify:vp
           npm run bend:proofs
+
+  # Keep the branch-protection check name "test" while the actual work runs in
+  # parallel jobs above. This job is green only when every required job passed.
+  test:
+    name: test
+    needs: [unit-release, browser-core, browser-offline, browser-storage, bend]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "All required test jobs passed."
