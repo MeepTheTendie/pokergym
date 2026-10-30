@@ -59,8 +59,10 @@ await send('Page.addScriptToEvaluateOnNewDocument', { source: `
 async function open(url, { fresh = true } = {}) {
   await send('Page.navigate', { url: 'about:blank' });
   await sleep(100);
-  await send('Page.navigate', { url: BASE });
-  await sleep(300);
+  // Use a static same-origin file to clear storage. Navigating to the trainer
+  // here can queue an open_trainer event that races the real target load.
+  await send('Page.navigate', { url: new URL('offline.js', BASE).href });
+  await sleep(100);
   if (fresh) await evaluate('localStorage.clear(); sessionStorage.clear(); true');
   else await evaluate('sessionStorage.clear(); true');
   await send('Page.navigate', { url });
