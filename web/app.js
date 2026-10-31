@@ -237,6 +237,7 @@ el('btnConfirmRestore').onclick = () => {
     profile = restored; pendingRestore = null; round = null; shortSession = false;
     el('btnConfirmRestore').hidden = true;
     el('btnContinue').disabled = false;
+    el('btnContinue').hidden = false;
     renderMap(); show('scr-map');
     el('backupStatus').textContent = 'Progress restored on this browser. Nothing was uploaded.';
   } catch { el('backupStatus').textContent = 'Restore failed. Browser storage may be full or blocked.'; }
@@ -327,6 +328,7 @@ el('btnTitle').onclick = () => { dailyMode = false; dailyRun = null; initTitle()
 /* ---------------- title ---------------- */
 function initTitle() {
   el('btnContinue').disabled = !profile;
+  el('btnContinue').hidden = !profile;
   // Without a save the daily is reachable only from a shared link (option a).
   // The Daily Drill is the built-in reason to come back; show it to everyone,
   // including first-time visitors with no save. The onclick path below creates
@@ -791,7 +793,7 @@ function renderDailyImage(number, results, games) {
   const startX = (w - gridW) / 2;
   const startY = 130;
   results.forEach((ok, i) => {
-    ctx.fillStyle = ok ? '#27ae60' : '#c0392b';
+    ctx.fillStyle = ok ? '#5f8f6a' : '#a8402f';
     const x = startX + i * (sq + gap);
     ctx.fillRect(x, startY, sq, sq);
     ctx.fillStyle = '#fff';

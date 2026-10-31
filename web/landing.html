@@ -149,7 +149,7 @@
 @font-face{font-family:'Sora';font-style:normal;font-weight:400 800;font-display:swap;src:url('/web/fonts/Sora-LatinExt.woff2') format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF}
 :root{
   --bg:#0a1a14;--surface:#142820;--surface-2:#1e3a2e;--border:#2a4a3a;
-  --text:#e8f0e8;--dim:#8fa89a;--gold:#d4a843;--green:#27ae60;--red:#c0392b;
+  --text:#e8f0e8;--dim:#8fa89a;--gold:#ebd07c;--green:#5f8f6a;--red:#a8402f;--card:#f5f0e6;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -166,6 +166,8 @@ a:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 .skip{position:absolute;left:-999px}.skip:focus{left:12px;top:12px;z-index:100;background:var(--gold);color:#1a1408;padding:10px 14px;border-radius:8px}
 #main:focus{outline:none}
 .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:center;padding-top:24px;padding-bottom:40px;cursor:pointer}
+.hero-mascot{width:150px;height:150px;object-fit:contain;display:block;margin:0 0 10px;filter:drop-shadow(0 8px 18px rgba(0,0,0,.35))}
+.coach-line{margin:0 0 8px;font-size:14px;color:var(--gold);min-height:1.4em}
 .eyebrow{margin:0 0 12px;font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold)}
 h1{font-size:clamp(30px,5vw,54px);line-height:1.1;letter-spacing:-1.5px;margin:0 0 16px;font-weight:900}
 h1 span{color:var(--gold)}
@@ -180,8 +182,9 @@ h1 span{color:var(--gold)}
 .scene .tag{margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold)}
 .scene h2{font-size:20px;line-height:1.35;margin:0 0 18px}
 .cards{display:flex;gap:8px;margin:0 0 18px}
-.card{flex:1;background:#fffdf7;color:#1c2e28;border:1px solid #d7d2c2;border-radius:8px;padding:16px 4px;text-align:center;font-size:22px;font-weight:800;box-shadow:0 3px 0 #06110c}
-.card.held{background:#16302a;color:#ffe4a3;border-color:var(--gold);transform:translateY(-4px);box-shadow:0 0 0 2px var(--gold)}
+.card{flex:1;background:var(--card,#f5f0e6);color:#1c2e28;border:1px solid #d7d2c2;border-radius:10px;padding:22px 4px;text-align:center;font-size:30px;font-weight:800;min-height:110px;box-shadow:0 4px 0 #06110c;transition:transform .6s ease}
+.card.held{background:#16302a;color:#ffe4a3;border-color:var(--gold);transform:translateY(-12px);box-shadow:0 0 0 2px var(--gold);animation:holdLift .7s ease-out both}
+@keyframes holdLift{from{transform:translateY(0)}to{transform:translateY(-12px)}}
 .card.red{color:#b42336}
 .card.held.red{color:#ff9aa8}
 .scene p{margin:0 0 8px;font-size:14px;color:var(--dim)}
@@ -255,6 +258,7 @@ footer{border-top:1px solid var(--border);color:var(--dim);font-size:13px;paddin
 
 <section class="hero" aria-labelledby="hero-heading">
 <div>
+<img class="hero-mascot" src="/web/mascot.webp" alt="Poker Gym mascot" width="220" height="220">
 <p class="eyebrow">Play Poker Gym · free four-game casino trainer</p>
 <h1 id="hero-heading">Can you get 5/5 today?</h1>
 <p class="lead">Five hands of blackjack, video poker, baccarat or Hold’em. The coach explains every decision after you make it. No signup, no real money, no ads.</p>
@@ -270,7 +274,7 @@ footer{border-top:1px solid var(--border);color:var(--dim);font-size:13px;paddin
 <div class="cards" role="img" aria-label="Jack of spades and jack of hearts held, with two of clubs, five of diamonds and nine of clubs">
 <span class="card held" aria-hidden="true">J♠&#xFE0E;</span><span class="card held red" aria-hidden="true">J♥&#xFE0E;</span><span class="card" aria-hidden="true">2♣&#xFE0E;</span><span class="card red" aria-hidden="true">5♦&#xFE0E;</span><span class="card" aria-hidden="true">9♣&#xFE0E;</span>
 </div>
-<p>In Jacks or Better, a pair of jacks already pays. Hold both jacks and draw three.</p>
+<p id="coachLine" class="coach-line" data-text="In Jacks or Better, a pair of jacks already pays. Hold both jacks and draw three.">In Jacks or Better, a pair of jacks already pays. Hold both jacks and draw three.</p>
 <p class="note">Tap to start training →</p>
 </a>
 </section>

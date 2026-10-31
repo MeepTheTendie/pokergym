@@ -38,7 +38,11 @@ if (status && window.top === window && document.querySelector('link[rel="manifes
     }
   });
   if ('serviceWorker' in navigator && window.isSecureContext) {
-    status.textContent = 'Downloading offline practice…';
+    const toast = document.createElement('div');
+    toast.className = 'offline-toast';
+    toast.textContent = 'Downloading offline practice…';
+    document.body.appendChild(toast);
+    status.textContent = '';
     // The worker script sits at the site root so it controls more than /web/:
     // index.html imports its game modules from /src/, which a /web/-scoped
     // worker could never intercept. Drop any pre-root worker registration
@@ -53,17 +57,20 @@ if (status && window.top === window && document.querySelector('link[rel="manifes
         installing?.addEventListener('statechange', () => {
           if (installing.state === 'redundant' && !navigator.serviceWorker.controller) {
             status.textContent = 'Offline download incomplete. Reopen online to retry.';
+            toast.textContent = 'Offline download incomplete';
           }
         });
         await navigator.serviceWorker.ready;
         const update = () => {
           if (navigator.serviceWorker.controller) {
             status.textContent = 'Offline practice ready. Your save stays in this browser.';
+            toast.textContent = 'Offline practice ready';
+            setTimeout(() => { toast.remove(); }, 2000);
           }
         };
         navigator.serviceWorker.addEventListener('controllerchange', update);
         update();
-      }).catch(() => { status.textContent = 'Offline download unavailable. You can still play online.'; });
+      }).catch(() => { status.textContent = 'Offline download unavailable. You can still play online.'; toast.textContent = 'Offline unavailable'; setTimeout(() => { toast.remove(); }, 2000); });
   } else {
     status.textContent = 'Play online. Your save stays in this browser.';
   }
