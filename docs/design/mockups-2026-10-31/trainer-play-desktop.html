@@ -1,0 +1,23 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="style.css"><style>
+.table{position:relative;border-radius:36px;background:radial-gradient(ellipse at 50% 45%,#2a5a45,#123024 72%);box-shadow:inset 0 0 0 10px #0d241b,inset 0 0 0 11px rgba(235,208,124,.25),inset 0 40px 100px rgba(0,0,0,.3);display:flex;flex-direction:column;align-items:center;justify-content:space-between}
+.lbl{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:14px}
+.lbl b{color:var(--cream);font-weight:600;letter-spacing:.06em;font-size:15px;text-transform:none;margin-left:8px}
+.row{display:flex;gap:16px;justify-content:center}
+.arc{font-family:Fraunces;font-style:italic;color:rgba(235,208,124,.45);font-size:15px;letter-spacing:.04em}
+.acts{display:flex;gap:12px}.acts .btn.dis{opacity:.35}
+
+.wrap{display:grid;grid-template-columns:1fr 400px;gap:28px;padding:28px;height:900px}
+.table{padding:56px 40px 44px}
+.side{padding:30px;display:flex;flex-direction:column}
+.sc{display:flex;justify-content:space-between;align-items:baseline;margin:10px 0 26px}.sc .display{font-size:44px}
+.dots{display:flex;gap:8px;margin-bottom:30px}.dots i{flex:1;height:6px;border-radius:3px;background:rgba(246,239,225,.12)}.dots i.ok{background:var(--ok)}
+.side .coach p{font-size:22px}
+.tip{margin-top:auto;padding:20px;border-radius:16px;background:rgba(0,0,0,.2);font-size:14px;line-height:1.55;color:var(--muted)}
+</style></head><body><div class="wrap"><div class="table"><div><div class="lbl">Dealer <b>shows 5</b></div><div class="row"><div class="card r" style="--w:168px"><div class="c tl">5<span>♦︎</span></div><div class="pip">♦︎</div><div class="c br">5<span>♦︎</span></div></div><div class="card back" style="--w:168px"></div></div></div>
+<div class="arc">Blackjack pays 3 to 2 · Dealer stands on soft 17</div>
+<div><div class="row"><div class="card" style="--w:168px"><div class="c tl">A<span>♠︎</span></div><div class="pip">♠︎</div><div class="c br">A<span>♠︎</span></div></div><div class="card r" style="--w:168px"><div class="c tl">4<span>♥︎</span></div><div class="pip">♥︎</div><div class="c br">4<span>♥︎</span></div></div></div><div class="lbl" style="margin:18px 0 26px">You <b>soft 15</b></div>
+<div class="acts"><span class="btn">Hit</span><span class="btn">Stand</span><span class="btn">Double</span><span class="btn dis">Split</span></div></div></div>
+<div class="panel side"><div class="logo"><img src="mascot.png" alt="Poker Gym mascot">Play Poker Gym</div><div class="sc"><span class="eyebrow">Blackjack · hand 3 of 5</span><span class="display">2/2</span></div>
+<div class="dots"><i class="ok"></i><i class="ok"></i><i></i><i></i><i></i></div>
+<div class="coach"><img src="mascot.png" alt="Poker Gym mascot"><p>Your call. Soft 15 against a dealer 5 — think about which card the dealer is most likely to bust with.</p></div>
+<div class="tip">The coach explains every decision right after you make it. Missed hands come back later on a spaced schedule.</div></div></div></body></html>

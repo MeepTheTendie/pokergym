@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap');
+:root{--felt:#0a1a14;--felt2:#173328;--felt3:#1f4434;--gold:#ebd07c;--cream:#f6efe1;--ink:#16130f;--red:#b3261e;--muted:#a9bdb1;--ok:#5fae7f;--miss:#c4523f}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(ellipse at 30% 20%,#14382a 0%,var(--felt) 60%);color:var(--cream);font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+.display{font-family:Fraunces,serif;font-weight:600;letter-spacing:-.02em}
+.eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:52px;padding:0 28px;border-radius:999px;font:600 16px Inter;border:1px solid rgba(246,239,225,.22);color:var(--cream);background:transparent}
+.btn.primary{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+.nav{display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px;font-family:Fraunces;font-weight:600;font-size:20px}
+.logo img{width:34px;height:34px;border-radius:50%}
+.nav a{color:var(--muted);text-decoration:none;font-size:14px;margin-left:28px}
+/* cards */
+.card{position:relative;width:var(--w,150px);aspect-ratio:5/7;background:linear-gradient(160deg,#fbf6ea,#efe5d0);border-radius:calc(var(--w,150px)*.08);color:var(--ink);box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 18px 40px -12px rgba(0,0,0,.6),0 4px 10px rgba(0,0,0,.25);font-family:Fraunces,serif;flex:none}
+.card.r{color:var(--red)}
+.card .c{position:absolute;display:flex;flex-direction:column;align-items:center;line-height:.9;font-weight:600;font-size:calc(var(--w,150px)*.19)}
+.card .c span{font-size:.8em;font-family:"DejaVu Sans",sans-serif}
+.card .tl{top:7%;left:8%}.card .br{bottom:7%;right:8%;transform:rotate(180deg)}
+.card .pip{position:absolute;inset:0;display:grid;place-items:center;font-size:calc(var(--w,150px)*.42);font-family:"DejaVu Sans",sans-serif}
+.card.face .pip{font-family:Fraunces;font-size:calc(var(--w,150px)*.5);font-weight:400}
+.card.face .pip::after{content:"";position:absolute;inset:16% 18%;border:1px solid currentColor;opacity:.25;border-radius:6px}
+.card.held{transform:translateY(-28px)}
+.card.held::before{content:"HELD";position:absolute;top:-30px;left:0;right:0;text-align:center;font:600 11px Inter;letter-spacing:.2em;color:var(--gold)}
+.card.back{background:repeating-linear-gradient(45deg,#7a2b22 0 6px,#8c3329 6px 12px);border:6px solid var(--cream)}
+.grid5{display:flex;gap:8px}.grid5 i{width:34px;height:34px;border-radius:8px;background:var(--ok)}.grid5 i.x{background:var(--miss)}
+.panel{background:rgba(246,239,225,.04);border:1px solid rgba(246,239,225,.1);border-radius:24px}
+.coach{display:flex;gap:14px;align-items:flex-start}
+.coach img{width:44px;height:44px;border-radius:50%;flex:none}
+.coach p{font-family:Fraunces;font-size:20px;line-height:1.35;font-weight:400}
+.note{font-size:13px;color:var(--muted);letter-spacing:.02em}
+@keyframes lift{0%,40%{transform:translateY(-28px)}75%,100%{transform:translateY(0)}}
+.anim .card.held{animation:lift 2.4s cubic-bezier(.2,.8,.2,1) infinite alternate}
