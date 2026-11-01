@@ -1,0 +1,7 @@
+01-obsidian	Obsidian	Linear, Raycast, GTO Wizard
+02-streak	Streak	Duolingo, Family, Balatro
+03-quarterly	The Quarterly	The Verge, Framer (sans + serif), Rapha, the chosen fresh 'rulebook' mockup
+04-stageshow	Stageshow	Stageshow post (benjitaylor) + kit, Raycast, Stripe, Apple
+05-high-roller	High Roller	PokerStars, Hearthstone (type-as-world), Poolsuite (total mood commitment)
+06-mono	Mono	Vercel, Linear, Geist type
+07-dot-matrix	Dot Matrix	Nothing, Teenage Engineering
