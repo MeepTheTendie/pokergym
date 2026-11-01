@@ -350,7 +350,7 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
   await evaluate('document.getElementById("btnNew").click(); document.querySelector(".class-card").click(); document.getElementById("btnBecome").click()');
   assert.equal(await evaluate('document.getElementById("scr-map").hidden'), false);
   assert.equal(await evaluate('document.querySelectorAll("[data-session-gym]").length'), 4, 'New trainer can choose all four training games');
-  assert.equal(await evaluate('document.querySelector("[data-gym=riverstone]").disabled'), true, 'Badge journey still requires earlier badges');
+  assert.equal(await evaluate('document.querySelector("[data-gym=riverstone]")?.tagName'), 'A', 'Badge journey: locked gym offers free-practice link instead of a badge-earning button');
   if (blockedStorage) {
     assert.equal(await evaluate('document.getElementById("saveStatus").hidden'), false, 'Storage failure is visible');
     await evaluate('document.querySelector("[data-session-gym=pokergym]").click(); if (!document.getElementById("scr-lesson").hidden) document.getElementById("btnSkip").click()');
@@ -763,7 +763,7 @@ Server(('127.0.0.1', 18997), Handler).serve_forever()
     assert.deepEqual(result.badges, [], 'Training never awards or unlocks badges');
     if (gym !== 'riverstone') await evaluate('document.getElementById("btnNext").click()');
     assert.equal(await evaluate('document.querySelectorAll("[data-session-gym]").length'), 4);
-    assert.equal(await evaluate('document.querySelector("[data-gym=riverstone]").disabled'), true);
+    assert.equal(await evaluate('document.querySelector("[data-gym=riverstone]")?.tagName'), 'A');
     assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), `${gym} results fit phone`);
     if (gym === 'villaoak') {
       const before = await evaluate('JSON.parse(localStorage.getItem("pokergym:save:v1"))');

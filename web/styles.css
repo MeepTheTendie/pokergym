@@ -498,6 +498,42 @@ textarea { width: 100%; resize: vertical; }
   border-color: #1c3328;
   opacity: 0.72;
 }
+#gymList a.gym-link {
+  text-decoration: none;
+  color: inherit;
+  position: static;
+  width: auto;
+  min-height: 106px;
+  padding: 14px;
+  text-align: left;
+  font-size: 15px;
+  font-weight: 800;
+  background: #0e1e17;
+  border: 1px solid #1c3328;
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 4px;
+  opacity: 0.85;
+}
+#gymList a.gym-link > span {
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: -0.2px;
+}
+#gymList a.gym-link small {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--dim);
+}
+#gymList a.gym-link small:last-child {
+  color: var(--gold);
+  font-weight: 800;
+  margin-top: 4px;
+}
 #gymList small {
   display: block;
   font-size: 11px;

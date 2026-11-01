@@ -923,6 +923,22 @@ function renderMap() {
   for (const gym of GYMS) {
     const cleared = profile.badges.includes(gym.id);
     const open = canBattle(profile, gym.id) || canPractice(profile, gym.id);
+    if (!open) {
+      // The gym track is locked until the previous badge is earned, but free
+      // practice is always available from the home page, so never strand the
+      // player on a disabled button.
+      const a = document.createElement('a');
+      a.className = 'gym-link locked';
+      a.href = `/web/?practice=${gym.game}`;
+      a.dataset.gym = gym.id;
+      const nameSpan = document.createElement('span'); nameSpan.textContent = gym.name;
+      const labelSmall = document.createElement('small'); labelSmall.textContent = TRAINING_LABEL[gym.game];
+      const statusSmall = document.createElement('small'); statusSmall.textContent = '🔒 Gym locked · Free practice →';
+      a.title = "Earn the previous gym's badge to unlock the full gym track. Free practice is always available.";
+      a.append(nameSpan, labelSmall, statusSmall);
+      list.appendChild(a);
+      continue;
+    }
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = open ? 'primary' : '';
