@@ -45,6 +45,15 @@ test('public build contains its module graph without repository or diagnostic fi
   assert.ok(loader.indexOf('var ATTRIBUTION') < loader.indexOf("API_HOST + '/static/array.js'"), 'attribution is snapshotted before the SDK starts loading');
   assert.match(loader, /posthog\.register\(ATTRIBUTION\)/);
   assert.doesNotMatch(loader, /register\(attribution\)/);
+  // Every guide page is a search/AI landing page, so every one must load
+  // analytics (34 shipped untracked until Nov 2).
+  const guideDirs = (await readdir(path.join(root, 'guides'), { withFileTypes: true })).filter((d) => d.isDirectory()).map((d) => d.name);
+  assert.ok(guideDirs.length >= 30, 'guides are built');
+  for (const guide of guideDirs) {
+    const html = await readFile(path.join(root, `guides/${guide}/index.html`), 'utf8');
+    assert.match(html, /<script src="\/web\/posthog-loader\.js"><\/script>/, `${guide} loads analytics`);
+  }
+  assert.match(await readFile(path.join(root, 'guides/index.html'), 'utf8'), /<script src="\/web\/posthog-loader\.js"><\/script>/, 'guides index loads analytics');
   for (const guide of ['weekly-01', 'blackjack', 'jacks-or-better', 'baccarat', 'holdem-best-five']) {
     const html = await readFile(path.join(root, `guides/${guide}/index.html`), 'utf8');
     assert.match(html, /<script src="\/web\/posthog-loader\.js"><\/script>/, `${guide} loads analytics`);
