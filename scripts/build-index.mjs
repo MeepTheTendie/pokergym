@@ -7,7 +7,7 @@ import { scenarios } from './scenarios.mjs';
 
 const root = path.join(import.meta.dirname, '..');
 const BASE = 'https://playpokergym.com';
-const UPDATED = '2026-10-28';
+const UPDATED = '2026-11-02';
 
 const CORE = [
   ['/', 1.0], ['/web/', 0.9], ['/guides/', 0.8], ['/web/privacy', 0.3],
