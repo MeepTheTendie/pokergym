@@ -116,9 +116,9 @@ Page: https://playpokergym.com/guides/blackjack-16-vs-10-hit/
 Practice: https://playpokergym.com/web/?drill=bj-16-v10&ref=guide
 
 ### 12 against a dealer 2: hit or stand?
-Stand. Against a 2 or a 3, let the dealer take the risk.
-Why: A dealer 2 or 3 is the weakest upcard. The dealer has to draw to 17 and will bust more often than from a 7 through ace.
-Page: https://playpokergym.com/guides/blackjack-12-vs-2-stand/
+Hit. Hit 12 against a 2 or a 3; stand on 12 against 4, 5 and 6.
+Why: A dealer 2 or 3 busts less often than a 4, 5 or 6, so standing on 12 leaves you relying on a bust that usually does not come.
+Page: https://playpokergym.com/guides/blackjack-12-vs-2-hit/
 Practice: https://playpokergym.com/web/?practice=blackjack&ref=guide
 
 ### 11 against a dealer 10: double or hit?
