@@ -36,7 +36,7 @@ const group = slug =>
 function llmsList() {
   const sections = ['Blackjack', 'Video poker', 'Baccarat', "Hold'em", 'Free trainers'].map(name => {
     const rows = scenarios.filter(s => group(s.slug) === name);
-    return `### ${name}\n\n${rows.map(s => `- [${s.title}](${BASE}/guides/${s.slug}/): ${s.answer}`).join('\n')}`;
+    return `### ${name}\n\n${rows.map(s => `- [${s.title}](${BASE}/guides/${s.slug}/): ${s.answer.split(/(?<=\.) /)[0]}`).join('\n')}`;
   });
   return sections.join('\n\n');
 }

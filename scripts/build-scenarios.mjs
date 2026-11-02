@@ -19,6 +19,42 @@ function esc(text) {
   return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+// Search-shaped title: game name first, "vs" instead of "against", plus the
+// year, so the title starts with the words people actually type.
+const GAME_WORD = [['blackjack-', 'Blackjack'], ['video-poker-', 'Video poker'], ['holdem-', 'Hold\u2019em'], ['baccarat-', 'Baccarat']];
+export function seoTitle(s) {
+  if (s.seoTitle) return s.seoTitle;
+  let t = s.title.replace(/ against (?:a |an )?(?:dealer )?/i, ' vs ');
+  const game = GAME_WORD.find(([prefix]) => s.slug.startsWith(prefix));
+  const lower = t.toLowerCase();
+  if (game && !lower.includes(game[1].toLowerCase().slice(0, 6)) && !lower.includes('jacks or better')) {
+    t = `${game[1]} ${/^[A-Z][a-z]/.test(t) ? t[0].toLowerCase() + t.slice(1) : t}`;
+  }
+  return `${t} (2026)`;
+}
+
+// Questions every learner asks about a hand, appended when a page has fewer than three.
+const GAME_FAQ = {
+  'blackjack-': ['Which blackjack rules is this answer for?', 'Six decks, dealer stands on soft 17, double after split allowed, no surrender. The free trainer grades with those exact rules and shows the expected value of each option.'],
+  'video-poker-': ['Which pay table is this hold for?', 'Full-pay 9/6 Jacks or Better (9 for a full house, 6 for a flush), which returns about 99.54% with perfect play. The free trainer scores every hold against that table.'],
+  'baccarat-': ['Is there a baccarat strategy that beats the house?', 'No. The draws are fixed by the tableau, so the only choice is the bet. Banker at about 1.06% is the cheapest; Tie at 8:1 is the most expensive at about 14.4%.'],
+  'holdem-': ['How do I turn outs into odds quickly?', 'Use the rule of 4 and 2: multiply your outs by 4 on the flop (two cards to come) or by 2 on the turn. Nine flush outs is about 36% on the flop and 18% on the turn.'],
+  'free-': ['Do I need an account or money to practice?', 'No. Play Poker Gym runs in the browser with no signup, no download and no real money; progress is saved on your device.'],
+};
+
+function enrich(s, all) {
+  const prefix = Object.keys(GAME_FAQ).find(p => s.slug.startsWith(p));
+  const faq = [...s.faq];
+  if (faq.length < 3 && prefix && !faq.some(([q]) => q === GAME_FAQ[prefix][0])) faq.push(GAME_FAQ[prefix]);
+  const related = [...s.related];
+  for (const other of all) {
+    if (related.length >= 4) break;
+    if (other.slug === s.slug || related.some(([slug]) => slug === other.slug)) continue;
+    if (prefix && other.slug.startsWith(prefix)) related.push([other.slug, other.title]);
+  }
+  return { ...s, faq, related, title: seoTitle(s), h1: s.title };
+}
+
 function page(s) {
   const url = `${BASE}/guides/${s.slug}/`;
   const faqSchema = {
@@ -82,14 +118,14 @@ ${s.related.map(([slug, label]) => `<li><a href="/guides/${slug}/">${esc(label)}
 ${s.faq.map(([q, a]) => `<h3>${esc(q)}</h3>\n<p>${esc(a)}</p>`).join('\n')}
 </main>
 <footer>Play Poker Gym · free blackjack, video poker, baccarat and Hold\u2019em practice in your browser. <a href="/web/privacy">Privacy</a></footer>
-</body></html>
+<script src="/web/posthog-loader.js"></script></body></html>
 `;
 }
 
 for (const scenario of scenarios) {
   const dir = path.join(root, 'public', 'guides', scenario.slug);
   mkdirSync(dir, { recursive: true });
-  writeFileSync(path.join(dir, 'index.html'), page(scenario));
+  writeFileSync(path.join(dir, 'index.html'), page(enrich(scenario, scenarios)));
   console.log('wrote', path.relative(root, path.join(dir, 'index.html')));
 }
 
@@ -144,7 +180,7 @@ ${EXISTING.map(([name, href, note]) => `<li><a href="${href}">${esc(name)}</a> �
 <p><a class="cta" href="/web/?ref=guide">Open the free trainer →</a></p>
 </main>
 <footer>Play Poker Gym · free blackjack, video poker, baccarat and Hold'em practice in your browser.</footer>
-</body></html>
+<script src="/web/posthog-loader.js"></script></body></html>
 `;
 }
 

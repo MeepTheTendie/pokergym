@@ -61,6 +61,36 @@ No. The coach compares average outcomes under the simulator's rules. Different r
 
 Every entry below has a page with the answer, the reasoning and a drill link.
 
+### Soft 17 (A-6) against a dealer 2: hit, double or stand?
+Hit. Never stand on soft 17, and against a 2 hitting edges out doubling.
+Why: Seventeen only wins when the dealer busts, and a dealer 2 busts about 35% of the time. Standing on soft 17 here loses roughly 15 cents per dollar in the coach’s six-deck, stands-on-soft-17 game.
+Page: https://playpokergym.com/guides/blackjack-soft-17-vs-2-hit/
+Practice: https://playpokergym.com/web/?drill=bj-soft17-v2&ref=guide
+
+### Split aces against a dealer 10? A-A vs 10
+Split. Aces are split against every dealer card, including a 10.
+Why: Two aces together are a soft 12, one of the worst starting hands. Split, each ace becomes the start of a hand where any ten-value card (about 31% of the shoe) makes 21.
+Page: https://playpokergym.com/guides/blackjack-aces-vs-10-split/
+Practice: https://playpokergym.com/web/?drill=bj-aa-v10&ref=guide
+
+### Should you split 4s against a dealer 5?
+Split if you can double after splitting. If you cannot, hit.
+Why: A pair of fours is a hard 8: you never double it and you never stand. The only question is whether two hands starting with a 4 beat one hand of 8.
+Page: https://playpokergym.com/guides/blackjack-44-vs-5-split/
+Practice: https://playpokergym.com/web/?drill=bj-44-v5&ref=guide
+
+### Hard 9 against a dealer 2: double or hit?
+Hit. Double hard 9 against 3 through 6, but against a 2 just hit.
+Why: A 9 makes 19 with any ten-value card, so doubling is tempting. But a dealer 2 makes a pat hand more often than a 3 through 6, and doubling locks you into one card.
+Page: https://playpokergym.com/guides/blackjack-9-vs-2-hit/
+Practice: https://playpokergym.com/web/?drill=bj-hard9-v2&ref=guide
+
+### Jacks or Better: low pair or 3 to a royal?
+Hold the three to a royal and throw the low pair away.
+Why: A low pair pays nothing until it improves to two pair or better. Three suited royal cards like K-Q-J can still make a royal (800 for 1 at max coins), a straight flush, a flush, a straight, or a paying high pair.
+Page: https://playpokergym.com/guides/video-poker-low-pair-or-three-to-a-royal/
+Practice: https://playpokergym.com/web/?drill=vp-low-pair&ref=guide
+
 ### Baccarat: Player has 5 — does Player draw?
 Yes. Player draws on 0–5 and stands on 6–7.
 Why: The Player hand is mechanical: the first two cards decide it, with no judgement and no optional draw. A total of 5 is always a draw.

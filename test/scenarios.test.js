@@ -22,6 +22,11 @@ test('every scenario has a page, a sitemap entry and an assistant entry', () => 
     assert.ok(s.answer.length > 2, s.slug);
     assert.ok(s.why.length >= 2, s.slug);
     assert.ok(s.faq.length >= 2, s.slug);
+    const html = readFileSync(page(s.slug), 'utf8');
+    assert.ok((html.match(/"@type": "Question"/g) || []).length >= 3, `${s.slug}: FAQ needs 3 questions`);
+    assert.ok((html.match(/<li><a href="\/guides\//g) || []).length >= 3, `${s.slug}: needs 3 related guides`);
+    assert.ok((html.match(/class="cta"/g) || []).length === 1, `${s.slug}: exactly one CTA`);
+    assert.match(html, /<title>[^<]*20\d\d/, `${s.slug}: title year`);
   }
 });
 
