@@ -4,6 +4,93 @@
 // related[[slug,label]], faq[[q,a]].
 export const scenarios = [
   {
+    slug: 'blackjack-soft-17-vs-2-hit',
+    title: 'Soft 17 (A-6) against a dealer 2: hit, double or stand?',
+    description: 'Hit soft 17 against a 2. Standing gives up about 15 cents per dollar; hitting is roughly break-even and beats doubling by a hair. Practice the exact deal free.',
+    answer: 'Hit. Never stand on soft 17, and against a 2 hitting edges out doubling.',
+    why: [
+      'Seventeen only wins when the dealer busts, and a dealer 2 busts about 35% of the time. Standing on soft 17 here loses roughly 15 cents per dollar in the coach\u2019s six-deck, stands-on-soft-17 game.',
+      'The ace means you cannot bust on the next card, so hitting is free improvement: it brings the hand to about break-even. Doubling is almost as good (about half a cent worse), which is why some charts list double against a 2 under hits-soft-17 rules; against 3 through 6 the double becomes the clear play.',
+    ],
+    cta: ['Play this exact hand', '/web/?drill=bj-soft17-v2&ref=guide'],
+    related: [['blackjack-soft-18-vs-3-double', 'Soft 18 against a 3: double or stand?'], ['blackjack-soft-18-vs-9', 'Soft 18 against a 9: hit or stand?'], ['blackjack-12-vs-2-hit', '12 against a 2: hit or stand?']],
+    faq: [
+      ['Should you ever stand on soft 17?', 'No. Soft 17 is never a stand in basic strategy. Hit it against 2, 7, 8, 9, 10 and ace, and double it against 3 through 6 when doubling is allowed.'],
+      ['Do you double soft 17 against a 2?', 'Under the standard stands-on-soft-17 rules, no: hitting is slightly better. Some hits-soft-17 charts double it against a 2; the difference is under one cent per dollar.'],
+      ['Why is soft 17 a weak hand?', 'Seventeen beats nothing on its own; it only wins if the dealer busts or pushes with 17. Because the ace counts as 1 or 11, you can take a card with no risk of busting.'],
+    ],
+  },
+  {
+    slug: 'blackjack-aces-vs-10-split',
+    seoTitle: 'Split aces vs 10 in blackjack? Always (2026)',
+    title: 'Split aces against a dealer 10? A-A vs 10',
+    description: 'Always split aces, even against a 10. Splitting is worth about +18 cents per dollar; hitting a soft 12 is about \u22127 cents. Practice the exact deal free.',
+    answer: 'Split. Aces are split against every dealer card, including a 10.',
+    why: [
+      'Two aces together are a soft 12, one of the worst starting hands. Split, each ace becomes the start of a hand where any ten-value card (about 31% of the shoe) makes 21.',
+      'Against a 10 the coach rates the split at about +0.18 of your bet and hitting at about \u22120.07, a swing of a quarter of a bet. You get one card on each split ace in most casinos, and it is still the best play by far.',
+    ],
+    cta: ['Play this exact hand', '/web/?drill=bj-aa-v10&ref=guide'],
+    related: [['blackjack-88-vs-10-split', '8-8 against a 10: split or hit?'], ['blackjack-1010-vs-6-stand', '10-10 against a 6: split or stand?'], ['blackjack-99-vs-7-stand', '9-9 against a 7: split or stand?']],
+    faq: [
+      ['Do you always split aces in blackjack?', 'Yes. Aces and eights are the two pairs you split against every dealer upcard in basic strategy.'],
+      ['Is a split ace plus a 10 a blackjack?', 'No. A 21 made after splitting aces counts as 21, not a natural, so it pays even money rather than 3:2.'],
+      ['What if I can only draw one card to each split ace?', 'Split anyway. One card per ace is the common rule and the split is still worth roughly a quarter of a bet more than hitting soft 12 against a 10.'],
+    ],
+  },
+  {
+    slug: 'blackjack-44-vs-5-split',
+    seoTitle: 'Split 4s vs 5 in blackjack? Yes, with DAS (2026)',
+    title: 'Should you split 4s against a dealer 5?',
+    description: 'Split 4s against a 5 only when double after split is allowed; otherwise hit. With DAS the split is worth about +11 cents per dollar versus +8 for hitting.',
+    answer: 'Split if you can double after splitting. If you cannot, hit.',
+    why: [
+      'A pair of fours is a hard 8: you never double it and you never stand. The only question is whether two hands starting with a 4 beat one hand of 8.',
+      'A 5 is one of the dealer\u2019s weakest cards. With double after split, each 4 that catches a 6 or 7 becomes a 10 or 11 you can double, so the coach rates splitting at about +0.11 of your bet against +0.08 for hitting. Take away the double after split and that edge disappears, so hit.',
+    ],
+    cta: ['Play this exact hand', '/web/?drill=bj-44-v5&ref=guide'],
+    related: [['blackjack-55-vs-6-double', '5-5 against a 6: split or double?'], ['blackjack-88-vs-10-split', '8-8 against a 10: split or hit?'], ['blackjack-aces-vs-10-split', 'A-A against a 10: split?']],
+    faq: [
+      ['Do you split 4s against a 4?', 'Only against 5 and 6, and only with double after split. Against a 4 and every other card, hit the hard 8.'],
+      ['Should you double 4-4 as a hard 8?', 'No. Hard 8 is never a double in six-deck basic strategy; the hand is too far from 21.'],
+      ['When should you split 4s in blackjack?', 'Against a dealer 5 or 6 when the table lets you double after splitting. Otherwise never split them.'],
+    ],
+  },
+  {
+    slug: 'blackjack-9-vs-2-hit',
+    title: 'Hard 9 against a dealer 2: double or hit?',
+    description: 'Hit hard 9 against a 2 in six-deck blackjack. Doubling is close but about 1 cent per dollar worse; double 9 against 3 through 6 instead. Practice free.',
+    answer: 'Hit. Double hard 9 against 3 through 6, but against a 2 just hit.',
+    why: [
+      'A 9 makes 19 with any ten-value card, so doubling is tempting. But a dealer 2 makes a pat hand more often than a 3 through 6, and doubling locks you into one card.',
+      'The coach puts hitting at about +0.077 of your bet and doubling at about +0.068. The gap is small, about a cent per dollar, so this is a classic hand people get wrong in both directions. In single-deck games the double sometimes becomes correct.',
+    ],
+    cta: ['Play this exact hand', '/web/?drill=bj-hard9-v2&ref=guide'],
+    related: [['blackjack-10-vs-9-double', '10 against a 9: double or hit?'], ['blackjack-11-vs-10-double', '11 against a 10: double or hit?'], ['blackjack-12-vs-2-hit', '12 against a 2: hit or stand?']],
+    faq: [
+      ['Should you double 9 against a 2 in blackjack?', 'Not in a six-deck game. Hit instead; the double is worth about one cent per dollar less. Some single and double-deck charts double it.'],
+      ['When do you double a hard 9?', 'Against a dealer 3, 4, 5 or 6. Against 2 and 7 through ace, hit.'],
+      ['Is 9 vs 2 the same with soft 9 (A-8)?', 'No. Soft 19 (A-8) is a stand against a 2. Only the hard 9 is a hit-or-double question.'],
+    ],
+  },
+  {
+    slug: 'video-poker-low-pair-or-three-to-a-royal',
+    title: 'Jacks or Better: low pair or 3 to a royal?',
+    description: 'Hold 3 to a royal over a low pair in 9/6 Jacks or Better. K-Q-J suited returns about 1.02 per coin; the pair of 5s about 0.82. Practice the exact hand free.',
+    answer: 'Hold the three to a royal and throw the low pair away.',
+    why: [
+      'A low pair pays nothing until it improves to two pair or better. Three suited royal cards like K-Q-J can still make a royal (800 for 1 at max coins), a straight flush, a flush, a straight, or a paying high pair.',
+      'In the exact deal 5-5 with K-Q-J suited, the coach rates holding K-Q-J at about 1.02 per coin bet and holding 5-5 at about 0.82. That is one of the few holds where breaking a pair is right.',
+    ],
+    cta: ['Play this exact hand', '/web/?drill=vp-low-pair&ref=guide'],
+    related: [['video-poker-pair-of-jacks-or-four-to-a-flush', 'Pair of jacks or 4 to a flush?'], ['video-poker-trips-or-flush-draw', 'Three of a kind or four to a flush?'], ['video-poker-two-pair-hold-both', 'Two pair: hold both or chase trips?']],
+    faq: [
+      ['Do you break a low pair for 3 to a royal?', 'Yes, in 9/6 Jacks or Better. Three to a royal ranks above a low pair; four to a royal ranks above even a high pair.'],
+      ['Do you break a high pair (jacks or better) for 3 to a royal?', 'No. A paying high pair beats three to a royal. Only four to a royal beats a high pair.'],
+      ['What about a low pair against 4 to a flush?', 'Hold the four to a flush. It returns more than a low pair in 9/6 Jacks or Better.'],
+    ],
+  },
+  {
     slug: 'baccarat-player-draws-on-five',
     title: 'Baccarat: Player has 5 — does Player draw?',
     description: 'Player draws on 0–5 and stands on 6–7. The third-card tableau in one minute, then practice free in Play Poker Gym.',
