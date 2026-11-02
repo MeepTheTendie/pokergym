@@ -105,6 +105,24 @@ export default {
       target.searchParams.set('utm_content', 'typed');
       return Response.redirect(target.href, 302);
     }
+    // Canonical social-reel entry. Captions post a short link
+    // (playpokergym.com/reel?src=fb&c=p1-QF) instead of hand-typed UTMs, so a
+    // reel can never be mis-attributed to the wrong platform (e.g. a Facebook
+    // reel tagged utm_source=yt, which is what happened on 2026-11-01).
+    if (url.pathname === '/reel' || url.pathname === '/reel/') {
+      const src = (url.searchParams.get('src') || 'fb').toLowerCase();
+      const platform = src === 'yt' ? 'youtube' : src === 'ig' ? 'reels' : 'facebook';
+      const utmSource = src === 'yt' ? 'yt' : src === 'ig' ? 'ig' : 'fb';
+      const target = new URL('/web/', url.origin);
+      target.searchParams.set('ref', platform);
+      target.searchParams.set('utm_source', utmSource);
+      target.searchParams.set('utm_medium', 'reel');
+      target.searchParams.set('utm_campaign', url.searchParams.get('camp') || 'hooktest1112');
+      const content = url.searchParams.get('c') || url.searchParams.get('utm_content');
+      if (content) target.searchParams.set('utm_content', content);
+      if (url.searchParams.get('daily') === '1') target.searchParams.set('daily', '1');
+      return Response.redirect(target.href, 302);
+    }
     // PostHog is proxied through our own origin (see worker/proxy.js). This is
     // never counted and never wrapped in the page security headers.
     if (isIngestPath(url.pathname)) {

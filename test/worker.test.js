@@ -77,6 +77,31 @@ test('typed path /go redirects to the trainer with endscreen attribution', async
   assert.equal(c.waits.length, 0);
 });
 
+test('reel link /reel stamps platform attribution instead of relying on captions', async () => {
+  const e = env(); const c = ctx();
+  const response = await worker.fetch(nav('https://playpokergym.com/reel?src=fb&c=p1-QF'), e, c);
+  assert.equal(response.status, 302);
+  const loc = new URL(response.headers.get('location'));
+  assert.equal(loc.pathname, '/web/');
+  assert.equal(loc.searchParams.get('ref'), 'facebook');
+  assert.equal(loc.searchParams.get('utm_source'), 'fb');
+  assert.equal(loc.searchParams.get('utm_medium'), 'reel');
+  assert.equal(loc.searchParams.get('utm_campaign'), 'hooktest1112');
+  assert.equal(loc.searchParams.get('utm_content'), 'p1-QF');
+  assert.deepEqual(e.served, []);
+  assert.deepEqual(e.points, []);
+  assert.equal(c.waits.length, 0);
+  // Instagram and YouTube variants
+  const ig = new URL((await worker.fetch(nav('https://playpokergym.com/reel?src=ig&c=ig-bio'), e, c)).headers.get('location'));
+  assert.equal(ig.searchParams.get('ref'), 'reels');
+  assert.equal(ig.searchParams.get('utm_source'), 'ig');
+  const yt = new URL((await worker.fetch(nav('https://playpokergym.com/reel?src=yt&c=p2-AF&camp=p5bonus1031&daily=1'), e, c)).headers.get('location'));
+  assert.equal(yt.searchParams.get('ref'), 'youtube');
+  assert.equal(yt.searchParams.get('utm_source'), 'yt');
+  assert.equal(yt.searchParams.get('utm_campaign'), 'p5bonus1031');
+  assert.equal(yt.searchParams.get('daily'), '1');
+});
+
 test('worker counts a page view and always serves assets', async () => {
   const e = env(); const c = ctx();
   const res = await worker.fetch(nav('https://playpokergym.com/web/?ref=share&d=9', { 'cf-connecting-ip': '203.0.113.9', 'user-agent': 'X', cookie: 'a=b' }), e, c);
@@ -123,8 +148,8 @@ test('wrangler config: worker + assets binding, array run_worker_first, AE datas
   assert.equal(cfg.main, 'worker/index.js');
   assert.equal(cfg.assets.binding, 'ASSETS');
   assert.ok(Array.isArray(cfg.assets.run_worker_first));
-  assert.deepEqual(cfg.assets.run_worker_first, ['/', '/go', '/web/', '/web', '/web/index.html', '/guides/*', '/ingest/*']);
-  for (const p of cfg.assets.run_worker_first.filter(p => !p.includes('*') && p !== '/go')) assert.ok(pathBucket(p), `${p} is a counted path`);
+  assert.deepEqual(cfg.assets.run_worker_first, ['/', '/go', '/reel', '/reel/', '/web/', '/web', '/web/index.html', '/guides/*', '/ingest/*']);
+  for (const p of cfg.assets.run_worker_first.filter(p => !p.includes('*') && p !== '/go' && p !== '/reel' && p !== '/reel/')) assert.ok(pathBucket(p), `${p} is a counted path`);
   assert.deepEqual(cfg.analytics_engine_datasets, [{ binding: 'VISITS', dataset: 'pokergym_visits' }]);
   assert.ok(cfg.routes.some(r => r.pattern === 'playpokergym.com' && r.custom_domain));
   assert.equal(cfg.workers_dev, false);
