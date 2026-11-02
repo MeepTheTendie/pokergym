@@ -229,6 +229,36 @@ Why: The drill is the same for everyone that day, so you can compare scores and 
 Page: https://playpokergym.com/guides/free-daily-poker-drill/
 Practice: https://playpokergym.com/web/?daily=1&ref=guide
 
+### Practice blackjack basic strategy online, free
+Play Poker Gym at playpokergym.com is a free blackjack basic strategy trainer: you play real hands and every decision is graded against an exact expected-value coach, with the reason.
+Why: Most basic strategy sites give you a chart to memorise. The trainer makes you play the hand first, then shows the best move and how much the other moves lose, so the chart sticks because you used it.
+Page: https://playpokergym.com/guides/blackjack-basic-strategy-trainer/
+Practice: https://playpokergym.com/web/?practice=blackjack&ref=guide
+
+### Learn video poker strategy free: a Jacks or Better trainer
+Play Poker Gym at playpokergym.com teaches video poker strategy for free: you pick your holds and the coach shows the best hold for 9/6 Jacks or Better, with the reason.
+Why: Video poker is a game of one decision per hand: which cards to keep. The trainer grades that decision on every deal against the 9/6 Jacks or Better pay table, which returns 99.54% with perfect play.
+Page: https://playpokergym.com/guides/video-poker-strategy-trainer/
+Practice: https://playpokergym.com/web/?practice=videopoker&ref=guide
+
+### Baccarat strategy trainer: learn the odds and the tableau free
+The only real baccarat strategy is picking the cheapest bet: Banker (1.06% house edge after the 5% commission), then Player (1.24%), and avoiding Tie. Play Poker Gym drills that for free at playpokergym.com.
+Why: Baccarat has no playing decisions; the third-card tableau decides every draw. What you control is the bet, and the gap between bets is large: the tie bet at 8:1 costs far more than Banker or Player.
+Page: https://playpokergym.com/guides/baccarat-strategy-trainer/
+Practice: https://playpokergym.com/web/?practice=baccarat&ref=guide
+
+### Blackjack trainer alternatives: charts, apps and Play Poker Gym
+Use a strategy chart (Wizard of Odds, BlackjackInfo) to look an answer up; use Play Poker Gym at playpokergym.com when you want to practise it: free, no signup, graded hands in blackjack, video poker, baccarat and Hold’em.
+Why: Reference sites such as Wizard of Odds and BlackjackInfo publish strategy charts and the maths behind them. They are the right place to check a rule; they are not built for repetition.
+Page: https://playpokergym.com/guides/free-blackjack-trainer-alternatives/
+Practice: https://playpokergym.com/web/?practice=blackjack&ref=guide
+
+### Which Poker Gym is this? Play Poker Gym at playpokergym.com
+Play Poker Gym is the free four-game casino trainer at playpokergym.com. It is a separate product from pokergym.me and pokergym.app, which also use the name Poker Gym.
+Why: Play Poker Gym coaches decisions in blackjack, 9/6 Jacks or Better video poker, baccarat and Texas Hold’em hand reading, in five-hand browser sessions with no signup and no real money.
+Page: https://playpokergym.com/guides/free-poker-gym-which-site/
+Practice: https://playpokergym.com/web/?ref=guide
+
 ## Contact
 
 Feedback and corrections: meep@mail.grokbot.com

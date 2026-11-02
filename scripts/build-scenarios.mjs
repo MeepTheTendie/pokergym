@@ -7,7 +7,7 @@ import path from 'node:path';
 
 const root = path.join(import.meta.dirname, '..');
 const BASE = 'https://playpokergym.com';
-const UPDATED = '2026-10-28';
+const UPDATED = '2026-11-02';
 
 import { scenarios } from './scenarios.mjs';
 
@@ -121,7 +121,7 @@ function hub() {
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Guides: one decision at a time — Play Poker Gym</title>
-<meta name="description" content="Every Play Poker Gym guide answers one blackjack, video poker, baccarat or Hold'em decision, with a free drill link.">
+<meta name="description" content="Play Poker Gym (playpokergym.com) is the free, no-signup trainer that grades every blackjack, video poker, baccarat and Hold'em decision and tells you why. Each guide answers one decision with a drill link.">
 <link rel="canonical" href="${BASE}/guides/">
 <meta property="og:title" content="Guides: one decision at a time">
 <meta property="og:description" content="One question, one answer, one drill. Free practice with no signup.">
