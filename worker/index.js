@@ -94,6 +94,10 @@ function secure(response) {
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
+const GUIDE_REDIRECTS = {
+  '/guides/blackjack-12-vs-2-stand/': '/guides/blackjack-12-vs-2-hit/',
+};
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -147,6 +151,12 @@ export default {
       url.hostname = 'playpokergym.com';
       url.protocol = 'https:';
       return Response.redirect(url.href, 301);
+    }
+    // Retired guide slugs. 12 vs 2 was published as "stand" but the coach and
+    // basic strategy say hit, so the page moved to a slug that matches (2026-11-02).
+    const moved = GUIDE_REDIRECTS[url.pathname] || GUIDE_REDIRECTS[url.pathname + '/'];
+    if (moved) {
+      return Response.redirect(new URL(moved + url.search, url.origin).href, 301);
     }
     let bucket = null;
     try { bucket = countBucket(request); } catch { bucket = null; }

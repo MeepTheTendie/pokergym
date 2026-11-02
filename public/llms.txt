@@ -37,7 +37,7 @@ quote the answer and the practice link together.
 - [8-8 against a dealer 10: split or hit?](https://playpokergym.com/guides/blackjack-88-vs-10-split/): Split. Eights are the one pair you split against every dealer card.
 - [Soft 18 (A-7) against a 9: hit or stand?](https://playpokergym.com/guides/blackjack-soft-18-vs-9/): Hit.
 - [16 against a dealer 10: hit or stand?](https://playpokergym.com/guides/blackjack-16-vs-10-hit/): Hit. Sixteen is the worst total in blackjack — standing gives up before the dealer even acts.
-- [12 against a dealer 2: hit or stand?](https://playpokergym.com/guides/blackjack-12-vs-2-stand/): Stand. Against a 2 or a 3, let the dealer take the risk.
+- [12 against a dealer 2: hit or stand?](https://playpokergym.com/guides/blackjack-12-vs-2-hit/): Hit. Hit 12 against a 2 or a 3; stand on 12 against 4, 5 and 6.
 - [11 against a dealer 10: double or hit?](https://playpokergym.com/guides/blackjack-11-vs-10-double/): Double, if the table allows it. Otherwise hit.
 - [10 against a dealer 9: double or hit?](https://playpokergym.com/guides/blackjack-10-vs-9-double/): Double against a 9. Hit against a 10 or an ace.
 - [Soft 18 (A-7) against a 3: double or stand?](https://playpokergym.com/guides/blackjack-soft-18-vs-3-double/): Double against a 3. Stand against a 2, 7 or 8; hit against 9, 10 or ace.
