@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { PUBLISHED_REFS } from '../src/rpg/links.js';
 import { GUIDE_PATHS, pathBucket, isPageLike, countBucket, dataPoint } from '../worker/count.js';
 import worker from '../worker/index.js';
+import { subscriptionId } from '../worker/push.js';
 import { SECURITY_HEADERS, headersFileText } from '../worker/security.js';
 import { buildQuery, formatTable, playersByDayQuery, stageReachQuery, eventTotalsQuery, formatPlayers, formatStages, formatEvents, notTestClause } from '../scripts/stats.mjs';
 
@@ -329,6 +330,47 @@ test('push subscription is validated and stored, then removable', async () => {
   const gone = await worker.fetch(new Request('https://playpokergym.com/push/unsubscribe', { method: 'POST', body: JSON.stringify({ endpoint: 'https://fcm.googleapis.com/fcm/send/abc' }) }), e, c);
   assert.equal(gone.status, 200);
   assert.equal(e.PUSH_SUBS.map.size, 0);
+});
+
+test('push unsubscribe rejects endpoints outside the push-service allowlist', async () => {
+  const e = { ...env(), PUSH_SUBS: kvStub() };
+  e.PUSH_SUBS.map.set('sub:seed', '{"endpoint":"https://fcm.googleapis.com/fcm/send/abc"}');
+  const c = ctx();
+  for (const endpoint of [
+    'https://attacker.example/send/abc',
+    'http://fcm.googleapis.com/fcm/send/abc',
+    'https://fcm.googleapis.com:8443/fcm/send/abc',
+    'https://user:pw@fcm.googleapis.com/fcm/send/abc',
+    '',
+  ]) {
+    const res = await worker.fetch(new Request('https://playpokergym.com/push/unsubscribe', {
+      method: 'POST', body: JSON.stringify({ endpoint }),
+    }), e, c);
+    assert.equal(res.status, 400, endpoint);
+    assert.deepEqual(await res.json(), { ok: false, error: 'invalid' });
+  }
+});
+
+test('push subscribe refuses a brand-new device once the namespace ceiling is reached', async () => {
+  const pair = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
+  const raw = Buffer.from(await crypto.subtle.exportKey('raw', pair.publicKey)).toString('base64url');
+  const keys = { p256dh: raw, auth: Buffer.alloc(16, 7).toString('base64url') };
+  const endpoint = 'https://fcm.googleapis.com/fcm/send/known';
+  const e = { ...env(), PUSH_SUBS: kvStub() };
+  for (let i = 0; i < 999; i++) e.PUSH_SUBS.map.set(`sub:seed-${i}`, '{}');
+  e.PUSH_SUBS.map.set(`sub:${await subscriptionId(endpoint)}`, '{}');
+  const c = ctx();
+
+  const existing = await worker.fetch(new Request('https://playpokergym.com/push/subscribe', {
+    method: 'POST', body: JSON.stringify({ endpoint, keys }),
+  }), e, c);
+  assert.equal(existing.status, 200, 'an already-subscribed device may refresh at the ceiling');
+
+  const fresh = await worker.fetch(new Request('https://playpokergym.com/push/subscribe', {
+    method: 'POST', body: JSON.stringify({ endpoint: 'https://fcm.googleapis.com/fcm/send/new', keys }),
+  }), e, c);
+  assert.equal(fresh.status, 503);
+  assert.deepEqual(await fresh.json(), { ok: false, error: 'full' });
 });
 
 test('push subscribe reports unavailable when the KV binding is missing', async () => {

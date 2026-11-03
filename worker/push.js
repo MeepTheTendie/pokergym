@@ -48,16 +48,27 @@ function allowedPushHost(host) {
   return PUSH_ENDPOINT_HOSTS.some((allowed) => name === allowed || name.endsWith(`.${allowed}`));
 }
 
-/** A stored subscription must be a real https endpoint with both keys. */
-export function validSubscription(value) {
-  if (!value || typeof value !== 'object') return false;
-  if (typeof value.endpoint !== 'string' || value.endpoint.length > 1024) return false;
+/**
+ * A push endpoint must be a plain https URL on a known push service. Shared by
+ * subscribe and unsubscribe so both paths enforce the same allowlist: an
+ * unsubscribe that accepted arbitrary strings could be pointed at any stored
+ * key, and it costs nothing to keep the two checks identical.
+ */
+export function isPushEndpoint(endpoint) {
+  if (typeof endpoint !== 'string' || endpoint.length > 1024) return false;
   let url;
-  try { url = new URL(value.endpoint); } catch { return false; }
+  try { url = new URL(endpoint); } catch { return false; }
   if (url.protocol !== 'https:') return false;
   if (url.username || url.password) return false;
   if (url.port && url.port !== '443') return false;
   if (!allowedPushHost(url.hostname)) return false;
+  return true;
+}
+
+/** A stored subscription must be a real https endpoint with both keys. */
+export function validSubscription(value) {
+  if (!value || typeof value !== 'object') return false;
+  if (!isPushEndpoint(value.endpoint)) return false;
   const keys = value.keys;
   if (!keys || typeof keys !== 'object') return false;
   if (typeof keys.p256dh !== 'string' || typeof keys.auth !== 'string') return false;
