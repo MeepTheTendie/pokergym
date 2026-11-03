@@ -26,6 +26,13 @@ Canonical rules for PokerGym work. This file supersedes conflicting one-line gua
 - A PR does not need to be rebased onto every new `main` commit merely to satisfy “up to date”; required tests are the gate.
 - `automation/daily-prompt.md` applies only to the scheduled systemd job, not to interactive agents.
 
+## Public social caption release gate (Wes, 2026-11-02)
+
+- **Internal experiment metadata must never be published as social copy.** `TEST: pair N, question-first/answer-first`, `TEST`, internal filenames, and similar production markers belong only in the manifest, shared tracker, and UTM values, not in public captions/descriptions/titles/first comments. The user-facing opening must be the approved hook question or statement.
+- Before creating/updating/scheduling any social post, remove only nonpublic production metadata from the copy while preserving the approved substantive caption, video, title, link, tracking parameters, posting time, and variant assignment. **Fail closed**: do not schedule an item whose public text still contains a production label. Check every network's final outgoing caption, not merely the source file.
+- After bulk scheduling or edits, independently re-read the complete platform-specific queue and verify no `TEST:`/`TEST: pair` prefixes, exact network UTM links, videos, 4 PM America/Chicago schedule, auto-publish and non-draft flags, correct count, and no duplicates. A public-copy error is an escalation-level publishing blocker, not an accepted experimental label.
+- Already-published errors require caption edits through an authorized native interface (where available); never delete or repost without owner authorization. The Metricool scheduled-post editing endpoint is **not** evidence of ability to edit a live Facebook/Instagram/YouTube post.
+
 ## Conflict rule
 
 If two rule sources disagree, this file wins. Update this file and the ControlDoc Decision Log together when the policy changes.
