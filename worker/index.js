@@ -5,7 +5,7 @@
 import { countBucket, dataPoint } from './count.js';
 import { isIngestPath, proxyPostHog } from './proxy.js';
 import { SECURITY_HEADERS } from './security.js';
-import { sendPush, subscriptionId, validSubscription } from './push.js';
+import { isPushEndpoint, sendPush, subscriptionId, validSubscription } from './push.js';
 
 // One reminder a day, 09:00 America/Chicago in winter / 08:00 in summer.
 // The copy says "a reminder", never "every day at a time", so DST is harmless.
@@ -63,17 +63,30 @@ async function readJson(request, limit = 4096) {
   try { return JSON.parse(new TextDecoder().decode(bytes)); } catch { return null; }
 }
 
+// A hard ceiling on stored subscriptions. The endpoint is unauthenticated, so
+// without a cap an attacker with many addresses can grow the namespace (and the
+// daily send loop) without bound. Re-subscribing an existing device is still
+// allowed at the ceiling: only brand-new devices are refused.
+const MAX_SUBSCRIPTIONS = 1000;
+
 async function subscribe(request, env) {
   if (!env.PUSH_SUBS) return pushJson({ ok: false, error: 'unavailable' }, 503);
   const body = await readJson(request);
   if (!body || !validSubscription(body)) return pushJson({ ok: false, error: 'invalid' }, 400);
   const id = await subscriptionId(body.endpoint);
+  const key = `sub:${id}`;
+  if (!(await env.PUSH_SUBS.get(key))) {
+    const page = await env.PUSH_SUBS.list({ prefix: 'sub:', limit: 1000 });
+    if (!page.list_complete || page.keys.length >= MAX_SUBSCRIPTIONS) {
+      return pushJson({ ok: false, error: 'full' }, 503);
+    }
+  }
   const record = {
     endpoint: body.endpoint,
     keys: { p256dh: body.keys.p256dh, auth: body.keys.auth },
     created: new Date().toISOString(),
   };
-  await env.PUSH_SUBS.put(`sub:${id}`, JSON.stringify(record));
+  await env.PUSH_SUBS.put(key, JSON.stringify(record));
   return pushJson({ ok: true });
 }
 
@@ -81,7 +94,7 @@ async function unsubscribe(request, env) {
   if (!env.PUSH_SUBS) return pushJson({ ok: false, error: 'unavailable' }, 503);
   const body = await readJson(request);
   const endpoint = body && typeof body.endpoint === 'string' ? body.endpoint : '';
-  if (!endpoint || endpoint.length > 1024) return pushJson({ ok: false, error: 'invalid' }, 400);
+  if (!isPushEndpoint(endpoint)) return pushJson({ ok: false, error: 'invalid' }, 400);
   await env.PUSH_SUBS.delete(`sub:${await subscriptionId(endpoint)}`);
   return pushJson({ ok: true });
 }
