@@ -237,6 +237,7 @@ el('btnConfirmRestore').onclick = () => {
     profile = restored; pendingRestore = null; round = null; shortSession = false;
     el('btnConfirmRestore').hidden = true;
     el('btnContinue').disabled = false;
+    el('btnContinue').hidden = false;
     renderMap(); show('scr-map');
     el('backupStatus').textContent = 'Progress restored on this browser. Nothing was uploaded.';
   } catch { el('backupStatus').textContent = 'Restore failed. Browser storage may be full or blocked.'; }
@@ -325,8 +326,21 @@ el('btnMap').onclick = () => { dailyMode = false; dailyRun = null; renderMap(); 
 el('btnTitle').onclick = () => { dailyMode = false; dailyRun = null; initTitle(); };
 
 /* ---------------- title ---------------- */
+// A brand-new visitor (no save, no link that promised something specific) gets
+// one action that deals a blackjack hand straight away. No resume control, no
+// style picker, no game menu: the data showed most visitors left before their
+// first hand, so the first screen asks for nothing but one tap.
+function isFirstVisitScreen() {
+  return !profile && !sharedDaily && !requestedGym;
+}
 function initTitle() {
+  const firstVisit = isFirstVisitScreen();
+  // Never show a disabled-looking resume button: hide it until there is a save.
+  el('btnContinue').hidden = !profile;
   el('btnContinue').disabled = !profile;
+  el('btnNew').hidden = firstVisit;
+  el('btnStart').textContent = firstVisit ? 'Deal my first hand' : 'Start training';
+  el('scr-title').classList.toggle('first-visit', firstVisit);
   // Without a save the daily is reachable only from a shared link (option a).
   // The Daily Drill is the built-in reason to come back; show it to everyone,
   // including first-time visitors with no save. The onclick path below creates
@@ -2873,6 +2887,7 @@ analytics.openTrainer({
   entry: trainerEntry,
   returning,
   days_since_last_visit: daysSinceLastVisit,
+  first_screen: isFirstVisitScreen() ? 'quick_deal' : 'menu',
   ...(preview ? { preview: true } : {}),
 });
 // Attach the save state to the stable device id created by the loader, so
