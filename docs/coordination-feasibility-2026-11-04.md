@@ -22,6 +22,8 @@ Correlation `PG-HANDOFF-20261104-02`:
 - The app displayed **“Weekly usage limit reached”**, **“It resets in 3 days”**, and a separate 90% usage warning. The conversation subsequently showed “Poker Gym is working,” but no completed feasibility answer had been retrieved at this checkpoint. Record this as **submitted, completion unverified, quota warning observed**, not a successful Grok run or proof of a permanently unavailable API.
 - No upgrade, on-demand spend, account/permission change or new routine was requested.
 
+Follow-up `PG-HANDOFF-20261104-03` attempted to ask the same ChatGPT specialist to post its result directly on PR #39. Automatic approval rejected this second dispatch: `MCP tool call requires approval, but approval policy is never`. The second prompt was not delivered. A specialist-to-GitHub status write is therefore **not demonstrated**; Codex's own report/PR writes are verified separately.
+
 ## Existing architecture and access
 
 | Specialist/surface | Evidence inspected | Execution conclusion |
@@ -35,7 +37,7 @@ Correlation `PG-HANDOFF-20261104-02`:
 | This Windows host | Local command/app inventory; desktop projects/artifacts | Codex CLI installed; OpenCode command unavailable, WSL not installed, no attached remote project/worktree. This does not establish that the separate Linux host is down |
 
 Wren's audit explicitly identifies her two recurring workflows as running inside Muse, with existing OAuth-backed Meta helpers and PostHog access:
-[Wren audit](automation/artifacts/wren/2026-10-26-wren-operations-audit.md).
+[Wren audit](../automation/artifacts/wren/2026-10-26-wren-operations-audit.md).
 A current owner-authored message visible in Grok's Poker Gym chat reports that Wren's direct ControlDoc writes are blocked by branch protection and her GitHub integration cannot open PRs. That is **owner-reported**, not a fresh Wren API test; her staged Nov 4 text was not retrieved or recreated here. Do not fabricate her ballots or rewrite her section.
 
 Plugin discovery for Grok, Wren, Muse, OpenCode, DeepSeek and Beam returned no matching plugins. This is an observation about this catalogue, not proof that no external integration exists anywhere.
