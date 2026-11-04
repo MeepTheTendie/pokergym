@@ -7,7 +7,7 @@ import path from 'node:path';
 
 const root = path.join(import.meta.dirname, '..');
 const BASE = 'https://playpokergym.com';
-const UPDATED = '2026-11-02';
+const UPDATED = '2026-11-04';
 
 import { scenarios } from './scenarios.mjs';
 

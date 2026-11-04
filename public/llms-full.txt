@@ -289,6 +289,66 @@ Why: Play Poker Gym coaches decisions in blackjack, 9/6 Jacks or Better video po
 Page: https://playpokergym.com/guides/free-poker-gym-which-site/
 Practice: https://playpokergym.com/web/?ref=guide
 
+### Baccarat: odds of losing 6 hands in a row
+About 1.4%, or roughly one time in 69 decided hands, if you bet Banker on every hand.
+Why: Start with one hand. Banker wins about 45.9% of the time, Player about 44.6%, and about 9.5% of hands are ties. A tie returns your stake, so it is neither a win nor a loss and does not break a losing run. Throwing ties out, Banker loses about 49.3% of decided hands.
+Page: https://playpokergym.com/guides/baccarat-odds-of-losing-6-in-a-row/
+Practice: https://playpokergym.com/web/?practice=baccarat&ref=guide
+
+### How often does Banker win in baccarat?
+About 45.9% of hands, against 44.6% for Player. The remaining 9.5% are ties.
+Why: The gap comes from the tableau, not from luck. Player acts first and its draw is mechanical; Banker draws second and its third card depends on what Player did. Seeing Player’s third card is worth about 1.3 percentage points of win rate, and that is the entire reason Banker exists as a separate bet.
+Page: https://playpokergym.com/guides/baccarat-how-often-banker-wins/
+Practice: https://playpokergym.com/web/?practice=baccarat&ref=guide
+
+### 15 against a dealer 10: hit or stand?
+Hit. Hitting 15 against a 10 loses about 50 cents per dollar; standing loses about 54.
+Why: A dealer 10 makes 17 or better about 79% of the time and busts only about 21%. Standing on 15 means you win only when the dealer busts, so standing is a losing play by construction — the coach scores it at about −0.54 per dollar.
+Page: https://playpokergym.com/guides/blackjack-15-vs-10-hit/
+Practice: https://playpokergym.com/web/?practice=blackjack&ref=guide
+
+### Soft 16 (A-5): hit, double or stand?
+Double against a 4, 5 or 6. Hit against a 2, 3, 7, 8, 9, 10 or ace.
+Why: Soft 16 cannot bust. The ace drops to one, so the worst total you can reach is 6, and that is what makes doubling safe with an unmade hand. Against a 6 the coach rates doubling at about +0.19 per dollar, hitting at about +0.10 and standing at about −0.15.
+Page: https://playpokergym.com/guides/blackjack-soft-16-hands/
+Practice: https://playpokergym.com/web/?practice=blackjack&ref=guide
+
+### 13 against a dealer 2: hit or stand?
+Stand. Thirteen against a 2 is a stand, while 12 against a 2 is a hit.
+Why: Both hands win only when the dealer busts, and a dealer 2 busts about 35% of the time. What separates them is what you can draw without busting. A 12 busts on ten-value cards only, five ranks out of thirteen. A 13 busts on a 9 as well as every ten-value card, six ranks.
+Page: https://playpokergym.com/guides/blackjack-13-vs-2-stand/
+Practice: https://playpokergym.com/web/?practice=blackjack&ref=guide
+
+### 17 against a dealer 10: hit or stand?
+Stand. Seventeen against a 10 is always a stand in basic strategy.
+Why: A dealer 10 finishes with 17 or better about 79% of the time, so a 17 that stands wins only on the 21% dealer bust and pushes on the 11% of hands that finish on 17. That still adds up to losing about 42 cents per dollar, which is better than throwing the hand away.
+Page: https://playpokergym.com/guides/blackjack-17-vs-10-stand/
+Practice: https://playpokergym.com/web/?practice=blackjack&ref=guide
+
+### Should you split a pair of 2s? The 2-2 rule
+Split 2s against a 2, 3, 4, 5, 6 or 7. Hit against an 8, 9, 10 or ace.
+Why: A pair of twos is a hard 4, the worst total on the table: it cannot win without three more good cards. Splitting gives you two hands that each start at 2 and can still become anything, and against a weak dealer card that option is worth paying for. Against a 6 the coach rates splitting at about +0.24 per dollar and hitting at about +0.02.
+Page: https://playpokergym.com/guides/blackjack-22-vs-9-hit/
+Practice: https://playpokergym.com/web/?practice=blackjack&ref=guide
+
+### 11 against a dealer ace: double or hit?
+Hit. Double 11 against 2 through 10, but against an ace just hit.
+Why: Eleven is the best doubling total in the game because any ten-value card makes 21. But a double only pays if the dealer is likely to pay you off, and an ace upcard is the least likely card to bust: about 12% of the time, against 21% for a 10 and 42% for a 6.
+Page: https://playpokergym.com/guides/blackjack-11-vs-ace-hit/
+Practice: https://playpokergym.com/web/?practice=blackjack&ref=guide
+
+### Jacks or Better: 4 to a flush or a low pair?
+Hold the four to a flush. A low pair pays nothing until it improves, so the flush draw beats it.
+Why: In the deal K-Q-7-5 of clubs with a second 5, holding the four clubs returns about 1.28 per coin and holding the pair of 5s about 0.82. Four to a flush completes roughly one time in five, and along the way it also pays whenever you pair a high card.
+Page: https://playpokergym.com/guides/video-poker-four-to-a-flush-vs-low-pair/
+Practice: https://playpokergym.com/web/?drill=vp-flush-vs-low-pair&ref=guide
+
+### Video poker: what do you hold with nothing?
+Hold two suited high cards if you have them, otherwise a single high card. Discard the rest.
+Why: The bottom of the 9/6 Jacks or Better chart is still worth playing. Two suited high cards return about 0.57 per coin, one high card about 0.47, and discarding all five about 0.34. A hand with nothing in it is a small loss, not a dead hand, and the gap between those three numbers is where a lot of long-run return hides.
+Page: https://playpokergym.com/guides/video-poker-nothing-hand-hold/
+Practice: https://playpokergym.com/web/?practice=videopoker&ref=guide
+
 ## Contact
 
 Feedback and corrections: meep@mail.grokbot.com
