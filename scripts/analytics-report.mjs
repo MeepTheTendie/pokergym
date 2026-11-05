@@ -378,7 +378,13 @@ export function aggregateSources(people = [], daysByPerson = new Map()) {
     if (days > 1) row.returned += 1;
     rows.set(label, row);
   }
-  const order = ['YouTube', 'Instagram', 'Facebook', 'Reddit', 'TikTok', 'X', 'Direct', 'Unknown', 'Other'];
+  // Every label SOURCE_LABELS can produce must appear here, or that channel is
+  // computed and then silently dropped from the table -- which is exactly what
+  // "source rows total N but the window has M" was reporting. AI assistants tag
+  // with utm_source, so they land here as often as Reddit does.
+  const order = ['YouTube', 'Instagram', 'Facebook', 'Reddit', 'TikTok', 'X',
+    'ChatGPT', 'Perplexity', 'Claude', 'Gemini', 'Copilot',
+    'Direct', 'Unknown', 'Other'];
   const out = order.filter(label => rows.has(label)).map(label => rows.get(label));
   const total = {
     source: 'TOTAL', visitors: out.reduce((n, r) => n + r.visitors, 0),
@@ -787,7 +793,9 @@ export function windows(now = new Date()) {
 async function main() {
   const key = posthogKey();
   if (!key) {
-    console.error('No POSTHOG_PERSONAL_API_KEY (or keyring entry). See README "Visit stats".');
+    console.error('No PostHog key. Set POSTHOG_PERSONAL_API_KEY, or store one in the keyring,');
+    console.error('or write it to a mode-600 file at ~/.config/pokergym/posthog.key.');
+    console.error('Any of the three is enough; see README "Visit stats".');
     process.exitCode = 1;
     return;
   }

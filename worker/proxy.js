@@ -15,6 +15,28 @@ export function isIngestPath(pathname) {
   return pathname === '/ingest' || pathname.startsWith('/ingest/');
 }
 
+// PostHog's event endpoints. These are the requests whose arrival proves the
+// browser sent something, independently of whether PostHog then ingests it.
+const CAPTURE_PATHS = new Set(['/e', '/e/', '/i/v0/e', '/i/v0/e/', '/batch', '/batch/']);
+
+export function isCapturePath(pathname) {
+  const rest = pathname.slice('/ingest'.length) || '/';
+  return CAPTURE_PATHS.has(rest);
+}
+
+// One Analytics Engine data point per capture request that reached the edge,
+// written before PostHog is asked to accept it. Deliberately counts *requests*,
+// not events: the SDK batches several events into one POST and may gzip the
+// body, so parsing here would cost CPU on the ingest path and risk the very
+// analytics it is meant to police. A non-zero witness count against a zero
+// event count in PostHog is the signal worth having; a missing proportionality
+// constant is not a defect.
+export function captureWitness(requestUrl) {
+  const url = new URL(requestUrl);
+  const compression = url.searchParams.get('compression') || 'none';
+  return { indexes: ['v1'], blobs: ['capture', compression], doubles: [1] };
+}
+
 // Map an incoming /ingest/... request onto the PostHog host that serves it.
 // The SDK bundle lives under /static/ on the assets host; events, /decide and
 // flags go to the ingestion host. Returns an absolute upstream URL.

@@ -60,7 +60,13 @@ export function projectId() {
 // checks). No real player shares these markers, so excluding them keeps the
 // launch numbers honest. A new probe must carry one of these markers, or a
 // distinct_id listed below, so that it stays excluded.
-const TEST_EVENT_NAMES = ['iso_probe', 'pg_probe_batch', 'pg_proxy_probe', 'pg_proxy_probe2',
+  // A campaign name is an attribution key other agents measure by. Never add a
+  // live campaign to an exclusion list: `utm_campaign=hooktest1112` is the
+  // owner-approved campaign for the 36 protected Nov 1-12 posts (ControlDoc
+  // 2026-10-29), not a probe marker. Excluding it would delete the running
+  // experiment, not clean it up. Probe *events*, probe *distinct ids* and probe
+  // *refs* are the only safe identifiers for traffic this project creates.
+  const TEST_EVENT_NAMES = ['iso_probe', 'pg_probe_batch', 'pg_proxy_probe', 'pg_proxy_probe2',
   'attrib_probe', 'diag_manual_probe', 'diag_pipeline_check', 'manual_probe'];
 const TEST_REFS = ['attribcheck', 'funnel-check'];
 // Probe visits hit a bare URL with no marker, so no property can catch them.
@@ -241,17 +247,27 @@ function accountId() {
   return '';
 }
 
+// Resolution order, first hit wins. The file exists because `secret-tool`
+// needs an unlocked login keyring, which a headless or SSH session does not
+// have: the key is present, `secret-tool lookup` still fails, and the report
+// prints "no key" while the key sits right there. One line in a mode-600 file
+// removes that failure mode. The value is never logged, echoed or committed.
+export const POSTHOG_KEY_FILE = '~/.config/pokergym/posthog.key';
+
 function posthogKey() {
   if (process.env.POSTHOG_PERSONAL_API_KEY) return process.env.POSTHOG_PERSONAL_API_KEY.trim();
   try {
-    return execFileSync('secret-tool', ['lookup', 'service', 'posthog-personal-api-key', 'account', 'pokergym'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    const key = execFileSync('secret-tool', ['lookup', 'service', 'posthog-personal-api-key', 'account', 'pokergym'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    if (key) return key;
+  } catch { /* no keyring session, fall through to the file */ }
+  try {
+    return readFileSync(path.join(process.env.HOME || '', '.config/pokergym/posthog.key'), 'utf8').trim();
   } catch {
     return '';
   }
 }
 
 export { posthogKey };
-
 export async function hogql(key, query) {
   const res = await fetch(`${POSTHOG_HOST}/api/projects/${projectId()}/query/`, {
     method: 'POST',

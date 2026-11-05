@@ -3,7 +3,7 @@
 // assets.run_worker_first; every other request goes straight to assets.
 // Counting failures never prevent serving assets.
 import { countBucket, dataPoint } from './count.js';
-import { isIngestPath, proxyPostHog } from './proxy.js';
+import { captureWitness, isCapturePath, isIngestPath, proxyPostHog } from './proxy.js';
 import { SECURITY_HEADERS } from './security.js';
 import { isPushEndpoint, sendPush, subscriptionId, validSubscription } from './push.js';
 
@@ -126,6 +126,14 @@ export default {
     // (playpokergym.com/reel?src=fb&c=p1-QF) instead of hand-typed UTMs, so a
     // reel can never be mis-attributed to the wrong platform (e.g. a Facebook
     // reel tagged utm_source=yt, which is what happened on 2026-11-01).
+    //
+    // The `camp` fallback is `hooktest1112`, which is NOT a test marker: it is
+    // the owner-approved campaign for the 36 protected Nov 1-12 posts. Anything
+    // that reaches this route without an explicit camp therefore joins that
+    // cohort with no pair label. Do not "clean it up" by excluding the campaign
+    // in scripts/stats.mjs, and do not repoint the fallback mid-experiment: both
+    // destroy the running comparison. A distinguishable fallback is a Nov 13
+    // change, after the window closes (Beam, 2026-11-04 review).
     if (url.pathname === '/reel' || url.pathname === '/reel/') {
       const src = (url.searchParams.get('src') || 'fb').toLowerCase();
       const platform = src === 'yt' ? 'youtube' : src === 'ig' ? 'reels' : 'facebook';
@@ -143,11 +151,27 @@ export default {
     // PostHog is proxied through our own origin (see worker/proxy.js). This is
     // never counted and never wrapped in the page security headers.
     if (isIngestPath(url.pathname)) {
+      let response;
       try {
-        return await proxyPostHog(request);
+        response = await proxyPostHog(request);
       } catch {
         return new Response('analytics proxy unavailable', { status: 502 });
       }
+      // Independent edge-side witness: how many capture requests we actually
+      // forwarded, separate from whether PostHog ingested or kept them. Written
+      // to its own dataset so it can never pollute pokergym_visits. A failure
+      // here must never affect the proxy response.
+      if (env.INGEST && request.method === 'POST' && isCapturePath(url.pathname)) {
+        try {
+          const point = captureWitness(request.url);
+          const write = () => env.INGEST.writeDataPoint(point);
+          if (ctx && ctx.waitUntil) ctx.waitUntil(Promise.resolve().then(write).catch(() => {}));
+          else await write().catch(() => {});
+        } catch {
+          // The witness is diagnostic only; never break ingest for it.
+        }
+      }
+      return response;
     }
     // Web push: the only return path that does not need a platform's
     // permission. Same-origin POSTs from the recap; no PII is stored.
