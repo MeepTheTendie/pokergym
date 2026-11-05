@@ -165,6 +165,23 @@ Historical values that **cannot** be reconstructed:
 
 ## Known gaps and permissions
 
+- **`utm_campaign=hooktest1112` is a live measured campaign, never a test marker.** It is the
+  owner-approved campaign for the 36 protected Nov 1–12 posts (ControlDoc 2026-10-29). It must not be
+  added to any exclusion list in this module: excluding it deletes the running QF/AF experiment
+  instead of cleaning up probe traffic. Traffic created by this project is identified by probe
+  *events*, probe *distinct ids* and probe *refs*, and by nothing else. The `/reel` route falls back
+  to this campaign when `camp` is absent, so anything reaching `/reel` without one joins the cohort
+  with no pair label — a fix belongs after the window closes, not inside it.
+- **A second, edge-side count of analytics requests exists but is not yet in this report.**
+  `worker/proxy.js` writes one Analytics Engine data point per `/ingest` capture request to the
+  `pokergym_ingest` dataset (`INGEST` binding), counting requests rather than events because the SDK
+  batches and gzips. It is a witness for "did the browser send anything at all", not a visitor
+  number, and it is not joined to PostHog numbers anywhere yet.
+- **`npm run report` can read its key from three places**, in order: `POSTHOG_PERSONAL_API_KEY`, the
+  `posthog-personal-api-key` keyring entry, then `~/.config/pokergym/posthog.key` (mode 600). The
+  third exists because `secret-tool` needs an unlocked login keyring, which a headless or SSH
+  session does not have; the report used to fail with "no key" while a key was present.
+
 - The new PostHog dashboard is a saved snapshot of SQL, not a live import of
   this module. If `notTestClause()` or a metric definition changes, update the
   dashboard tiles and reconcile them against `npm run report`.

@@ -163,7 +163,9 @@ export function windowFromArgs(argv = process.argv.slice(2)) {
 async function main() {
   const key = posthogKey();
   if (!key) {
-    console.error('No POSTHOG_PERSONAL_API_KEY (or keyring entry). See README "Visit stats".');
+    console.error('No PostHog key. Set POSTHOG_PERSONAL_API_KEY, or store one in the keyring,');
+    console.error('or write it to a mode-600 file at ~/.config/pokergym/posthog.key.');
+    console.error('Any of the three is enough; see README "Visit stats".');
     process.exitCode = 1;
     return;
   }
