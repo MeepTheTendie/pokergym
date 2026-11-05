@@ -319,3 +319,26 @@ test('the zero-decision audit ignores starts before decision_made existed', () =
   assert.match(sql, /decision_made/);
   assert.match(sql, /HAVING/);
 });
+
+test('every label sourceLabel can produce reaches the source table', () => {
+  // Regression: aggregateSources filtered its output through a fixed order list
+  // that omitted the AI sources, so ChatGPT arrivals were counted, dropped from
+  // the table, and the report warned that source rows did not reconcile.
+  const people = [
+    { person_id: 'a', source: 'chatgpt.com', starts: 1, completes: 1 },
+    { person_id: 'b', source: 'perplexity.ai', starts: 0, completes: 0 },
+    { person_id: 'c', source: 'claude.ai', starts: 0, completes: 0 },
+    { person_id: 'd', source: 'gemini.google.com', starts: 0, completes: 0 },
+    { person_id: 'e', source: 'copilot.microsoft.com', starts: 0, completes: 0 },
+  ];
+  const { rows, total } = aggregateSources(people, new Map());
+  const emitted = rows.reduce((n, r) => n + r.visitors, 0);
+  assert.equal(emitted, people.length, 'no source may be silently dropped');
+  assert.equal(total.visitors, people.length);
+  const chatgpt = rows.find(r => r.source === 'ChatGPT');
+  assert.ok(chatgpt, 'ChatGPT must appear as its own row');
+  assert.equal(chatgpt.finished, 1);
+  for (const label of ['Perplexity', 'Claude', 'Gemini', 'Copilot']) {
+    assert.ok(rows.some(r => r.source === label), `${label} must appear as its own row`);
+  }
+});

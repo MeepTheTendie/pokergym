@@ -18,8 +18,9 @@ to put the **social numbers and the site numbers next to each other**, because e
 flatters the channels and the pair does not.
 
 Short version: **Facebook is giving us reach to the right demographic and almost no attention.
-Instagram is not being distributed at all. Neither channel produced a player. ChatGPT referrals
-outperformed both combined.**
+Instagram is not being distributed at all. Neither channel produced meaningful product usage.
+Reddit and ChatGPT referrals, at a fraction of the reach, produced every five-hand completer worth
+counting.**
 
 ---
 
@@ -148,29 +149,53 @@ view spread means anything, and on this account's distribution the spread would 
 
 ## 4. Cross-reference: reach versus arrivals versus players
 
-PostHog, first-touch source, Oct 17 – Nov 4, project exclusions applied (probes, `Edge/12.246`
-automation profiles, cohort 644643, unfurl-bot rule). The PostHog project has no data before
-Oct 17, so this table covers three days fewer than the CSVs.
+**Corrected after `npm run report` ran on 2026-11-04 18:56 CST.** The first version of this table was
+built by classifying each event row independently, which double-counted people across source buckets
+and counted people who never made a pageview. The numbers below come from the canonical report's own
+definitions: a visitor is a unique `person_id` with at least one valid `$pageview` after the
+exclusions, and first-touch source is resolved once per person, not per event.
 
-| First-touch source | Visitors | Players | 5-hand completers | Player rate |
+PostHog, launch window Oct 17 – Nov 4, partial. The project has no data before Oct 17, so this is two
+weeks shorter than the CSVs.
+
+| First-touch source | Visitors | Started a hand | Finished five hands | Finish rate |
 | --- | ---: | ---: | ---: | ---: |
-| direct | 85 | 11 | 5 | 13% |
-| youtube | 52 | 3 | 0 | 6% |
-| **other (unlabelled)** | 27 | **23** | **12** | **85%** |
-| **chatgpt** | 19 | **10** | **6** | **53%** |
-| **facebook** | 12 | **0** | **0** | **0%** |
-| instagram | 11 | 1 | 1 | 9% |
+| Direct | 47 | 8 | 4 | 9% |
+| **YouTube** | **37** | 3 | 0 | 0% |
+| **Reddit** | 19 | **18** | **9** | **47%** |
+| **ChatGPT** | 19 | **10** | **6** | **32%** |
+| Other | 5 | 4 | 2 | 40% |
+| Unknown | 4 | 2 | 1 | 25% |
+| Instagram | 3 | 1 | 1 | 33% |
+| Facebook | 3 | **0** | **0** | **0%** |
+| X | 3 | 1 | 1 | 33% |
+| **Total** | **140** | **47** | **24** | 17% |
 
-**7,011 Facebook views produced 12 site visitors and zero players.**
-**3,935 Instagram views produced 11 site visitors and one player.**
+The report's own 14-completed-day window (Oct 21 – Nov 3) agrees in shape: 112 visitors, Reddit 18/17/9
+and ChatGPT 17/8/5, YouTube 30/0/0, Facebook 3/0/0.
 
-For contrast, 19 ChatGPT referrals produced 10 players and 6 five-hand completers. The channel with
-the least reach is producing all of the actual product usage.
+**7,011 Facebook views produced 3 site visitors and zero players.**
+**3,935 Instagram views produced 3 site visitors and one player.**
 
-The `other` bucket is the second-best performer at an 85% player rate, which is not plausible for
-cold acquisition. It is almost certainly returning traffic whose first-touch referrer is empty or
-unrecognised. **It needs a label before any further channel comparison is run**, because it
-currently dilutes every percentage in this table.
+The channel with the most reach has the worst conversion, and the two channels with a third of the
+reach are carrying the product:
+
+| Channel | Views | Visitors | Views per visitor | Players |
+| --- | ---: | ---: | ---: | ---: |
+| Facebook | 6,998 | 3 | ~2,330 | 0 |
+| Instagram | 3,935 | 3 | ~1,310 | 1 |
+| Reddit | — | 19 | — | 18 |
+| ChatGPT | — | 19 | — | 10 |
+
+YouTube deserves separate attention: it is the largest labelled arrival source at 37 visitors and
+produced **zero** five-hand completers, with only 3 of 37 starting a hand at all. That is an 8% start
+rate against Reddit's 95% and ChatGPT's 53%. Something between the short and the trainer is losing
+YouTube traffic before it plays.
+
+The `other` bucket is **5 visitors, not 27**. The earlier figure came from the broken per-row
+classification and should not be quoted. The bucket is small enough to ignore for now; `Direct` at 47
+visitors is the number that actually needs explaining, since it is the largest single source and only
+8 of those 47 started a hand.
 
 ---
 
@@ -185,8 +210,14 @@ short. This is worth fixing, not abandoning.
 The content is not the bottleneck; the absence of distribution is. Daily effort here is currently
 unpaid work.
 
-**ChatGPT referrals — the actual engine.** Highest player rate and highest completion rate of any
-labelled source. Worth understanding and deliberately feeding.
+**ChatGPT and Reddit — the actual engine.** Reddit converts 18 of 19 visitors into a started hand
+and 9 into five-hand completers; ChatGPT converts 19 into 10 and 6. Between them they are 38 visitors
+and 15 completers, against 40,000+ social views and one completer. Worth understanding and
+deliberately feeding before any more social volume.
+
+**YouTube — the leak.** 37 visitors, 3 starts, 0 completions. It is the only social channel that
+delivers strangers in volume, and it loses them before they play. That is a landing-to-trainer
+problem, not a content problem.
 
 ---
 
@@ -199,8 +230,10 @@ labelled source. Worth understanding and deliberately feeding.
    Re-cut the 27–44s videos to 12s rather than producing new ones.
 3. **Add a click path.** 7,011 views with no link in the post is reach with no funnel. First-comment
    link plus an end card on the 12s cuts, or a boosted post with a link and a real budget.
-4. **Label the `other` traffic** in PostHog (or in `notTestClause`/the report's source mapping)
-   before the next channel read. Right now it is 27 visitors at an 85% player rate with no name.
+4. **Explain `Direct` before the next channel read.** 47 visitors, the largest single source, only 8
+   of them starting a hand. That is either in-app browsers stripping referrers (the ControlDoc already
+   notes IG/FB in-app browsers showing as Direct) or genuine dark traffic. It is bigger than every
+   named social channel combined, so it is the number that distorts the rest.
 5. **Plan acquisition for men 65+**, because that is who the algorithm is finding. That means
    large text, no install friction, and Facebook-first creative — not a race to a younger demo on
    Instagram.
@@ -224,27 +257,37 @@ labelled source. Worth understanding and deliberately feeding.
 
 ## 8. What I did not verify
 
-- **No Cloudflare or server-side request counts were used** as an independent check on social
-  arrivals. `CLOUDFLARE_API_TOKEN` was not available in this session.
-- **No conversion is attributed to a specific post.** PostHog records `utm_campaign` on only some
-  arrivals; matching a site visitor back to a specific reel would need a unique campaign string per
-  post, which is not in use.
 - **Whether the 65+ audience is genuine or an artefact of Meta's delivery.** The split is what the
   export reports; I did not check it against a second source.
-- **The `other` bucket's composition.** Inferred as returning/untagged traffic from its 85% player
-  rate, not confirmed by inspecting person histories.
-- **`npm run report` was not run.** It fails on this machine with
-  `No POSTHOG_PERSONAL_API_KEY (or keyring entry)`, so the §4 table was produced by running the
-  report's own exclusion clause through the PostHog MCP query tool instead. The numbers should match
-  the canonical report once the key is stored; they have not been diffed against it.
+- **Post-level attribution.** No unique campaign string per post is in use, so no site visitor can be
+  traced to a specific reel. `utm_campaign=hooktest1112` covers the whole Nov 1–12 queue.
+
+`npm run report` **was** run, at 18:56 CST on 2026-11-04, once the personal API key was available. It
+is what corrected §4: the first version of that table was built by classifying each event row
+independently, which double-counted people across source buckets and included people who never made a
+pageview. Every number in §4 is now the report's own output or a direct sum of it, and the report's
+reconciliation line reads clean (`reconciled total: 112 visitors (window denominator 112)`).
+
+That line only started reading clean today. The report computed ChatGPT arrivals correctly but then
+dropped them from the source table, because `aggregateSources()` filtered its output through a fixed
+label order that omitted every AI source in `SOURCE_LABELS`. The visible symptom was the data-quality
+warning `source rows total 95 visitors but the window has 112`, which had been firing as a real
+attribution failure rather than a display bug. Fixed on 2026-11-04; ChatGPT now appears with 17
+visitors / 8 starts / 5 completers in the 14-day window.
+
+Still not verified: no conversion is attributed to a specific post, and no Cloudflare request counts
+were used as an independent check on arrivals (`CLOUDFLARE_API_TOKEN` unavailable).
 
 ---
 
 ## 9. Reproduce
 
-The §4 table, run against project 670990. Replace `now()` bounds to change the window. This is the
-`notTestClause()` from `scripts/stats.mjs` inlined, minus the two person-level rules that need a
-subquery.
+Superseded. `npm run report` now runs on this machine and is the authoritative source for every
+number in §4; the query below is kept only as a record of the method that produced the **wrong** first
+version of the table (per-row classification, no `$pageview` requirement, people counted in more than
+one bucket). Do not use it. Use the report.
+
+The original query, for the record:
 
 ```sql
 SELECT
