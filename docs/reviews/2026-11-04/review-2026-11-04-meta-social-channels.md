@@ -203,8 +203,10 @@ visitors is the number that actually needs explaining, since it is the largest s
 
 **Facebook — a reach channel that is not yet an acquisition channel.** The distribution is real and
 the demographic is right. Attention is four seconds, engagement is rounding error (0 shares, 2
-comments), and the posts carry no link, so the reach cannot convert. One format works and it is
-short. This is worth fixing, not abandoning.
+comments), and across 26 posts in five weeks the export records **0 link clicks** — not a low rate,
+zero. The link works when tested by hand, so the captions are being read and not acted on: they ask
+for a comment, and 2 people commented. One format works and it is short. This is worth fixing, not
+abandoning.
 
 **Instagram — not a channel yet.** 25 reels, 0 comments, 0 saves, 0 follows, follower-only reach.
 The content is not the bottleneck; the absence of distribution is. Daily effort here is currently
@@ -228,10 +230,12 @@ problem, not a content problem.
 2. **Make 12 seconds the default, not the exception.** One question, answer withheld, one-line
    caption. The only post that did this beat the median by 6.7× and held 61% to the last interval.
    Re-cut the 27–44s videos to 12s rather than producing new ones.
-3. **Fix the Facebook link, which is not arriving tagged.** `utm_source=fb` appears **zero times** in
-   the whole history, while `utm_source=yt` (13 pageviews) and `utm_source=ig` (5) do arrive. The
-   captions carry a link, so the link or the app is eating it. Check one live Facebook caption by hand
-   before producing another clip.
+3. **The link is fine. Nobody clicks it.** Verified 2026-11-04 19:15 CST: a manual tap on the live
+   `p4-AF` Facebook post produced the project's **first ever `utm_source=fb` pageview**, with
+   `ref=facebook`, `utm_campaign=hooktest1112` and `utm_content=p4-AF` all intact. The Facebook export
+   for the same five weeks reports 7,011 views and **0 link clicks** (5 total clicks, all of them
+   "other clicks", i.e. profile taps and photo expands). So the pipeline was never broken: the posts
+   have produced no click through to test. Fix the ask, not the link.
 4. **Explain `Direct` before the next channel read.** 47 visitors, the largest single source, only 8
    of them starting a hand. That is either in-app browsers stripping referrers (the ControlDoc already
    notes IG/FB in-app browsers showing as Direct) or genuine dark traffic. It is bigger than every
