@@ -228,8 +228,10 @@ problem, not a content problem.
 2. **Make 12 seconds the default, not the exception.** One question, answer withheld, one-line
    caption. The only post that did this beat the median by 6.7× and held 61% to the last interval.
    Re-cut the 27–44s videos to 12s rather than producing new ones.
-3. **Add a click path.** 7,011 views with no link in the post is reach with no funnel. First-comment
-   link plus an end card on the 12s cuts, or a boosted post with a link and a real budget.
+3. **Fix the Facebook link, which is not arriving tagged.** `utm_source=fb` appears **zero times** in
+   the whole history, while `utm_source=yt` (13 pageviews) and `utm_source=ig` (5) do arrive. The
+   captions carry a link, so the link or the app is eating it. Check one live Facebook caption by hand
+   before producing another clip.
 4. **Explain `Direct` before the next channel read.** 47 visitors, the largest single source, only 8
    of them starting a hand. That is either in-app browsers stripping referrers (the ControlDoc already
    notes IG/FB in-app browsers showing as Direct) or genuine dark traffic. It is bigger than every
