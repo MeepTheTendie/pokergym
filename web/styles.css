@@ -1189,3 +1189,8 @@ summary:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
   .row.nudge button:not(:disabled), button.nudge:not(:disabled) { animation: none; outline: 3px solid #a9e9bc; outline-offset: 2px; }
 }
+
+/* First visit: one primary action; offline/install chatter stays quiet below it. */
+#offlineStatus { font-size: 11px; opacity: .7; margin-top: 4px; }
+#scr-title.first-visit .title-menu .row button.primary { font-size: 1.1em; padding-top: 14px; padding-bottom: 14px; }
+#scr-title.first-visit #btnDaily { opacity: .9; }
