@@ -4,4 +4,4 @@
 
 The files in this folder (`README.md`, `run-daily.sh`, `daily-prompt.md`) are kept for history only. Do not treat them as a live scheduler, do not assume any scheduled job runs on the owner's computer, and do not follow `daily-prompt.md` as rules. `docs/OPERATING_RULES.md` is canonical.
 
-A replacement wake-up for Beam/DeepSeek (OpenCode) is being designed separately; until one is installed and proven, those agents run only when Wes opens them.
+The replacement wake-up for Beam/DeepSeek is `automation/opencode-dispatch/` (Windows Task Scheduler on the desktop where OpenCode lives). Until it is installed and proven, those agents run only when Wes opens them.
