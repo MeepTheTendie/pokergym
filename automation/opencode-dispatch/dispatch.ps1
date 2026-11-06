@@ -18,16 +18,19 @@ New-Item -ItemType Directory -Force -Path $Home_, $Logs | Out-Null
 
 function Log($m) { $l = "$(Get-Date -Format s) $m"; Write-Host $l; Add-Content -Path (Join-Path $Logs 'dispatcher.log') -Value $l }
 
-$DeepseekModel = ''; $BeamModel = ''; $DeepseekAgent = ''; $BeamAgent = ''; $RunTimeoutMin = 30
+$OpencodeBin = ''; $DeepseekModel = ''; $BeamModel = ''; $DeepseekAgent = ''; $BeamAgent = ''; $RunTimeoutMin = 30
 if (Test-Path $Cfg) { . $Cfg }
 
 # Single instance.
 $mutex = New-Object System.Threading.Mutex($false, 'Global\PokerGymOpenCodeDispatch')
 if (-not $mutex.WaitOne(0)) { exit 0 }
 try {
+  # $OpencodeBin comes from config.ps1 (written by install.ps1); fall back to PATH.
   # Application only: npm also installs an opencode.ps1 shim that Start-Process cannot launch.
-  $oc = (Get-Command opencode -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1)
-  if (-not $oc) { Log 'opencode not on PATH; stopping'; exit 1 }
+  $oc = $null
+  if ($OpencodeBin -and (Test-Path $OpencodeBin)) { $oc = [pscustomobject]@{ Source = $OpencodeBin } }
+  else { $oc = (Get-Command opencode -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1) }
+  if (-not $oc) { Log 'OpenCode CLI not found (config.ps1 OpencodeBin or PATH); stopping'; exit 1 }
   $git = (Get-Command git -ErrorAction SilentlyContinue)
   if (-not $git) { Log 'git not on PATH; stopping'; exit 1 }
 
@@ -66,7 +69,7 @@ try {
     $model = ''; $agentName = ''
     if ($t.Agent -eq 'deepseek') {
       $model = $DeepseekModel; $agentName = $DeepseekAgent
-      if (-not $model) { $model = (& opencode models 2>$null | Where-Object { $_ -match '^opencode-go/deepseek' } | Select-Object -First 1) }
+      if (-not $model) { $model = (& $oc.Source models 2>$null | Where-Object { $_ -match '^opencode-go/deepseek' } | Select-Object -First 1) }
     } else { $model = $BeamModel; $agentName = $BeamAgent }
     $mshow = $model; if (-not $mshow) { $mshow = 'opencode default' }
     if ($DryRun) { Log "DRY RUN: would dispatch $($t.Agent) for comment $($t.Id) (model: $mshow)"; continue }
