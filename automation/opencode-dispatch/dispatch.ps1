@@ -39,8 +39,11 @@ try {
   $comments = @()
   try {
     for ($page = 1; $page -le 10; $page++) {
-      $chunk = @(Invoke-RestMethod -Headers @{ 'Accept' = 'application/vnd.github+json'; 'User-Agent' = 'pokergym-dispatcher' } `
-        -Uri "https://api.github.com/repos/$Repo/issues/$Issue/comments?per_page=100&page=$page&since=$since")
+      # Assign first, then enumerate: in Windows PowerShell 5.1, @(Invoke-RestMethod ...) wraps the
+      # whole JSON array as ONE item, which made every comment fail the filter.
+      $resp = Invoke-RestMethod -Headers @{ 'Accept' = 'application/vnd.github+json'; 'User-Agent' = 'pokergym-dispatcher' } `
+        -Uri "https://api.github.com/repos/$Repo/issues/$Issue/comments?per_page=100&page=$page&since=$since"
+      $chunk = @(); foreach ($x in $resp) { $chunk += $x }
       $comments += $chunk
       if ($chunk.Count -lt 100) { break }
     }
@@ -54,6 +57,7 @@ try {
     elseif ($first -match '^\s*BEAM-TASK:') { $tasks += [pscustomobject]@{ Id = [long]$c.id; Agent = 'beam'; Body = $c.body } }
   }
   $tasks = @($tasks | Sort-Object Id)
+  Log "Checked $($comments.Count) recent #41 comment(s); $($tasks.Count) marker comment(s)."
 
   # First run: record existing markers so old tasks are never replayed.
   if (-not (Test-Path $Seen)) {
