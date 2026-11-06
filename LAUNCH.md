@@ -26,9 +26,8 @@ The production build now includes the frontend and strategy modules, and exclude
 
 Target one to two hours per day once there is a stable shareable demo and a verified scheduled execution mechanism. Find relevant channels that permit promotion; publish accurate gameplay demonstrations and useful training content using available authorized accounts. Reply to interested players, record attribution and feedback, then improve the highest-impact onboarding issue. No spam, fabricated reviews, guaranteed winnings, platform-rule evasion or unapproved ad spend. Measure qualified players, activation, retention and actual paid subscriptions, not number of posts. The measurement is `npm run stats`: it prints the crawler-inclusive visit counter plus the PostHog real-player report (unique people per day, journey stages, top events); use the PostHog numbers to pick the next improvement. See MARKETING.md for how to read it.
 
-Daily scheduling is verified: pokergym-daily.timer fires at 09:00 America/Chicago with
-Persistent=true. The runner uses the keyring for PostHog reads (verified reachable from
-systemd --user). See automation/README.md.
+Daily scheduling: **retired.** The pokergym-daily systemd job no longer exists on the owner's
+machine (Wes, 2026-11-06). Its files are archived in automation/retired/ for history only.
 
 ## Owner involvement
 
