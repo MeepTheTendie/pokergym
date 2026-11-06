@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
+import { launchChromium } from './lib/chromium.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const appFile = path.join(root, 'web/app.js');
@@ -29,18 +30,12 @@ await sleep(800);
 
 const BASE = `http://127.0.0.1:${PORT}/web/`;
 
-async function runBrowser(debugPort) {
+async function runBrowser() {
   const profilePath = await mkdtemp(path.join(tmpdir(), 'pokergym-push-browser-'));
   const downloadPath = await mkdtemp(path.join(tmpdir(), 'pokergym-push-downloads-'));
-  const chrome = spawn('chromium', ['--headless=new', '--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage',
-    '--window-size=390,844', `--user-data-dir=${profilePath}`, `--remote-debugging-port=${debugPort}`, 'about:blank'], { stdio: 'ignore' });
-  await sleep(800);
-  let page;
-  for (let i = 0; i < 100 && !page; i++) {
-    try { page = (await (await fetch(`http://127.0.0.1:${debugPort}/json/list`)).json()).find(t => t.type === 'page'); } catch {}
-    if (!page) await sleep(100);
-  }
-  assert.ok(page, 'Chromium available');
+  // Retries a bounded number of launches and reports Chromium's stderr on failure.
+  const { chrome, page, close } = await launchChromium({ profileDir: profilePath, extraArgs: ['--window-size=390,844'] });
+  assert.ok(page?.webSocketDebuggerUrl, 'Chromium DevTools page available');
   const ws = new WebSocket(page.webSocketDebuggerUrl);
   await new Promise(resolve => { ws.onopen = resolve; });
   let id = 0; const pending = new Map(); const downloads = [];
@@ -97,19 +92,19 @@ async function runBrowser(debugPort) {
       await sleep(80);
     }
   };
-  return { ws, send, evaluate, waitFor, playHands, downloads, profilePath, downloadPath, chrome };
+  return { ws, send, evaluate, waitFor, playHands, downloads, profilePath, downloadPath, chrome, close };
 }
 
 async function closeBrowser(browser) {
   browser.ws?.close();
-  browser.chrome.kill('SIGTERM');
+  await browser.close?.();
   await rm(browser.profilePath, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
   await rm(browser.downloadPath, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 }
 
 // Case 1: notification permission granted.
 {
-  const browser = await runBrowser(9351);
+  const browser = await runBrowser();
   const { ws, send, evaluate, waitFor, playHands, downloads } = browser;
   await send('Page.enable');
   await send('Runtime.enable');
@@ -183,7 +178,7 @@ async function closeBrowser(browser) {
 
 // Case 2: notification permission denied.
 {
-  const browser = await runBrowser(9352);
+  const browser = await runBrowser();
   const { ws, send, evaluate, waitFor, playHands } = browser;
   await send('Page.enable');
   await send('Runtime.enable');
@@ -209,7 +204,7 @@ async function closeBrowser(browser) {
 
 // Case 3: no PushManager, as on iPhone Safari outside the Home Screen.
 {
-  const browser = await runBrowser(9353);
+  const browser = await runBrowser();
   const { ws, send, evaluate, waitFor, playHands } = browser;
   await send('Page.enable');
   await send('Runtime.enable');
