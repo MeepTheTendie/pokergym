@@ -1,6 +1,6 @@
 # PokerGym operating rules
 
-Canonical rules for PokerGym work. This file supersedes conflicting one-line guardrails in `docs/PokerGymControlDoc.md`, `automation/daily-prompt.md`, and ad-hoc agent notes. It applies to PokerGym only.
+Canonical rules for PokerGym work. This file supersedes conflicting one-line guardrails in `docs/PokerGymControlDoc.md`, the retired `automation/retired/daily-prompt.md`, and ad-hoc agent notes. It applies to PokerGym only.
 
 ## Ship path
 
@@ -24,7 +24,7 @@ Canonical rules for PokerGym work. This file supersedes conflicting one-line gua
 - An ambiguous internal optimization gets the highest-value safe option, stated up front; it does not need a formal acceptance list unless it touches production, deletes data, or changes external state.
 - A green PR does not need a separate human review when the owner has already granted standing permission; use the documented admin-merge path.
 - A PR does not need to be rebased onto every new `main` commit merely to satisfy “up to date”; required tests are the gate.
-- `automation/daily-prompt.md` applies only to the scheduled systemd job, not to interactive agents.
+- `automation/retired/daily-prompt.md` belonged to the daily systemd job, which is retired (Wes, 2026-11-06). It applies to no one.
 
 ## Public social caption release gate (Wes, 2026-11-02)
 
