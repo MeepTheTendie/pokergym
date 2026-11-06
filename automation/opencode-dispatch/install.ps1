@@ -51,6 +51,7 @@ $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -MultipleInstances 
 Register-ScheduledTask -TaskName 'PokerGym OpenCode Dispatcher' -Action $action -Trigger $trigger -Settings $settings `
   -Description 'Polls github.com/MeepTheTendie/pokergym issue #41 for DEEPSEEK-TASK / BEAM-TASK and runs OpenCode.' -Force | Out-Null
 
-# First run records a baseline (existing markers are not replayed) and proves the GitHub read path.
-& powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$bin\dispatch.ps1"
-Write-Host "Installed: Task Scheduler > 'PokerGym OpenCode Dispatcher', every 15 min. Logs: $home_\logs"
+# Kick off the first run in the background through Task Scheduler (never in this window).
+# On a fresh install it records a baseline so existing markers are not replayed.
+Start-ScheduledTask -TaskName 'PokerGym OpenCode Dispatcher'
+Write-Host "Installed and started in the background: Task Scheduler > 'PokerGym OpenCode Dispatcher', every 15 min. Logs: $home_\logs"
