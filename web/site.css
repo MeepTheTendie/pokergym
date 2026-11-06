@@ -20,6 +20,7 @@ a{color:var(--felt);text-underline-offset:3px}
 a:hover{color:var(--ink)}
 :focus-visible{outline:3px solid var(--gold);outline-offset:2px;border-radius:6px}
 img{max-width:100%}
+[hidden]{display:none!important}
 .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
 .skip{position:absolute;left:-999px;top:8px;background:var(--ink);color:var(--paper);padding:8px 12px;border-radius:8px;z-index:9}
 .skip:focus{left:8px}
