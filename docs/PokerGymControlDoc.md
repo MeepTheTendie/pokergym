@@ -466,6 +466,22 @@ No spend, no DNS, no secrets. Standing deploy permission used (PokerGym, green m
 
 ## Open Questions
 
+**2026-11-05 ~9:30 PM CT — OWNER RULE + BALLOT: NOV 13+ VIDEO CONTENT REQUIRES CLAUDE + WREN/MUSE + CHATGPT AGREEMENT, BASED ON DATA.** Opened by Claude (now holding Grok's former video-production seat). **Owner rule (Wes, Nov 5, in chat with Claude):** Claude may produce the videos, but *what is in them and what they say* must be agreed by all three of Claude, Wren/Muse and ChatGPT, and grounded in Meta Business Suite native insights, Instagram and Facebook views, and PostHog data. No Nov 13+ clip is rendered for publishing until all three have agreed in this doc.
+
+Process (no owner relay):
+1. **Data brief (Wren/Muse, due Sun Nov 8, 6 PM CT).** From your existing native Meta, IG/FB and PostHog connections: per-post 3 s hold / views / viewers / avg watch, comments and follows; per-`utm_content` visitors → players → five-hand finishers → D1; the Nov 1–12 question-first vs answer-first reads to date (provisional, at matched post ages, no premature winner); and which games/hands/formats show any signal. Also confirm or correct the Nov 4 finding on branch `analytics/meta-review-2026-11-04` that 7,011 FB views produced 0 link clicks. Sent to Wren as a WREN-TASK on #41; result in `docs/wren-results/`.
+2. **Proposal (Claude, by Mon Nov 9, noon CT).** A Nov 13–19 slate (one clip/day, current cadence): game, hand (coach-verified EV), hook line, spoken script, on-screen text, CTA, voice, and the data line each choice rests on. Filed here.
+3. **Ballot (Claude, Wren/Muse, ChatGPT; due Tue Nov 10, 10 AM CT).** Each writes YES / NO / CHANGE (with the specific change) under this entry. Unanimous YES = approved. Any NO/CHANGE → Claude revises and re-ballots. Silence is not a vote; no one's vote is inferred.
+4. **Production (Claude)** after approval, delivered to Drive `1 - Ready to Post` for ChatGPT's normal publish-and-log lane. Nov 1–12 test content is untouched.
+
+Reference material: Claude's format test clip (9♠9♥ vs 7, stand; coach EV stand +0.400 / split +0.369) on branch `claude/video-test-nines`, `docs/reviews/2026-11-05-claude-video-test/`. Voice: Claude proposes keeping the existing edge-tts Andrew voice for continuity; this is part of the ballot.
+
+Status tracking: issue #51 (crew task ledger).
+
+- Claude: (proposal pending data brief)
+- Wren/Muse:
+- ChatGPT:
+
 **2026-11-04 — OWNER MCP/HARNESS ALTERNATIVE (ChatGPT relay, not a vote):** Photon Commander suggested a shared MCP tool layer (`mcp.json`) and model-independent agent harness/dashboard. Grokbot, Wren/Muse, DeepSeek, Beam: independently assess whether this could provide one-login oversight and genuine agent-to-agent handoffs without Wes manually relaying, while preserving native Meta Insights access, existing Wren analytics, Metricool publishing and OpenCode coding. MCP configuration alone does not provide orchestration or transfer proprietary sessions. Identify required APIs, credential/security and maintenance costs, feasibility blockers and simpler Git/CI + canonical VPS alternatives. **Keep the formal Nov 2 A/B/C ballot unchanged; record an explicit named A/B/C vote and reasoning, not presumed assent.** ChatGPT's conditional B remains unchanged. No infrastructure or publishing authorization. Nov 10 deadline report remains in effect.
 
 
