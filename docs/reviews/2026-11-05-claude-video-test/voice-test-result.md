@@ -1,36 +1,18 @@
-# Voice test result — 2026-11-06 (scheduled run)
+# Voice test result — PASS (2026-11-05 9:31 PM CT, Claude)
 
-**Result: FAILED — no TTS access from the cloud sandbox. No voiced draft was produced.**
+Supersedes the earlier FAILED entry from the scheduled run: Wes changed the cloud environment's network access, and `speech.platform.bing.com` is now reachable (use `edge-tts --proxy "$HTTPS_PROXY"`).
 
-## Setup
-- `pip install --break-system-packages -q edge-tts pillow` — OK (PyPI is reachable).
-- Voice: `en-US-AndrewNeural`, rate `+10%`, line (a) "Pair of nines against a seven. Split, or stand?"
+`draft-voiced.mp4` — 14.2 s, 1080x1920, 30 fps, ~9 Mbps, AAC 160k, integrated loudness −14.1 LUFS.
 
-## Network check
-`curl -s -o /dev/null -w "%{http_code}" https://speech.platform.bing.com/` → `000`
-With `-sS`: `curl: (56) CONNECT tunnel failed, response 403`
+Voice: edge-tts `en-US-AndrewNeural` (same free voice Grok used; no account, no spend).
+| Line | Start | Rate | Length |
+|---|---|---|---|
+| "Pair of nines against a seven. Split, or stand?" | 0.05 s | +10% | 2.93 s |
+| "Stand. Your eighteen already beats the dealer's likely seventeen." | 4.55 s | +15% | 3.86 s |
+| "Eight or nine showing? Then split." | 8.45 s | +15% | 2.11 s |
+| "Free drill at playpokergym dot com slash go." | 10.85 s | +10% | 3.26 s |
 
-## Attempt 1 — edge-tts, no `--proxy`
-```
-aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host speech.platform.bing.com:443 ssl:<ssl.SSLContext ...> [Name or service not known]
-```
-(Direct DNS is not available in the sandbox; all egress must go through the agent proxy.)
+Timing change vs the silent draft: the end screen now starts at 10.75 s (was 10.3) and the clip runs 14.2 s (was 13.5) so the last two lines fit.
+Cues: pink-noise hit at 0 s (150–2000 Hz, audible on phone speakers), 1.5 kHz tick at the reveal, soft clock ticks every 0.5 s during the question. Voice mixes clearly above the cues (segment means about −17 to −18 dB).
 
-## Attempt 2 — edge-tts, `--proxy "$HTTPS_PROXY"`
-```
-aiohttp.client_exceptions.ClientHttpProxyError: 403, message='Forbidden', url='http://127.0.0.1:42717'
-  -> edge_tts.exceptions.SkewAdjustmentError: No server date in headers.
-```
-(The `SkewAdjustmentError` is edge-tts misreporting the proxy's 403 — there was no server response at all.)
-
-## Proxy status
-`$HTTPS_PROXY/__agentproxy/status` logs `connect_rejected` for `speech.platform.bing.com:443`:
-"gateway answered 403 to CONNECT (policy denial or upstream failure)". Retried twice, same result — this is an
-egress policy block, not a transient failure.
-
-## What would unblock it
-- Allow `speech.platform.bing.com` in the environment's network egress settings, or
-- Generate the four mp3 lines locally (edge-tts works on a normal connection) and commit them to this folder;
-  the mix/mux steps (adelay, cues, loudnorm -14 LUFS, AAC 160k/48 kHz, `-c:v copy`) can then run in the cloud.
-
-Steps 3–5 (voice lines, audio mix, `draft-voiced.mp4`) were not run.
+For Wren/ChatGPT review only. Not scheduled, not for publishing until the Nov 10 ballot approves a slate.

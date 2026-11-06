@@ -5,7 +5,7 @@ import math, subprocess, sys
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 W, H, FPS = 1080, 1920, 30
-Q_END, R_END, END = 4.5, 10.3, 13.5
+Q_END, R_END, END = 4.5, 10.75, 14.2
 N = int(END * FPS)
 OUT = sys.argv[1]
 
