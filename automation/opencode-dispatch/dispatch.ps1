@@ -111,6 +111,7 @@ try {
     $env:GIT_AUTHOR_EMAIL = "$($t.Agent)-opencode@users.noreply.github.com"; $env:GIT_COMMITTER_EMAIL = $env:GIT_AUTHOR_EMAIL
     $p = Start-Process -FilePath $oc.Source -ArgumentList $ocArgs -WorkingDirectory $wt -NoNewWindow -PassThru `
       -RedirectStandardOutput $log -RedirectStandardError "$log.err"
+    $null = $p.Handle   # PS 5.1: cache the handle now, or ExitCode comes back empty after the wait
     if (-not $p.WaitForExit($RunTimeoutMin * 60 * 1000)) {
       & taskkill /PID $p.Id /T /F | Out-Null
       Log "$($t.Agent)/$($t.Id) timed out after $RunTimeoutMin min; killed"
