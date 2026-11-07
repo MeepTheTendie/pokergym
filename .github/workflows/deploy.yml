@@ -9,7 +9,6 @@ on:
     workflows: [tests]
     types: [completed]
     branches: [main]
-  workflow_dispatch:
 
 concurrency:
   group: deploy-production
@@ -20,7 +19,7 @@ permissions:
 
 jobs:
   deploy:
-    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -39,21 +38,62 @@ jobs:
       - uses: actions/checkout@v5
         if: steps.gate.outputs.ready == 'true'
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
-      - uses: actions/setup-node@v5
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - name: Confirm tested commit is still main
+        id: freshness
         if: steps.gate.outputs.ready == 'true'
+        run: |
+          git fetch --no-tags origin main
+          tested='${{ github.event.workflow_run.head_sha }}'
+          current=$(git rev-parse FETCH_HEAD)
+          if [ "$tested" = "$current" ]; then
+            echo 'current=true' >> "$GITHUB_OUTPUT"
+          else
+            echo "main advanced to $current; skipping stale deploy of $tested"
+            echo 'current=false' >> "$GITHUB_OUTPUT"
+            echo "Deployment skipped: main advanced from tested commit $tested to $current before deployment." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/setup-node@v5
+        if: steps.gate.outputs.ready == 'true' && steps.freshness.outputs.current == 'true'
         with:
           node-version: '24'
           cache: npm
-      - if: steps.gate.outputs.ready == 'true'
+      # Skip the deployment if another main commit landed after these tests.
+      - if: steps.gate.outputs.ready == 'true' && steps.freshness.outputs.current == 'true'
         run: npm ci
+      - name: Recheck main immediately before deploy
+        id: final_freshness
+        if: steps.gate.outputs.ready == 'true' && steps.freshness.outputs.current == 'true'
+        run: |
+          git fetch --no-tags origin main
+          tested='${{ github.event.workflow_run.head_sha }}'
+          current=$(git rev-parse FETCH_HEAD)
+          if [ "$tested" = "$current" ]; then
+            echo 'current=true' >> "$GITHUB_OUTPUT"
+          else
+            echo "main advanced to $current during setup; skipping stale deploy of $tested"
+            echo 'current=false' >> "$GITHUB_OUTPUT"
+            echo "Deployment skipped: main advanced to $current during deployment setup." >> "$GITHUB_STEP_SUMMARY"
+          fi
       - name: Deploy
-        if: steps.gate.outputs.ready == 'true'
+        if: steps.gate.outputs.ready == 'true' && steps.final_freshness.outputs.current == 'true'
+        env:
+          POKERGYM_BUILD_COMMIT: ${{ github.event.workflow_run.head_sha }}
         run: npm run deploy 2>&1 | tee deploy.log
       - name: Live check
-        if: steps.gate.outputs.ready == 'true'
+        if: steps.gate.outputs.ready == 'true' && steps.final_freshness.outputs.current == 'true'
         run: |
-          sleep 10
+          expected='${{ github.event.workflow_run.head_sha }}'
+          live=''
+          for attempt in $(seq 1 24); do
+            live=$(curl --fail --silent --show-error https://playpokergym.com/build-info.json 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{process.stdout.write(JSON.parse(s).commit||"")}catch{}})') || true
+            if [ "$live" = "$expected" ]; then break; fi
+            sleep 5
+          done
+          if [ "$live" != "$expected" ]; then
+            echo "Expected deployed commit $expected, got '$live'" >&2
+            exit 1
+          fi
           for path in / /web/ /guides/; do
             code=$(curl -s -o /dev/null -w '%{http_code}' "https://playpokergym.com$path")
             echo "$path $code"
@@ -61,7 +101,7 @@ jobs:
           done
           {
             echo "### Deployed"
-            echo "- Commit: \`${{ github.event.workflow_run.head_sha || github.sha }}\`"
+            echo "- Commit: \`${expected}\`"
             echo "- Worker version: \`$(grep -oiE 'version id: *[0-9a-f-]+' deploy.log | awk '{print $NF}' | tail -1)\`"
             echo "- Live check: /, /web/, /guides/ all 200"
           } >> "$GITHUB_STEP_SUMMARY"
