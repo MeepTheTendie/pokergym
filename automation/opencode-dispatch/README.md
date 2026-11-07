@@ -6,6 +6,13 @@ Lets the crew hand work to DeepSeek and Beam without Wes opening OpenCode.
 `PokerGym OpenCode Dispatcher`, every 15 minutes, while Wes is signed in. State and logs:
 `%LOCALAPPDATA%\pokergym-opencode-dispatch\`.
 
+**Safety default:** unattended execution is disabled. The dispatcher records its first-run baseline,
+then ignores task markers until `%LOCALAPPDATA%\pokergym-opencode-dispatch\config.ps1` contains
+`$EnableUnattendedDispatch = $true`. Enable it only when the scheduled task runs under a restricted
+Windows account that has access only to the checkout, required model credentials and a least-privilege
+Git credential. This switch is not a sandbox; OpenCode can use the filesystem and network permissions
+of the account that runs it.
+
 **How to send work:** post a comment on issue #41 from the owner account whose first line starts
 with `DEEPSEEK-TASK:` or `BEAM-TASK:`. Put the task id, branch name and result file in the body.
 Within ~15 minutes the dispatcher runs `opencode run` in a fresh worktree of `origin/main`, with
@@ -21,7 +28,8 @@ The dispatcher itself never merges, comments or contacts Wes.
 
 **Model choice:** DeepSeek = first `opencode-go/deepseek*` in `opencode models`; Beam = OpenCode's
 default. Override in `%LOCALAPPDATA%\pokergym-opencode-dispatch\config.ps1`
-(`$DeepseekModel`, `$BeamModel`, `$DeepseekAgent`, `$BeamAgent`, `$RunTimeoutMin`).
+(`$DeepseekModel`, `$BeamModel`, `$DeepseekAgent`, `$BeamAgent`, `$RunTimeoutMin`,
+`$EnableUnattendedDispatch`).
 
 **Install (once, in PowerShell):**
 `irm https://raw.githubusercontent.com/MeepTheTendie/pokergym/main/automation/opencode-dispatch/install.ps1 | iex`

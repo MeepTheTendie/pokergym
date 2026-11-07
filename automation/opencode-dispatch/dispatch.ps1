@@ -19,6 +19,7 @@ New-Item -ItemType Directory -Force -Path $Home_, $Logs | Out-Null
 function Log($m) { $l = "$(Get-Date -Format s) $m"; Write-Host $l; Add-Content -Path (Join-Path $Logs 'dispatcher.log') -Value $l }
 
 $OpencodeBin = ''; $DeepseekModel = ''; $BeamModel = ''; $DeepseekAgent = ''; $BeamAgent = ''; $RunTimeoutMin = 30
+$EnableUnattendedDispatch = $false
 if (Test-Path $Cfg) { . $Cfg }
 
 # Single instance.
@@ -66,6 +67,10 @@ try {
     Log "Baseline recorded ($($tasks.Count) existing marker comment(s) skipped). Read path OK."
     exit 0
   }
+  if (-not $EnableUnattendedDispatch -and -not $DryRun) {
+    Log 'Unattended dispatch is disabled. Enable it only after running this task under a restricted Windows account with no unrelated files or credentials.'
+    exit 0
+  }
   $seenIds = @(Get-Content $Seen)
 
   foreach ($t in $tasks) {
@@ -76,7 +81,11 @@ try {
       if (-not $model) { $model = (& $oc.Source models 2>$null | Where-Object { $_ -match '^opencode-go/deepseek' } | Select-Object -First 1) }
     } else { $model = $BeamModel; $agentName = $BeamAgent }
     $mshow = $model; if (-not $mshow) { $mshow = 'opencode default' }
-    if ($DryRun) { Log "DRY RUN: would dispatch $($t.Agent) for comment $($t.Id) (model: $mshow)"; continue }
+    if ($DryRun) {
+      $mode = if ($EnableUnattendedDispatch) { 'enabled' } else { 'disabled by default' }
+      Log "DRY RUN: would dispatch $($t.Agent) for comment $($t.Id) (model: $mshow; unattended dispatch $mode)"
+      continue
+    }
 
     # Setup. A failure here leaves the task unseen so the next tick retries it.
     $wt = Join-Path $Home_ "worktrees\$($t.Agent)-$($t.Id)"
@@ -87,8 +96,6 @@ try {
       & git -C $Clone worktree prune
       & git -C $Clone worktree add -q --detach $wt origin/main; if ($LASTEXITCODE) { throw 'git worktree add failed' }
     } catch { Log "setup failed for $($t.Agent)/$($t.Id): $($_.Exception.Message); retry next tick"; exit 0 }
-
-    Add-Content -Path $Seen -Value "$($t.Id)"   # at-most-once from here: a failed agent run is not replayed
 
     $url = "https://github.com/$Repo/issues/$Issue#issuecomment-$($t.Id)"
     $prompt = (Get-Content -Raw (Join-Path $Here 'standing-prompt.md')).Replace('{{AGENT}}', $t.Agent).Replace('{{COMMENT_ID}}', "$($t.Id)").Replace('{{COMMENT_URL}}', $url)
@@ -109,8 +116,17 @@ try {
     $who = @{ deepseek = 'DeepSeek (OpenCode)'; beam = 'Beam (OpenCode)' }[$t.Agent]
     $env:GIT_AUTHOR_NAME = $who; $env:GIT_COMMITTER_NAME = $who
     $env:GIT_AUTHOR_EMAIL = "$($t.Agent)-opencode@users.noreply.github.com"; $env:GIT_COMMITTER_EMAIL = $env:GIT_AUTHOR_EMAIL
-    $p = Start-Process -FilePath $oc.Source -ArgumentList $ocArgs -WorkingDirectory $wt -NoNewWindow -PassThru `
-      -RedirectStandardOutput $log -RedirectStandardError "$log.err"
+    try {
+      $p = Start-Process -FilePath $oc.Source -ArgumentList $ocArgs -WorkingDirectory $wt -NoNewWindow -PassThru `
+        -RedirectStandardOutput $log -RedirectStandardError "$log.err"
+    } catch {
+      Log "launch failed for $($t.Agent)/$($t.Id): $($_.Exception.Message); task remains unseen for retry"
+      & git -C $Clone worktree remove --force $wt 2>$null
+      continue
+    }
+    # Once the process exists, treat this as an attempted run even if it later
+    # exits nonzero or times out. A setup/spawn failure stays unseen for retry.
+    Add-Content -Path $Seen -Value "$($t.Id)"
     $null = $p.Handle   # PS 5.1: cache the handle now, or ExitCode comes back empty after the wait
     if (-not $p.WaitForExit($RunTimeoutMin * 60 * 1000)) {
       & taskkill /PID $p.Id /T /F | Out-Null
