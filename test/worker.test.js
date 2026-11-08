@@ -89,6 +89,7 @@ test('reel link /reel stamps platform attribution instead of relying on captions
   assert.equal(loc.searchParams.get('utm_medium'), 'reel');
   assert.equal(loc.searchParams.get('utm_campaign'), 'hooktest1112');
   assert.equal(loc.searchParams.get('utm_content'), 'p1-QF');
+  assert.equal(loc.searchParams.get('c'), 'p1-QF');
   assert.deepEqual(e.served, []);
   assert.deepEqual(e.points, []);
   assert.equal(c.waits.length, 0);

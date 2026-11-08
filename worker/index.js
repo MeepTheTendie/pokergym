@@ -147,8 +147,10 @@ export default {
       target.searchParams.set('utm_source', utmSource);
       target.searchParams.set('utm_medium', 'reel');
       target.searchParams.set('utm_campaign', url.searchParams.get('camp') || 'hooktest1112');
-      const content = url.searchParams.get('c') || url.searchParams.get('utm_content');
+      const clip = url.searchParams.get('c') || url.searchParams.get('clip');
+      const content = clip || url.searchParams.get('utm_content');
       if (content) target.searchParams.set('utm_content', content);
+      if (clip) target.searchParams.set('c', clip);
       if (url.searchParams.get('daily') === '1') target.searchParams.set('daily', '1');
       return Response.redirect(target.href, 302);
     }
