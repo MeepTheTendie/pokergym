@@ -1,0 +1,15 @@
+{
+  "_note": "TEST ONLY. Never used in production. Production private key lives only in the Worker secret PRO_SIGNING_KEY.",
+  "publicKeyJwk": {
+    "crv": "Ed25519",
+    "x": "0nj7E167ATXNSmUS3p4KiEtAb10cf3ypp1VE6zWekz8",
+    "kty": "OKP"
+  },
+  "privateKeyJwk": {
+    "crv": "Ed25519",
+    "d": "_k7eoIsIWYI7Lsn7u8qEXRhh73kA5leycOz-26KrNd0",
+    "x": "0nj7E167ATXNSmUS3p4KiEtAb10cf3ypp1VE6zWekz8",
+    "kty": "OKP"
+  },
+  "publicKeySpkiB64": "MCowBQYDK2VwAyEA0nj7E167ATXNSmUS3p4KiEtAb10cf3ypp1VE6zWekz8="
+}

@@ -342,6 +342,25 @@ export const text = (s, max) => typeof s === 'string' && s.length <= max;
 export const game = id => GYMS.some(g => g.game === id);
 export const list = (xs, max, check) => Array.isArray(xs) && xs.length <= max && xs.every(check);
 export const dayKey = k => typeof k === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(k);
+
+// A Pro entitlement is either `false` (free save) or `{ tier: "monthly" |
+// "lifetime", exp }`. Lifetime stores exp 0; monthly stores a positive unix
+// expiry. The flag is the object's presence; expiry lives on it (see pro.js).
+export function isValidProField(pro) {
+  if (pro === false) return true;
+  if (!pro || typeof pro !== 'object' || Array.isArray(pro)) return false;
+  if (pro.tier === 'lifetime') return true;
+  return pro.tier === 'monthly' && Number.isSafeInteger(pro.exp) && pro.exp > 0;
+}
+
+// Lenient normalization for stored/imported profiles: a valid entitlement comes
+// back as a normalized { tier, exp } object; anything else (including `false`)
+// becomes `false`.
+export function sanitizePro(pro) {
+  if (!isValidProField(pro)) return false;
+  if (pro === false) return false;
+  return pro.tier === 'lifetime' ? { tier: 'lifetime', exp: 0 } : { tier: 'monthly', exp: pro.exp };
+}
 const isCount = count;
 const clampCount = (n, fallback = 0) => (isCount(n) ? n : fallback);
 const asList = xs => (Array.isArray(xs) ? xs : []);
@@ -403,7 +422,7 @@ export function sanitizeProfile(profile) {
   return {
     version: SAVE_VERSION,
     classId,
-    pro: profile.pro === true,
+    pro: sanitizePro(profile.pro),
     name: typeof profile.name === 'string' && profile.name.length <= 100 ? profile.name : 'PLAYER',
     gym: GYM_BY_ID[profile.gym] ? profile.gym : (gymForClass(classId)?.id ?? GYMS[0].id),
     xp: clampCount(profile.xp),

@@ -1,4 +1,4 @@
-import { deserialize, serialize, validMistakeQuiz, validMistakeBox, validMistakeDue, SESSION_HANDS, count, text, game, list, dayKey } from './state.js';
+import { deserialize, serialize, validMistakeQuiz, validMistakeBox, validMistakeDue, SESSION_HANDS, count, text, game, list, dayKey, isValidProField } from './state.js';
 import { GYMS, GYM_BY_ID } from './gyms.js';
 import { validDailyGames, validDailyPlan, DAILY_HANDS } from './daily.js';
 
@@ -33,7 +33,7 @@ export function readBackup(raw) {
       (p.activeSession != null && (!session(p.activeSession) || p.activeSession.played >= SESSION_HANDS)) ||
       (p.daily != null && !daily(p.daily)) ||
       (p.sessions != null && !list(p.sessions, 30, s => session(s) && s.played === SESSION_HANDS && text(s.completedAt, 100))) ||
-      (p.pro !== undefined && typeof p.pro !== 'boolean')) throw new Error('Invalid backup');
+      (p.pro !== undefined && !isValidProField(p.pro))) throw new Error('Invalid backup');
   return p;
 }
 export function writeBackup(profile) {

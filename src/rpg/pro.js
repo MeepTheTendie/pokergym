@@ -1,143 +1,155 @@
-// Gym Pro unlock codes (Ko-fi). Fully offline: no network call, no account, no
-// server secret. A player pastes a code, it is validated locally, and a Pro
-// flag is set on the existing save so it survives export and import.
+// Gym Pro unlock codes (Ko-fi). Fully offline: no network call, no account, and
+// no secret in the client. A player pastes a code, its Ed25519 signature is
+// verified locally with Web Crypto (`crypto.subtle.verify`, no dependency), and
+// a Pro entitlement is written to the existing save so it survives export and
+// import.
 //
-// A valid code is a short payload plus an HMAC-SHA256 checksum over it, so we
-// never ship a list of valid codes — only the format and the checksum key. The
-// key below is bundled with the client and is deliberately NOT a secret (the
-// task forbids server secrets and requires offline validation). It is a
-// "pepper" that stops typos and casual guessing. It is not DRM: anyone who
-// reads the client source can mint a code. That is accepted for this checksum
-// gate; real entitlement enforcement, if ever needed, is a later decision.
+// Code format (produced by the Worker, which holds the private key):
 //
-// No new dependencies: SHA-256 and HMAC-SHA256 are implemented here in a few
-// dozen lines and verified against the RFC 4231 test vectors in
-// test/pro.test.js.
+//   base64url(payload) + "." + base64url(signature)
+//   payload = JSON { t: "monthly" | "lifetime", exp: <unix seconds | 0>, id: <8-char ref> }
+//
+// SIGNING INPUT (must match the Worker exactly): the Ed25519 signature is over
+// the UTF-8 bytes of the base64url-encoded payload string — i.e. the exact
+// segment that appears before the "." in the code. This keeps verification
+// byte-exact without any JSON re-serialization on the client.
+//
+// The client embeds only the PUBLIC key. Codes cannot be forged from the
+// shipped JavaScript because the private key never leaves the Worker.
+//
+// Entitlement stored on the profile: `pro` is `false` for a free save, or an
+// object `{ tier: "monthly" | "lifetime", exp: <unix seconds> }` for a Pro save
+// (lifetime always stores exp 0). `proStatus(profile)` reports the live state.
 
-// Non-secret checksum pepper (see the note above). Not a credential.
-const PRO_CODE_KEY = 'pokergym:gym-pro:2026-11';
+import { sanitizePro } from './state.js';
 
-const K = [
-  0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
-  0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
-  0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
-  0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
-  0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
-  0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
-  0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
-  0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
-];
+// A monthly entitlement within this many seconds of expiring is "renew soon".
+export const PRO_RENEW_SOON_SECONDS = 5 * 24 * 60 * 60; // 5 days
 
-const rotr = (x, n) => (x >>> n) | (x << (32 - n));
-const toBytes = (text) => new TextEncoder().encode(text);
-const bytesToHex = (bytes) => Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
-const hexToBytes = (hex) => {
-  const out = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
-  return out;
+// Embedded Ed25519 PUBLIC key (JWK). This is the TEST key from
+// test/fixtures/pro-test-keys.json (paired with the TEST private key there).
+// Before launch, Claude swaps this for the production public key paired with
+// the Worker secret PRO_SIGNING_KEY. The private key is never present here.
+const PRO_PUBLIC_KEY_JWK = {
+  crv: 'Ed25519',
+  x: '0nj7E167ATXNSmUS3p4KiEtAb10cf3ypp1VE6zWekz8',
+  kty: 'OKP',
 };
 
-function sha256Hex(bytes) {
-  const l = bytes.length;
-  const bitLen = BigInt(l) * 8n;
-  const bitLenHi = Number((bitLen >> 32n) & 0xffffffffn);
-  const bitLenLo = Number(bitLen & 0xffffffffn);
-  const withOne = l + 1;
-  const total = withOne + 8 + ((64 - ((withOne + 8) % 64)) % 64);
-  const padded = new Uint8Array(total);
-  padded.set(bytes);
-  padded[l] = 0x80;
-  const dv = new DataView(padded.buffer);
-  dv.setUint32(total - 8, bitLenHi);
-  dv.setUint32(total - 4, bitLenLo);
+const unixNow = () => Math.floor(Date.now() / 1000);
+const toUtf8 = (s) => new TextEncoder().encode(s);
 
-  const H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
-  const w = new Uint32Array(64);
-  for (let i = 0; i < total; i += 64) {
-    for (let t = 0; t < 16; t++) w[t] = dv.getUint32(i + t * 4);
-    for (let t = 16; t < 64; t++) {
-      const s0 = rotr(w[t - 15], 7) ^ rotr(w[t - 15], 18) ^ (w[t - 15] >>> 3);
-      const s1 = rotr(w[t - 2], 17) ^ rotr(w[t - 2], 19) ^ (w[t - 2] >>> 10);
-      w[t] = (w[t - 16] + s0 + w[t - 7] + s1) >>> 0;
-    }
-    let [a, b, c, d, e, f, g, h] = H;
-    for (let t = 0; t < 64; t++) {
-      const S1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);
-      const ch = (e & f) ^ (~e & g);
-      const temp1 = (h + S1 + ch + K[t] + w[t]) >>> 0;
-      const S0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);
-      const maj = (a & b) ^ (a & c) ^ (b & c);
-      const temp2 = (S0 + maj) >>> 0;
-      h = g; g = f; f = e; e = (d + temp1) >>> 0;
-      d = c; c = b; b = a; a = (temp1 + temp2) >>> 0;
-    }
-    H[0] = (H[0] + a) >>> 0; H[1] = (H[1] + b) >>> 0; H[2] = (H[2] + c) >>> 0; H[3] = (H[3] + d) >>> 0;
-    H[4] = (H[4] + e) >>> 0; H[5] = (H[5] + f) >>> 0; H[6] = (H[6] + g) >>> 0; H[7] = (H[7] + h) >>> 0;
+// Decodes RFC 4648 §5 base64url (padding tolerated). Returns a Uint8Array, or
+// null when the input is not well-formed base64url.
+function b64urlDecode(str) {
+  if (typeof str !== 'string' || !/^[A-Za-z0-9_-]+$/.test(str)) return null;
+  const s = str.replace(/-/g, '+').replace(/_/g, '/');
+  const padded = s + '='.repeat((4 - (s.length % 4)) % 4);
+  let bin;
+  try { bin = atob(padded); } catch { return null; }
+  if (bin.length === 0) return null;
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+
+// The cached CryptoKey. Imported lazily so the module stays synchronous to load
+// (it ships to the browser and is imported by state.js).
+let publicKeyPromise;
+function getPublicKey() {
+  if (!publicKeyPromise) {
+    publicKeyPromise = crypto.subtle.importKey(
+      'jwk', PRO_PUBLIC_KEY_JWK, { name: 'Ed25519' }, false, ['verify'],
+    );
   }
-  return H.map((x) => x.toString(16).padStart(8, '0')).join('');
+  return publicKeyPromise;
 }
 
-function hmacSha256Hex(key, message) {
-  const blockSize = 64;
-  let keyBytes = toBytes(key);
-  if (keyBytes.length > blockSize) keyBytes = hexToBytes(sha256Hex(keyBytes));
-  const ipad = new Uint8Array(blockSize);
-  const opad = new Uint8Array(blockSize);
-  for (let i = 0; i < blockSize; i++) { ipad[i] = 0x36; opad[i] = 0x5c; }
-  for (let i = 0; i < keyBytes.length; i++) { ipad[i] ^= keyBytes[i]; opad[i] ^= keyBytes[i]; }
-  const messageBytes = toBytes(message);
-  const inner = new Uint8Array(blockSize + messageBytes.length);
-  inner.set(ipad); inner.set(messageBytes, blockSize);
-  const outer = new Uint8Array(blockSize + 32);
-  outer.set(opad); outer.set(hexToBytes(sha256Hex(inner)), blockSize);
-  return sha256Hex(outer);
-}
-
-// The redeem code format: PG-<8 hex payload>-<8 hex checksum>. The checksum is
-// the first 8 hex chars of HMAC-SHA256(PRO_CODE_KEY, "pokergym:pro:" + payload).
-const CODE_RE = /^PG([0-9A-F]{8})([0-9A-F]{8})$/;
-
-// Collapses case, dashes and whitespace so a player can type the code however
-// they like. Returns { payload, checksum } or null when the shape is wrong.
-function normalizeProCode(code) {
+// Splits "base64url(payload).base64url(signature)" into its parts, validating
+// shape and the fixed 64-byte Ed25519 signature length. Returns null on any
+// malformed input.
+function splitProCode(code) {
   if (typeof code !== 'string') return null;
-  const cleaned = code.toUpperCase().replace(/[\s-]/g, '');
-  const m = CODE_RE.exec(cleaned);
-  return m ? { payload: m[1], checksum: m[2] } : null;
+  const cleaned = code.trim();
+  const dot = cleaned.indexOf('.');
+  if (dot <= 0 || dot === cleaned.length - 1) return null;
+  const payloadB64 = cleaned.slice(0, dot);
+  const sigB64 = cleaned.slice(dot + 1);
+  if (!/^[A-Za-z0-9_-]+$/.test(payloadB64) || !/^[A-Za-z0-9_-]+$/.test(sigB64)) return null;
+  const payloadBytes = b64urlDecode(payloadB64);
+  const sigBytes = b64urlDecode(sigB64);
+  if (!payloadBytes || !sigBytes || sigBytes.length !== 64) return null;
+  return { payloadB64, payloadBytes, sigB64, sigBytes };
 }
 
-// The checksum for a given 8-hex payload, upper-cased.
-export function proChecksum(payload) {
-  return hmacSha256Hex(PRO_CODE_KEY, `pokergym:pro:${payload}`).slice(0, 8).toUpperCase();
+// Validates a decoded payload object. Returns { tier, exp, id } or null.
+// Lifetime must carry exp 0 (or omit it); monthly must carry a positive,
+// finite, integer exp (unix seconds).
+function parsePayload(bytes) {
+  let text;
+  try { text = new TextDecoder().decode(bytes); } catch { return null; }
+  let obj;
+  try { obj = JSON.parse(text); } catch { return null; }
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return null;
+  if (obj.t !== 'monthly' && obj.t !== 'lifetime') return null;
+  if (typeof obj.id !== 'string' || !/^[A-Za-z0-9]{8}$/.test(obj.id)) return null;
+  if (obj.t === 'lifetime') {
+    if (obj.exp !== 0 && obj.exp !== undefined) return null;
+    return { tier: 'lifetime', exp: 0, id: obj.id };
+  }
+  if (!Number.isSafeInteger(obj.exp) || obj.exp <= 0) return null;
+  return { tier: 'monthly', exp: obj.exp, id: obj.id };
 }
 
-// True when `code` is a well-formed code whose checksum matches its payload.
-export function isValidProCode(code) {
-  const parts = normalizeProCode(code);
-  if (!parts) return false;
-  return parts.checksum === proChecksum(parts.payload);
+// Verifies a code's Ed25519 signature against the embedded public key and
+// checks expiry. Resolves to the parsed { tier, exp, id } on success, or null
+// on any failure (malformed, tampered, wrong key, or an expired monthly code).
+export async function verifyProCode(code, now = unixNow()) {
+  const parts = splitProCode(code);
+  if (!parts) return null;
+  let ok = false;
+  try {
+    const key = await getPublicKey();
+    ok = await crypto.subtle.verify(
+      { name: 'Ed25519' }, key, parts.sigBytes, toUtf8(parts.payloadB64),
+    );
+  } catch {
+    ok = false;
+  }
+  if (!ok) return null;
+  const payload = parsePayload(parts.payloadBytes);
+  if (!payload) return null;
+  if (payload.tier === 'monthly' && now > payload.exp) return null;
+  return payload;
 }
 
-// Mints a redeemable code for an 8-hex payload. Used by the seller (Ko-fi) and
-// by tests; it ships no list of valid codes.
-export function mintProCode(payload) {
-  const p = String(payload).toUpperCase().replace(/[\s-]/g, '');
-  if (!/^[0-9A-F]{8}$/.test(p)) throw new Error('payload must be 8 hex characters');
-  return `PG-${p}-${proChecksum(p)}`;
-}
-
-export function hasPro(profile) {
-  return Boolean(profile && profile.pro === true);
-}
-
-// The "Restore Pro" entry point. Given a valid code, returns the profile with
-// its Pro flag set; given an invalid code, returns null and leaves the caller's
-// profile untouched. Idempotent: an already-Pro profile is returned unchanged.
-export function restorePro(profile, code) {
+// The "Restore Pro" entry point. On a valid, unexpired code, returns the
+// profile with `pro` set to { tier, exp }; on any invalid/expired code, returns
+// null and leaves the caller's profile untouched.
+export async function restorePro(profile, code, now = unixNow()) {
   if (!profile || typeof profile !== 'object') return null;
-  if (!isValidProCode(code)) return null;
-  if (profile.pro === true) return profile;
-  return { ...profile, pro: true };
+  const payload = await verifyProCode(code, now);
+  if (!payload) return null;
+  return { ...profile, pro: { tier: payload.tier, exp: payload.exp } };
 }
 
-export { sha256Hex, hmacSha256Hex };
+/* ---------------- stored entitlement status ---------------- */
+
+const INACTIVE = Object.freeze({ active: false, tier: null, exp: null, renewSoon: false });
+
+// Live status of the stored entitlement. Synchronous: it only reads the save.
+export function proStatus(profile, now = unixNow()) {
+  const pro = sanitizePro(profile?.pro);
+  if (pro === false) return INACTIVE;
+  if (pro.tier === 'lifetime') {
+    return { active: true, tier: 'lifetime', exp: 0, renewSoon: false };
+  }
+  const active = now <= pro.exp;
+  const renewSoon = active && (pro.exp - now) < PRO_RENEW_SOON_SECONDS;
+  return { active, tier: 'monthly', exp: pro.exp, renewSoon };
+}
+
+// True when the stored entitlement is currently active (not expired).
+export function hasPro(profile, now = unixNow()) {
+  return proStatus(profile, now).active;
+}
