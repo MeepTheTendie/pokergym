@@ -14,8 +14,14 @@ function loadPack(slug) {
   return JSON.parse(readFileSync(join(root, 'data', 'pro-packs', `${slug}.json`), 'utf8'));
 }
 
-function assertSpotShape(spot, { allowRuleReason = false } = {}) {
+function assertSpotShape(spot, index, { allowRuleReason = false } = {}) {
   assert.ok(spot.id, 'spot id');
+  assert.ok(typeof spot.leak === 'string' && spot.leak.length > 0, `${spot.id}: leak tag`);
+  if (index < 3) {
+    assert.equal(spot.free, true, `${spot.id}: spots 1-3 must be free sample`);
+  } else {
+    assert.notEqual(spot.free, true, `${spot.id}: only spots 1-3 should be marked free`);
+  }
   assert.ok(spot.setup && typeof spot.setup === 'object', `${spot.id}: setup`);
   assert.ok(spot.correctAction !== undefined, `${spot.id}: correctAction`);
   assert.ok(typeof spot.explanation === 'string' && spot.explanation.length > 10, `${spot.id}: explanation`);
@@ -32,8 +38,9 @@ function assertSpotShape(spot, { allowRuleReason = false } = {}) {
 test('pro pack: blackjack soft hands (20) match engine', () => {
   const pack = loadPack('blackjack-soft-hands');
   assert.equal(pack.spots.length, 20);
-  for (const spot of pack.spots) {
-    assertSpotShape(spot);
+  assert.equal(pack.freeSampleCount, 3);
+  for (const [index, spot] of pack.spots.entries()) {
+    assertSpotShape(spot, index);
     clearBjCache();
     const round = roundWith(spot.setup.playerRanks, spot.setup.dealerUpRank);
     const result = bestAction(round);
@@ -45,8 +52,9 @@ test('pro pack: blackjack soft hands (20) match engine', () => {
 test('pro pack: blackjack pairs/splits (20) match engine', () => {
   const pack = loadPack('blackjack-pairs-splits');
   assert.equal(pack.spots.length, 20);
-  for (const spot of pack.spots) {
-    assertSpotShape(spot);
+  assert.equal(pack.freeSampleCount, 3);
+  for (const [index, spot] of pack.spots.entries()) {
+    assertSpotShape(spot, index);
     clearBjCache();
     const round = roundWith(spot.setup.playerRanks, spot.setup.dealerUpRank);
     const result = bestAction(round);
@@ -58,9 +66,10 @@ test('pro pack: blackjack pairs/splits (20) match engine', () => {
 test('pro pack: jacks or better 9/6 holds (20) match engine', () => {
   const pack = loadPack('jacks-or-better-holds-96');
   assert.equal(pack.spots.length, 20);
+  assert.equal(pack.freeSampleCount, 3);
   const v = variantById('jacks-or-better');
-  for (const spot of pack.spots) {
-    assertSpotShape(spot);
+  for (const [index, spot] of pack.spots.entries()) {
+    assertSpotShape(spot, index);
     const hand = spot.setup.hand.map(c => ({ r: c.r, s: c.s }));
     clearVpCache();
     const result = bestHold(hand, { variant: v });
@@ -73,8 +82,9 @@ test('pro pack: jacks or better 9/6 holds (20) match engine', () => {
 test('pro pack: baccarat third-card rule (20) match engine', () => {
   const pack = loadPack('baccarat-third-card-rule');
   assert.equal(pack.spots.length, 20);
-  for (const spot of pack.spots) {
-    assertSpotShape(spot, { allowRuleReason: true });
+  assert.equal(pack.freeSampleCount, 3);
+  for (const [index, spot] of pack.spots.entries()) {
+    assertSpotShape(spot, index, { allowRuleReason: true });
     const s = spot.setup;
     let draws;
     if (s.actor === 'player') {

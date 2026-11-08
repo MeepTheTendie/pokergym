@@ -3,10 +3,12 @@
   "title": "Baccarat Third-Card Rule",
   "description": "20 graded third-card rule decisions using the baccarat engine rules (playerDraws/bankerDraws).",
   "spotCount": 20,
+  "freeSampleCount": 3,
   "generatedFrom": "existing scenario/strategy engine (no hand-written EVs or correct actions)",
   "spots": [
     {
       "id": "bac-01",
+      "leak": "bac-player-draw",
       "setup": {
         "actor": "player",
         "playerTotal": 0,
@@ -18,10 +20,12 @@
         "evGap": null,
         "ruleReason": "playerDraws(0)=true (total <= 5)"
       },
-      "explanation": "Player draws on totals 0 through 5."
+      "explanation": "Player draws on totals 0 through 5.",
+      "free": true
     },
     {
       "id": "bac-02",
+      "leak": "bac-player-draw",
       "setup": {
         "actor": "player",
         "playerTotal": 3,
@@ -33,10 +37,12 @@
         "evGap": null,
         "ruleReason": "playerDraws(3)=true (total <= 5)"
       },
-      "explanation": "A player total of 3 requires a third card."
+      "explanation": "A player total of 3 requires a third card.",
+      "free": true
     },
     {
       "id": "bac-03",
+      "leak": "bac-player-draw",
       "setup": {
         "actor": "player",
         "playerTotal": 5,
@@ -48,10 +54,12 @@
         "evGap": null,
         "ruleReason": "playerDraws(5)=true (total <= 5)"
       },
-      "explanation": "Player draws on 5; it is the highest total that still takes a card."
+      "explanation": "Player draws on 5; it is the highest total that still takes a card.",
+      "free": true
     },
     {
       "id": "bac-04",
+      "leak": "bac-player-stand",
       "setup": {
         "actor": "player",
         "playerTotal": 6,
@@ -67,6 +75,7 @@
     },
     {
       "id": "bac-05",
+      "leak": "bac-player-stand",
       "setup": {
         "actor": "player",
         "playerTotal": 7,
@@ -82,6 +91,7 @@
     },
     {
       "id": "bac-06",
+      "leak": "bac-banker-player-stood",
       "setup": {
         "actor": "banker",
         "bankerTotal": 2,
@@ -99,6 +109,7 @@
     },
     {
       "id": "bac-07",
+      "leak": "bac-banker-player-stood",
       "setup": {
         "actor": "banker",
         "bankerTotal": 5,
@@ -116,6 +127,7 @@
     },
     {
       "id": "bac-08",
+      "leak": "bac-banker-player-stood",
       "setup": {
         "actor": "banker",
         "bankerTotal": 6,
@@ -133,6 +145,7 @@
     },
     {
       "id": "bac-09",
+      "leak": "bac-third-card",
       "setup": {
         "actor": "banker",
         "bankerTotal": 3,
@@ -150,6 +163,7 @@
     },
     {
       "id": "bac-10",
+      "leak": "bac-third-card",
       "setup": {
         "actor": "banker",
         "bankerTotal": 3,
@@ -167,6 +181,7 @@
     },
     {
       "id": "bac-11",
+      "leak": "bac-third-card",
       "setup": {
         "actor": "banker",
         "bankerTotal": 4,
@@ -184,6 +199,7 @@
     },
     {
       "id": "bac-12",
+      "leak": "bac-third-card",
       "setup": {
         "actor": "banker",
         "bankerTotal": 4,
@@ -201,6 +217,7 @@
     },
     {
       "id": "bac-13",
+      "leak": "bac-third-card",
       "setup": {
         "actor": "banker",
         "bankerTotal": 4,
@@ -218,6 +235,7 @@
     },
     {
       "id": "bac-14",
+      "leak": "bac-third-card",
       "setup": {
         "actor": "banker",
         "bankerTotal": 4,
@@ -235,6 +253,7 @@
     },
     {
       "id": "bac-15",
+      "leak": "bac-third-card",
       "setup": {
         "actor": "banker",
         "bankerTotal": 5,
@@ -252,6 +271,7 @@
     },
     {
       "id": "bac-16",
+      "leak": "bac-third-card",
       "setup": {
         "actor": "banker",
         "bankerTotal": 5,
@@ -269,6 +289,7 @@
     },
     {
       "id": "bac-17",
+      "leak": "bac-third-card",
       "setup": {
         "actor": "banker",
         "bankerTotal": 5,
@@ -286,6 +307,7 @@
     },
     {
       "id": "bac-18",
+      "leak": "bac-third-card",
       "setup": {
         "actor": "banker",
         "bankerTotal": 6,
@@ -303,6 +325,7 @@
     },
     {
       "id": "bac-19",
+      "leak": "bac-third-card",
       "setup": {
         "actor": "banker",
         "bankerTotal": 6,
@@ -320,6 +343,7 @@
     },
     {
       "id": "bac-20",
+      "leak": "bac-banker-always-stand",
       "setup": {
         "actor": "banker",
         "bankerTotal": 7,

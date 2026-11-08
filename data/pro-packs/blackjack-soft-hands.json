@@ -3,10 +3,12 @@
   "title": "Blackjack Soft Hands",
   "description": "20 graded soft-hand decisions (A,2-A,9) using exact expected value from the blackjack engine.",
   "spotCount": 20,
+  "freeSampleCount": 3,
   "generatedFrom": "existing scenario/strategy engine (no hand-written EVs or correct actions)",
   "spots": [
     {
       "id": "bj-soft-01",
+      "leak": "soft-18-stand",
       "setup": {
         "playerRanks": [
           14,
@@ -40,10 +42,12 @@
           }
         ]
       },
-      "explanation": "Soft 18 vs 2 is a close stand; doubling and hitting lose a bit more expected value."
+      "explanation": "Soft 18 vs 2 is a close stand; doubling and hitting lose a bit more expected value.",
+      "free": true
     },
     {
       "id": "bj-soft-02",
+      "leak": "soft-double",
       "setup": {
         "playerRanks": [
           14,
@@ -77,10 +81,12 @@
           }
         ]
       },
-      "explanation": "Soft 18 vs 3 earns more by doubling: you can improve and the dealer is weak."
+      "explanation": "Soft 18 vs 3 earns more by doubling: you can improve and the dealer is weak.",
+      "free": true
     },
     {
       "id": "bj-soft-03",
+      "leak": "soft-double",
       "setup": {
         "playerRanks": [
           14,
@@ -114,10 +120,12 @@
           }
         ]
       },
-      "explanation": "Double soft 18 against a dealer 6 to press a strong edge."
+      "explanation": "Double soft 18 against a dealer 6 to press a strong edge.",
+      "free": true
     },
     {
       "id": "bj-soft-04",
+      "leak": "soft-18-hit",
       "setup": {
         "playerRanks": [
           14,
@@ -155,6 +163,7 @@
     },
     {
       "id": "bj-soft-05",
+      "leak": "soft-18-hit",
       "setup": {
         "playerRanks": [
           14,
@@ -192,6 +201,7 @@
     },
     {
       "id": "bj-soft-06",
+      "leak": "soft-17-hit",
       "setup": {
         "playerRanks": [
           14,
@@ -229,6 +239,7 @@
     },
     {
       "id": "bj-soft-07",
+      "leak": "soft-double",
       "setup": {
         "playerRanks": [
           14,
@@ -266,6 +277,7 @@
     },
     {
       "id": "bj-soft-08",
+      "leak": "soft-double",
       "setup": {
         "playerRanks": [
           14,
@@ -303,6 +315,7 @@
     },
     {
       "id": "bj-soft-09",
+      "leak": "soft-double",
       "setup": {
         "playerRanks": [
           14,
@@ -340,6 +353,7 @@
     },
     {
       "id": "bj-soft-10",
+      "leak": "soft-17-hit",
       "setup": {
         "playerRanks": [
           14,
@@ -377,6 +391,7 @@
     },
     {
       "id": "bj-soft-11",
+      "leak": "soft-double",
       "setup": {
         "playerRanks": [
           14,
@@ -414,6 +429,7 @@
     },
     {
       "id": "bj-soft-12",
+      "leak": "soft-double",
       "setup": {
         "playerRanks": [
           14,
@@ -451,6 +467,7 @@
     },
     {
       "id": "bj-soft-13",
+      "leak": "soft-double",
       "setup": {
         "playerRanks": [
           14,
@@ -488,6 +505,7 @@
     },
     {
       "id": "bj-soft-14",
+      "leak": "soft-hit",
       "setup": {
         "playerRanks": [
           14,
@@ -525,6 +543,7 @@
     },
     {
       "id": "bj-soft-15",
+      "leak": "soft-double",
       "setup": {
         "playerRanks": [
           14,
@@ -562,6 +581,7 @@
     },
     {
       "id": "bj-soft-16",
+      "leak": "soft-double",
       "setup": {
         "playerRanks": [
           14,
@@ -599,6 +619,7 @@
     },
     {
       "id": "bj-soft-17",
+      "leak": "soft-double",
       "setup": {
         "playerRanks": [
           14,
@@ -636,6 +657,7 @@
     },
     {
       "id": "bj-soft-18",
+      "leak": "soft-hit",
       "setup": {
         "playerRanks": [
           14,
@@ -673,6 +695,7 @@
     },
     {
       "id": "bj-soft-19",
+      "leak": "soft-stand",
       "setup": {
         "playerRanks": [
           14,
@@ -710,6 +733,7 @@
     },
     {
       "id": "bj-soft-20",
+      "leak": "soft-stand",
       "setup": {
         "playerRanks": [
           14,

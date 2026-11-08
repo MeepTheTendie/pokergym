@@ -3,10 +3,12 @@
   "title": "Blackjack Pairs and Splits",
   "description": "20 graded pair decisions using exact expected value from the blackjack engine.",
   "spotCount": 20,
+  "freeSampleCount": 3,
   "generatedFrom": "existing scenario/strategy engine (no hand-written EVs or correct actions)",
   "spots": [
     {
       "id": "bj-pair-01",
+      "leak": "pair-split",
       "setup": {
         "playerRanks": [
           14,
@@ -45,10 +47,12 @@
           }
         ]
       },
-      "explanation": "Always split aces: two chances to make strong hands beats one soft 12."
+      "explanation": "Always split aces: two chances to make strong hands beats one soft 12.",
+      "free": true
     },
     {
       "id": "bj-pair-02",
+      "leak": "pair-split",
       "setup": {
         "playerRanks": [
           14,
@@ -87,10 +91,12 @@
           }
         ]
       },
-      "explanation": "Split aces even against a 10; one soft 12 is a poor starting point."
+      "explanation": "Split aces even against a 10; one soft 12 is a poor starting point.",
+      "free": true
     },
     {
       "id": "bj-pair-03",
+      "leak": "pair-split",
       "setup": {
         "playerRanks": [
           8,
@@ -129,10 +135,12 @@
           }
         ]
       },
-      "explanation": "Split 8s against a 10 to escape hard 16, the worst common total."
+      "explanation": "Split 8s against a 10 to escape hard 16, the worst common total.",
+      "free": true
     },
     {
       "id": "bj-pair-04",
+      "leak": "pair-split",
       "setup": {
         "playerRanks": [
           8,
@@ -175,6 +183,7 @@
     },
     {
       "id": "bj-pair-05",
+      "leak": "pair-split",
       "setup": {
         "playerRanks": [
           8,
@@ -217,6 +226,7 @@
     },
     {
       "id": "bj-pair-06",
+      "leak": "pair-9s-stand",
       "setup": {
         "playerRanks": [
           9,
@@ -259,6 +269,7 @@
     },
     {
       "id": "bj-pair-07",
+      "leak": "pair-split",
       "setup": {
         "playerRanks": [
           9,
@@ -301,6 +312,7 @@
     },
     {
       "id": "bj-pair-08",
+      "leak": "pair-9s-stand",
       "setup": {
         "playerRanks": [
           9,
@@ -343,6 +355,7 @@
     },
     {
       "id": "bj-pair-09",
+      "leak": "pair-9s-stand",
       "setup": {
         "playerRanks": [
           9,
@@ -385,6 +398,7 @@
     },
     {
       "id": "bj-pair-10",
+      "leak": "pair-split",
       "setup": {
         "playerRanks": [
           7,
@@ -427,6 +441,7 @@
     },
     {
       "id": "bj-pair-11",
+      "leak": "pair-no-split",
       "setup": {
         "playerRanks": [
           7,
@@ -469,6 +484,7 @@
     },
     {
       "id": "bj-pair-12",
+      "leak": "pair-split",
       "setup": {
         "playerRanks": [
           6,
@@ -511,6 +527,7 @@
     },
     {
       "id": "bj-pair-13",
+      "leak": "pair-no-split",
       "setup": {
         "playerRanks": [
           6,
@@ -553,6 +570,7 @@
     },
     {
       "id": "bj-pair-14",
+      "leak": "pair-4s-no-split",
       "setup": {
         "playerRanks": [
           4,
@@ -595,6 +613,7 @@
     },
     {
       "id": "bj-pair-15",
+      "leak": "pair-4s-no-split",
       "setup": {
         "playerRanks": [
           4,
@@ -637,6 +656,7 @@
     },
     {
       "id": "bj-pair-16",
+      "leak": "pair-split",
       "setup": {
         "playerRanks": [
           3,
@@ -679,6 +699,7 @@
     },
     {
       "id": "bj-pair-17",
+      "leak": "pair-split",
       "setup": {
         "playerRanks": [
           2,
@@ -721,6 +742,7 @@
     },
     {
       "id": "bj-pair-18",
+      "leak": "pair-split",
       "setup": {
         "playerRanks": [
           2,
@@ -763,6 +785,7 @@
     },
     {
       "id": "bj-pair-19",
+      "leak": "pair-never-split-10s",
       "setup": {
         "playerRanks": [
           10,
@@ -805,6 +828,7 @@
     },
     {
       "id": "bj-pair-20",
+      "leak": "pair-5s-as-hard-10",
       "setup": {
         "playerRanks": [
           5,

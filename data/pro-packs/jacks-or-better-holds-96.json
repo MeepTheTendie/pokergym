@@ -3,10 +3,12 @@
   "title": "Jacks or Better Holds (9/6)",
   "description": "20 graded 9/6 Jacks or Better hold decisions using exact draw expected value from the video poker engine.",
   "spotCount": 20,
+  "freeSampleCount": 3,
   "generatedFrom": "existing scenario/strategy engine (no hand-written EVs or correct actions)",
   "spots": [
     {
       "id": "vp96-01",
+      "leak": "vp-high-pair",
       "setup": {
         "hand": [
           {
@@ -138,10 +140,12 @@
           }
         ]
       },
-      "explanation": "Keeping the pair gives the best expected return (1.537 credits)."
+      "explanation": "Keeping the pair gives the best expected return (1.537 credits).",
+      "free": true
     },
     {
       "id": "vp96-02",
+      "leak": "vp-high-pair",
       "setup": {
         "hand": [
           {
@@ -273,10 +277,12 @@
           }
         ]
       },
-      "explanation": "Keeping the pair gives the best expected return (1.537 credits)."
+      "explanation": "Keeping the pair gives the best expected return (1.537 credits).",
+      "free": true
     },
     {
       "id": "vp96-03",
+      "leak": "vp-trips",
       "setup": {
         "hand": [
           {
@@ -413,10 +419,12 @@
           }
         ]
       },
-      "explanation": "Keeping the three of a kind gives the best expected return (4.302 credits)."
+      "explanation": "Keeping the three of a kind gives the best expected return (4.302 credits).",
+      "free": true
     },
     {
       "id": "vp96-04",
+      "leak": "vp-4-to-royal",
       "setup": {
         "hand": [
           {
@@ -560,6 +568,7 @@
     },
     {
       "id": "vp96-05",
+      "leak": "vp-4-to-royal",
       "setup": {
         "hand": [
           {
@@ -700,6 +709,7 @@
     },
     {
       "id": "vp96-06",
+      "leak": "vp-open-straight-draw",
       "setup": {
         "hand": [
           {
@@ -839,6 +849,7 @@
     },
     {
       "id": "vp96-07",
+      "leak": "vp-4-to-straight-flush",
       "setup": {
         "hand": [
           {
@@ -977,6 +988,7 @@
     },
     {
       "id": "vp96-08",
+      "leak": "vp-4-to-flush",
       "setup": {
         "hand": [
           {
@@ -1114,6 +1126,7 @@
     },
     {
       "id": "vp96-09",
+      "leak": "vp-4-to-flush",
       "setup": {
         "hand": [
           {
@@ -1246,6 +1259,7 @@
     },
     {
       "id": "vp96-10",
+      "leak": "vp-open-straight-draw",
       "setup": {
         "hand": [
           {
@@ -1383,6 +1397,7 @@
     },
     {
       "id": "vp96-11",
+      "leak": "vp-broadway-draw",
       "setup": {
         "hand": [
           {
@@ -1520,6 +1535,7 @@
     },
     {
       "id": "vp96-12",
+      "leak": "vp-two-pair",
       "setup": {
         "hand": [
           {
@@ -1660,6 +1676,7 @@
     },
     {
       "id": "vp96-13",
+      "leak": "vp-quads",
       "setup": {
         "hand": [
           {
@@ -1802,6 +1819,7 @@
     },
     {
       "id": "vp96-14",
+      "leak": "vp-high-pair",
       "setup": {
         "hand": [
           {
@@ -1937,6 +1955,7 @@
     },
     {
       "id": "vp96-15",
+      "leak": "vp-low-pair-vs-high-cards",
       "setup": {
         "hand": [
           {
@@ -2070,6 +2089,7 @@
     },
     {
       "id": "vp96-16",
+      "leak": "vp-3-to-royal",
       "setup": {
         "hand": [
           {
@@ -2202,6 +2222,7 @@
     },
     {
       "id": "vp96-17",
+      "leak": "vp-hold-high-cards",
       "setup": {
         "hand": [
           {
@@ -2330,6 +2351,7 @@
     },
     {
       "id": "vp96-18",
+      "leak": "vp-open-straight-draw",
       "setup": {
         "hand": [
           {
@@ -2460,6 +2482,7 @@
     },
     {
       "id": "vp96-19",
+      "leak": "vp-3-to-straight-flush",
       "setup": {
         "hand": [
           {
@@ -2594,6 +2617,7 @@
     },
     {
       "id": "vp96-20",
+      "leak": "vp-suited-high-cards",
       "setup": {
         "hand": [
           {
