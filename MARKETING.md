@@ -1,8 +1,8 @@
 # Poker Gym player acquisition
 
-## Monetization rule (owner, 2026-10-15)
+## Monetization (Wes, 2026-11-08)
 
-No subscriptions, ever, and no recurring prices. Monetization is the optional Ko-fi tip jar (https://ko-fi.com/playpokergym). The only other path left open is a possible one-time US$4.99 Pro unlock, considered only if at least five people ask for something like it unprompted after day 30. Prompted answers do not count as demand, so public copy asks no pricing or willingness-to-pay question. Older log entries below that mention a monthly offer or pricing research are superseded; that research was removed. Day 14 of the current launch is a measurement checkpoint only: report the number of unprompted requests for more. It does not lower the day-30 / five-ask gate above.
+The Oct 15 "no subscriptions, tips only" rule is retired. Monetization now follows [`plan.md`](plan.md): the free trainer stays free forever, Gym Pro (new content only) is sold through Ko-fi from Tue Nov 24. The current acquisition plan, outlay and campaign runbooks are in [`docs/monetization/marketing-plan.md`](docs/monetization/marketing-plan.md); this file keeps the channel evidence, tagging convention and history below.
 
 ## Verified status
 
