@@ -122,6 +122,18 @@ export default {
       target.searchParams.set('utm_content', 'typed');
       return Response.redirect(target.href, 302);
     }
+    // Wes's daily X posts: playpokergym.com/x (optionally /x?c=<topic>) so X
+    // traffic is attributable even when the app strips the t.co referrer.
+    if (url.pathname === '/x' || url.pathname === '/x/') {
+      const target = new URL('/web/', url.origin);
+      target.searchParams.set('ref', 'x');
+      target.searchParams.set('utm_source', 'x');
+      target.searchParams.set('utm_medium', 'social');
+      target.searchParams.set('utm_campaign', 'wes-daily');
+      const content = url.searchParams.get('c');
+      if (content) target.searchParams.set('utm_content', content);
+      return Response.redirect(target.href, 302);
+    }
     // Canonical social-reel entry. Captions post a short link
     // (playpokergym.com/reel?src=fb&c=p1-QF) instead of hand-typed UTMs, so a
     // reel can never be mis-attributed to the wrong platform (e.g. a Facebook
