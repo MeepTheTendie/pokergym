@@ -210,6 +210,8 @@ test('stats: probe and scripted automation visits are excluded', () => {
   assert.match(clause, /person_id NOT IN \('ba45edef-/);
   assert.match(clause, /properties\.\$raw_user_agent IS NULL OR/);
   assert.match(clause, /NOT LIKE '%Edge\/12\.246%'/);
+  assert.match(clause, /\$virt_traffic_type/);
+  assert.match(clause, /NOT IN \('Bot', 'Automation', 'AI Agent'\)/);
 });
 
 test('stats: unfurl-bot visits are excluded', () => {
