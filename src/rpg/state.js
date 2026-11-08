@@ -32,6 +32,7 @@ export function createProfile(classId) {
     version: SAVE_VERSION,
     name: 'PLAYER',
     classId,
+    pro: false,
     xp: 0,
     score: 0,
     streak: 0,
@@ -402,6 +403,7 @@ export function sanitizeProfile(profile) {
   return {
     version: SAVE_VERSION,
     classId,
+    pro: profile.pro === true,
     name: typeof profile.name === 'string' && profile.name.length <= 100 ? profile.name : 'PLAYER',
     gym: GYM_BY_ID[profile.gym] ? profile.gym : (gymForClass(classId)?.id ?? GYMS[0].id),
     xp: clampCount(profile.xp),
