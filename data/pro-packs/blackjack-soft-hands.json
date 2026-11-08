@@ -1,0 +1,749 @@
+{
+  "packId": "blackjack-soft-hands",
+  "title": "Blackjack Soft Hands",
+  "description": "20 graded soft-hand decisions (A,2-A,9) using exact expected value from the blackjack engine.",
+  "spotCount": 20,
+  "generatedFrom": "existing scenario/strategy engine (no hand-written EVs or correct actions)",
+  "spots": [
+    {
+      "id": "bj-soft-01",
+      "setup": {
+        "playerRanks": [
+          14,
+          7
+        ],
+        "playerHand": "A-7 (soft 18)",
+        "dealerUpRank": 2,
+        "dealerUpcard": "2",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "stand",
+      "correctActionLabel": "Stand",
+      "engine": {
+        "ev": 0.124001,
+        "evGap": 0.00349,
+        "alternatives": [
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": 0.124001
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": 0.120511
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.063025
+          }
+        ]
+      },
+      "explanation": "Soft 18 vs 2 is a close stand; doubling and hitting lose a bit more expected value."
+    },
+    {
+      "id": "bj-soft-02",
+      "setup": {
+        "playerRanks": [
+          14,
+          7
+        ],
+        "playerHand": "A-7 (soft 18)",
+        "dealerUpRank": 3,
+        "dealerUpcard": "3",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "double",
+      "correctActionLabel": "Double",
+      "engine": {
+        "ev": 0.178869,
+        "evGap": 0.02775,
+        "alternatives": [
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": 0.178869
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": 0.151119
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.090554
+          }
+        ]
+      },
+      "explanation": "Soft 18 vs 3 earns more by doubling: you can improve and the dealer is weak."
+    },
+    {
+      "id": "bj-soft-03",
+      "setup": {
+        "playerRanks": [
+          14,
+          7
+        ],
+        "playerHand": "A-7 (soft 18)",
+        "dealerUpRank": 6,
+        "dealerUpcard": "6",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "double",
+      "correctActionLabel": "Double",
+      "engine": {
+        "ev": 0.383732,
+        "evGap": 0.103244,
+        "alternatives": [
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": 0.383732
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": 0.280488
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.191866
+          }
+        ]
+      },
+      "explanation": "Double soft 18 against a dealer 6 to press a strong edge."
+    },
+    {
+      "id": "bj-soft-04",
+      "setup": {
+        "playerRanks": [
+          14,
+          7
+        ],
+        "playerHand": "A-7 (soft 18)",
+        "dealerUpRank": 9,
+        "dealerUpcard": "9",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "hit",
+      "correctActionLabel": "Hit",
+      "engine": {
+        "ev": -0.099189,
+        "evGap": 0.083451,
+        "alternatives": [
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": -0.099189
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.18264
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -0.286512
+          }
+        ]
+      },
+      "explanation": "Soft 18 cannot stand profitably against a 9; hitting is the least costly play."
+    },
+    {
+      "id": "bj-soft-05",
+      "setup": {
+        "playerRanks": [
+          14,
+          7
+        ],
+        "playerHand": "A-7 (soft 18)",
+        "dealerUpRank": 10,
+        "dealerUpcard": "10",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "hit",
+      "correctActionLabel": "Hit",
+      "engine": {
+        "ev": -0.143211,
+        "evGap": 0.036352,
+        "alternatives": [
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": -0.143211
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.179563
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -0.344126
+          }
+        ]
+      },
+      "explanation": "Against a 10, hit soft 18 rather than standing on a likely loser."
+    },
+    {
+      "id": "bj-soft-06",
+      "setup": {
+        "playerRanks": [
+          14,
+          6
+        ],
+        "playerHand": "A-6 (soft 17)",
+        "dealerUpRank": 2,
+        "dealerUpcard": "2",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "hit",
+      "correctActionLabel": "Hit",
+      "engine": {
+        "ev": 0.000965,
+        "evGap": 0.004624,
+        "alternatives": [
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.000965
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -0.003659
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.149609
+          }
+        ]
+      },
+      "explanation": "Soft 17 is too weak to stand vs 2; take a hit and try to improve."
+    },
+    {
+      "id": "bj-soft-07",
+      "setup": {
+        "playerRanks": [
+          14,
+          6
+        ],
+        "playerHand": "A-6 (soft 17)",
+        "dealerUpRank": 3,
+        "dealerUpcard": "3",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "double",
+      "correctActionLabel": "Double",
+      "engine": {
+        "ev": 0.058668,
+        "evGap": 0.028196,
+        "alternatives": [
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": 0.058668
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.030472
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.113384
+          }
+        ]
+      },
+      "explanation": "Double soft 17 vs 3: the dealer is vulnerable and you cannot bust on one card."
+    },
+    {
+      "id": "bj-soft-08",
+      "setup": {
+        "playerRanks": [
+          14,
+          6
+        ],
+        "playerHand": "A-6 (soft 17)",
+        "dealerUpRank": 4,
+        "dealerUpcard": "4",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "double",
+      "correctActionLabel": "Double",
+      "engine": {
+        "ev": 0.125261,
+        "evGap": 0.062631,
+        "alternatives": [
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": 0.125261
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.062631
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.073706
+          }
+        ]
+      },
+      "explanation": "Soft 17 becomes a strong double against a dealer 4."
+    },
+    {
+      "id": "bj-soft-09",
+      "setup": {
+        "playerRanks": [
+          14,
+          6
+        ],
+        "playerHand": "A-6 (soft 17)",
+        "dealerUpRank": 6,
+        "dealerUpcard": "6",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "double",
+      "correctActionLabel": "Double",
+      "engine": {
+        "ev": 0.260887,
+        "evGap": 0.130443,
+        "alternatives": [
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": 0.260887
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.130443
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": 0.012006
+          }
+        ]
+      },
+      "explanation": "Double soft 17 vs 6, one of the best soft doubling spots."
+    },
+    {
+      "id": "bj-soft-10",
+      "setup": {
+        "playerRanks": [
+          14,
+          6
+        ],
+        "playerHand": "A-6 (soft 17)",
+        "dealerUpRank": 7,
+        "dealerUpcard": "7",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "hit",
+      "correctActionLabel": "Hit",
+      "engine": {
+        "ev": 0.055058,
+        "evGap": 0.062422,
+        "alternatives": [
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.055058
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -0.007364
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.103826
+          }
+        ]
+      },
+      "explanation": "Against a 7, soft 17 should hit; standing gives up too much."
+    },
+    {
+      "id": "bj-soft-11",
+      "setup": {
+        "playerRanks": [
+          14,
+          5
+        ],
+        "playerHand": "A-5 (soft 16)",
+        "dealerUpRank": 4,
+        "dealerUpcard": "4",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "double",
+      "correctActionLabel": "Double",
+      "engine": {
+        "ev": 0.060634,
+        "evGap": 0.020194,
+        "alternatives": [
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": 0.060634
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.04044
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.203594
+          }
+        ]
+      },
+      "explanation": "Double soft 16 vs 4: one card cannot bust you and the dealer may break."
+    },
+    {
+      "id": "bj-soft-12",
+      "setup": {
+        "playerRanks": [
+          14,
+          5
+        ],
+        "playerHand": "A-5 (soft 16)",
+        "dealerUpRank": 6,
+        "dealerUpcard": "6",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "double",
+      "correctActionLabel": "Double",
+      "engine": {
+        "ev": 0.187435,
+        "evGap": 0.084919,
+        "alternatives": [
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": 0.187435
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.102516
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.146311
+          }
+        ]
+      },
+      "explanation": "Soft 16 is a clear double against a dealer 6."
+    },
+    {
+      "id": "bj-soft-13",
+      "setup": {
+        "playerRanks": [
+          14,
+          4
+        ],
+        "playerHand": "A-4 (soft 15)",
+        "dealerUpRank": 4,
+        "dealerUpcard": "4",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "double",
+      "correctActionLabel": "Double",
+      "engine": {
+        "ev": 0.064562,
+        "evGap": 0.00384,
+        "alternatives": [
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": 0.064562
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.060722
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.20398
+          }
+        ]
+      },
+      "explanation": "Double soft 15 vs 4; hitting is weaker when the dealer shows weakness."
+    },
+    {
+      "id": "bj-soft-14",
+      "setup": {
+        "playerRanks": [
+          14,
+          4
+        ],
+        "playerHand": "A-4 (soft 15)",
+        "dealerUpRank": 7,
+        "dealerUpcard": "7",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "hit",
+      "correctActionLabel": "Hit",
+      "engine": {
+        "ev": 0.035679,
+        "evGap": 0.21349,
+        "alternatives": [
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.035679
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -0.177811
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.472512
+          }
+        ]
+      },
+      "explanation": "Soft 15 should hit against a 7 because standing wins too rarely."
+    },
+    {
+      "id": "bj-soft-15",
+      "setup": {
+        "playerRanks": [
+          14,
+          3
+        ],
+        "playerHand": "A-3 (soft 14)",
+        "dealerUpRank": 5,
+        "dealerUpcard": "5",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "double",
+      "correctActionLabel": "Double",
+      "engine": {
+        "ev": 0.138314,
+        "evGap": 0.022048,
+        "alternatives": [
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": 0.138314
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.116266
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.158985
+          }
+        ]
+      },
+      "explanation": "Double soft 14 vs 5 to take advantage of dealer weakness."
+    },
+    {
+      "id": "bj-soft-16",
+      "setup": {
+        "playerRanks": [
+          14,
+          3
+        ],
+        "playerHand": "A-3 (soft 14)",
+        "dealerUpRank": 6,
+        "dealerUpcard": "6",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "double",
+      "correctActionLabel": "Double",
+      "engine": {
+        "ev": 0.186176,
+        "evGap": 0.045366,
+        "alternatives": [
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": 0.186176
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.14081
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.146976
+          }
+        ]
+      },
+      "explanation": "Soft 14 is a profitable double against a dealer 6."
+    },
+    {
+      "id": "bj-soft-17",
+      "setup": {
+        "playerRanks": [
+          14,
+          2
+        ],
+        "playerHand": "A-2 (soft 13)",
+        "dealerUpRank": 6,
+        "dealerUpcard": "6",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "double",
+      "correctActionLabel": "Double",
+      "engine": {
+        "ev": 0.187443,
+        "evGap": 0.024093,
+        "alternatives": [
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": 0.187443
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.16335
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.147343
+          }
+        ]
+      },
+      "explanation": "Double soft 13 vs 6; you need improvement and cannot bust on the next card."
+    },
+    {
+      "id": "bj-soft-18",
+      "setup": {
+        "playerRanks": [
+          14,
+          2
+        ],
+        "playerHand": "A-2 (soft 13)",
+        "dealerUpRank": 10,
+        "dealerUpcard": "10",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "hit",
+      "correctActionLabel": "Hit",
+      "engine": {
+        "ev": -0.101795,
+        "evGap": 0.406046,
+        "alternatives": [
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": -0.101795
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -0.507841
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.540188
+          }
+        ]
+      },
+      "explanation": "Soft 13 has no standing value against a 10, so hit."
+    },
+    {
+      "id": "bj-soft-19",
+      "setup": {
+        "playerRanks": [
+          14,
+          8
+        ],
+        "playerHand": "A-8 (soft 19)",
+        "dealerUpRank": 6,
+        "dealerUpcard": "6",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "stand",
+      "correctActionLabel": "Stand",
+      "engine": {
+        "ev": 0.493924,
+        "evGap": 0.013887,
+        "alternatives": [
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": 0.493924
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": 0.480038
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.240019
+          }
+        ]
+      },
+      "explanation": "Soft 19 is already strong; stand and let the dealer play into a 6."
+    },
+    {
+      "id": "bj-soft-20",
+      "setup": {
+        "playerRanks": [
+          14,
+          9
+        ],
+        "playerHand": "A-9 (soft 20)",
+        "dealerUpRank": 10,
+        "dealerUpcard": "10",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "stand",
+      "correctActionLabel": "Stand",
+      "engine": {
+        "ev": 0.554555,
+        "evGap": 0.53192,
+        "alternatives": [
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": 0.554555
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.022635
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -0.015847
+          }
+        ]
+      },
+      "explanation": "Soft 20 is a stand even against a 10 because improving it is very unlikely."
+    }
+  ]
+}

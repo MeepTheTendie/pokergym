@@ -1,0 +1,339 @@
+{
+  "packId": "baccarat-third-card-rule",
+  "title": "Baccarat Third-Card Rule",
+  "description": "20 graded third-card rule decisions using the baccarat engine rules (playerDraws/bankerDraws).",
+  "spotCount": 20,
+  "generatedFrom": "existing scenario/strategy engine (no hand-written EVs or correct actions)",
+  "spots": [
+    {
+      "id": "bac-01",
+      "setup": {
+        "actor": "player",
+        "playerTotal": 0,
+        "note": "Player initial two-card total"
+      },
+      "correctAction": "draw",
+      "correctActionLabel": "Draw",
+      "engine": {
+        "evGap": null,
+        "ruleReason": "playerDraws(0)=true (total <= 5)"
+      },
+      "explanation": "Player draws on totals 0 through 5."
+    },
+    {
+      "id": "bac-02",
+      "setup": {
+        "actor": "player",
+        "playerTotal": 3,
+        "note": "Player initial two-card total"
+      },
+      "correctAction": "draw",
+      "correctActionLabel": "Draw",
+      "engine": {
+        "evGap": null,
+        "ruleReason": "playerDraws(3)=true (total <= 5)"
+      },
+      "explanation": "A player total of 3 requires a third card."
+    },
+    {
+      "id": "bac-03",
+      "setup": {
+        "actor": "player",
+        "playerTotal": 5,
+        "note": "Player initial two-card total"
+      },
+      "correctAction": "draw",
+      "correctActionLabel": "Draw",
+      "engine": {
+        "evGap": null,
+        "ruleReason": "playerDraws(5)=true (total <= 5)"
+      },
+      "explanation": "Player draws on 5; it is the highest total that still takes a card."
+    },
+    {
+      "id": "bac-04",
+      "setup": {
+        "actor": "player",
+        "playerTotal": 6,
+        "note": "Player initial two-card total"
+      },
+      "correctAction": "stand",
+      "correctActionLabel": "Stand",
+      "engine": {
+        "evGap": null,
+        "ruleReason": "playerDraws(6)=false (total >= 6)"
+      },
+      "explanation": "Player stands on 6 and does not take a third card."
+    },
+    {
+      "id": "bac-05",
+      "setup": {
+        "actor": "player",
+        "playerTotal": 7,
+        "note": "Player initial two-card total"
+      },
+      "correctAction": "stand",
+      "correctActionLabel": "Stand",
+      "engine": {
+        "evGap": null,
+        "ruleReason": "playerDraws(7)=false (total >= 6)"
+      },
+      "explanation": "Player stands on 7; only naturals 8 and 9 are higher before the draw phase resolves."
+    },
+    {
+      "id": "bac-06",
+      "setup": {
+        "actor": "banker",
+        "bankerTotal": 2,
+        "playerStood": true,
+        "playerThirdValue": null,
+        "note": "Player stood (total 6 or 7)"
+      },
+      "correctAction": "draw",
+      "correctActionLabel": "Draw",
+      "engine": {
+        "evGap": null,
+        "ruleReason": "bankerDraws(2, undefined)=true (total <= 5)"
+      },
+      "explanation": "When the player stands, banker draws on 0 through 5."
+    },
+    {
+      "id": "bac-07",
+      "setup": {
+        "actor": "banker",
+        "bankerTotal": 5,
+        "playerStood": true,
+        "playerThirdValue": null,
+        "note": "Player stood (total 6 or 7)"
+      },
+      "correctAction": "draw",
+      "correctActionLabel": "Draw",
+      "engine": {
+        "evGap": null,
+        "ruleReason": "bankerDraws(5, undefined)=true (total <= 5)"
+      },
+      "explanation": "Banker draws on 5 when the player did not take a third card."
+    },
+    {
+      "id": "bac-08",
+      "setup": {
+        "actor": "banker",
+        "bankerTotal": 6,
+        "playerStood": true,
+        "playerThirdValue": null,
+        "note": "Player stood (total 6 or 7)"
+      },
+      "correctAction": "stand",
+      "correctActionLabel": "Stand",
+      "engine": {
+        "evGap": null,
+        "ruleReason": "bankerDraws(6, undefined)=false (total >= 6)"
+      },
+      "explanation": "Banker stands on 6 when the player stands."
+    },
+    {
+      "id": "bac-09",
+      "setup": {
+        "actor": "banker",
+        "bankerTotal": 3,
+        "playerStood": false,
+        "playerThirdValue": 8,
+        "note": "Player drew a third card with value 8"
+      },
+      "correctAction": "stand",
+      "correctActionLabel": "Stand",
+      "engine": {
+        "evGap": null,
+        "ruleReason": "bankerDraws(3, 8)=false (banker 3 stands vs player third 8)"
+      },
+      "explanation": "Banker total 3 draws against most player third cards, but stands if the player drew an 8."
+    },
+    {
+      "id": "bac-10",
+      "setup": {
+        "actor": "banker",
+        "bankerTotal": 3,
+        "playerStood": false,
+        "playerThirdValue": 7,
+        "note": "Player drew a third card with value 7"
+      },
+      "correctAction": "draw",
+      "correctActionLabel": "Draw",
+      "engine": {
+        "evGap": null,
+        "ruleReason": "bankerDraws(3, 7)=true (banker 3 draws vs player third 7)"
+      },
+      "explanation": "Against a player third card of 7, banker total 3 takes another card."
+    },
+    {
+      "id": "bac-11",
+      "setup": {
+        "actor": "banker",
+        "bankerTotal": 4,
+        "playerStood": false,
+        "playerThirdValue": 1,
+        "note": "Player drew a third card with value 1 (Ace)"
+      },
+      "correctAction": "stand",
+      "correctActionLabel": "Stand",
+      "engine": {
+        "evGap": null,
+        "ruleReason": "bankerDraws(4, 1)=false (player third not in 2-7)"
+      },
+      "explanation": "Banker total 4 draws only when the player third card is 2 through 7."
+    },
+    {
+      "id": "bac-12",
+      "setup": {
+        "actor": "banker",
+        "bankerTotal": 4,
+        "playerStood": false,
+        "playerThirdValue": 2,
+        "note": "Player drew a third card with value 2"
+      },
+      "correctAction": "draw",
+      "correctActionLabel": "Draw",
+      "engine": {
+        "evGap": null,
+        "ruleReason": "bankerDraws(4, 2)=true (player third in 2-7)"
+      },
+      "explanation": "A player third card of 2 makes banker total 4 draw."
+    },
+    {
+      "id": "bac-13",
+      "setup": {
+        "actor": "banker",
+        "bankerTotal": 4,
+        "playerStood": false,
+        "playerThirdValue": 7,
+        "note": "Player drew a third card with value 7"
+      },
+      "correctAction": "draw",
+      "correctActionLabel": "Draw",
+      "engine": {
+        "evGap": null,
+        "ruleReason": "bankerDraws(4, 7)=true (player third in 2-7)"
+      },
+      "explanation": "Banker total 4 still draws against a player third card of 7."
+    },
+    {
+      "id": "bac-14",
+      "setup": {
+        "actor": "banker",
+        "bankerTotal": 4,
+        "playerStood": false,
+        "playerThirdValue": 8,
+        "note": "Player drew a third card with value 8"
+      },
+      "correctAction": "stand",
+      "correctActionLabel": "Stand",
+      "engine": {
+        "evGap": null,
+        "ruleReason": "bankerDraws(4, 8)=false (player third not in 2-7)"
+      },
+      "explanation": "Banker total 4 stands when the player third card is 8 or higher than 7."
+    },
+    {
+      "id": "bac-15",
+      "setup": {
+        "actor": "banker",
+        "bankerTotal": 5,
+        "playerStood": false,
+        "playerThirdValue": 3,
+        "note": "Player drew a third card with value 3"
+      },
+      "correctAction": "stand",
+      "correctActionLabel": "Stand",
+      "engine": {
+        "evGap": null,
+        "ruleReason": "bankerDraws(5, 3)=false (player third not in 4-7)"
+      },
+      "explanation": "Banker total 5 draws only on player third cards 4 through 7; 3 is too low."
+    },
+    {
+      "id": "bac-16",
+      "setup": {
+        "actor": "banker",
+        "bankerTotal": 5,
+        "playerStood": false,
+        "playerThirdValue": 4,
+        "note": "Player drew a third card with value 4"
+      },
+      "correctAction": "draw",
+      "correctActionLabel": "Draw",
+      "engine": {
+        "evGap": null,
+        "ruleReason": "bankerDraws(5, 4)=true (player third in 4-7)"
+      },
+      "explanation": "With banker total 5, a player third card of 4 triggers a banker draw."
+    },
+    {
+      "id": "bac-17",
+      "setup": {
+        "actor": "banker",
+        "bankerTotal": 5,
+        "playerStood": false,
+        "playerThirdValue": 7,
+        "note": "Player drew a third card with value 7"
+      },
+      "correctAction": "draw",
+      "correctActionLabel": "Draw",
+      "engine": {
+        "evGap": null,
+        "ruleReason": "bankerDraws(5, 7)=true (player third in 4-7)"
+      },
+      "explanation": "Banker total 5 draws against a player third card of 7."
+    },
+    {
+      "id": "bac-18",
+      "setup": {
+        "actor": "banker",
+        "bankerTotal": 6,
+        "playerStood": false,
+        "playerThirdValue": 5,
+        "note": "Player drew a third card with value 5"
+      },
+      "correctAction": "stand",
+      "correctActionLabel": "Stand",
+      "engine": {
+        "evGap": null,
+        "ruleReason": "bankerDraws(6, 5)=false (player third not in 6-7)"
+      },
+      "explanation": "Banker total 6 draws only if the player third card is 6 or 7."
+    },
+    {
+      "id": "bac-19",
+      "setup": {
+        "actor": "banker",
+        "bankerTotal": 6,
+        "playerStood": false,
+        "playerThirdValue": 6,
+        "note": "Player drew a third card with value 6"
+      },
+      "correctAction": "draw",
+      "correctActionLabel": "Draw",
+      "engine": {
+        "evGap": null,
+        "ruleReason": "bankerDraws(6, 6)=true (player third in 6-7)"
+      },
+      "explanation": "A player third card of 6 gives banker total 6 permission to draw."
+    },
+    {
+      "id": "bac-20",
+      "setup": {
+        "actor": "banker",
+        "bankerTotal": 7,
+        "playerStood": false,
+        "playerThirdValue": 6,
+        "note": "Player drew a third card with value 6"
+      },
+      "correctAction": "stand",
+      "correctActionLabel": "Stand",
+      "engine": {
+        "evGap": null,
+        "ruleReason": "bankerDraws(7, 6)=false (banker total >= 7 always stands)"
+      },
+      "explanation": "Banker always stands on 7, regardless of the player third card."
+    }
+  ]
+}
