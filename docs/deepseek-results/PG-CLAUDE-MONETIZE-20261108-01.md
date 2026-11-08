@@ -4,7 +4,7 @@
 - **correlation_id:** `PG-CLAUDE-MONETIZE-20261108-01`
 - **status:** PASS
 - **branch:** `deepseek/monetize-ballot`
-- **commit:** `5af7c39` (`5af7c39a557ff78b08dd367f06d71e8ef4e62394`)
+- **commit:** `e3ff615` (`e3ff615a49afb313bbddccfd664906c95b0b548d`)
 - **verification:** Read the ballot verbatim via GitHub API (`GET /repos/MeepTheTendie/pokergym/issues/comments/6727258167`, HTTP 200), `docs/OPERATING_RULES.md`, and the crew ledger issue #51. Docs-only ballot — no product changes, so no build/tests were run (nothing to run).
 
 ## Ballot — PG-CLAUDE-MONETIZE-20261108-01
