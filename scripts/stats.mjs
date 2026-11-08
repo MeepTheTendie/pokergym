@@ -146,7 +146,13 @@ export function notTestClause() {
         preview_opens > 0
         AND interactions = 0
       )
-    )`;
+    )
+    -- PostHog classifies traffic by virtual type. Bot/Automation/AI Agent
+    -- profiles are excluded from clean counts; Regular and unknown pass.
+    -- This complements the behavioural rules above (a bot can still slip
+    -- through if it mimics a real session, which is why we keep both).
+    AND (properties.$virt_traffic_type IS NULL
+      OR properties.$virt_traffic_type NOT IN ('Bot', 'Automation', 'AI Agent'))`;
 }
 
 // Unique people per day, the number the dashboard shows as DAU. A pageview is

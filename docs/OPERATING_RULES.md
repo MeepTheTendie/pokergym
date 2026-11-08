@@ -15,7 +15,7 @@ Canonical rules for PokerGym work. This file supersedes conflicting one-line gua
 - Never commit or print a credential. The VAPID private key stays out of the repo.
 - No paid spend, new accounts in Wes's name, DNS changes, auth changes, or secret rotation without explicit approval.
 - No fabricated evidence, fake reviews, guaranteed gambling profits, or real-money wagering.
-- No subscriptions or pricing work. The product is free with optional Ko-fi tips.
+- Monetization follows `plan.md` (Wes, 2026-11-08): the free trainer stays free forever and nothing free today is ever gated; Gym Pro sells new content only through Ko-fi. Price changes, new paid products, ad spend or a new payment processor need a crew decision logged in the ControlDoc, and anything that spends money or needs a new account needs Wes. (Replaces the Oct 15 "no subscriptions or pricing work" rule.)
 - Preserve user work and unrelated files.
 
 ## Not gates
