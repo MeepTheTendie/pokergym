@@ -103,6 +103,22 @@ test('reel link /reel stamps platform attribution instead of relying on captions
   assert.equal(yt.searchParams.get('daily'), '1');
 });
 
+test('x link /x tags the owner daily X posts', async () => {
+  const e = env(); const c = ctx();
+  const response = await worker.fetch(nav('https://playpokergym.com/x?c=soft17'), e, c);
+  assert.equal(response.status, 302);
+  const loc = new URL(response.headers.get('location'));
+  assert.equal(loc.pathname, '/web/');
+  assert.equal(loc.searchParams.get('ref'), 'x');
+  assert.equal(loc.searchParams.get('utm_source'), 'x');
+  assert.equal(loc.searchParams.get('utm_medium'), 'social');
+  assert.equal(loc.searchParams.get('utm_campaign'), 'wes-daily');
+  assert.equal(loc.searchParams.get('utm_content'), 'soft17');
+  const bare = new URL((await worker.fetch(nav('https://playpokergym.com/x'), e, c)).headers.get('location'));
+  assert.equal(bare.searchParams.get('utm_content'), null);
+  assert.deepEqual(e.served, []);
+});
+
 test('worker counts a page view and always serves assets', async () => {
   const e = env(); const c = ctx();
   const res = await worker.fetch(nav('https://playpokergym.com/web/?ref=share&d=9', { 'cf-connecting-ip': '203.0.113.9', 'user-agent': 'X', cookie: 'a=b' }), e, c);
