@@ -1,0 +1,44 @@
+name: indexnow
+
+# Tells Bing (and the other IndexNow engines: Yandex, Seznam, Naver, Yep)
+# about every URL in public/sitemap.xml after each successful production
+# deploy, and on demand from the Actions tab. No account or secret needed:
+# ownership is proven by the key file at https://playpokergym.com/<key>.txt.
+# Runs separately from `deploy` so a ping failure never marks a deploy red.
+on:
+  workflow_run:
+    workflows: [deploy]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+      - name: Confirm key file is live
+        run: |
+          key=$(tr -d '[:space:]' < scripts/indexnow-key.txt)
+          live=$(curl --fail --silent --show-error "https://playpokergym.com/$key.txt" | tr -d '[:space:]')
+          [ "$live" = "$key" ] || { echo "key file not live (got '$live')" >&2; exit 1; }
+      - name: Submit sitemap URLs to IndexNow
+        run: node scripts/indexnow.mjs | tee indexnow.log
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### IndexNow"
+            echo "- Sitemap URLs: $(grep -c '<loc>' public/sitemap.xml)"
+            echo "- Result: $(cat indexnow.log 2>/dev/null || echo 'not run')"
+          } >> "$GITHUB_STEP_SUMMARY"
