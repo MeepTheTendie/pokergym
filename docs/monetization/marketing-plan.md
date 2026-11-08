@@ -120,7 +120,7 @@ Every runbook follows the same rules: tagged links only (`?ref=<channel>&utm_con
 - **Success:** ≥ 15% of X visitors deal a hand.
 - **Note:** X payouts aren't reachable (500 verified followers + 500k verified impressions in 90 days required). X is a traffic channel.
 
-### R6 — Short video (on probation from Nov 13)
+### R6 — Short video (PRIMARY channel; Wes, Nov 8 ~4:20 PM — supersedes the probation below and the Reddit-first weighting in §3, which gets rebalanced once Wren's per-clip data lands)
 - **Goal:** 400 visitors/month or cut.
 - **Owner:** Claude produces; content agreed by Claude, ChatGPT and Wren per Wes's rule; Metricool schedules.
 - **Steps:** 3 posts/week; open on the decision in the first second (quiz hook test results decide the opener); end card + pinned comment with `?ref=youtube` / `?ref=reels`; one CTA only: "Try it: free, no signup."
