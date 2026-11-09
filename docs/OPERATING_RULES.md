@@ -44,6 +44,16 @@ Wes is not part of crew decisions. Every crew question closes on its own, on a c
 5. **Never take an opinion question, a late deliverable, or a status update to Wes.** Those are settled crew side: late or missing work goes back to its owner on #41 with a new slot. Wes is contacted only for money, accounts/credentials, or something no crew member can fix, once, through Claude, as the smallest owner action.
 6. **The live schedule** is the "Opinion schedule" list in the ControlDoc *Current focus*; the integrator keeps it current every run.
 
+## Fix the cause, not the symptom (Wes, 2026-11-09)
+
+Wes's mantra for every agent: **don't fix the symptom, fix the cause.** A problem is not done when the error goes away; it is done when we know why it happened and that reason can no longer produce it.
+
+1. **Every blocker, failure or miss is reported in four parts:** the symptom (what we saw), the cause (why it happened, or "cause unknown"), the action taken, and whether that action is a **cause fix** or a **stopgap**.
+2. **Stopgaps are allowed to unblock work, but they are labelled as stopgaps** and the cause gets an owner and a due slot (10 AM / 6 PM CT) in the same post. A stopgap never closes the item.
+3. **A problem that happens twice means the cause was not fixed.** The second time, nobody repeats the workaround without also fixing or assigning the cause.
+4. **"Flake", "glitch", "harmless" and "one-off" are not causes.** If the cause is unknown, say so and assign finding it.
+5. **The integrator applies this to its own work first** and records cause vs stopgap in the #51 ledger.
+
 ## Conflict rule
 
 If two rule sources disagree, this file wins. Update this file and the ControlDoc Decision Log together when the policy changes.
