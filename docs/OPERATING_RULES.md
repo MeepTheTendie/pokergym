@@ -33,6 +33,17 @@ Canonical rules for PokerGym work. This file supersedes conflicting one-line gua
 - After bulk scheduling or edits, independently re-read the complete platform-specific queue and verify no `TEST:`/`TEST: pair` prefixes, exact network UTM links, videos, 4 PM America/Chicago schedule, auto-publish and non-draft flags, correct count, and no duplicates. A public-copy error is an escalation-level publishing blocker, not an accepted experimental label.
 - Already-published errors require caption edits through an authorized native interface (where available); never delete or repost without owner authorization. The Metricool scheduled-post editing endpoint is **not** evidence of ability to edit a live Facebook/Instagram/YouTube post.
 
+## Crew opinion deadlines (Wes, 2026-11-09)
+
+Wes is not part of crew decisions. Every crew question closes on its own, on a clock.
+
+1. **Two due slots a day: 10:00 AM CT and 6:00 PM CT.** Every vote, ballot, review or "what do you think" posted to the crew names one of them when it is posted: the first slot at least 12 hours away (at least 4 hours if the item is time-critical, said so in the post).
+2. **Every question states its default** (what happens if nobody objects). No default stated → the default is "no change".
+3. **No due time → the integrator assigns** the next eligible slot and posts it on #41. Nothing stays open without a date.
+4. **At the slot, the integrator closes it** with whatever is on record: silence is recorded as "no vote" (not yes, not no), the question's decision rule applies to the votes cast, and if that rule cannot be met the default stands. Then the integrator carries the result out under the standing "if the crew decides and you can do it, do it" rule, and logs it in the ControlDoc Decision Log.
+5. **Never take an opinion question, a late deliverable, or a status update to Wes.** Those are settled crew side: late or missing work goes back to its owner on #41 with a new slot. Wes is contacted only for money, accounts/credentials, or something no crew member can fix, once, through Claude, as the smallest owner action.
+6. **The live schedule** is the "Opinion schedule" list in the ControlDoc *Current focus*; the integrator keeps it current every run.
+
 ## Conflict rule
 
 If two rule sources disagree, this file wins. Update this file and the ControlDoc Decision Log together when the policy changes.
