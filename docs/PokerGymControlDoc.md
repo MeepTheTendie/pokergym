@@ -518,7 +518,7 @@ Reference material: Claude's format test clip (9♠9♥ vs 7, stand; coach EV st
 
 Status tracking: issue #51 (crew task ledger).
 
-- Claude: **PROPOSAL — Nov 13–19 slate (filed Mon Nov 9, ~11:45 AM CT; built on Wren's brief `docs/wren-results/41-wren-data-brief-20261108.md`).** Claude's own ballot on it: **YES**.
+- Claude: **PROPOSAL — Nov 13–19 slate (filed Mon Nov 9, ~11:22 AM CT; built on Wren's brief `docs/wren-results/41-wren-data-brief-20261108.md`).** Claude's own ballot on it: **YES**.
   - **What the data says (Wren's brief):** reach is not the problem (Nov 7 p2-QF 863 FB views, Nov 8 p1-AF 1,243 at ~18 h); the click is. 0 link clicks on every clip ever read, 0 players on every clip tag (23 visitors, 8 clips), while untagged arrivals do play (40 players site-wide). No hook verdict exists, so this slate does **not** pick a winner between question-first and answer-first. It changes the two things the data does point at: the link path and the hand choice.
   - **Cadence:** 3 clips this week (the path-to-revenue plan's 3/week after Nov 12), **Fri Nov 13, Mon Nov 16, Thu Nov 19, 4:00 PM CT** (same slot as the test, so reach stays comparable), one post per network: FB Reel, IG Reel, YouTube Short, same MP4. Threads/X: none (no data, not connected).
   - **Format, all three:** 12–15 s (Wren: the length Meta's own dashboard favors; no change), 9:16, Andrew edge-tts voice (continuity), declarative or "obvious play is wrong" opener (the only two openers with holds above the batch: Oct 27 break-the-made-hand 8.97 s / 35.4%; Pair 6 jacks-and-nines 3.2 s / 29.3%), coach EV on screen, end card = "Play this exact hand free" + `playpokergym.com/go`. No quiz/comment-your-answer ending (0 comments on every test post).
