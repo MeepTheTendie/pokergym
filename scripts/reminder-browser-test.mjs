@@ -8,6 +8,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { setTimeout as sleep } from 'node:timers/promises';
+import { launchChromium } from './lib/chromium.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const appFile = path.join(root, 'web/app.js');
@@ -18,25 +19,20 @@ try {
 if (needsBuild) execFileSync(process.execPath, ['scripts/build.mjs'], { cwd: root, stdio: 'inherit' });
 
 const PORT = 8902;
-const DEBUG_PORT = 9341;
 const BASE = `http://127.0.0.1:${PORT}/web/`;
 const server = spawn('python3', ['-m', 'http.server', String(PORT), '--bind', '127.0.0.1'], {
   cwd: path.join(root, 'dist'), stdio: 'ignore',
 });
 const profilePath = await mkdtemp(path.join(tmpdir(), 'pokergym-reminder-profile-'));
 const downloadPath = await mkdtemp(path.join(tmpdir(), 'pokergym-reminder-downloads-'));
-const chrome = spawn('chromium', ['--headless=new', '--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage',
-  '--window-size=390,844', `--user-data-dir=${profilePath}`, `--remote-debugging-port=${DEBUG_PORT}`, 'about:blank'], { stdio: 'ignore' });
-await sleep(800);
+// Retries a bounded number of launches and reports Chromium's stderr on failure.
+const browser = await launchChromium({ profileDir: profilePath, extraArgs: ['--window-size=390,844'] });
+const chrome = browser.chrome;
 
 let ws;
 try {
-  let page;
-  for (let i = 0; i < 100 && !page; i++) {
-    try { page = (await (await fetch(`http://127.0.0.1:${DEBUG_PORT}/json/list`)).json()).find(t => t.type === 'page'); } catch {}
-    if (!page) await sleep(100);
-  }
-  assert.ok(page, 'Chromium available');
+  let page = browser.page;
+  assert.ok(page?.webSocketDebuggerUrl, 'Chromium DevTools page available');
   ws = new WebSocket(page.webSocketDebuggerUrl);
   await new Promise(resolve => { ws.onopen = resolve; });
 
