@@ -219,7 +219,7 @@ def render_video(clip, P, out):
 
     ff = subprocess.Popen(['ffmpeg', '-y', '-loglevel', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24',
         '-s', f'{W}x{H}', '-r', str(FPS), '-i', '-', '-an', '-c:v', 'libx264', '-preset', 'slow',
-        '-b:v', '9M', '-minrate', '9M', '-maxrate', '9M', '-bufsize', '9M', '-x264-params', 'nal-hrd=cbr',
+        '-b:v', '4500k', '-minrate', '4500k', '-maxrate', '4500k', '-bufsize', '4500k', '-x264-params', 'nal-hrd=cbr',  # ≤15 s → ~8.7 MB with audio, under the Drive connector's 10 MB upload cap
         '-pix_fmt', 'yuv420p', '-r', str(FPS), out], stdin=subprocess.PIPE)
     for i in range(N):
         t = i / FPS
