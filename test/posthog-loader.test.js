@@ -91,6 +91,16 @@ test('first-touch UTMs are set once via $set_once', () => {
   });
 });
 
+test('a trailing backtick on utm_content is trimmed before recording', () => {
+  // `ig-bio` + a stray trailing backtick must record as `ig-bio`, not `ig-bio``.
+  const { identified } = setupLoader('?utm_source=ig&utm_medium=reel&utm_campaign=hooktest1112&utm_content=ig-bio%60');
+  assert.ok(identified.length > 0);
+  const props = identified[0][1];
+  assert.equal(props.$set_once.utm_content, 'ig-bio');
+  assert.equal(props.$set_once.utm_source, 'ig');
+  assert.equal(props.$set_once.utm_campaign, 'hooktest1112');
+});
+
 test('first-touch is not overwritten by a later visit', () => {
   // First visit stores utm_source=first.
   const first = setupLoader('?ref=share&sh=a&utm_source=first');

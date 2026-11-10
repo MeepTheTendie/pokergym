@@ -61,6 +61,20 @@
   var FIRST_KEY = 'pg_first_touch_v1';
   var SESSION_KEY = 'pg_session_source_v1';
   var SOURCE_KEYS = ['ref', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content'];
+  // Normalize a campaign value the same way the worker does: strip surrounding
+  // whitespace and any trailing run of backticks/quotes, so a stray trailing
+  // backtick (e.g. `utm_content=ig-bio` + backtick) records as `ig-bio`.
+  function cleanCampaign(value) {
+    if (value === undefined || value === null) return '';
+    var text = String(value);
+    var prev;
+    do {
+      prev = text;
+      text = text.trim();
+      text = text.replace(/[`'"\u2018\u2019\u201c\u201d]+$/, '');
+    } while (text !== prev);
+    return text;
+  }
   function readStore(store, key) {
     try { var raw = store.getItem(key); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
   }
@@ -70,7 +84,11 @@
   try {
     var params = new URLSearchParams(window.location.search);
     var entry = {};
-    SOURCE_KEYS.concat(['d', 'practice', 'sh']).forEach(function (key) {
+    SOURCE_KEYS.forEach(function (key) {
+      var value = cleanCampaign(params.get(key));
+      if (value) entry[key] = value.slice(0, 100);
+    });
+    ['d', 'practice', 'sh'].forEach(function (key) {
       var value = params.get(key);
       if (value) entry[key] = String(value).slice(0, 100);
     });
