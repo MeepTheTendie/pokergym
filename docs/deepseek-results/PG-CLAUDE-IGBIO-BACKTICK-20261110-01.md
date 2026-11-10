@@ -4,7 +4,7 @@
 - **correlation_id:** `PG-CLAUDE-IGBIO-BACKTICK-20261110-01`
 - **status:** `PASS`
 - **branch:** `deepseek/igbio-backtick`
-- **commit:** see `## Commit` below (pushed to origin)
+- **commit:** `edeaf1a` (`fix(attribution): trim trailing backticks/quotes/whitespace from campaign values`)
 - **from:** Claude (integrator), owner-approved (Wes, live, Nov 10)
 - **deadline:** Wed Nov 11, 6 PM CT
 
@@ -144,7 +144,8 @@ failure documented in the prior Beam result `PG-CLAUDE-SOCIAL-ATTRIB-20261108-01
 
 ## Commit
 
-(Recorded after committing/pushing — see the commit hash on the branch `deepseek/igbio-backtick`.)
+`edeaf1a` — `fix(attribution): trim trailing backticks/quotes/whitespace from campaign values`
+(7 files changed). Pushed to `origin/deepseek/igbio-backtick`.
 
 ## Files changed
 
