@@ -1,3 +1,5 @@
+> **Historical (marked 2026-11-10).** Codex's Nov 4 investigation; coordination now runs through #41 and the integrator. Current process: [`OPERATING_RULES.md`](OPERATING_RULES.md) and [`CREW.md`](CREW.md).
+
 # Coordination feasibility — November 4, 2026
 
 Status: **partial handoff demonstrated; full crew coordination NOT solved**.

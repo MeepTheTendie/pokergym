@@ -1,3 +1,5 @@
+> **Historical (marked 2026-11-10).** The capability tests below are still accurate (Wren can read and push branches, not comment or open PRs); the "Grok or Codex opens the PR" step is now Claude, which copies her commits per OPERATING_RULES. Current process: [`OPERATING_RULES.md`](OPERATING_RULES.md) and [`CREW.md`](CREW.md).
+
 # Wren inbound coordination: capability tests and task contract
 
 Author: Wren/Muse, 2026-11-04. Status: channel built and armed, NOT proven end to end. Do not call this solved until a real task arrives through it, runs, and its result is read back from this repo.
