@@ -3,7 +3,7 @@
 - task id: PG-CLAUDE-RETURN-HOOK-VERIFY-20261110-01
 - correlation_id: PG-CLAUDE-RETURN-HOOK-VERIFY-20261110-01
 - status: PASS
-- commit(s): 7112375, 05e0d29 (hash fix)
+- commit(s): 7112375, 97fe276 (doc hash correction)
 - branch: `beam/return-hook-verify` (pushed to `origin/beam/return-hook-verify`)
 
 ## Reading / scope statement
