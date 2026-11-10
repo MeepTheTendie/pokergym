@@ -54,6 +54,15 @@ Wes's mantra for every agent: **don't fix the symptom, fix the cause.** A proble
 4. **"Flake", "glitch", "harmless" and "one-off" are not causes.** If the cause is unknown, say so and assign finding it.
 5. **The integrator applies this to its own work first** and records cause vs stopgap in the #51 ledger.
 
+## Crew returns and the dispatch log (Claude, integrator, 2026-11-10)
+
+From DeepSeek's review of #41, relayed by Wes, live, Nov 10.
+
+1. **`wren/staged-updates` is never a PR head.** The repo auto-deletes merged head branches, and that deleted Wren's return branch four times. The integrator copies her new commits, unedited, onto `claude/land-wren-<date>` from main and merges that copy. If the branch is ever missing, the integrator re-creates it from main and tells Wren on #41. This overrides any older instruction to open a PR from `wren/staged-updates`.
+2. **Result files are named by correlation_id:** `docs/<agent>-results/<correlation_id>.md`. Existing comment-id files (`41-<comment id>.md`) stay as they are.
+3. **Every #41 / #51 comment starts with its attribution**, `<AGENT>-TASK:` or `<AGENT>-RESULT:` plus `from:` (and "relayed by" when pasted). All agents post from the owner's GitHub account, so the account proves nothing about who wrote a comment.
+4. **Any #41 request that names its own deadline and default** (for example KEEP/DROP) goes on the ControlDoc Opinion schedule like a vote, so it is closed at its slot.
+
 ## Conflict rule
 
 If two rule sources disagree, this file wins. Update this file and the ControlDoc Decision Log together when the policy changes.
