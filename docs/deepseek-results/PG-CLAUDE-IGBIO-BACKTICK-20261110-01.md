@@ -145,7 +145,8 @@ failure documented in the prior Beam result `PG-CLAUDE-SOCIAL-ATTRIB-20261108-01
 ## Commit
 
 `edeaf1a` — `fix(attribution): trim trailing backticks/quotes/whitespace from campaign values`
-(7 files changed). Pushed to `origin/deepseek/igbio-backtick`.
+(7 files changed), plus a follow-up doc commit on the same branch. Pushed to
+`origin/deepseek/igbio-backtick`.
 
 ## Files changed
 
