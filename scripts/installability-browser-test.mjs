@@ -1,25 +1,22 @@
 import assert from 'node:assert/strict';
-import { spawn, execFileSync } from 'node:child_process';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
+import { launchChromium, findChromium } from './lib/chromium.mjs';
+import { execFileSync } from 'node:child_process';
 
 // Fresh isolated profile; never inspect the owner's browser or account data.
 // Live check: the canonical domain by default; POKERGYM_INSTALL_URL may point at
 // https://pokergym.history-atlas.workers.dev/web/ (still served) before the domain is live.
 const url = process.env.POKERGYM_INSTALL_URL ?? 'https://playpokergym.com/web/';
 const temp = await mkdtemp(path.join(tmpdir(), 'pokergym-install-test-'));
-const browser = spawn('chromium', ['--headless=new', '--no-sandbox', '--disable-dev-shm-usage',
-  `--user-data-dir=${temp}`, '--remote-debugging-port=19398', 'about:blank'], { stdio: 'ignore' });
+// Shared launcher: free port, bounded retries, Chromium stderr on failure.
+const browser = await launchChromium({ profileDir: temp });
 let ws;
 try {
-  let page;
-  for (let i = 0; i < 100 && !page; i++) {
-    try { page = (await (await fetch('http://127.0.0.1:19398/json/list')).json()).find(t => t.type === 'page'); } catch {}
-    if (!page) await sleep(100);
-  }
-  assert.ok(page, 'Isolated Chromium started');
+  const page = browser.page;
+  assert.ok(page?.webSocketDebuggerUrl, 'Isolated Chromium started');
   ws = new WebSocket(page.webSocketDebuggerUrl);
   await new Promise(resolve => { ws.onopen = resolve; });
   let id = 0;
@@ -143,9 +140,9 @@ try {
   assert.ok(shortcutHands >= resumedHands && shortcutHands <= resumedHands + 1, 'Shortcut resume preserves completed hands; a natural may settle immediately');
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Resumed training fits phone width');
   assert.deepEqual(errors, [], 'No browser runtime errors');
-  console.log(JSON.stringify({ checkedAt: new Date().toISOString(), url, chromium: execFileSync('chromium', ['--version'], { encoding: 'utf8' }).trim(), manifestUrl: manifest.url, startUrl: start.href, icons: data.icons.length, installabilityErrors: [], firstDecisionTaps: 1, firstDecisionMs, firstDecisionGradingAndReview: 'passed', offlineStartUrlSaveResume: 'passed', offlineShortcutDestinations: 'passed', physicalAndroidInstallation: 'unverified' }, null, 2));
+  console.log(JSON.stringify({ checkedAt: new Date().toISOString(), url, chromium: execFileSync(findChromium(), ['--version'], { encoding: 'utf8' }).trim(), manifestUrl: manifest.url, startUrl: start.href, icons: data.icons.length, installabilityErrors: [], firstDecisionTaps: 1, firstDecisionMs, firstDecisionGradingAndReview: 'passed', offlineStartUrlSaveResume: 'passed', offlineShortcutDestinations: 'passed', physicalAndroidInstallation: 'unverified' }, null, 2));
 } finally {
-  ws?.close(); browser.kill('SIGTERM');
-  await new Promise(resolve => browser.exitCode !== null ? resolve() : browser.once('exit', resolve));
+  ws?.close();
+  await browser.close();
   await rm(temp, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 }
