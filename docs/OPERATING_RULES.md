@@ -2,12 +2,18 @@
 
 Canonical rules for PokerGym work. This file supersedes conflicting one-line guardrails in `docs/PokerGymControlDoc.md`, the retired `automation/retired/daily-prompt.md`, and ad-hoc agent notes. It applies to PokerGym only.
 
+**Where the rules live (cleaned up 2026-11-10):**
+- This file: how work is done.
+- [`CREW.md`](CREW.md): who owns what, and which tools each agent uses.
+- `PokerGymControlDoc.md`: the record (Decision Log, Opinion schedule, status sections). It holds no rules of its own that conflict with this file.
+- Historical, no longer instructions: `specialist-write-path-2026-11-04.md`, `grok-runtime-handoff-2026-11-04.md`, `coordination-feasibility-2026-11-04.md`, `wren-inbound-coordination.md` (its capability tests are still accurate) and `automation/retired/`.
+
 ## Ship path
 
-1. One branch per task. Delete the branch after merge.
-2. Open a PR to `main`. The required `test` check must be green before merge.
+1. One branch per task. The repo deletes a merged head branch automatically; `wren/staged-updates` is never used as a PR head (see "Crew returns").
+2. The integrator (Claude) opens the PR to `main`, DRAFT while a hold applies. The required `test` check must be green before merge.
 3. A green PR may be squash-merged by the agent that owns the task. If GitHub blocks only on the required-review or up-to-date rule, the owner/agent may use an admin merge (`--admin`). Never use it to bypass a red test.
-4. Deploy only from a merged, green `main` with `npm run deploy`. Wes's 2026-10-28 standing permission covers PokerGym deploys; no extra per-deploy approval is needed.
+4. Deploy happens automatically: a green `tests` run on `main` triggers the `deploy` workflow. No manual deploys. Wes's 2026-10-28 standing permission covers PokerGym deploys.
 5. After deploy, check the live URL, report the commit and Worker version, and log the change in `docs/PokerGymControlDoc.md`.
 
 ## Non-negotiables
@@ -62,6 +68,9 @@ From DeepSeek's review of #41, relayed by Wes, live, Nov 10.
 2. **Result files are named by correlation_id:** `docs/<agent>-results/<correlation_id>.md`. Existing comment-id files (`41-<comment id>.md`) stay as they are.
 3. **Every #41 / #51 comment starts with its attribution**, `<AGENT>-TASK:` or `<AGENT>-RESULT:` plus `from:` (and "relayed by" when pasted). All agents post from the owner's GitHub account, so the account proves nothing about who wrote a comment.
 4. **Any #41 request that names its own deadline and default** (for example KEEP/DROP) goes on the ControlDoc Opinion schedule like a vote, so it is closed at its slot.
+5. **Video slates are timed before the ballot.** A slate proposal states each clip's measured length from an actual voice render (`render_slate.py --plan` or a full render), not an estimate. A script that does not fit the approved length goes back to its proposer before the vote. Cause: the Nov 16 clip's approved script ran 16.4 s against a 12–15 s spec.
+6. **Videos are rendered to upload.** Renders target ≤ 9 MB (the Drive connector refuses uploads over 10 MB), so the delivered file is the file that was checked.
+7. **Getting a clip into Metricool (Wes, live, Nov 10: "if Metricool is getting in the way, figure out a way around it").** Metricool cannot fetch a private Drive file, and the integrator does not change Drive sharing. The integrator uploads to Drive and tries Metricool once; if Metricool cannot read the file, it sends a `CHATGPT-TASK` the same run (ChatGPT's proven path imports the Drive file through a temporary signed URL, no sharing change) and checks the queue with `getScheduledPosts` on its next run. An approved clip is never left unscheduled because of a tool limit.
 
 ## Conflict rule
 
