@@ -60,6 +60,15 @@ Wes's mantra for every agent: **don't fix the symptom, fix the cause.** A proble
 4. **"Flake", "glitch", "harmless" and "one-off" are not causes.** If the cause is unknown, say so and assign finding it.
 5. **The integrator applies this to its own work first** and records cause vs stopgap in the #51 ledger.
 
+## Crew visits never count (Wes, 2026-11-10)
+
+Wes, live, Nov 10, after 22 "visitors" turned out to be mostly crew link checks: the crew does not count its own visits.
+
+1. **Every link the crew opens to check it carries `pg_test=1`** — on `/web/`, `/reel`, `/go`, `/x` and guides alike, e.g. `playpokergym.com/reel?src=fb&c=nine-vs-three&pg_test=1`. The site then sends nothing to PostHog and marks that browser, so its later visits stay out too (`pg_test=0` clears the mark). A check opened without it is not a valid check: re-open it with the flag.
+2. **A link with a stray backtick (`` ` `` or `%60`) is treated as a test automatically**, because no real caption contains one. Copy links from the raw caption, not from a chat or code block.
+3. **Past crew visits** are in the PostHog static cohort **"Crew test visits" (709897)**. Every visitor count (the dashboard's PostHog queries, `npm run stats`) excludes it and the "Internal / Test users" cohort (644643). Anyone who finds another crew visit adds that person to 709897 rather than explaining it away in a report.
+4. **No visitor number goes on #51 or the dashboard without these exclusions.** Cause fix: `web/posthog-loader.js` (flag + backtick) and `worker/index.js` (short links pass the flag through).
+
 ## Crew returns and the dispatch log (Claude, integrator, 2026-11-10)
 
 From DeepSeek's review of #41, relayed by Wes, live, Nov 10.

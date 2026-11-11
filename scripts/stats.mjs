@@ -80,6 +80,9 @@ const AUTOMATION_USER_AGENTS = ['Edge/12.246'];
 // PostHog's own "Internal / Test users" cohort. Profiles are marked
 // $internal_or_test_user=true on the person and recalculated into this cohort.
 export const INTERNAL_COHORT_ID = 644643;
+// Static cohort of crew link checks (backtick-pasted links, pre-launch /reel
+// redirects, unposted clip tags, diagnostic refs). Created 2026-11-10.
+export const CREW_TEST_COHORT_ID = 709897;
 
 // SQL fragment (HogQL) that drops this project's own probe traffic and the
 // automation above.
@@ -98,6 +101,7 @@ export function notTestClause() {
     AND distinct_id NOT IN (${quoted(TEST_DISTINCT_IDS)})
     AND person_id NOT IN (${quoted(AUTOMATION_PERSON_IDS)})
     AND person_id NOT IN COHORT ${INTERNAL_COHORT_ID}
+    AND person_id NOT IN COHORT ${CREW_TEST_COHORT_ID}
     AND (properties.ref IS NULL OR properties.ref NOT IN (${quoted(TEST_REFS)}))
     AND (properties.first_ref IS NULL OR properties.first_ref NOT IN (${quoted(TEST_REFS)}))
     AND (properties.session_ref IS NULL OR properties.session_ref NOT IN (${quoted(TEST_REFS)}))
