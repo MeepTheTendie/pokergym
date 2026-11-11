@@ -619,7 +619,7 @@ function computeToday() {
   }
   if (daily.lastKey !== key) {
     return {
-      state: `Daily Drill #${number} is ready. Five hands, one from each game, the same drill for everyone today.`,
+      state: `Daily Drill #${number} is ready. Five hands across all four games, the same drill for everyone today.`,
       label: `Play Daily Drill #${number}`,
       action: () => startDaily('map'),
     };
@@ -668,6 +668,7 @@ function renderToday() {
   const key = dailyKey();
   const daily = dailyOf(profile);
   renderDailyHistory(daily.history, key);
+  renderDailySquares(daily, key);
   if (daily.lastKey === key) {
     const results = daily.history.find(entry => entry.key === key)?.results ?? [];
     const text = dailyShareText(key, results, dailyNumber(key));
@@ -693,6 +694,33 @@ function renderToday() {
     tip.innerHTML = TIP_HTML;
     actions.appendChild(tip);
   }
+}
+
+// The five squares under the Today card. Before today's drill is played they
+// are neutral placeholders; once the day is complete they show the real result
+// stored in daily.history, so a perfect run reads as five green squares instead
+// of the old hard-coded ✓✓✓✓✕ decoration.
+function renderDailySquares(daily, key) {
+  const host = el('dailySquares');
+  if (!host) return;
+  host.replaceChildren();
+  const played = daily.lastKey === key;
+  const results = played
+    ? (daily.history.find(entry => entry.key === key)?.results ?? [])
+    : [];
+  for (let i = 0; i < DAILY_HANDS; i++) {
+    const sq = document.createElement('span');
+    if (played && i < results.length) {
+      sq.className = 'sq ' + (results[i] ? 'sq-green' : 'sq-red');
+      sq.textContent = results[i] ? '✓' : '✕';
+    } else {
+      sq.className = 'sq sq-empty';
+    }
+    host.appendChild(sq);
+  }
+  host.setAttribute('aria-label', played
+    ? `Today's result: ${results.filter(Boolean).length} of ${results.length} correct`
+    : 'Daily Drill not played yet');
 }
 
 function renderDailyHistory(history, key) {
@@ -1724,7 +1752,10 @@ function setControls() {
 
   if (vp) {
     // A fresh hand is dealt automatically. DEAL stays disabled while a hand is
-    // live so it cannot be used to discard a bad deal and reroll for free.
+    // live so it cannot be used to discard a bad deal and reroll for free. In
+    // daily/session flow "Next hand" is the only continue once a hand settles,
+    // so a second gold DEAL beside it is hidden.
+    el('btnDeal').hidden = (dailyMode || shortSession) && handDone;
     el('btnDeal').disabled = !handDone;
     el('btnDraw').disabled = handDone;
     el('btnDraw').classList.toggle('primary', !handDone);
@@ -1741,7 +1772,12 @@ function setControls() {
     return;
   }
   if (gameId === 'baccarat') {
-    if (round?.quiz) {
+    const quiz = round?.quiz;
+    if (quiz) {
+      // House-edge and tie-payout questions are answered from the Odds panel;
+      // open it by default while the question is live so the numbers are in
+      // front of the player instead of hidden behind a collapsed summary.
+      if (!handDone && (quiz.type === 'select' || quiz.type === 'tieodds')) el('paytablePanel').open = true;
       renderQuizButtons();
       return;
     }
@@ -1879,7 +1915,7 @@ function startHand() {
   clearInterval(message._typer);
   message._typer = null;
   const dailyIntro = dailyMode && dailyRun && dailyRun.index === 0
-    ? 'This is the Daily Drill: five hands, one from each game. Make the play you think is best; the coach grades it and explains why after each hand. '
+    ? 'This is the Daily Drill: five hands across all four games. Make the play you think is best; the coach grades it and explains why after each hand. '
     : '';
   message.textContent = dailyIntro + instructions[gameId];
   el('masterPrompt').hidden = true;
@@ -2520,7 +2556,7 @@ function doDraw() {
     optimal,
     difficulty: handDifficulty(round.result),
     review,
-    line: `Result: ${round.winLabel}. Your hold was ${optimal ? 'the best play' : 'not the best play'}.`,
+    line: `Result: ${round.winLabel}.`,
   });
 }
 
