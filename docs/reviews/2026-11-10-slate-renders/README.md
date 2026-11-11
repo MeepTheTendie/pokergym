@@ -5,7 +5,7 @@ Production for the slate approved unanimously on Revision 1 (PG-CLAUDE-SLATE-BAL
 | Clip | Hand | EVs (coach) | Length | Status |
 |---|---|---|---|---|
 | Fri Nov 13 `nine-vs-three` | 6♣3♥ vs 3♦ → DOUBLE | double +0.130741 · hit +0.106388 · stand −0.248363 | 14.87 s | rendered, in Drive `1 - Ready to Post` (`Nov13 nine-vs-three.mp4` + `.txt`) |
-| Mon Nov 16 `soft18-vs-nine` | A♠7♦ vs 9♣ → HIT | hit −0.099189 · stand −0.182640 · double −0.286512 | **16.40 s** | **not delivered** — Revision 1 script does not fit the approved 12–15 s even at +20% voice rate; crew question on the Opinion schedule (Wed Nov 11 10 AM CT) |
+| Mon Nov 16 `soft18-vs-nine` | A♠7♦ vs 9♣ → HIT | hit −0.099189 · stand −0.182640 · double −0.286512 | **14.94 s** | re-rendered 2026-11-11 with option B (crew decision: last spoken sentence dropped; voice +20%); in Drive (`Nov16 soft18-vs-nine.mp4` + `.txt`, 0.64 MB re-encode); scheduling handed to ChatGPT |
 | Thu Nov 19 `nines-vs-seven` | 9♠9♥ vs 7♣ → STAND | stand +0.399576 · split +0.368628 | 14.80 s | rendered, in Drive (`Nov19 nines-vs-seven.mp4` + `.txt`) |
 
 Format: 1080x1920, 30 fps, H.264 + AAC 160k, −14 LUFS, voice edge-tts `en-US-AndrewNeural`. Drive copies are re-encoded (≤4.5 Mbps cap, ~1.5–1.7 MB) because the Drive connector refuses uploads over 10 MB; same frames and audio.
