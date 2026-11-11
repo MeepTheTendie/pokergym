@@ -12,6 +12,10 @@ test('coach meter stays neutral before an action or coach request', () => {
   assert.match(src, /if \(!handDone && !coachedHand && !acted\) \{\s*\n\s*el\('handGrade'\)\.textContent = 'Your call'/);
 });
 
+test("hold'em grade reads Your call before Confirm five", () => {
+  assert.match(src, /\/\/ hold'em\r?\n  if \(!handDone && !coachedHand && !acted\) \{\r?\n    el\('handGrade'\)\.textContent = 'Your call';/);
+});
+
 test('showCoach reveals the meter on demand', () => {
   assert.match(src, /coachedHand = true;\s*\n\s*renderStatus\(\);/);
 });
