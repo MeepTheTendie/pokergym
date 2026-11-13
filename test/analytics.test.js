@@ -293,7 +293,7 @@ test('app.js wires every trainer event through the tracker, once, in the right p
   // every Daily Drill entry path names itself
   {
     const calls = [...app.matchAll(/(?<![.\w])startDaily\(([^)]*)\)/g)].map((m) => m[1]).filter((arg) => !arg.startsWith('entry ='));
-    assert.deepEqual(calls.sort(), ["'daily_link'", "'map'", "'map_resume'", "'recap'", "'recap'", "'replay'", "'replay'", 'entry'].sort());
+    assert.deepEqual(calls.sort(), ["'daily_link'", "'map'", "'map_resume'", "'recap'", "'replay'", "'replay'", 'entry'].sort());
     assert.match(app, /const entry = sharedDaily \? \(dailyLinkEntry \?\? 'title'\) : 'title';/);
     assert.match(app, /entryParams\.daily \? 'daily_link' : sharedDaily \? 'share_link' : null/);
   }
@@ -367,7 +367,7 @@ test('return prompt events carry the run id and fire through the tracker', () =>
   assert.deepEqual(last('return_prompt_clicked'), expected);
 });
 
-test('the non-daily recap shows one return line and one Daily Drill button', () => {
+test('the non-daily recap shows one return line and reuses the existing Daily Drill button', () => {
   const recap = app.slice(app.indexOf('function renderSessionSummary('), app.indexOf('function settleDailyHand('));
   const hook = recap.slice(recap.indexOf('// Return hook:'), recap.indexOf('// Two different ways to come back tomorrow.'));
   assert.match(hook, /if \(!daily\) \{/, 'prompt must not appear on a daily recap');
@@ -375,7 +375,11 @@ test('the non-daily recap shows one return line and one Daily Drill button', () 
   // A completed daily gets the unlock time from the existing helper.
   assert.match(hook, /dailyDone[\s\S]*formatDailyCountdown\(\)/);
   assert.match(hook, /analytics\.returnPromptShown\(\{ daily_done: dailyDone, run_id: recapRunId \}\)/);
-  assert.match(hook, /analytics\.returnPromptClicked\(\{ daily_done: dailyDone, run_id: recapRunId \}\)/);
-  // The click is measured before the existing Daily Drill flow starts.
-  assert.ok(hook.indexOf('returnPromptClicked(') < hook.indexOf("startDaily('recap')"));
+  // No second gold button: the hook adds no button of its own.
+  assert.doesNotMatch(hook, /createElement\('button'\)/);
+  // The existing primary Daily Drill button carries the click, measured before the flow starts.
+  const dailyBtn = recap.slice(recap.indexOf('if (!daily && !dailyDone) {'), recap.indexOf('const again ='));
+  assert.match(dailyBtn, /analytics\.returnPromptClicked\(\{ daily_done: dailyDone, run_id: recapRunId \}\)/);
+  assert.ok(dailyBtn.indexOf('returnPromptClicked(') < dailyBtn.indexOf("startDaily('recap')"));
+  assert.equal(recap.match(/analytics\.returnPromptClicked\(/g)?.length, 1);
 });
