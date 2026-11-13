@@ -398,8 +398,9 @@ label { color: var(--ink-2); font-size: 14px; font-weight: 600; }
 .daily-squares .sq-green { background: #2E9A5B; border: 1px solid #5BC78A; }
 .daily-squares .sq-red { background: #C2491A; border: 1px solid #E8784A; }
 .daily-squares .sq-empty {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
+  /* on the felt hero: an open slot, not a filled square */
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px dashed rgba(246, 244, 238, 0.35);
 }
 
 #dailyHistory {
