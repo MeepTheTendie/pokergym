@@ -129,6 +129,7 @@ export function parseEntryParams(search) {
     day: parseDay(params.get('d')),
     practice: params.get('practice') || null,
     drill: params.get('drill') || null,
+    clip: params.get('c') || params.get('clip') || null,
     daily: params.get('daily') === '1',
     sh: params.get('sh') || null,
   };

@@ -112,6 +112,13 @@ const GUIDE_REDIRECTS = {
   '/guides/blackjack-12-vs-2-stand/': '/guides/blackjack-12-vs-2-hit/',
 };
 
+// Crew link checks carry ?pg_test=1 so the page never counts them
+// (web/posthog-loader.js). Short links must pass the flag through.
+function keepTestFlag(from, target) {
+  const flag = from.searchParams.get('pg_test');
+  if (flag !== null) target.searchParams.set('pg_test', flag);
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -121,6 +128,7 @@ export default {
       const target = new URL('/web/', url.origin);
       target.searchParams.set('ref', 'endscreen');
       target.searchParams.set('utm_content', 'typed');
+      keepTestFlag(url, target);
       return Response.redirect(target.href, 302);
     }
     // Wes's daily X posts: playpokergym.com/x (optionally /x?c=<topic>) so X
@@ -133,6 +141,7 @@ export default {
       target.searchParams.set('utm_campaign', 'wes-daily');
       const content = cleanCampaign(url.searchParams.get('c'));
       if (content) target.searchParams.set('utm_content', content);
+      keepTestFlag(url, target);
       return Response.redirect(target.href, 302);
     }
     // Canonical social-reel entry. Captions post a short link
@@ -148,9 +157,14 @@ export default {
       target.searchParams.set('utm_source', utmSource);
       target.searchParams.set('utm_medium', 'reel');
       target.searchParams.set('utm_campaign', cleanCampaign(url.searchParams.get('camp')) || 'hooktest1112');
-      const content = cleanCampaign(url.searchParams.get('c')) || cleanCampaign(url.searchParams.get('utm_content'));
+      // Keep both the c=/clip deeplink passthrough added on main and #111's
+      // cleaning of pasted campaign values (trailing backticks/quotes/space).
+      const clip = cleanCampaign(url.searchParams.get('c') || url.searchParams.get('clip'));
+      const content = clip || cleanCampaign(url.searchParams.get('utm_content'));
       if (content) target.searchParams.set('utm_content', content);
+      if (clip) target.searchParams.set('c', clip);
       if (url.searchParams.get('daily') === '1') target.searchParams.set('daily', '1');
+      keepTestFlag(url, target);
       return Response.redirect(target.href, 302);
     }
     // PostHog is proxied through our own origin (see worker/proxy.js). This is

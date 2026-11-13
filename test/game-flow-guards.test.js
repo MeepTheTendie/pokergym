@@ -19,7 +19,7 @@ test('a coached Daily hand is practice-only and replays the same hand', () => {
 
 test('natural blackjack deals through rather than awarding a free decision', () => {
   assert.match(src, /!rigged && round\.settled && skip < 100/);
-  assert.match(src, /if \(!decisions\.length\) \{\s*\n\s*if \(drillMode\)/);
+  assert.match(src, /if \(!decisions\.length\) \{\s*\n\s*if \(drillMode \|\| profile\?\.activeSession\?\.reelClip\)/);
 });
 
 test('restore sanitizes and review reveal can advance', () => {

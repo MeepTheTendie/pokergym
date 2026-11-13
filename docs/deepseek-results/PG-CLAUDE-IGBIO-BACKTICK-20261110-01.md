@@ -148,6 +148,39 @@ failure documented in the prior Beam result `PG-CLAUDE-SOCIAL-ATTRIB-20261108-01
 (7 files changed), plus a follow-up doc commit on the same branch. Pushed to
 `origin/deepseek/igbio-backtick`.
 
+## Merge with main, 2026-11-13
+
+Merged `origin/main` (`d1ea03a`) into `deepseek/igbio-backtick` — merge commit, no
+rebase, no force-push. One code conflict in `worker/index.js`: main's newer
+`/reel` `c=`/`clip` passthrough and this branch's `cleanCampaign` trimming now
+coexist:
+
+```js
+target.searchParams.set('utm_campaign', cleanCampaign(url.searchParams.get('camp')) || 'hooktest1112');
+const clip = cleanCampaign(url.searchParams.get('c') || url.searchParams.get('clip'));
+const content = clip || cleanCampaign(url.searchParams.get('utm_content'));
+```
+
+One semantic conflict in the loader tests: main's owner rule of 2026-11-10
+(`docs/OPERATING_RULES.md`) treats **any** stray backtick (` or %60) as a crew
+test visit and returns before identifying, so the original #111 loader test
+("trailing backtick on `utm_content` is trimmed and recorded") can no longer
+pass as written. The merge keeps main's live behavior and splits the coverage:
+
+- whitespace trimming on `utm_content` still records `ig-bio` (cleanCampaign
+  coverage retained);
+- a backticked `utm_content` is asserted to mark the visit internal with no
+  identify, matching the owner rule and the merged test above it.
+
+**Open item for Wren's sign-off:** if a real Instagram bio arrival can carry the
+backtick (the 14 historical `ig-bio\`` persons), main's rule currently drops
+those people instead of recording the cleaned tag. This branch's worker-level
+cleaning still applies to `/reel?c=` values that pass through, but the direct
+bio-link case is governed by main's backtick-is-test rule. Nothing about that
+rule was changed here.
+
+Full suite after the merge: `npm test` — **389 pass, 0 fail**.
+
 ## Files changed
 
 - `src/rpg/links.js` — new `cleanCampaign(value)` helper.

@@ -2,12 +2,18 @@
 
 Canonical rules for PokerGym work. This file supersedes conflicting one-line guardrails in `docs/PokerGymControlDoc.md`, the retired `automation/retired/daily-prompt.md`, and ad-hoc agent notes. It applies to PokerGym only.
 
+**Where the rules live (cleaned up 2026-11-10):**
+- This file: how work is done.
+- [`CREW.md`](CREW.md): who owns what, and which tools each agent uses.
+- `PokerGymControlDoc.md`: the record (Decision Log, Opinion schedule, status sections). It holds no rules of its own that conflict with this file.
+- Historical, no longer instructions: `specialist-write-path-2026-11-04.md`, `grok-runtime-handoff-2026-11-04.md`, `coordination-feasibility-2026-11-04.md`, `wren-inbound-coordination.md` (its capability tests are still accurate) and `automation/retired/`.
+
 ## Ship path
 
-1. One branch per task. Delete the branch after merge.
-2. Open a PR to `main`. The required `test` check must be green before merge.
+1. One branch per task. The repo deletes a merged head branch automatically; `wren/staged-updates` is never used as a PR head (see "Crew returns").
+2. The integrator (Claude) opens the PR to `main`, DRAFT while a hold applies. The required `test` check must be green before merge.
 3. A green PR may be squash-merged by the agent that owns the task. If GitHub blocks only on the required-review or up-to-date rule, the owner/agent may use an admin merge (`--admin`). Never use it to bypass a red test.
-4. Deploy only from a merged, green `main` with `npm run deploy`. Wes's 2026-10-28 standing permission covers PokerGym deploys; no extra per-deploy approval is needed.
+4. Deploy happens automatically: a green `tests` run on `main` triggers the `deploy` workflow. No manual deploys. Wes's 2026-10-28 standing permission covers PokerGym deploys.
 5. After deploy, check the live URL, report the commit and Worker version, and log the change in `docs/PokerGymControlDoc.md`.
 
 ## Non-negotiables
@@ -33,6 +39,17 @@ Canonical rules for PokerGym work. This file supersedes conflicting one-line gua
 - After bulk scheduling or edits, independently re-read the complete platform-specific queue and verify no `TEST:`/`TEST: pair` prefixes, exact network UTM links, videos, 4 PM America/Chicago schedule, auto-publish and non-draft flags, correct count, and no duplicates. A public-copy error is an escalation-level publishing blocker, not an accepted experimental label.
 - Already-published errors require caption edits through an authorized native interface (where available); never delete or repost without owner authorization. The Metricool scheduled-post editing endpoint is **not** evidence of ability to edit a live Facebook/Instagram/YouTube post.
 
+## Video production (Wes, 2026-11-13)
+
+Wes, live: "You are in charge of video production." and "I expect you all to look at the data and make decisions together."
+
+1. **Claude owns video production end to end:** hooks, scripts, renders, the slate, Drive upload and Metricool scheduling.
+2. **Decisions come from the data, together.** Wren's daily pull and readouts, ChatGPT's queue/performance checks and the Business Suite exports feed every slate. Each slate entry names the number it is based on.
+3. **Veto window, not unanimous ballot.** Claude posts each slate on #41 with a veto slot (the next 10 AM / 6 PM CT slot at least 4 hours out). Wren or ChatGPT may veto a clip with a reason (wrong poker fact, public-copy error, a data conflict). A vetoed clip is fixed or dropped; the rest ship. Silence is no veto. This replaces the Nov 5 "all three must agree" content rule; the public caption release gate above still applies.
+4. **Unattended posting** (Wes, 2026-11-06) covers slate clips whose veto window closed with no standing veto.
+5. **Primary metric: attention in the first seconds.** Average seconds viewed and 3-second hold per reel, read exactly from Business Suite exports/prints. Metricool's rounded average watch is not used for tripwires. Weak-watch tripwire: under 3.0 s exact.
+6. **Every weekly readout names one content change**, and it ships in the next slate unless vetoed. Data that is recorded but not acted on is a miss under "Fix the cause, not the symptom".
+
 ## Crew opinion deadlines (Wes, 2026-11-09)
 
 Wes is not part of crew decisions. Every crew question closes on its own, on a clock.
@@ -54,6 +71,15 @@ Wes's mantra for every agent: **don't fix the symptom, fix the cause.** A proble
 4. **"Flake", "glitch", "harmless" and "one-off" are not causes.** If the cause is unknown, say so and assign finding it.
 5. **The integrator applies this to its own work first** and records cause vs stopgap in the #51 ledger.
 
+## Crew visits never count (Wes, 2026-11-10)
+
+Wes, live, Nov 10, after 22 "visitors" turned out to be mostly crew link checks: the crew does not count its own visits.
+
+1. **Every link the crew opens to check it carries `pg_test=1`** — on `/web/`, `/reel`, `/go`, `/x` and guides alike, e.g. `playpokergym.com/reel?src=fb&c=nine-vs-three&pg_test=1`. The site then sends nothing to PostHog and marks that browser, so its later visits stay out too (`pg_test=0` clears the mark). A check opened without it is not a valid check: re-open it with the flag.
+2. **A link with a stray backtick (`` ` `` or `%60`) is treated as a test automatically**, because no real caption contains one. Copy links from the raw caption, not from a chat or code block.
+3. **Past crew visits** are in the PostHog static cohort **"Crew test visits" (709897)**. Every visitor count (the dashboard's PostHog queries, `npm run stats`) excludes it and the "Internal / Test users" cohort (644643). Anyone who finds another crew visit adds that person to 709897 rather than explaining it away in a report.
+4. **No visitor number goes on #51 or the dashboard without these exclusions.** Cause fix: `web/posthog-loader.js` (flag + backtick) and `worker/index.js` (short links pass the flag through).
+
 ## Crew returns and the dispatch log (Claude, integrator, 2026-11-10)
 
 From DeepSeek's review of #41, relayed by Wes, live, Nov 10.
@@ -62,6 +88,9 @@ From DeepSeek's review of #41, relayed by Wes, live, Nov 10.
 2. **Result files are named by correlation_id:** `docs/<agent>-results/<correlation_id>.md`. Existing comment-id files (`41-<comment id>.md`) stay as they are.
 3. **Every #41 / #51 comment starts with its attribution**, `<AGENT>-TASK:` or `<AGENT>-RESULT:` plus `from:` (and "relayed by" when pasted). All agents post from the owner's GitHub account, so the account proves nothing about who wrote a comment.
 4. **Any #41 request that names its own deadline and default** (for example KEEP/DROP) goes on the ControlDoc Opinion schedule like a vote, so it is closed at its slot.
+5. **Video slates are timed before the ballot.** A slate proposal states each clip's measured length from an actual voice render (`render_slate.py --plan` or a full render), not an estimate. A script that does not fit the approved length goes back to its proposer before the vote. Cause: the Nov 16 clip's approved script ran 16.4 s against a 12–15 s spec.
+6. **Videos are rendered to upload.** Renders target ≤ 9 MB (the Drive connector refuses uploads over 10 MB), so the delivered file is the file that was checked.
+7. **Getting a clip into Metricool (Wes, live, Nov 10: "if Metricool is getting in the way, figure out a way around it").** Metricool cannot fetch a private Drive file, and the integrator does not change Drive sharing. The integrator uploads to Drive and tries Metricool once; if Metricool cannot read the file, it sends a `CHATGPT-TASK` the same run (ChatGPT's proven path imports the Drive file through a temporary signed URL, no sharing change) and checks the queue with `getScheduledPosts` on its next run. An approved clip is never left unscheduled because of a tool limit.
 
 ## Conflict rule
 

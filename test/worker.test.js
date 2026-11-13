@@ -78,6 +78,16 @@ test('typed path /go redirects to the trainer with endscreen attribution', async
   assert.equal(c.waits.length, 0);
 });
 
+test('short links pass the crew test flag through to the page', async () => {
+  const e = env(); const c = ctx();
+  for (const link of ['https://playpokergym.com/reel?src=fb&c=nine-vs-three&pg_test=1', 'https://playpokergym.com/go?pg_test=1', 'https://playpokergym.com/x?c=t&pg_test=1']) {
+    const loc = new URL((await worker.fetch(nav(link), e, c)).headers.get('location'));
+    assert.equal(loc.searchParams.get('pg_test'), '1', link);
+  }
+  const plain = new URL((await worker.fetch(nav('https://playpokergym.com/reel?src=fb&c=p1-QF'), e, c)).headers.get('location'));
+  assert.equal(plain.searchParams.has('pg_test'), false);
+});
+
 test('reel link /reel stamps platform attribution instead of relying on captions', async () => {
   const e = env(); const c = ctx();
   const response = await worker.fetch(nav('https://playpokergym.com/reel?src=fb&c=p1-QF'), e, c);
@@ -89,6 +99,7 @@ test('reel link /reel stamps platform attribution instead of relying on captions
   assert.equal(loc.searchParams.get('utm_medium'), 'reel');
   assert.equal(loc.searchParams.get('utm_campaign'), 'hooktest1112');
   assert.equal(loc.searchParams.get('utm_content'), 'p1-QF');
+  assert.equal(loc.searchParams.get('c'), 'p1-QF');
   assert.deepEqual(e.served, []);
   assert.deepEqual(e.points, []);
   assert.equal(c.waits.length, 0);

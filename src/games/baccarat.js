@@ -62,10 +62,35 @@ function drawThirdCardBanker(bankerTotal, playerThirdCardValue) {
   }
 }
 
-export function newRound(rng = Math.random, betOn = 'player', amount = 1, decks = GAME.decks) {
-  const deck = newShoe(rng, decks);
-  const playerHand = [deck.shift(), deck.shift()];
-  const bankerHand = [deck.shift(), deck.shift()];
+export function newRound(rng = Math.random, betOn = 'player', amount = 1, decks = GAME.decks, rigged = null) {
+  // Reel deeplinks can rig the exact dealt hand. `sequence` lists cards in the
+  // order the round consumes them: player, player, banker, banker, then any
+  // third cards the tableau draws (player third, banker third). Cards are
+  // removed from the shoe so the round remains self-consistent.
+  let deck;
+  const take = (() => {
+    if (!rigged || !Array.isArray(rigged.sequence)) return null;
+    const seq = rigged.sequence.map(c => ({ ...c }));
+    let i = 0;
+    return () => {
+      if (i >= seq.length) throw new Error('Rigged baccarat sequence exhausted');
+      return seq[i++];
+    };
+  })();
+  if (take) {
+    deck = newShoe(rng, decks);
+    // Pre-pull rigged cards so duplicates are impossible; take() supplies copies.
+    for (const card of rigged.sequence) {
+      const at = deck.findIndex(c => c.r === card.r && c.s === card.s);
+      if (at === -1) throw new Error(`Rigged card not in the shoe: ${card.r}/${card.s}`);
+      deck.splice(at, 1);
+    }
+  } else {
+    deck = newShoe(rng, decks);
+  }
+  const draw = () => (take ? take() : deck.shift());
+  const playerHand = [draw(), draw()];
+  const bankerHand = [draw(), draw()];
   let playerThird = null;
   let bankerThird = null;
 
@@ -78,13 +103,13 @@ export function newRound(rng = Math.random, betOn = 'player', amount = 1, decks 
   const natural = playerTotal >= 8 || bankerTotalBefore >= 8;
 
   if (!natural && drawThirdCardPlayer(playerTotal)) {
-    playerThird = deck.shift();
+    playerThird = draw();
     playerHand.push(playerThird);
   }
 
   const playerThirdValue = playerThird ? cardValue(playerThird.r) : undefined;
   if (!natural && drawThirdCardBanker(bankerTotalBefore, playerThirdValue)) {
-    bankerThird = deck.shift();
+    bankerThird = draw();
     bankerHand.push(bankerThird);
   }
 

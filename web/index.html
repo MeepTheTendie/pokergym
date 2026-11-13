@@ -151,20 +151,14 @@
         <h2>Today’s Daily Drill</h2>
         <p class="today-hero-title">Can you get 5 out of 5?</p>
         <p class="hint" id="todayState">Your next step.</p>
-        <p class="hint today-explainer">Five hands, one from each game. The coach grades every decision and explains the best play afterwards.</p>
+        <p class="hint today-explainer">Five hands across all four games. The coach grades every decision and explains the best play afterwards.</p>
       </div>
       <div class="today-hero-art" aria-hidden="true">
         <span class="mini-card mini-card-back"><span>A</span><i>♠</i></span>
         <span class="mini-card mini-card-front suit-red"><span>A</span><i>♥</i></span>
       </div>
     </div>
-    <div class="daily-squares" aria-hidden="true">
-      <span class="sq sq-green">✓</span>
-      <span class="sq sq-green">✓</span>
-      <span class="sq sq-green">✓</span>
-      <span class="sq sq-green">✓</span>
-      <span class="sq sq-red">✕</span>
-    </div>
+    <div class="daily-squares" id="dailySquares" role="img" aria-label="Today’s Daily Drill results"></div>
     <div class="row" id="todayActions"></div>
     <textarea id="dailySharePreview" readonly rows="4" hidden aria-label="Daily result to copy"></textarea>
     <p id="dailyShareStatus" class="hint" role="status" hidden>Nothing sent. Choose who receives it yourself.</p>
@@ -368,12 +362,12 @@
     </div>
     <div class="row" id="rowActions" hidden>
       <button id="btnHit" data-key="H">Hit</button>
-      <button id="btnStand" data-key="S" class="primary">Stand</button>
+      <button id="btnStand" data-key="S">Stand</button>
       <button id="btnDouble" data-key="D">Double</button>
       <button id="btnSplit" data-key="P">Split</button>
     </div>
     <div class="row" id="rowBet" hidden>
-      <button id="btnBanker" class="primary">Banker</button>
+      <button id="btnBanker">Banker</button>
       <button id="btnPlayer">Player</button>
       <button id="btnTie">Tie</button>
     </div>
@@ -406,7 +400,7 @@
     <button id="btnNext" class="primary" data-key="ENTER">Continue</button>
   </div>
 
-  <details class="window payout-panel">
+  <details class="window payout-panel" id="paytablePanel">
     <summary id="paytableTitle">Pay table</summary>
     <div class="paytable" id="paytable"></div>
   </details>

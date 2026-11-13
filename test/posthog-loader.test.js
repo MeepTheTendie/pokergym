@@ -12,11 +12,10 @@ function makeStorage() {
   };
 }
 
-function setupLoader(search) {
+function setupLoader(search, ls = makeStorage()) {
   const events = [];
   const registered = [];
   const identified = [];
-  const ls = makeStorage();
   const ss = makeStorage();
 
   const windowObj = {
@@ -91,14 +90,24 @@ test('first-touch UTMs are set once via $set_once', () => {
   });
 });
 
-test('a trailing backtick on utm_content is trimmed before recording', () => {
-  // `ig-bio` + a stray trailing backtick must record as `ig-bio`, not `ig-bio``.
-  const { identified } = setupLoader('?utm_source=ig&utm_medium=reel&utm_campaign=hooktest1112&utm_content=ig-bio%60');
+test('surrounding whitespace on utm_content is trimmed before recording', () => {
+  // cleanCampaign still normalizes values that reach the person profile.
+  const { identified } = setupLoader('?utm_source=ig&utm_medium=reel&utm_campaign=hooktest1112&utm_content=%20ig-bio%20');
   assert.ok(identified.length > 0);
   const props = identified[0][1];
   assert.equal(props.$set_once.utm_content, 'ig-bio');
   assert.equal(props.$set_once.utm_source, 'ig');
   assert.equal(props.$set_once.utm_campaign, 'hooktest1112');
+});
+
+test('a trailing backtick on utm_content marks a crew test visit', () => {
+  // Owner rule 2026-11-10: no real caption carries a stray backtick, so a
+  // backticked link is a pasted crew check. The loader must stop before it
+  // identifies anyone (the #111 branch predates this rule; main's behavior
+  // wins the merge, and Wren sign-off covers whether IG bio should differ).
+  const { identified, windowObj } = setupLoader('?utm_source=ig&utm_medium=reel&utm_campaign=hooktest1112&utm_content=ig-bio%60');
+  assert.deepEqual(identified, []);
+  assert.equal(windowObj.__pgInternal, true);
 });
 
 test('first-touch is not overwritten by a later visit', () => {
@@ -131,4 +140,38 @@ test('first-touch is not overwritten by a later visit', () => {
   globalThis.eval(readFileSync(new URL('../web/posthog-loader.js', import.meta.url), 'utf8'));
   assert.equal(JSON.parse(secondLs.getItem('pg_first_touch_v1')).utm_source, 'first');
   assert.equal(JSON.parse(secondLs.getItem('pg_first_touch_v1')).sh, 'a');
+});
+
+test('crew test link (?pg_test=1) sends nothing and marks the browser', () => {
+  const { events, registered, identified, ls, windowObj } = setupLoader('?pg_test=1&ref=share&sh=abc');
+  assert.deepEqual(events, []);
+  assert.deepEqual(registered, []);
+  assert.deepEqual(identified, []);
+  assert.equal(ls.getItem('pg_internal_v1'), '1');
+  assert.equal(windowObj.__pgInternal, true);
+});
+
+test('a marked browser stays out on later untagged visits; pg_test=0 clears it', () => {
+  const ls = makeStorage();
+  setupLoader('?pg_test=1', ls);
+  const later = setupLoader('?ref=share&sh=x', ls);
+  assert.deepEqual(later.events, []);
+  assert.deepEqual(later.registered, []);
+  const cleared = setupLoader('?pg_test=0&ref=share&sh=x', ls);
+  assert.equal(ls.getItem('pg_internal_v1'), null);
+  assert.deepEqual(cleared.events, [['share_arrival', { sh: 'x', ref: 'share' }]]);
+});
+
+test('a pasted link with a stray backtick is treated as a test visit', () => {
+  for (const search of ['?utm_source=fb&utm_content=nine-vs-three%60', '?utm_content=ig-bio`']) {
+    const { events, registered } = setupLoader(search + '&ref=share&sh=y');
+    assert.deepEqual(events, [], search);
+    assert.deepEqual(registered, [], search);
+  }
+});
+
+test('ordinary visits are still counted', () => {
+  const { registered, ls } = setupLoader('?utm_source=fb&utm_content=p4-QF');
+  assert.ok(registered.length > 0);
+  assert.equal(ls.getItem('pg_internal_v1'), null);
 });
