@@ -80,6 +80,9 @@ const AUTOMATION_USER_AGENTS = ['Edge/12.246'];
 // PostHog's own "Internal / Test users" cohort. Profiles are marked
 // $internal_or_test_user=true on the person and recalculated into this cohort.
 export const INTERNAL_COHORT_ID = 644643;
+// Static cohort of crew link checks (backtick-pasted links, pre-launch /reel
+// redirects, unposted clip tags, diagnostic refs). Created 2026-11-10.
+export const CREW_TEST_COHORT_ID = 709897;
 
 // SQL fragment (HogQL) that drops this project's own probe traffic and the
 // automation above.
@@ -98,6 +101,7 @@ export function notTestClause() {
     AND distinct_id NOT IN (${quoted(TEST_DISTINCT_IDS)})
     AND person_id NOT IN (${quoted(AUTOMATION_PERSON_IDS)})
     AND person_id NOT IN COHORT ${INTERNAL_COHORT_ID}
+    AND person_id NOT IN COHORT ${CREW_TEST_COHORT_ID}
     AND (properties.ref IS NULL OR properties.ref NOT IN (${quoted(TEST_REFS)}))
     AND (properties.first_ref IS NULL OR properties.first_ref NOT IN (${quoted(TEST_REFS)}))
     AND (properties.session_ref IS NULL OR properties.session_ref NOT IN (${quoted(TEST_REFS)}))
@@ -146,7 +150,13 @@ export function notTestClause() {
         preview_opens > 0
         AND interactions = 0
       )
-    )`;
+    )
+    -- PostHog classifies traffic by virtual type. Bot/Automation/AI Agent
+    -- profiles are excluded from clean counts; Regular and unknown pass.
+    -- This complements the behavioural rules above (a bot can still slip
+    -- through if it mimics a real session, which is why we keep both).
+    AND (properties.$virt_traffic_type IS NULL
+      OR properties.$virt_traffic_type NOT IN ('Bot', 'Automation', 'AI Agent'))`;
 }
 
 // Unique people per day, the number the dashboard shows as DAU. A pageview is

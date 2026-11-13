@@ -542,7 +542,7 @@ export const scenarios = [
   {
     slug: 'blackjack-basic-strategy-trainer',
     title: 'Practice blackjack basic strategy online, free',
-    description: 'Play Poker Gym (playpokergym.com) is a free blackjack basic strategy trainer: play real hands and get every hit, stand, double and split graded with the reason. No signup.',
+    description: 'Play Poker Gym (playpokergym.com) is a free blackjack basic strategy trainer: play real hands and get every hit, stand, double and split graded. No signup.',
     answer: 'Play Poker Gym at playpokergym.com is a free blackjack basic strategy trainer: you play real hands and every decision is graded against an exact expected-value coach, with the reason.',
     why: [
       'Most basic strategy sites give you a chart to memorise. The trainer makes you play the hand first, then shows the best move and how much the other moves lose, so the chart sticks because you used it.',
@@ -560,7 +560,7 @@ export const scenarios = [
   {
     slug: 'video-poker-strategy-trainer',
     title: 'Learn video poker strategy free: a Jacks or Better trainer',
-    description: 'Play Poker Gym (playpokergym.com) is a free video poker strategy trainer. Hold five cards, then see the exact best hold for 9/6 Jacks or Better and why. No signup.',
+    description: 'Play Poker Gym (playpokergym.com) is a free video poker strategy trainer. Hold five cards, then see the best hold for 9/6 Jacks or Better and why. No signup.',
     answer: 'Play Poker Gym at playpokergym.com teaches video poker strategy for free: you pick your holds and the coach shows the best hold for 9/6 Jacks or Better, with the reason.',
     why: [
       'Video poker is a game of one decision per hand: which cards to keep. The trainer grades that decision on every deal against the 9/6 Jacks or Better pay table, which returns 99.54% with perfect play.',
@@ -578,7 +578,7 @@ export const scenarios = [
   {
     slug: 'baccarat-strategy-trainer',
     title: 'Baccarat strategy trainer: learn the odds and the tableau free',
-    description: 'Play Poker Gym (playpokergym.com) is a free baccarat strategy trainer: scored questions on the third-card rules and which bet is cheapest. No signup, no real money.',
+    description: 'Play Poker Gym (playpokergym.com) is a free baccarat strategy trainer: scored questions on the third-card rules and the cheapest bet. No signup, no real money.',
     answer: 'The only real baccarat strategy is picking the cheapest bet: Banker (1.06% house edge after the 5% commission), then Player (1.24%), and avoiding Tie. Play Poker Gym drills that for free at playpokergym.com.',
     why: [
       'Baccarat has no playing decisions; the third-card tableau decides every draw. What you control is the bet, and the gap between bets is large: the tie bet at 8:1 costs far more than Banker or Player.',
@@ -596,7 +596,7 @@ export const scenarios = [
   {
     slug: 'free-blackjack-trainer-alternatives',
     title: 'Blackjack trainer alternatives: charts, apps and Play Poker Gym',
-    description: 'How Play Poker Gym (playpokergym.com) compares with strategy charts like Wizard of Odds and BlackjackInfo and with blackjack trainer apps. Free, no signup, four games.',
+    description: 'How Play Poker Gym (playpokergym.com) compares with Wizard of Odds and BlackjackInfo strategy charts and blackjack trainer apps. Free, no signup, four games.',
     answer: 'Use a strategy chart (Wizard of Odds, BlackjackInfo) to look an answer up; use Play Poker Gym at playpokergym.com when you want to practise it: free, no signup, graded hands in blackjack, video poker, baccarat and Hold\u2019em.',
     why: [
       'Reference sites such as Wizard of Odds and BlackjackInfo publish strategy charts and the maths behind them. They are the right place to check a rule; they are not built for repetition.',
@@ -631,7 +631,7 @@ export const scenarios = [
     slug: 'baccarat-odds-of-losing-6-in-a-row',
     seoTitle: 'Odds of losing 6 baccarat hands in a row (2026)',
     title: 'Baccarat: odds of losing 6 hands in a row',
-    description: 'About 1.4% \u2014 roughly one time in 69 decided hands \u2014 if you bet Banker every hand. Ties push and break nothing. The full streak table, and why it does not rescue a betting system.',
+    description: 'About 1.4%, roughly one time in 69 decided hands, if you bet Banker every hand. Ties push. The full streak table, and why it does not rescue a betting system.',
     answer: 'About 1.4%, or roughly one time in 69 decided hands, if you bet Banker on every hand.',
     why: [
       'Start with one hand. Banker wins about 45.9% of the time, Player about 44.6%, and about 9.5% of hands are ties. A tie returns your stake, so it is neither a win nor a loss and does not break a losing run. Throwing ties out, Banker loses about 49.3% of decided hands.',
@@ -650,7 +650,7 @@ export const scenarios = [
     slug: 'baccarat-how-often-banker-wins',
     seoTitle: 'How often does Banker win in baccarat? (2026)',
     title: 'How often does Banker win in baccarat?',
-    description: 'Banker wins about 45.9% of hands against 44.6% for Player, with the other 9.5% ties. Why that 1.3-point gap is the whole story, and how long Banker runs really get.',
+    description: 'Banker wins about 45.9% of hands vs 44.6% for Player, with 9.5% ties. Why that 1.3-point gap is the whole story, and how long Banker runs really get.',
     answer: 'About 45.9% of hands, against 44.6% for Player. The remaining 9.5% are ties.',
     why: [
       'The gap comes from the tableau, not from luck. Player acts first and its draw is mechanical; Banker draws second and its third card depends on what Player did. Seeing Player\u2019s third card is worth about 1.3 percentage points of win rate, and that is the entire reason Banker exists as a separate bet.',
@@ -688,7 +688,7 @@ export const scenarios = [
     slug: 'blackjack-soft-16-hands',
     seoTitle: 'Soft 16 in blackjack: hit, double or stand? (2026)',
     title: 'Soft 16 (A-5): hit, double or stand?',
-    description: 'A-5 is a soft 16. Double it against 4, 5 and 6, and hit against 2, 3 and 7 through ace. Doubling against a 6 is worth about 19 cents per dollar against 10 for hitting.',
+    description: 'A-5 is a soft 16. Double against 4, 5 and 6; hit against 2, 3 and 7 through ace. Doubling against a 6 is worth about 19 cents per dollar vs 10 for hitting.',
     answer: 'Double against a 4, 5 or 6. Hit against a 2, 3, 7, 8, 9, 10 or ace.',
     why: [
       'Soft 16 cannot bust. The ace drops to one, so the worst total you can reach is 6, and that is what makes doubling safe with an unmade hand. Against a 6 the coach rates doubling at about +0.19 per dollar, hitting at about +0.10 and standing at about \u22120.15.',
@@ -707,7 +707,7 @@ export const scenarios = [
     slug: 'blackjack-13-vs-2-stand',
     seoTitle: '13 vs 2 in blackjack: hit or stand? (2026)',
     title: '13 against a dealer 2: hit or stand?',
-    description: 'Stand on 13 against a 2, even though 12 against a 2 is a hit. The two hands differ by one card and the answer flips; the coach puts the gap at about 1.4 cents per dollar.',
+    description: 'Stand on 13 against a 2, even though 12 against a 2 is a hit. One card flips the answer; the coach puts the gap at about 1.4 cents per dollar.',
     answer: 'Stand. Thirteen against a 2 is a stand, while 12 against a 2 is a hit.',
     why: [
       'Both hands win only when the dealer busts, and a dealer 2 busts about 35% of the time. What separates them is what you can draw without busting. A 12 busts on ten-value cards only, five ranks out of thirteen. A 13 busts on a 9 as well as every ten-value card, six ranks.',
@@ -745,7 +745,7 @@ export const scenarios = [
     slug: 'blackjack-22-vs-9-hit',
     seoTitle: 'Do you split 2s in blackjack? Split 2-7, hit 8+ (2026)',
     title: 'Should you split a pair of 2s? The 2-2 rule',
-    description: 'Split 2s against 2 through 7, and hit against 8, 9, 10 and ace. Against a 9 splitting costs about 13 cents per dollar more than hitting, and the dealer card is the reason.',
+    description: 'Split 2s against 2 through 7; hit against 8, 9, 10 and ace. Against a 9, splitting costs about 13 cents per dollar more than hitting. Here is why.',
     answer: 'Split 2s against a 2, 3, 4, 5, 6 or 7. Hit against an 8, 9, 10 or ace.',
     why: [
       'A pair of twos is a hard 4, the worst total on the table: it cannot win without three more good cards. Splitting gives you two hands that each start at 2 and can still become anything, and against a weak dealer card that option is worth paying for. Against a 6 the coach rates splitting at about +0.24 per dollar and hitting at about +0.02.',
@@ -764,7 +764,7 @@ export const scenarios = [
     slug: 'blackjack-11-vs-ace-hit',
     seoTitle: '11 vs ace in blackjack: double or hit? (2026)',
     title: '11 against a dealer ace: double or hit?',
-    description: 'Hit 11 against an ace. Doubling is the right play against 2 through 10 but not against an ace, which busts only about 12% of the time and makes 21 about 36% of the time.',
+    description: 'Hit 11 against an ace. Double against 2 through 10, but not an ace, which busts only about 12% of the time and makes 21 about 36% of the time.',
     answer: 'Hit. Double 11 against 2 through 10, but against an ace just hit.',
     why: [
       'Eleven is the best doubling total in the game because any ten-value card makes 21. But a double only pays if the dealer is likely to pay you off, and an ace upcard is the least likely card to bust: about 12% of the time, against 21% for a 10 and 42% for a 6.',
@@ -802,7 +802,7 @@ export const scenarios = [
     slug: 'video-poker-nothing-hand-hold',
     seoTitle: 'Video poker: what to hold with no pair (2026)',
     title: 'Video poker: what do you hold with nothing?',
-    description: 'With no paying card, hold two suited high cards if you have them, otherwise one high card, and discard the rest. Discarding all five returns about 0.34 per coin against 0.57.',
+    description: 'No paying card? Hold two suited high cards if you have them, else one high card. Discarding all five returns about 0.34 per coin against 0.57.',
     answer: 'Hold two suited high cards if you have them, otherwise a single high card. Discard the rest.',
     why: [
       'The bottom of the 9/6 Jacks or Better chart is still worth playing. Two suited high cards return about 0.57 per coin, one high card about 0.47, and discarding all five about 0.34. A hand with nothing in it is a small loss, not a dead hand, and the gap between those three numbers is where a lot of long-run return hides.',

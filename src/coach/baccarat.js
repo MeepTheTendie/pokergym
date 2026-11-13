@@ -259,14 +259,15 @@ function commissionQuiz(r01) {
 
 function tieOddQuiz(r01) {
   const odds = 8 + Math.floor(r01 * 4); // 8, 9, 10, 11
-  const worthwhile = odds >= 10;
+  const pTie = outcomeProbabilities().tie;
+  const ev = pTie * odds - (1 - pTie); // expected value per unit staked
+  const worthwhile = ev > 0;
   return {
     type: 'tieodds',
     prompt: `Promo: tie pays ${odds}:1 on an otherwise standard game. Is the tie bet worthwhile at that price?`,
     options: ['YES, WORTHWHILE', 'NO, STILL LOSING'],
     correct: worthwhile ? 'YES, WORTHWHILE' : 'NO, STILL LOSING',
-    reason: `Tie lands on 9.52% of hands and breaks even at ${tieBreakEven().toFixed(1)}:1. At ${odds}:1 it is ${
-      worthwhile ? 'slightly positive expected value.' : 'still a losing bet.'}`,
+    reason: `Tie lands on ${(pTie * 100).toFixed(2)}% of hands and breaks even at ${tieBreakEven().toFixed(1)}:1. At ${odds}:1 the bet is ${worthwhile ? `positive expected value (${pct(ev)} per unit staked).` : 'still a losing bet.'}`,
     deal: false,
   };
 }

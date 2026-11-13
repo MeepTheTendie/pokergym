@@ -78,6 +78,16 @@ test('typed path /go redirects to the trainer with endscreen attribution', async
   assert.equal(c.waits.length, 0);
 });
 
+test('short links pass the crew test flag through to the page', async () => {
+  const e = env(); const c = ctx();
+  for (const link of ['https://playpokergym.com/reel?src=fb&c=nine-vs-three&pg_test=1', 'https://playpokergym.com/go?pg_test=1', 'https://playpokergym.com/x?c=t&pg_test=1']) {
+    const loc = new URL((await worker.fetch(nav(link), e, c)).headers.get('location'));
+    assert.equal(loc.searchParams.get('pg_test'), '1', link);
+  }
+  const plain = new URL((await worker.fetch(nav('https://playpokergym.com/reel?src=fb&c=p1-QF'), e, c)).headers.get('location'));
+  assert.equal(plain.searchParams.has('pg_test'), false);
+});
+
 test('reel link /reel stamps platform attribution instead of relying on captions', async () => {
   const e = env(); const c = ctx();
   const response = await worker.fetch(nav('https://playpokergym.com/reel?src=fb&c=p1-QF'), e, c);
@@ -89,6 +99,7 @@ test('reel link /reel stamps platform attribution instead of relying on captions
   assert.equal(loc.searchParams.get('utm_medium'), 'reel');
   assert.equal(loc.searchParams.get('utm_campaign'), 'hooktest1112');
   assert.equal(loc.searchParams.get('utm_content'), 'p1-QF');
+  assert.equal(loc.searchParams.get('c'), 'p1-QF');
   assert.deepEqual(e.served, []);
   assert.deepEqual(e.points, []);
   assert.equal(c.waits.length, 0);
@@ -101,6 +112,22 @@ test('reel link /reel stamps platform attribution instead of relying on captions
   assert.equal(yt.searchParams.get('utm_source'), 'yt');
   assert.equal(yt.searchParams.get('utm_campaign'), 'p5bonus1031');
   assert.equal(yt.searchParams.get('daily'), '1');
+});
+
+test('x link /x tags the owner daily X posts', async () => {
+  const e = env(); const c = ctx();
+  const response = await worker.fetch(nav('https://playpokergym.com/x?c=soft17'), e, c);
+  assert.equal(response.status, 302);
+  const loc = new URL(response.headers.get('location'));
+  assert.equal(loc.pathname, '/web/');
+  assert.equal(loc.searchParams.get('ref'), 'x');
+  assert.equal(loc.searchParams.get('utm_source'), 'x');
+  assert.equal(loc.searchParams.get('utm_medium'), 'social');
+  assert.equal(loc.searchParams.get('utm_campaign'), 'wes-daily');
+  assert.equal(loc.searchParams.get('utm_content'), 'soft17');
+  const bare = new URL((await worker.fetch(nav('https://playpokergym.com/x'), e, c)).headers.get('location'));
+  assert.equal(bare.searchParams.get('utm_content'), null);
+  assert.deepEqual(e.served, []);
 });
 
 test('worker counts a page view and always serves assets', async () => {
@@ -194,6 +221,8 @@ test('stats: probe and scripted automation visits are excluded', () => {
   assert.match(clause, /person_id NOT IN \('ba45edef-/);
   assert.match(clause, /properties\.\$raw_user_agent IS NULL OR/);
   assert.match(clause, /NOT LIKE '%Edge\/12\.246%'/);
+  assert.match(clause, /\$virt_traffic_type/);
+  assert.match(clause, /NOT IN \('Bot', 'Automation', 'AI Agent'\)/);
 });
 
 test('stats: unfurl-bot visits are excluded', () => {

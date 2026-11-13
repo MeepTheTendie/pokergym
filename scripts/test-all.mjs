@@ -15,6 +15,8 @@ const steps = [
   ['analytics (browser)', ['scripts/analytics-browser-test.mjs'], { serve: true }],
   ['reminder (browser)', ['scripts/reminder-browser-test.mjs']],
   ['push (browser)', ['scripts/push-browser-test.mjs']],
+  ['video poker (browser)', ['scripts/videopoker-browser-test.mjs'], { serve: true }],
+  ['weekly pack (browser)', ['scripts/weekly-pack-browser-test.mjs'], { serveDist: 8898 }],
   ['itch embed (browser)', ['scripts/itch-browser-test.mjs']],
   ['offline (browser)', ['scripts/itch-browser-test.mjs'], { env: { POKERGYM_OFFLINE_TEST: '1' } }],
   ['storage denied (browser)', ['scripts/itch-browser-test.mjs'], { env: { POKERGYM_STORAGE_TEST: 'denied' } }],
@@ -24,9 +26,9 @@ const steps = [
 const groups = {
   all: null,
   'unit-release': ['unit', 'release'],
-  'browser-core': ['analytics (browser)', 'reminder (browser)', 'push (browser)'],
+  'browser-core': ['analytics (browser)', 'reminder (browser)', 'push (browser)', 'video poker (browser)'],
   'browser-offline': ['itch embed (browser)', 'offline (browser)'],
-  'browser-storage': ['storage denied (browser)', 'storage quota (browser)'],
+  'browser-storage': ['storage denied (browser)', 'storage quota (browser)', 'weekly pack (browser)'],
 };
 const group = process.argv[2] ?? 'all';
 const names = groups[group];
@@ -58,6 +60,12 @@ for (const [name, args, opts = {}] of selected) {
   let server;
   if (opts.serve) {
     server = spawn('python3', ['-m', 'http.server', '8899', '--bind', '127.0.0.1'], { stdio: 'ignore' });
+    await sleep(800);
+  }
+  if (opts.serveDist) {
+    // The weekly pack is checked as shipped: build dist, then serve it.
+    execFileSync(process.execPath, ['scripts/build.mjs'], { stdio: 'inherit' });
+    server = spawn('python3', ['-m', 'http.server', String(opts.serveDist), '--bind', '127.0.0.1'], { cwd: 'dist', stdio: 'ignore' });
     await sleep(800);
   }
   const t = Date.now();

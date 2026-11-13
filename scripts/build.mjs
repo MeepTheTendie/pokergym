@@ -12,6 +12,7 @@ const { rm } = await import('node:fs/promises');
 await rm(path.join(output, 'web'), { recursive: true, force: true });
 await rm(path.join(output, 'src'), { recursive: true, force: true });
 await rm(path.join(output, 'guides'), { recursive: true, force: true });
+await rm(path.join(output, 'build-info.json'), { force: true });
 await mkdir(path.join(output, 'web'), { recursive: true });
 // Explicit allowlist: never publish harnesses, screenshots, credentials or node_modules.
 const files = ['index.html', 'app.js', 'audio.js', 'sound-controls.js', 'haptics.js', 'vp-coach-worker.js',
@@ -51,6 +52,11 @@ await cp(path.join(root, 'public/sitemap.xml'), path.join(output, 'sitemap.xml')
 await cp(path.join(root, 'public/robots.txt'), path.join(output, 'robots.txt'));
 await cp(path.join(root, 'public/llms.txt'), path.join(output, 'llms.txt'));
 await cp(path.join(root, 'public/llms-full.txt'), path.join(output, 'llms-full.txt'));
+// CI stamps production builds so the post-deploy check can confirm freshness,
+// rather than accepting a 200 from the previous deployment.
+if (/^[0-9a-f]{40}$/i.test(process.env.POKERGYM_BUILD_COMMIT || '')) {
+  await writeFile(path.join(output, 'build-info.json'), JSON.stringify({ commit: process.env.POKERGYM_BUILD_COMMIT }) + '\n');
+}
 // IndexNow key file: https://playpokergym.com/<key>.txt proves control of the
 // host to Bing and the other IndexNow partners. The key is public by design.
 try {
