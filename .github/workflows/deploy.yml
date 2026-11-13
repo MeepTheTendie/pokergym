@@ -1,0 +1,107 @@
+name: deploy
+
+# Deploys playpokergym.com after the `tests` workflow passes on main
+# (OPERATING_RULES 4: deploy only from a merged, green main). The Cloudflare
+# token lives only in this repo's Actions secrets; no agent holds it.
+# Owner approval: Wes, 2026-11-06 ("go nuts", after the auto-deploy proposal).
+on:
+  workflow_run:
+    workflows: [tests]
+    types: [completed]
+    branches: [main]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Skip until Cloudflare secrets are set
+        id: gate
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "Cloudflare secrets not set yet; skipping deploy." >> "$GITHUB_STEP_SUMMARY"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v5
+        if: steps.gate.outputs.ready == 'true'
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - name: Confirm tested commit is still main
+        id: freshness
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          git fetch --no-tags origin main
+          tested='${{ github.event.workflow_run.head_sha }}'
+          current=$(git rev-parse FETCH_HEAD)
+          if [ "$tested" = "$current" ]; then
+            echo 'current=true' >> "$GITHUB_OUTPUT"
+          else
+            echo "main advanced to $current; skipping stale deploy of $tested"
+            echo 'current=false' >> "$GITHUB_OUTPUT"
+            echo "Deployment skipped: main advanced from tested commit $tested to $current before deployment." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/setup-node@v5
+        if: steps.gate.outputs.ready == 'true' && steps.freshness.outputs.current == 'true'
+        with:
+          node-version: '24'
+          cache: npm
+      # Skip the deployment if another main commit landed after these tests.
+      - if: steps.gate.outputs.ready == 'true' && steps.freshness.outputs.current == 'true'
+        run: npm ci
+      - name: Recheck main immediately before deploy
+        id: final_freshness
+        if: steps.gate.outputs.ready == 'true' && steps.freshness.outputs.current == 'true'
+        run: |
+          git fetch --no-tags origin main
+          tested='${{ github.event.workflow_run.head_sha }}'
+          current=$(git rev-parse FETCH_HEAD)
+          if [ "$tested" = "$current" ]; then
+            echo 'current=true' >> "$GITHUB_OUTPUT"
+          else
+            echo "main advanced to $current during setup; skipping stale deploy of $tested"
+            echo 'current=false' >> "$GITHUB_OUTPUT"
+            echo "Deployment skipped: main advanced to $current during deployment setup." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Deploy
+        if: steps.gate.outputs.ready == 'true' && steps.final_freshness.outputs.current == 'true'
+        env:
+          POKERGYM_BUILD_COMMIT: ${{ github.event.workflow_run.head_sha }}
+        run: npm run deploy 2>&1 | tee deploy.log
+      - name: Live check
+        if: steps.gate.outputs.ready == 'true' && steps.final_freshness.outputs.current == 'true'
+        run: |
+          expected='${{ github.event.workflow_run.head_sha }}'
+          live=''
+          for attempt in $(seq 1 24); do
+            live=$(curl --fail --silent --show-error https://playpokergym.com/build-info.json 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{process.stdout.write(JSON.parse(s).commit||"")}catch{}})') || true
+            if [ "$live" = "$expected" ]; then break; fi
+            sleep 5
+          done
+          if [ "$live" != "$expected" ]; then
+            echo "Expected deployed commit $expected, got '$live'" >&2
+            exit 1
+          fi
+          for path in / /web/ /guides/; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "https://playpokergym.com$path")
+            echo "$path $code"
+            [ "$code" = "200" ] || exit 1
+          done
+          {
+            echo "### Deployed"
+            echo "- Commit: \`${expected}\`"
+            echo "- Worker version: \`$(grep -oiE 'version id: *[0-9a-f-]+' deploy.log | awk '{print $NF}' | tail -1)\`"
+            echo "- Live check: /, /web/, /guides/ all 200"
+          } >> "$GITHUB_STEP_SUMMARY"

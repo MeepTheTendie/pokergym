@@ -1,0 +1,114 @@
+/* Play Poker Gym site design system ("Deal Me In", Nov 2026).
+   One stylesheet for the guides, hub and static pages. The landing page and
+   trainer adopt it after the Nov 1-12 hook test (see ControlDoc). */
+@font-face{font-family:"Inter";src:url(/web/fonts/Inter-var.woff2) format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Inter Tight";src:url(/web/fonts/InterTight-var.woff2) format("woff2");font-weight:100 900;font-display:swap}
+
+:root{
+  --paper:#F6F4EE;--paper-2:#ECE8DD;--surface:#FFFFFF;--line:#E2DDD0;
+  --ink:#0F1A14;--ink-2:#33403A;--muted:#4A5750;--kicker:#7A5200;
+  --felt:#0F3D2E;--felt-hi:#14513D;--felt-lo:#0A2C21;--felt-text:#DCE7E1;--felt-muted:#B9CEC4;
+  --gold:#E8B53A;--gold-2:#C9932A;--card:#FFFDF8;--card-red:#B4232A;
+  --good:#1E7A45;--bad:#B4400C;
+  --display:"Inter Tight","Inter",system-ui,sans-serif;--body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --max:1200px;--r-lg:24px;--r-md:16px
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 18px/1.65 var(--body)}
+a{color:var(--felt);text-underline-offset:3px}
+a:hover{color:var(--ink)}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px;border-radius:6px}
+img{max-width:100%}
+[hidden]{display:none!important}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
+.skip{position:absolute;left:-999px;top:8px;background:var(--ink);color:var(--paper);padding:8px 12px;border-radius:8px;z-index:9}
+.skip:focus{left:8px}
+
+/* header */
+.pg-header{border-bottom:1px solid var(--line);background:var(--paper)}
+.pg-header .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px;padding-top:16px;padding-bottom:16px}
+.pg-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font:800 19px/1 var(--display);letter-spacing:-.01em}
+.pg-mark{width:36px;height:36px;border-radius:10px;background:var(--felt);display:grid;place-items:center;flex:none}
+.pg-nav{display:flex;flex-wrap:wrap;gap:6px 22px;font-size:15px;font-weight:500}
+.pg-nav a{color:var(--muted);text-decoration:none;padding:6px 0}
+.pg-nav a:hover,.pg-nav a[aria-current=page]{color:var(--ink)}
+.pg-nav a[aria-current=page]{font-weight:700}
+.pg-cta{margin-left:auto;background:var(--ink);color:var(--paper);text-decoration:none;font-weight:700;font-size:15px;padding:12px 18px;border-radius:999px;white-space:nowrap}
+.pg-cta:hover{color:var(--paper);background:var(--felt)}
+@media (max-width:640px){.pg-header .wrap{gap:10px 16px}.pg-cta{font-size:14px;padding:10px 14px}.pg-nav{order:3;width:100%;gap:4px 20px}h1{letter-spacing:-.02em}}
+
+/* footer */
+.pg-footer{border-top:1px solid var(--line);margin-top:72px}
+.pg-footer .wrap{display:flex;flex-wrap:wrap;gap:16px 24px;justify-content:space-between;padding-top:28px;padding-bottom:44px;font-size:14px;line-height:1.5;color:var(--muted)}
+.pg-footer nav{display:flex;flex-wrap:wrap;gap:8px 18px}
+.pg-footer a{color:var(--muted)}
+
+/* type */
+.kicker{margin:0 0 10px;font:700 13px/1.3 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--kicker)}
+h1,h2,h3{font-family:var(--display);letter-spacing:-.025em;line-height:1.08;margin:0}
+h1{font-weight:900;font-size:clamp(36px,6vw,60px);letter-spacing:-.035em}
+h2{font-weight:800;font-size:clamp(24px,3.4vw,30px);margin-top:44px;margin-bottom:12px}
+h3{font-weight:800;font-size:20px;margin-top:24px;margin-bottom:6px;letter-spacing:-.01em}
+.lede{font-size:20px;color:var(--muted);max-width:60ch;margin:18px 0 0}
+.note{font-size:15px;color:var(--muted)}
+.crumbs{font-size:14px;color:var(--muted);margin:32px 0 18px}
+
+/* felt panel + answer */
+.felt{color:#F6F4EE;background:var(--felt);background-image:radial-gradient(120% 90% at 50% 0%,var(--felt-hi) 0%,var(--felt) 55%,var(--felt-lo) 100%);border-radius:var(--r-lg);padding:28px}
+.answer-card{margin:28px 0 8px}
+.answer-card .kicker{color:var(--gold)}
+.answer{margin:0;font:900 clamp(26px,4.4vw,40px)/1.12 var(--display);letter-spacing:-.025em;color:#F6F4EE}
+
+/* buttons */
+.cta,.btn{display:inline-block;font:800 18px/1 var(--display);text-decoration:none;padding:16px 22px;border-radius:14px;background:var(--gold);color:var(--ink);border:0}
+.cta:hover,.btn:hover{background:#F2C455;color:var(--ink)}
+.btn-ghost{background:transparent;border:2px solid var(--ink);color:var(--ink)}
+.btn-ghost:hover{background:var(--ink);color:var(--paper)}
+
+/* article layout */
+.play-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;margin:18px 0 8px}
+.play-row .note{margin:0;max-width:34ch}
+.article-grid{display:flex;flex-wrap:wrap;gap:40px 48px;align-items:flex-start}
+.article-grid>article{flex:999 1 560px;min-width:0}
+.article-grid>aside{flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:16px}
+article p{max-width:66ch;color:var(--ink-2)}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px}
+.box h2{margin-top:0;font-size:22px}
+.links{list-style:none;padding:0;margin:0}
+.links li{border-top:1px solid var(--line)}
+.links li:first-child{border-top:0}
+.links a{display:block;padding:12px 0;color:var(--ink);font-weight:600;text-decoration:none;line-height:1.35}
+.links a:hover{color:var(--felt);text-decoration:underline}
+.faq h3{font-size:19px}
+.faq p{margin-top:4px}
+
+/* hub */
+.hub-head{padding:56px 0 8px}
+.game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:28px;align-items:start}
+.game-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px}
+.game-card h2{margin:0 0 4px;font-size:24px}
+.game-card .count{font-size:14px;color:var(--muted);margin:0 0 10px}
+.drill-band{margin-top:56px}
+.drill-band .wrap{display:flex;flex-wrap:wrap;gap:20px 40px;align-items:center;justify-content:space-between}
+.drill-band h2{margin:0;color:#F6F4EE;font-size:clamp(26px,3.6vw,36px)}
+.drill-band .kicker{color:var(--gold)}
+.drill-band p{color:var(--felt-text);margin:8px 0 0}
+
+/* static prose pages (privacy, about) */
+.prose{max-width:760px}
+.prose h2{font-size:24px}
+.prose p,.prose li{color:var(--ink-2)}
+
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* longer hand-written guides */
+.longform{max-width:860px;padding-top:24px}
+.longform article{margin:28px 0;padding:24px;background:var(--surface);border:1px solid var(--line);border-radius:20px}
+.longform article h2{margin-top:0}
+.hand{font:800 clamp(22px,4.6vw,30px)/1.3 var(--display);letter-spacing:.02em;word-spacing:8px;color:var(--felt)}
+summary{cursor:pointer;min-height:44px;padding:10px 0;font-weight:700;color:var(--felt)}
+table{width:100%;border-collapse:collapse;font-size:16px}
+th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line)}
+caption{text-align:left;font-weight:700;margin:15px 0}
+.table-scroll{overflow-x:auto}

@@ -13,10 +13,18 @@ import { scenarios } from './scenarios.mjs';
 
 
 
-const CSS = `*{box-sizing:border-box}body{margin:0;background:#14121c;color:#eee9fa;font:18px/1.65 system-ui,sans-serif}main,header,footer{max-width:800px;margin:auto;padding:24px}a{color:#bde7ff}h1{font-size:clamp(28px,5vw,40px);line-height:1.25;margin:0 0 10px}h2{font-size:22px;margin-top:34px}.answer{font-size:clamp(20px,4vw,26px);font-weight:700;color:#a9e9bc;margin:18px 0;padding:16px 18px;border-left:6px solid #a9e9bc;background:#201c2b}.cta{display:inline-block;background:#a9e9bc;color:#14121c;padding:14px 22px;font-weight:700;text-decoration:none;margin:10px 0;border-radius:4px}.note,footer{font-size:15px;color:#c9bfe8}ul{padding-left:20px}footer{border-top:1px solid #4a4468;margin-top:40px}@media(max-width:450px){main,header,footer{padding:18px}}`;
+import { HEAD_ASSETS, header, footer } from './site-chrome.mjs';
 
 function esc(text) {
   return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function gameName(slug) {
+  if (slug.startsWith('blackjack-')) return 'Blackjack';
+  if (slug.startsWith('video-poker-')) return 'Video poker';
+  if (slug.startsWith('baccarat-')) return 'Baccarat';
+  if (slug.startsWith('holdem-')) return 'Hold\u2019em';
+  return 'Free trainers';
 }
 
 // Search-shaped title: game name first, "vs" instead of "against", plus the
@@ -93,31 +101,46 @@ function page(s) {
 <meta property="og:type" content="article"><meta property="og:url" content="${url}">
 <meta property="og:image" content="${BASE}/og.png"><meta property="og:site_name" content="Play Poker Gym">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#14121c"><link rel="icon" href="/web/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/web/icon.svg" type="image/svg+xml">
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
 <link rel="sitemap" type="application/xml" href="/sitemap.xml">
-<style>${CSS}</style>
+${HEAD_ASSETS}
 <script type="application/ld+json">
 ${JSON.stringify({ '@context': 'https://schema.org', '@graph': [article, faqSchema, crumbs] }, null, 2)}
 </script>
 </head><body>
-<header><a href="/">Play Poker Gym</a> · <a href="/web/">Free four-game trainer</a></header>
-<main>
-<p class="note">Free practice · no signup · no real money</p>
-<h1>${esc(s.title)}</h1>
+${header('guides')}
+<main id="main" class="wrap">
+<p class="crumbs"><a href="/guides/">Guides</a> / ${esc(gameName(s.slug))}</p>
+<div class="article-grid">
+<article>
+<p class="kicker">${esc(gameName(s.slug))} \u00b7 free practice, no signup</p>
+<h1>${esc(s.h1 || s.title)}</h1>
+<div class="felt answer-card">
+<p class="kicker">The answer</p>
 <p class="answer">${esc(s.answer)}</p>
+</div>
+<div class="play-row"><a class="cta" href="${s.cta[1]}">${esc(s.cta[0])} \u2192</a><span class="note">The coach grades your call and explains it. Free, no signup.</span></div>
+<h2>Why</h2>
 ${s.why.map(p => `<p>${esc(p)}</p>`).join('\n')}
-<p><a class="cta" href="${s.cta[1]}">${esc(s.cta[0])} →</a></p>
-<p class="note">The trainer grades every decision against basic strategy, 9/6 Jacks or Better, or the standard baccarat tableau — the same answer you just read.</p>
-<p class="note">More: <a href="/guides/">all guides</a> · <a href="/web/">the free trainer</a></p>
-<h2>Related decisions</h2>
-<ul>
-${s.related.map(([slug, label]) => `<li><a href="/guides/${slug}/">${esc(label)}</a></li>`).join('\n')}
-</ul>
+<p class="note">The trainer grades every decision against basic strategy, 9/6 Jacks or Better, or the standard baccarat tableau \u2014 the same answer you just read.</p>
+<section class="faq">
 <h2>Questions</h2>
 ${s.faq.map(([q, a]) => `<h3>${esc(q)}</h3>\n<p>${esc(a)}</p>`).join('\n')}
+</section>
+</article>
+<aside>
+<div class="box">
+<h2>Related decisions</h2>
+<ul class="links">
+${s.related.map(([slug, label]) => `<li><a href="/guides/${slug}/">${esc(label)}</a></li>`).join('\n')}
+</ul>
+<p class="note"><a href="/guides/">All guides</a></p>
+</div>
+</aside>
+</div>
 </main>
-<footer>Play Poker Gym · free blackjack, video poker, baccarat and Hold\u2019em practice in your browser. <a href="/web/privacy">Privacy</a></footer>
+${footer()}
 <script src="/web/posthog-loader.js"></script></body></html>
 `;
 }
@@ -151,35 +174,47 @@ function hub() {
   const sections = GROUPS.map(([name, match]) => {
     const rows = scenarios.filter(s => match(s.slug));
     if (!rows.length) return '';
-    return `<h2>${esc(name)}</h2>\n<ul>\n${rows.map(s => `<li><a href="/guides/${s.slug}/">${esc(s.title)}</a></li>`).join('\n')}\n</ul>`;
+    return `<section class="game-card"><h2>${esc(name)}</h2><p class="count">${rows.length} guide${rows.length === 1 ? '' : 's'}</p>\n<ul class="links">\n${rows.map(s => `<li><a href="/guides/${s.slug}/">${esc(s.title)}</a></li>`).join('\n')}\n</ul></section>`;
   }).join('\n');
   return `<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Guides: one decision at a time — Play Poker Gym</title>
-<meta name="description" content="Play Poker Gym (playpokergym.com) is the free, no-signup trainer that grades every blackjack, video poker, baccarat and Hold'em decision and tells you why. Each guide answers one decision with a drill link.">
+<meta name="description" content="Play Poker Gym (playpokergym.com) guides: each answers one blackjack, video poker, baccarat or Hold'em decision, with a free drill link. No signup.">
 <link rel="canonical" href="${BASE}/guides/">
 <meta property="og:title" content="Guides: one decision at a time">
 <meta property="og:description" content="One question, one answer, one drill. Free practice with no signup.">
 <meta property="og:type" content="website"><meta property="og:url" content="${BASE}/guides/">
 <meta property="og:image" content="${BASE}/og.png"><meta property="og:site_name" content="Play Poker Gym">
-<meta name="theme-color" content="#14121c"><link rel="icon" href="/web/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/web/icon.svg" type="image/svg+xml">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <link rel="sitemap" type="application/xml" href="/sitemap.xml">
-<style>${CSS}</style>
+${HEAD_ASSETS}
 </head><body>
-<header><a href="/">Play Poker Gym</a> · <a href="/web/">Free four-game trainer</a></header>
-<main>
-<h1>Guides: one decision at a time</h1>
-<p class="note">Each page answers one question in the first sentence, then links to the exact drill.</p>
+${header('guides')}
+<main id="main">
+<div class="wrap hub-head">
+<p class="kicker">Guides \u00b7 ${scenarios.length} decisions</p>
+<h1>One decision at a time</h1>
+<p class="lede">Each guide answers one question in its first sentence, shows the reasoning, then deals you that exact hand to practice.</p>
+<div class="game-grid">
 ${sections}
+</div>
+<div class="box" style="margin-top:16px">
 <h2>Longer guides</h2>
-<ul>
-${EXISTING.map(([name, href, note]) => `<li><a href="${href}">${esc(name)}</a> — ${esc(note)}</li>`).join('\n')}
+<ul class="links">
+${EXISTING.map(([name, href, note]) => `<li><a href="${href}">${esc(name)}</a> <span class="note">${esc(note)}</span></li>`).join('\n')}
 </ul>
-<p><a class="cta" href="/web/?ref=guide">Open the free trainer →</a></p>
+</div>
+</div>
+<section class="felt drill-band" style="border-radius:0">
+<div class="wrap">
+<div><p class="kicker">The Daily Drill</p><h2>Five hands. Same for everyone. New every midnight.</h2><p>Finish, share your grid without spoilers, come back tomorrow.</p></div>
+<a class="cta" href="/web/?ref=guide">Open the free trainer \u2192</a>
+</div>
+</section>
 </main>
-<footer>Play Poker Gym · free blackjack, video poker, baccarat and Hold'em practice in your browser.</footer>
+${footer()}
 <script src="/web/posthog-loader.js"></script></body></html>
 `;
 }

@@ -147,3 +147,16 @@ test('the build publishes the crawler files', async () => {
     assert.match(build, new RegExp(file.replace('.', '\\.')), file);
   }
 });
+
+test('meta descriptions fit the 25–160 characters search engines show', async () => {
+  const { readdir } = await import('node:fs/promises');
+  const guides = (await readdir(path.join(root, 'public/guides'), { withFileTypes: true }))
+    .filter((d) => d.isDirectory()).map((d) => `public/guides/${d.name}/index.html`);
+  const files = ['web/landing.html', 'web/index.html', 'web/privacy.html', 'public/guides/index.html', ...guides];
+  for (const file of files) {
+    const html = await read(file);
+    const raw = /<meta\s+name="description"\s+content="([^"]*)"/i.exec(html)?.[1] ?? '';
+    const text = raw.replace(/&#39;|&apos;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+    assert.ok(text.length >= 25 && text.length <= 160, `${file}: description is ${text.length} characters`);
+  }
+});

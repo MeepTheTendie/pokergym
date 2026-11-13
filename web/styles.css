@@ -411,6 +411,10 @@ textarea { width: 100%; resize: vertical; }
   background: linear-gradient(180deg, #e04a3a 0%, #a8281b 100%);
   border: 1px solid #f26c5e;
 }
+.daily-squares .sq-empty {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
 
 #dailyHistory {
   margin-top: 12px;
