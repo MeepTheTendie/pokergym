@@ -85,20 +85,57 @@ const P6 = {
 
 const PAIRS = { 1: P1, 2: P2, 3: P3, 4: P4, 5: P5, 6: P6 };
 
-// Accept "p1-QF", "p1-AF", "p1", case-insensitively.
+// Nov 13-19 slate clips (PG-CLAUDE-SLATE-BALLOT-20261109-01). These use
+// descriptive slugs instead of the p1-p6 pair ids. Suits follow the rendered
+// slate (docs/reviews/2026-11-10-slate-renders/render_slate.py); ranks carry
+// the decision, suits do not affect blackjack EV.
+const SLUGS = {
+  'nine-vs-three': {
+    game: 'blackjack',
+    label: 'HARD 9 AGAINST A THREE',
+    player: [C(6, 3), C(3, 1)],   // 6♣ 3♥ = 9
+    dealer: C(3, 2),              // 3♦
+    hole: C(10, 3),               // 10♣
+  },
+  'soft18-vs-nine': {
+    game: 'blackjack',
+    label: 'SOFT 18 AGAINST A NINE',
+    player: [C(14, 0), C(7, 2)],  // A♠ 7♦ = soft 18
+    dealer: C(9, 3),              // 9♣
+    hole: C(10, 1),               // 10♥
+  },
+  'nines-vs-seven': {
+    game: 'blackjack',
+    label: 'NINES AGAINST A SEVEN',
+    player: [C(9, 0), C(9, 1)],   // 9♠ 9♥
+    dealer: C(7, 3),              // 7♣
+    hole: C(10, 2),               // 10♦
+  },
+};
+
+// Accept "p1-QF", "p1-AF", "p1", case-insensitively, or one of the Nov 13+
+// slate slugs (case-insensitive).
 const CLIP_RE = /^p([1-6])(?:-(?:qf|af))?$/i;
 
 export function normalizeClipId(id) {
   if (typeof id !== 'string') return null;
-  const m = CLIP_RE.exec(id.trim());
-  return m ? `p${m[1]}` : null;
+  const trimmed = id.trim();
+  const m = CLIP_RE.exec(trimmed);
+  if (m) return `p${m[1]}`;
+  const slug = trimmed.toLowerCase();
+  if (Object.prototype.hasOwnProperty.call(SLUGS, slug)) return slug;
+  return null;
 }
 
 export function reelClipFor(id) {
   const norm = normalizeClipId(id);
   if (!norm) return null;
-  const pair = Number(norm.slice(1));
-  const spec = PAIRS[pair];
+  if (norm.startsWith('p')) {
+    const pair = Number(norm.slice(1));
+    const spec = PAIRS[pair];
+    return spec ? { clip: norm, ...spec } : null;
+  }
+  const spec = SLUGS[norm];
   return spec ? { clip: norm, ...spec } : null;
 }
 
