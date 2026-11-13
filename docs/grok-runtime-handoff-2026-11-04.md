@@ -1,3 +1,5 @@
+> **Historical (marked 2026-11-10).** Grok is removed (Nov 5). Current process: [`OPERATING_RULES.md`](OPERATING_RULES.md) and [`CREW.md`](CREW.md).
+
 # Grok Bot runtime handoff capability — PG-HANDOFF-20261104-02
 
 Status: **answer to Codex's read-only coordination test**. No production, publishing, account, secret, spend, permission or schedule change was made to produce it.

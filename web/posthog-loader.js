@@ -18,6 +18,35 @@
     return;
   }
 
+  // Crew test visits never count. Any link the crew opens to check it carries
+  // ?pg_test=1, which also marks this browser so later visits from it stay out
+  // too; ?pg_test=0 clears the mark. A stray backtick in the address is a
+  // pasted test link (real captions never contain one), so it counts as a test.
+  // Owner ruling 2026-11-10: crew link checks were inflating visitor counts.
+  var INTERNAL_KEY = 'pg_internal_v1';
+  var internal = false;
+  try {
+    var testParam = new URLSearchParams(window.location.search).get('pg_test');
+    if (testParam === '0') window.localStorage.removeItem(INTERNAL_KEY);
+    else if (testParam !== null) window.localStorage.setItem(INTERNAL_KEY, '1');
+    var rawUrl = String(window.location.search || '') + String(window.location.hash || '');
+    internal = testParam !== null && testParam !== '0'
+      || rawUrl.indexOf('`') !== -1 || rawUrl.toLowerCase().indexOf('%60') !== -1
+      || window.localStorage.getItem(INTERNAL_KEY) === '1';
+  } catch (e) {
+    // Storage blocked: only the address itself can mark a test visit.
+    try {
+      var s = String(window.location.search || '');
+      internal = /[?&]pg_test=(?!0(&|$))/.test(s) || s.indexOf('`') !== -1 || s.toLowerCase().indexOf('%60') !== -1;
+    } catch (e2) { internal = false; }
+  }
+  if (internal) {
+    window.trackEvent = function () {};
+    window.pgIdentify = function () {};
+    window.__pgInternal = true;
+    return;
+  }
+
   // Project API key (public — it ships in client code). Empty disables analytics.
   var KEY = 'phc_wLPfBDNvoMeS7rSD8goD293GphD5aWjwznZbAz2yf6sc';
   var API_HOST = '/ingest';

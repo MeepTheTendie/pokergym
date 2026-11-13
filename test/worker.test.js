@@ -78,6 +78,16 @@ test('typed path /go redirects to the trainer with endscreen attribution', async
   assert.equal(c.waits.length, 0);
 });
 
+test('short links pass the crew test flag through to the page', async () => {
+  const e = env(); const c = ctx();
+  for (const link of ['https://playpokergym.com/reel?src=fb&c=nine-vs-three&pg_test=1', 'https://playpokergym.com/go?pg_test=1', 'https://playpokergym.com/x?c=t&pg_test=1']) {
+    const loc = new URL((await worker.fetch(nav(link), e, c)).headers.get('location'));
+    assert.equal(loc.searchParams.get('pg_test'), '1', link);
+  }
+  const plain = new URL((await worker.fetch(nav('https://playpokergym.com/reel?src=fb&c=p1-QF'), e, c)).headers.get('location'));
+  assert.equal(plain.searchParams.has('pg_test'), false);
+});
+
 test('reel link /reel stamps platform attribution instead of relying on captions', async () => {
   const e = env(); const c = ctx();
   const response = await worker.fetch(nav('https://playpokergym.com/reel?src=fb&c=p1-QF'), e, c);
@@ -211,6 +221,8 @@ test('stats: probe and scripted automation visits are excluded', () => {
   assert.match(clause, /person_id NOT IN \('ba45edef-/);
   assert.match(clause, /properties\.\$raw_user_agent IS NULL OR/);
   assert.match(clause, /NOT LIKE '%Edge\/12\.246%'/);
+  assert.match(clause, /\$virt_traffic_type/);
+  assert.match(clause, /NOT IN \('Bot', 'Automation', 'AI Agent'\)/);
 });
 
 test('stats: unfurl-bot visits are excluded', () => {
