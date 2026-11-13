@@ -111,6 +111,29 @@ const SLUGS = {
     dealer: C(7, 3),              // 7♣
     hole: C(10, 2),               // 10♦
   },
+  // Nov 15/17/18 slate (Claude, video owner; posted on #41 2026-11-13 with a
+  // Sat Nov 14 10 AM CT veto window). Ranks carry the decision.
+  'double-18-vs-six': {
+    game: 'blackjack',
+    label: 'SOFT 18 AGAINST A SIX',
+    player: [C(14, 2), C(7, 3)],  // A♦ 7♣ = soft 18
+    dealer: C(6, 0),              // 6♠
+    hole: C(10, 1),               // 10♥
+  },
+  'split-16-vs-ten': {
+    game: 'blackjack',
+    label: 'EIGHTS AGAINST A TEN',
+    player: [C(8, 1), C(8, 3)],   // 8♥ 8♣ = 16
+    dealer: C(13, 2),             // K♦
+    hole: C(6, 0),                // 6♠
+  },
+  'split-18-vs-nine': {
+    game: 'blackjack',
+    label: 'NINES AGAINST A NINE',
+    player: [C(9, 2), C(9, 3)],   // 9♦ 9♣ = 18
+    dealer: C(9, 1),              // 9♥
+    hole: C(10, 0),               // 10♠
+  },
 };
 
 // Accept "p1-QF", "p1-AF", "p1", case-insensitively, or one of the Nov 13+
