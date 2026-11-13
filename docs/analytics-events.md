@@ -55,6 +55,8 @@ visible in the data rather than implied by the event name.
 | `time_to_first_decision` | The first player decision in a run is made. | `ms` (milliseconds from deal to decision), `game`, `mode`, `run_id`, `run_kind`, `entry`, `event_version` |
 | `recap_view` | The end-of-run recap is shown after a five-hand session **or a completed Daily Drill**. | `daily_done`, `missed`, `run_id`, `run_kind` (`session`/`daily`), `event_version` |
 | `recap_tap` | A button on the end-of-run recap is tapped. | `button`: `daily_drill`, `play_again`, `replay_daily`, `challenge`, `review_mistakes`, `install`; `run_id`, `event_version` |
+| `return_prompt_shown` | The "come back tomorrow" line and Daily Drill button are shown on a **non-daily** five-hand recap. | `daily_done` (whether today's drill is already complete), `run_id`, `event_version` |
+| `return_prompt_clicked` | The return prompt's Daily Drill button is tapped. | `daily_done`, `run_id`, `event_version` |
 | `share` | A result is shared. | `channel`: `native`, `copy`, `challenge`; `surface`: `recap`, `recap_daily`, `daily`, `invite` |
 | `share_click` | A share action is invoked. | `game`, `channel` (`native`, `copy`, `x`, `facebook`…), `share_id` (short random id). Every share link carries `?ref=share&sh=<share_id>`. |
 | `share_arrival` | The trainer or landing loads with `ref=share`. | `sh` (the share id). Fires on load and registers `ref`/`sh` as first-touch person properties. |

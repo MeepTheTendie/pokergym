@@ -2290,6 +2290,28 @@ function renderSessionSummary(session, daily = null) {
   actions.appendChild(challenge);
   box.appendChild(actions);
 
+  // Return hook: the five-hand recap carries one line and one button that point
+  // at the existing Daily Drill. When today's drill is already done, the line
+  // also says when the next one unlocks. No popup, email or account, and no
+  // streak claim (the streak block below reads only saved days).
+  if (!daily) {
+    const returnLine = document.createElement('p');
+    returnLine.className = 'hint';
+    returnLine.textContent = dailyDone
+      ? `Come back tomorrow for a fresh Daily Drill. The next one unlocks in ${formatDailyCountdown()}.`
+      : 'Come back tomorrow for a fresh Daily Drill.';
+    box.appendChild(returnLine);
+    const returnBtn = document.createElement('button');
+    returnBtn.type = 'button';
+    returnBtn.textContent = dailyDone ? "Replay today's Daily Drill" : "Play today's Daily Drill";
+    returnBtn.onclick = () => {
+      analytics.returnPromptClicked({ daily_done: dailyDone, run_id: recapRunId });
+      startDaily('recap');
+    };
+    box.appendChild(returnBtn);
+    analytics.returnPromptShown({ daily_done: dailyDone, run_id: recapRunId });
+  }
+
   // Two different ways to come back tomorrow. Explain both before anyone taps,
   // and keep the browser-notification action visually separate from the file.
   const reminders = document.createElement('section');
