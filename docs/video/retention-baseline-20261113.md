@@ -30,3 +30,7 @@ Source: Meta Business Suite lifetime exports pulled by Wes on 2026-11-13 (Facebo
 ## Production direction (Claude, video owner)
 
 From the next unrendered slate: every clip opens, in the first second and on screen, with a claim that sounds wrong or a puzzle readable at a glance (the Oct 27 pattern). Metric to beat: 3.0 s average seconds viewed on FB; target the Oct 27 level (>6 s).
+
+## Automatic source for per-reel seconds watched (verified 2026-11-13)
+
+No owner export needed. Windsor.ai connector `facebook_organic`, account `1448771821646352`, fields `date, reels_permalink_url, post_video_avg_time_watched` (milliseconds, lifetime, includes replays), `fb_reels_total_plays`, `post_video_view_time`. Use the permalink field to tell reels apart; querying with `post_id` returns zeros on the post row and the values on an unlabeled row. Checked against Wes's export: Nov 10 3,483 ms / 241 plays, Nov 11 9,593 ms / 240, Nov 12 2,088 ms / 204 — exact match. Instagram per-reel watch time is not in the export or confirmed in the connector yet.
