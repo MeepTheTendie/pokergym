@@ -79,3 +79,13 @@ test('reel p6 holdem rigs jacks on a paired 9-9-5-5-2 board', () => {
   assert.deepEqual(best.cards.map(c => c.r).slice(0, 4), [11, 11, 9, 9]);
   assert.equal(best.cards[4].r, 5, '5 kicker plays over the board 2');
 });
+
+test('reel Nov 15/17/18 slate slugs deal the described blackjack decisions', () => {
+  for (const [slug, want] of [['double-18-vs-six', 'double'], ['split-16-vs-ten', 'split'], ['split-18-vs-nine', 'split']]) {
+    const clip = reelClipFor(slug);
+    assert.ok(clip, slug);
+    const r = newBjRound(Math.random, { player: clip.player, dealer: [clip.dealer, clip.hole] });
+    const best = bestAction(r);
+    assert.ok(best.optimal.includes(want), `${slug} should ${want}, got ${best.optimal}`);
+  }
+});
