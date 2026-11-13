@@ -1640,6 +1640,12 @@ function renderStatus() {
   }
 
   // hold'em
+  if (!handDone && !coachedHand && !acted) {
+    el('handGrade').textContent = 'Your call';
+    setGauge(0, 'mid');
+    el('potentialText').textContent = 'Choose your answer.';
+    return;
+  }
   const cat = round.result.category;
   el('handGrade').textContent = round.result.label;
   setGauge((cat / 9) * 100, cat >= 5 ? 'high' : cat >= 3 ? 'mid' : 'low');
@@ -1758,7 +1764,7 @@ function setControls() {
     el('btnDeal').hidden = (dailyMode || shortSession) && handDone;
     el('btnDeal').disabled = !handDone;
     el('btnDraw').disabled = handDone;
-    el('btnDraw').classList.toggle('primary', !handDone);
+    el('btnDraw').classList.toggle('primary', !handDone && Array.isArray(round?.holds) && round.holds.some(Boolean));
     el('btnDeal').classList.toggle('primary', handDone);
     return;
   }
