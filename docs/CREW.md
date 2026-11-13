@@ -46,3 +46,4 @@ The single roster. If another doc names a different owner, this file and [`OPERA
 | Crew integrator | :09, hourly in deadline windows, else every 2 h 7 AM–11 PM | PRs, merges, Opinion schedule, ledger, Nov 13+ scheduling |
 | Daily video hold-time check | 12:43 PM | Reel watch-time tripwire on #51 |
 | Dashboard Meta pull + accountability | 6:47 AM | Refreshes the dashboard's Meta data and decision checks |
+| Playtest | Tue and Fri, 7:41 PM | Plays the live site as a new visitor per [`playtest/PLAYTEST.md`](playtest/PLAYTEST.md); report in `docs/playtest/`, fixes tasked on #41 |
