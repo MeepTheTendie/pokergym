@@ -3,6 +3,7 @@ import { GYMS, GYM_BY_ID, gymForClass, isUnlocked } from './gyms.js';
 import { dayGap, dailyPlan, validDailyGames, validDailyPlan, DAILY_HANDS } from './daily.js';
 
 import { validDrillPlan } from './drills.js';
+import { normalizeClipId } from './reel-clips.js';
 
 export const SAVE_VERSION = 2;
 
@@ -352,6 +353,8 @@ function sanitizeSession(s) {
   const out = { gymId: s.gymId, played, dealt: clampCount(s.dealt) || played, optimal: Math.min(clampCount(s.optimal), played),
     startedAt: typeof s.startedAt === 'string' && s.startedAt.length <= 100 ? s.startedAt : new Date().toISOString() };
   if (validDrillPlan(s.drill, GYM_BY_ID[s.gymId].game)) out.drill = { mode: s.drill.mode, indices: [...s.drill.indices] };
+  const reelClip = normalizeClipId(s.reelClip);
+  if (reelClip) out.reelClip = reelClip;
   if (typeof s.completedAt === 'string' && s.completedAt.length <= 100) out.completedAt = s.completedAt;
   return out;
 }

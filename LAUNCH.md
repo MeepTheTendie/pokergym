@@ -2,7 +2,7 @@
 
 ## Monetization rule (owner, 2026-10-15)
 
-No subscriptions, ever, and no recurring prices. Monetization is the optional Ko-fi tip jar (https://ko-fi.com/playpokergym). The only other path left open is a possible one-time US$4.99 Pro unlock, considered only if at least five people ask for something like it unprompted after day 30. Prompted answers do not count as demand, so public copy asks no pricing or willingness-to-pay question. Older log entries below that mention a monthly offer or pricing research are superseded; that research was removed. Day 14 of the current launch is a measurement checkpoint only: report the number of unprompted requests for more. It does not lower the day-30 / five-ask gate above.
+**Superseded 2026-11-08 (Wes):** the Oct 15 no-subscriptions / tips-only rule and the day-30 five-ask gate are retired. Monetization follows [`plan.md`](plan.md) (Gym Pro via Ko-fi, free trainer free forever). Original text kept in git history.
 
 ## Direction
 
@@ -19,16 +19,15 @@ The production build now includes the frontend and strategy modules, and exclude
 1. Build a reproducible public demo artifact; test deployed module loading, mobile layout, sound gestures, strategy feedback and save/resume. Preserve existing local changes.
 2. Add a clear product landing page and playable free introduction. Keep learning free; the optional Ko-fi tip jar is the only live monetization.
 3. Learn from real player feedback. Record visitors, completed first sessions and return visits separately. Ask no pricing questions; note unprompted requests for paid extras.
-4. Only after day 30, and only if at least five players ask unprompted, consider a one-time US$4.99 Pro unlock. Never a subscription.
+4. (Superseded 2026-11-08: see `plan.md` for Gym Pro.)
 5. Complete Android distribution, privacy/data disclosures and storefront requirements before claiming a store launch. A responsive website is not a published Android app.
 
 ## Autonomous daily marketing brief
 
 Target one to two hours per day once there is a stable shareable demo and a verified scheduled execution mechanism. Find relevant channels that permit promotion; publish accurate gameplay demonstrations and useful training content using available authorized accounts. Reply to interested players, record attribution and feedback, then improve the highest-impact onboarding issue. No spam, fabricated reviews, guaranteed winnings, platform-rule evasion or unapproved ad spend. Measure qualified players, activation, retention and actual paid subscriptions, not number of posts. The measurement is `npm run stats`: it prints the crawler-inclusive visit counter plus the PostHog real-player report (unique people per day, journey stages, top events); use the PostHog numbers to pick the next improvement. See MARKETING.md for how to read it.
 
-Daily scheduling is verified: pokergym-daily.timer fires at 09:00 America/Chicago with
-Persistent=true. The runner uses the keyring for PostHog reads (verified reachable from
-systemd --user). See automation/README.md.
+Daily scheduling: **retired.** The pokergym-daily systemd job no longer exists on the owner's
+machine (Wes, 2026-11-06). Its files are archived in automation/retired/ for history only.
 
 ## Owner involvement
 
