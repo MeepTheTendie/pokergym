@@ -90,6 +90,26 @@ test('first-touch UTMs are set once via $set_once', () => {
   });
 });
 
+test('surrounding whitespace on utm_content is trimmed before recording', () => {
+  // cleanCampaign still normalizes values that reach the person profile.
+  const { identified } = setupLoader('?utm_source=ig&utm_medium=reel&utm_campaign=hooktest1112&utm_content=%20ig-bio%20');
+  assert.ok(identified.length > 0);
+  const props = identified[0][1];
+  assert.equal(props.$set_once.utm_content, 'ig-bio');
+  assert.equal(props.$set_once.utm_source, 'ig');
+  assert.equal(props.$set_once.utm_campaign, 'hooktest1112');
+});
+
+test('a trailing backtick on utm_content marks a crew test visit', () => {
+  // Owner rule 2026-11-10: no real caption carries a stray backtick, so a
+  // backticked link is a pasted crew check. The loader must stop before it
+  // identifies anyone (the #111 branch predates this rule; main's behavior
+  // wins the merge, and Wren sign-off covers whether IG bio should differ).
+  const { identified, windowObj } = setupLoader('?utm_source=ig&utm_medium=reel&utm_campaign=hooktest1112&utm_content=ig-bio%60');
+  assert.deepEqual(identified, []);
+  assert.equal(windowObj.__pgInternal, true);
+});
+
 test('first-touch is not overwritten by a later visit', () => {
   // First visit stores utm_source=first.
   const first = setupLoader('?ref=share&sh=a&utm_source=first');

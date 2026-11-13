@@ -130,6 +130,28 @@ test('x link /x tags the owner daily X posts', async () => {
   assert.deepEqual(e.served, []);
 });
 
+test('campaign values are trimmed of trailing backticks, quotes and whitespace', async () => {
+  const e = env(); const c = ctx();
+  // A short link whose ?c= value picked up a trailing backtick (e.g. copied out
+  // of a Markdown code span) must forward a clean utm_content.
+  const reel = new URL((await worker.fetch(nav('https://playpokergym.com/reel?src=ig&c=ig-bio%60'), e, c)).headers.get('location'));
+  assert.equal(reel.searchParams.get('utm_content'), 'ig-bio');
+  assert.equal(reel.searchParams.get('utm_source'), 'ig');
+  assert.equal(reel.searchParams.get('ref'), 'reels');
+  // utm_content passthrough and campaign value are cleaned too.
+  const passthrough = new URL((await worker.fetch(nav('https://playpokergym.com/reel?src=fb&utm_content=p1-QF%60&camp=hooktest1112%60'), e, c)).headers.get('location'));
+  assert.equal(passthrough.searchParams.get('utm_content'), 'p1-QF');
+  assert.equal(passthrough.searchParams.get('utm_campaign'), 'hooktest1112');
+  // A backticked src still resolves to the right platform instead of falling
+  // through to the facebook default.
+  const igSrc = new URL((await worker.fetch(nav('https://playpokergym.com/reel?src=ig%60&c=x'), e, c)).headers.get('location'));
+  assert.equal(igSrc.searchParams.get('utm_source'), 'ig');
+  assert.equal(igSrc.searchParams.get('ref'), 'reels');
+  // /x forwards a cleaned utm_content as well.
+  const x = new URL((await worker.fetch(nav('https://playpokergym.com/x?c=soft17%60'), e, c)).headers.get('location'));
+  assert.equal(x.searchParams.get('utm_content'), 'soft17');
+});
+
 test('worker counts a page view and always serves assets', async () => {
   const e = env(); const c = ctx();
   const res = await worker.fetch(nav('https://playpokergym.com/web/?ref=share&d=9', { 'cf-connecting-ip': '203.0.113.9', 'user-agent': 'X', cookie: 'a=b' }), e, c);

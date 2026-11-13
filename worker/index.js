@@ -3,6 +3,7 @@
 // assets.run_worker_first; every other request goes straight to assets.
 // Counting failures never prevent serving assets.
 import { countBucket, dataPoint } from './count.js';
+import { cleanCampaign } from '../src/rpg/links.js';
 import { isIngestPath, proxyPostHog } from './proxy.js';
 import { SECURITY_HEADERS } from './security.js';
 import { isPushEndpoint, sendPush, subscriptionId, validSubscription } from './push.js';
@@ -138,7 +139,7 @@ export default {
       target.searchParams.set('utm_source', 'x');
       target.searchParams.set('utm_medium', 'social');
       target.searchParams.set('utm_campaign', 'wes-daily');
-      const content = url.searchParams.get('c');
+      const content = cleanCampaign(url.searchParams.get('c'));
       if (content) target.searchParams.set('utm_content', content);
       keepTestFlag(url, target);
       return Response.redirect(target.href, 302);
@@ -148,16 +149,18 @@ export default {
     // reel can never be mis-attributed to the wrong platform (e.g. a Facebook
     // reel tagged utm_source=yt, which is what happened on 2026-11-01).
     if (url.pathname === '/reel' || url.pathname === '/reel/') {
-      const src = (url.searchParams.get('src') || 'fb').toLowerCase();
+      const src = cleanCampaign(url.searchParams.get('src') || 'fb').toLowerCase();
       const platform = src === 'yt' ? 'youtube' : src === 'ig' ? 'reels' : 'facebook';
       const utmSource = src === 'yt' ? 'yt' : src === 'ig' ? 'ig' : 'fb';
       const target = new URL('/web/', url.origin);
       target.searchParams.set('ref', platform);
       target.searchParams.set('utm_source', utmSource);
       target.searchParams.set('utm_medium', 'reel');
-      target.searchParams.set('utm_campaign', url.searchParams.get('camp') || 'hooktest1112');
-      const clip = url.searchParams.get('c') || url.searchParams.get('clip');
-      const content = clip || url.searchParams.get('utm_content');
+      target.searchParams.set('utm_campaign', cleanCampaign(url.searchParams.get('camp')) || 'hooktest1112');
+      // Keep both the c=/clip deeplink passthrough added on main and #111's
+      // cleaning of pasted campaign values (trailing backticks/quotes/space).
+      const clip = cleanCampaign(url.searchParams.get('c') || url.searchParams.get('clip'));
+      const content = clip || cleanCampaign(url.searchParams.get('utm_content'));
       if (content) target.searchParams.set('utm_content', content);
       if (clip) target.searchParams.set('c', clip);
       if (url.searchParams.get('daily') === '1') target.searchParams.set('daily', '1');
