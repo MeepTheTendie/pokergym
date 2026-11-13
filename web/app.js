@@ -2240,6 +2240,7 @@ function renderSessionSummary(session, daily = null) {
     dailyBtn.textContent = `Play Daily Drill #${todayNum}`;
     dailyBtn.onclick = () => {
       analytics.recapTap({ button: 'daily_drill', run_id: recapRunId });
+      analytics.returnPromptClicked({ daily_done: dailyDone, run_id: recapRunId });
       startDaily('recap');
     };
     actions.appendChild(dailyBtn);
@@ -2289,6 +2290,21 @@ function renderSessionSummary(session, daily = null) {
   };
   actions.appendChild(challenge);
   box.appendChild(actions);
+
+  // Return hook: the five-hand recap carries one line pointing at the Daily
+  // Drill. Before today's drill is done, the existing primary "Play Daily Drill"
+  // button is the action (its tap also fires return_prompt_clicked), so there is
+  // no second gold button. After it is done, the line says when the next one
+  // unlocks and there is no button. No popup, email, account or streak claim.
+  if (!daily) {
+    const returnLine = document.createElement('p');
+    returnLine.className = 'hint';
+    returnLine.textContent = dailyDone
+      ? `Come back tomorrow for a fresh Daily Drill. The next one unlocks in ${formatDailyCountdown()}.`
+      : 'Come back tomorrow for a fresh Daily Drill.';
+    box.appendChild(returnLine);
+    analytics.returnPromptShown({ daily_done: dailyDone, run_id: recapRunId });
+  }
 
   // Two different ways to come back tomorrow. Explain both before anyone taps,
   // and keep the browser-notification action visually separate from the file.
