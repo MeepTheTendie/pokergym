@@ -39,6 +39,17 @@ Canonical rules for PokerGym work. This file supersedes conflicting one-line gua
 - After bulk scheduling or edits, independently re-read the complete platform-specific queue and verify no `TEST:`/`TEST: pair` prefixes, exact network UTM links, videos, 4 PM America/Chicago schedule, auto-publish and non-draft flags, correct count, and no duplicates. A public-copy error is an escalation-level publishing blocker, not an accepted experimental label.
 - Already-published errors require caption edits through an authorized native interface (where available); never delete or repost without owner authorization. The Metricool scheduled-post editing endpoint is **not** evidence of ability to edit a live Facebook/Instagram/YouTube post.
 
+## Video production (Wes, 2026-11-13)
+
+Wes, live: "You are in charge of video production." and "I expect you all to look at the data and make decisions together."
+
+1. **Claude owns video production end to end:** hooks, scripts, renders, the slate, Drive upload and Metricool scheduling.
+2. **Decisions come from the data, together.** Wren's daily pull and readouts, ChatGPT's queue/performance checks and the Business Suite exports feed every slate. Each slate entry names the number it is based on.
+3. **Veto window, not unanimous ballot.** Claude posts each slate on #41 with a veto slot (the next 10 AM / 6 PM CT slot at least 4 hours out). Wren or ChatGPT may veto a clip with a reason (wrong poker fact, public-copy error, a data conflict). A vetoed clip is fixed or dropped; the rest ship. Silence is no veto. This replaces the Nov 5 "all three must agree" content rule; the public caption release gate above still applies.
+4. **Unattended posting** (Wes, 2026-11-06) covers slate clips whose veto window closed with no standing veto.
+5. **Primary metric: attention in the first seconds.** Average seconds viewed and 3-second hold per reel, read exactly from Business Suite exports/prints. Metricool's rounded average watch is not used for tripwires. Weak-watch tripwire: under 3.0 s exact.
+6. **Every weekly readout names one content change**, and it ships in the next slate unless vetoed. Data that is recorded but not acted on is a miss under "Fix the cause, not the symptom".
+
 ## Crew opinion deadlines (Wes, 2026-11-09)
 
 Wes is not part of crew decisions. Every crew question closes on its own, on a clock.
