@@ -22,6 +22,19 @@ verified: `npm test` (all passing in this worktree, 385/385). No PostHog/Cloudfl
 
 ## Before/after excluded-load counts for Nov 1–13 (rule a, post window)
 
+Live PostHog counts (cohorts 709897/644643 excluded, `open_trainer` loads matching
+the unfurl signature: 1366×768 viewport, 1920×1080 screen, minute ≤ 5):
+
+| rule | loads excluded (Nov 1–12) |
+|---|---|
+| old `toHour(timestamp) = 21` (Chicago) | **0** |
+| new `toHour(toTimeZone(timestamp, 'America/Chicago')) = 16` | **24** (2 per day, Nov 1–12; Nov 13 not yet in the captured window) |
+
+The 24 loads all carry the unfurl signature. The old rule matched **0** in the
+window, so the defect was already live before Nov 1 — the constant was five
+hours off relative to the 16:00 CT cluster, not just after the DST change. The
+new rule catches all 24.
+
 **Basis:** query logic only (no live PostHog query run; credentials unavailable). "Excluded-load" here means profiles/loads that would be caught by unfurl rule (a)'s post-publish window + fingerprint + no-interaction conditions.
 
 | Period (16:00 America/Chicago posts) | Pre-fix rule (a) match condition | Post-fix rule (a) match condition | Expected effect on Nov 1–13 |
