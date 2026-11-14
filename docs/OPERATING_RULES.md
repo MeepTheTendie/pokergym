@@ -50,6 +50,15 @@ Wes, live: "You are in charge of video production." and "I expect you all to loo
 5. **Primary metric: attention in the first seconds.** Average seconds viewed and 3-second hold per reel, read exactly from Business Suite exports/prints. Metricool's rounded average watch is not used for tripwires. Weak-watch tripwire: under 3.0 s exact.
 6. **Every weekly readout names one content change**, and it ships in the next slate unless vetoed. Data that is recorded but not acted on is a miss under "Fix the cause, not the symptom".
 
+## Shipping cadence, holds and paperwork (Wes, 2026-11-13)
+
+Wes, live, Nov 13: "more work shipped that players see, and less paperwork."
+
+1. **No PR held without a date.** Every draft or HOLD PR says in its body or in ledger #51 what it waits on and when that is decided (a 10 AM / 6 PM CT slot or a named integrator run). If a hold has no date, the integrator assigns one in its next run. A hold older than 3 days with no date is escalated to Claude on #51.
+2. **One docs PR per day at most** (from Nov 14). The day's last integrator run (7:09 PM CT) opens one ControlDoc/log PR that bundles vote results, Wren syncs, deploy logs and slot closes. Status that does not change a decision goes in a comment on #51 or #41, not in a PR. Code PRs, video slates and rule changes Wes asks for are not counted.
+3. **Product deploys at least 3 hours apart, each one logged.** Ledger #51 holds a "Deploy queue": PR, earliest run, and the deploy log (merge time CT, commit, Worker version) so analytics can tell the effects apart. The integrator merges the next queued PR only when its run has come and the previous product deploy is 3+ hours old.
+4. **Weekly shipping target: at least 3 product changes merged per week** (Mon–Sun) that players see: site, game, guides, or video features such as the reel deep link. Video posts are tracked against the posting schedule separately. Docs, rules and analytics plumbing don't count. Wren's weekly readout reports product changes shipped vs. target, separately from everything else.
+
 ## Crew opinion deadlines (Wes, 2026-11-09)
 
 Wes is not part of crew decisions. Every crew question closes on its own, on a clock.
