@@ -43,7 +43,7 @@ visible in the data rather than implied by the event name.
 
 | Event | Fires when | Properties |
 |---|---|---|
-| `open_trainer` | The trainer page loads. Once per page load. | `entry`: `daily_link` (`?daily=1`), `share_link` (`?d=<n>` share grid), `practice_link` (`?practice=`), `drill_link` (`?drill=<scenario id>`, opens that authored hand first), `direct`; `returning`: has a local save; `days_since_last_visit`: days since the last local visit when a save exists; `preview`: true when the page loads hidden (bot-suspect load; it will not auto-start) |
+| `open_trainer` | The trainer page loads. Once per page load. | `entry`: `daily_link` (`?daily=1`), `share_link` (`?d=<n>` share grid), `practice_link` (`?practice=`), `drill_link` (`?drill=<scenario id>`, opens that authored hand first), `direct`; `returning`: has a local save; `days_since_last_visit`: days since the last local visit when a save exists; `preview`: true when the page loads hidden (bot-suspect load; it will not auto-start); `first_screen` (since the Nov 13, 2026 first-hand change): `quick_deal` when a brand-new visitor with no save and no link sees the single "Deal my first hand" screen, else `menu` |
 | `start_training` | The first hand of the page load is dealt (any mode). Once per page load. | `game`; `mode`: `daily`, `session`, `challenge`; `entry` |
 | `game_start` | A five-hand session, drill, or gym challenge begins, including a resumed one. Not fired for Daily Drill hands. | `game`: `blackjack`, `videopoker`, `baccarat`, `holdem`; `mode`: `session`, `master`, `weak` (drills), `challenge`; `resumed`; `entry`; `run_id` |
 | `hand_dealt` | A hand is dealt inside a live `game_start`/`start_daily` run. | `run_id`, `run_kind` (`session`/`daily`), `game`, `mode`, `entry`, `hand_index` (1-based), `hand_total` (5 for sessions/daily, 10 for a challenge), `event_version` |
@@ -55,6 +55,8 @@ visible in the data rather than implied by the event name.
 | `time_to_first_decision` | The first player decision in a run is made. | `ms` (milliseconds from deal to decision), `game`, `mode`, `run_id`, `run_kind`, `entry`, `event_version` |
 | `recap_view` | The end-of-run recap is shown after a five-hand session **or a completed Daily Drill**. | `daily_done`, `missed`, `run_id`, `run_kind` (`session`/`daily`), `event_version` |
 | `recap_tap` | A button on the end-of-run recap is tapped. | `button`: `daily_drill`, `play_again`, `replay_daily`, `challenge`, `review_mistakes`, `install`; `run_id`, `event_version` |
+| `return_prompt_shown` | The "come back tomorrow" line is shown on a **non-daily** five-hand recap (with the next unlock time when today's drill is done). | `daily_done` (whether today's drill is already complete), `run_id`, `event_version` |
+| `return_prompt_clicked` | The recap's existing "Play Daily Drill #N" button is tapped (shown only while today's drill is not done; also fires `recap_tap` `daily_drill`). | `daily_done`, `run_id`, `event_version` |
 | `share` | A result is shared. | `channel`: `native`, `copy`, `challenge`; `surface`: `recap`, `recap_daily`, `daily`, `invite` |
 | `share_click` | A share action is invoked. | `game`, `channel` (`native`, `copy`, `x`, `facebook`…), `share_id` (short random id). Every share link carries `?ref=share&sh=<share_id>`. |
 | `share_arrival` | The trainer or landing loads with `ref=share`. | `sh` (the share id). Fires on load and registers `ref`/`sh` as first-touch person properties. |
@@ -82,6 +84,14 @@ real interaction follows.
 `decision_made` is deliberately a **stage**, not every action. A blackjack hand
 can contain several actions; `hand_complete.decisions` is the count. This keeps
 the funnel denominator equal to hands dealt.
+
+### First-hand funnel (no new events)
+
+The Nov 13 first-screen change reuses existing events. Saw the new screen:
+`open_trainer` with `first_screen = quick_deal` (exclude `preview: true`).
+Started a hand: `start_training` in the same page load (`$session_id`). Made a
+decision: `decision_made` with `hand_index = 1`. Compare the
+`open_trainer → start_training` rate for `quick_deal` before/after Nov 13.
 
 ## Landing page and guides (click tracking)
 

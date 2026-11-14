@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { createAnalytics, EVENTS, GAMES } from '../src/rpg/analytics.js';
+import { createAnalytics, EVENTS, GAMES, EVENT_VERSION } from '../src/rpg/analytics.js';
 
 const read = (p) => readFileSync(new URL(p, import.meta.url), 'utf8');
 
@@ -354,4 +354,32 @@ test('the first-hand nudge is one-time, legal-button only, and clears on a decis
   assert.match(html, /id="firstNudge"/);
   const css = read('../web/styles.css');
   assert.match(css, /prefers-reduced-motion[\s\S]*nudge/);
+});
+
+test('return prompt events carry the run id and fire through the tracker', () => {
+  const { a, count, last } = harness();
+  assert.equal(a.returnPromptShown({ daily_done: false, run_id: 'session-abc-1' }), true);
+  assert.equal(a.returnPromptClicked({ daily_done: false, run_id: 'session-abc-1' }), true);
+  assert.equal(count('return_prompt_shown'), 1);
+  assert.equal(count('return_prompt_clicked'), 1);
+  const expected = { daily_done: false, run_id: 'session-abc-1', event_version: EVENT_VERSION, ref: 'youtube' };
+  assert.deepEqual(last('return_prompt_shown'), expected);
+  assert.deepEqual(last('return_prompt_clicked'), expected);
+});
+
+test('the non-daily recap shows one return line and reuses the existing Daily Drill button', () => {
+  const recap = app.slice(app.indexOf('function renderSessionSummary('), app.indexOf('function settleDailyHand('));
+  const hook = recap.slice(recap.indexOf('// Return hook:'), recap.indexOf('// Two different ways to come back tomorrow.'));
+  assert.match(hook, /if \(!daily\) \{/, 'prompt must not appear on a daily recap');
+  assert.match(hook, /Come back tomorrow for a fresh Daily Drill\./);
+  // A completed daily gets the unlock time from the existing helper.
+  assert.match(hook, /dailyDone[\s\S]*formatDailyCountdown\(\)/);
+  assert.match(hook, /analytics\.returnPromptShown\(\{ daily_done: dailyDone, run_id: recapRunId \}\)/);
+  // No second gold button: the hook adds no button of its own.
+  assert.doesNotMatch(hook, /createElement\('button'\)/);
+  // The existing primary Daily Drill button carries the click, measured before the flow starts.
+  const dailyBtn = recap.slice(recap.indexOf('if (!daily && !dailyDone) {'), recap.indexOf('const again ='));
+  assert.match(dailyBtn, /analytics\.returnPromptClicked\(\{ daily_done: dailyDone, run_id: recapRunId \}\)/);
+  assert.ok(dailyBtn.indexOf('returnPromptClicked(') < dailyBtn.indexOf("startDaily('recap')"));
+  assert.equal(recap.match(/analytics\.returnPromptClicked\(/g)?.length, 1);
 });

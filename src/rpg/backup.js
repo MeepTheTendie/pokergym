@@ -3,8 +3,9 @@ import { GYMS, GYM_BY_ID } from './gyms.js';
 import { validDailyGames, validDailyPlan, DAILY_HANDS } from './daily.js';
 
 import { validDrillPlan } from './drills.js';
+import { normalizeClipId } from './reel-clips.js';
 
-const session = s => s && GYM_BY_ID[s.gymId] && count(s.played) && s.played <= SESSION_HANDS && count(s.optimal) && s.optimal <= s.played && text(s.startedAt, 100) && (s.drill === undefined || validDrillPlan(s.drill, GYM_BY_ID[s.gymId].game));
+const session = s => s && GYM_BY_ID[s.gymId] && count(s.played) && s.played <= SESSION_HANDS && count(s.optimal) && s.optimal <= s.played && text(s.startedAt, 100) && (s.drill === undefined || validDrillPlan(s.drill, GYM_BY_ID[s.gymId].game)) && (s.reelClip === undefined || Boolean(normalizeClipId(s.reelClip)));
 const dayResults = r => Array.isArray(r) && r.length === DAILY_HANDS && r.every(v => typeof v === 'boolean');
 const daily = d => d && typeof d === 'object' && !Array.isArray(d) &&
   (d.lastKey == null || dayKey(d.lastKey)) &&

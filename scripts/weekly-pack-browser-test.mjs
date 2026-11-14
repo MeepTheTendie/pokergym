@@ -1,24 +1,20 @@
 import assert from 'node:assert/strict';
-import { spawn, execFileSync } from 'node:child_process';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
+import { launchChromium } from './lib/chromium.mjs';
 
 // Fresh isolated profile; never inspect the owner's browser or account data.
 // Run against built assets or a deployed pack; no owner browser data is used.
 const url = process.env.POKERGYM_PACK_URL ?? 'http://127.0.0.1:8898/guides/weekly-01/';
 const temp = await mkdtemp(path.join(tmpdir(), 'pokergym-install-test-'));
-const browser = spawn('chromium', ['--headless=new', '--no-sandbox', '--disable-dev-shm-usage',
-  `--user-data-dir=${temp}`, '--remote-debugging-port=19398', 'about:blank'], { stdio: 'ignore' });
+// Shared launcher: free port, bounded retries, Chromium stderr on failure.
+const browser = await launchChromium({ profileDir: temp });
 let ws;
 try {
-  let page;
-  for (let i = 0; i < 100 && !page; i++) {
-    try { page = (await (await fetch('http://127.0.0.1:19398/json/list')).json()).find(t => t.type === 'page'); } catch {}
-    if (!page) await sleep(100);
-  }
-  assert.ok(page, 'Isolated Chromium started');
+  const page = browser.page;
+  assert.ok(page?.webSocketDebuggerUrl, 'Isolated Chromium started');
   ws = new WebSocket(page.webSocketDebuggerUrl);
   await new Promise(resolve => { ws.onopen = resolve; });
   let id = 0;
@@ -231,7 +227,7 @@ try {
   assert.deepEqual(errors, []);
   console.log(JSON.stringify({ url, firstScore: 3, retryScore: 5, reload: 'passed', completedReviewAndSharing: 'passed', explicitOfflineRetry: 'passed', revealBeforeChoice: 'passed', interruptedResume: 'passed', offlineResumeAndUrlVariants: 'passed', invalidAttempt: 'passed', corruptSave: 'passed', deniedAndQuotaStorage: 'passed', unsentEditableFeedback: 'passed', phoneOverflow: false, runtimeErrors: 0 }));
 } finally {
-  ws?.close(); browser.kill('SIGTERM');
-  await new Promise(resolve => browser.exitCode !== null ? resolve() : browser.once('exit', resolve));
+  ws?.close();
+  await browser.close();
   await rm(temp, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 }
