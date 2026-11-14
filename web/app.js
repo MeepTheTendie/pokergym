@@ -1533,14 +1533,21 @@ function renderPlay() {
       ? `Result: ${round.winLabel}. Your hold was ${round.holdBest ? 'the best play' : 'not the best play'}.`
       : `Holding ${round.holds.filter(Boolean).length} of 5 cards`;
     const hint = el('holdHint');
-    if (hint && !round.drawn && !holdHintShown && !storedFlag('pg_hold_hint')) {
-      holdHintShown = true;
+    if (hint) {
+      // Reserve the hint line's height in video poker so the Draw button does
+      // not jump when the one-time first-hold hint appears and then leaves.
       hint.hidden = false;
-      setTimeout(() => { hint.hidden = true; try { localStorage.setItem('pg_hold_hint', '1'); } catch {} }, 6000);
+      const show = !round.drawn && !holdHintShown && !storedFlag('pg_hold_hint');
+      hint.style.visibility = show ? 'visible' : 'hidden';
+      if (show) {
+        holdHintShown = true;
+        setTimeout(() => { hint.style.visibility = 'hidden'; try { localStorage.setItem('pg_hold_hint', '1'); } catch {} }, 6000);
+      }
     }
-    if (round.drawn && hint) hint.hidden = true;
     return;
   }
+  const vpHint = el('holdHint');
+  if (vpHint) { vpHint.hidden = true; vpHint.style.visibility = ''; }
 
   if (gameId === 'blackjack') {
     const up = sumHand([round.dealerUpcard]).total;
@@ -1610,7 +1617,9 @@ function renderStatus() {
       round.payout >= 25 ? 'high' : round.payout > 0 ? 'mid' : 'low');
     el('potentialText').textContent = round.payout > 0
       ? `${round.winLabel} pays ${round.payout} on this pay table.`
-      : 'The draw made no paying hand. The hold was still the right play.';
+      : round.holdBest
+        ? 'The draw made no paying hand. The hold was still the right play.'
+        : 'The draw made no paying hand. Your hold was not the best play.';
     return;
   }
 
@@ -1828,6 +1837,23 @@ function updateBattlePips() {
   pips.forEach((pip, i) => pip.classList.toggle('done', i < done));
 }
 
+// The session header ("Five hands · N of 5 done") lags by one hand if it is
+// only written at deal time, so it is re-rendered when a hand settles too.
+function renderBattleLabel() {
+  const intro = shortSession && !dailyMode && !drillMode && gameId === 'blackjack'
+    && (profile?.handsPlayed ?? 0) === 0
+    ? BLACKJACK_DRILLS.find((hand) => hand.type === 'hard')
+    : null;
+  const played = profile?.activeSession?.played ?? (profile?.sessions?.[0]?.played ?? 0);
+  document.querySelector('.battle-label').textContent = dailyMode && dailyRun
+    ? `Daily Drill #${dailyRun.number} · hand ${dailyRun.index + 1} of ${DAILY_HANDS}`
+    : drillMode
+      ? `${drillMode === 'weak' ? 'Weak-spot drill' : 'Master Drill'} · ${drillLabel ? sentence(drillLabel) : TRAINING_LABEL[gameId]} · ${played} of ${SESSION_HANDS}`
+      : intro ? `First practice · ${sentence(intro.label)}`
+      : shortSession ? `Five hands · ${played} of ${SESSION_HANDS} done`
+      : `${canPractice(profile, gymId) ? 'Practice' : 'Gym challenge'} · ${handsWon} of ${HANDS_TO_WIN} good plays`;
+}
+
 function renderBattle() {
   renderPlay();
   renderStatus();
@@ -1983,19 +2009,39 @@ function startHand() {
     daily: dailyMode,
     dailyIntro: dailyMode && dailyRun && dailyRun.index === 0,
   });
-  el('masterPrompt').hidden = true;
-  document.querySelector('.battle-label').textContent = dailyMode && dailyRun
-    ? `Daily Drill #${dailyRun.number} · hand ${dailyRun.index + 1} of ${DAILY_HANDS}`
-    : drillMode
-      ? `${drillMode === 'weak' ? 'Weak-spot drill' : 'Master Drill'} · ${drillLabel ? sentence(drillLabel) : TRAINING_LABEL[gameId]} · ${profile.activeSession?.played ?? 0} of ${SESSION_HANDS}`
-      : introductory ? `First practice · ${sentence(introductory.label)}`
-      : shortSession ? `Five hands · ${profile.activeSession.played} of ${SESSION_HANDS} done` : `${canPractice(profile, gymId) ? 'Practice' : 'Gym challenge'} · ${handsWon} of ${HANDS_TO_WIN} good plays`;
+  renderBattleLabel();
 
   scheduleFirstNudge();
   revealHand();
 
   // A natural settles before anybody gets to touch anything.
   if (gameId === 'blackjack' && round.settled) settleBlackjack();
+}
+
+// A label is not always a sentence (blackjack's outcomeLabel returns "You lose"
+// with no full stop). Close the clause before the coach's verdict is joined on.
+function endSentence(text) {
+  const t = String(text ?? '').trimEnd();
+  if (!t) return t;
+  return /[.!?…]$/.test(t) ? t : `${t}.`;
+}
+
+// The one-line "why" behind the coach's verdict. A miss shows the correction
+// inline (the better play), and a correct play names the reason the game already
+// computed (the best hold for video poker, the best action + EV for blackjack),
+// so the coach never praises or corrects without explaining.
+function coachReason(review) {
+  return review?.correction ? ` ${review.correction}` : ' The better play was different.';
+}
+function correctPlayWhy() {
+  if (gameId === 'videopoker' && round && round.drawn) {
+    return ` ${reasonFor(round.hand.filter((_, i) => round.holds[i]), variantById(round.variantId))}`;
+  }
+  if (gameId === 'blackjack') {
+    const why = decisions.find((d) => d.optimal)?.review?.correction;
+    return why ? ` ${why}` : '';
+  }
+  return '';
 }
 
 function settleHand({ optimal, difficulty, line, review }) {
@@ -2046,18 +2092,19 @@ function settleHand({ optimal, difficulty, line, review }) {
   const passed = !shortSession && handsAtGym >= HANDS_TO_WIN && rate >= PASS_RATE;
 
   renderBattle();
+  renderBattleLabel();
   el('battleEndRow').hidden = false;
 
   const say = coached
     ? `${gym.leader}: That was the coach’s answer. Read the explanation — this hand does not count.`
     : optimal
-      ? `${gym.leader}: Good read. That was the best play.`
-      : `${gym.leader}: Not quite. The better play was different — here is why.`;
+      ? `${gym.leader}: Good read. That was the best play.${correctPlayWhy()}`
+      : `${gym.leader}: Not quite.${coachReason(review)}`;
   const gainLine = coached
     ? (optimal ? `Learning rep: +${fmt(applied.gained)} XP. No score and no streak change.` : 'Coached hand. No score. Read the review below.')
     : optimal
       ? `+${fmt(applied.points)} points · ${fmt(profile.streak)}-hand streak · +${fmt(applied.gained)} XP`
-      : 'Your streak reset. The review explains the better play.';
+      : 'Your streak reset.';
 
   let verdict;
   const exhausted = !shortSession && !passed && handsAtGym >= HANDS_TO_WIN;
@@ -2108,9 +2155,8 @@ function settleHand({ optimal, difficulty, line, review }) {
 
   if (shortSession && !profile.activeSession) renderSessionSummary(profile.sessions[0]);
 
-  const full = `${line} ${say} ${gainLine} ${verdict}`;
+  const full = `${endSentence(line)} ${say} ${gainLine} ${verdict}`;
   el('masterLine')._dataset = { full };
-  el('masterPrompt').hidden = false;
   cancelAutoAdvance();
   typewriter(el('masterLine'), full, () => {
     if (dailyMode || awaitingBadge || reduceMotion()) return;
@@ -2124,8 +2170,12 @@ function settleHand({ optimal, difficulty, line, review }) {
   });
 
   advice = null;
-  el('coachPanel').hidden = true;
-  el('why').hidden = true;
+  if (!coached) {
+    // A coached hand keeps the coach panel open so "Read the explanation" has
+    // something to read; the next hand closes it.
+    el('coachPanel').hidden = true;
+    el('why').hidden = true;
+  }
   el('btnNext').textContent = awaitingBadge ? 'Back to home' : 'Next hand';
   maybeShowTip();
 }
@@ -2253,8 +2303,8 @@ function renderSessionSummary(session, daily = null) {
   // A regular session announces itself here; a daily already emitted
   // daily_complete in settleDailyHand. Never fire both.
   if (!daily) analytics.sessionComplete(sessionToken, { correct: session.optimal, hands: SESSION_HANDS });
-  const miss = daily ? null : sessionMistakes[0];
-  if (miss) {
+  const misses = daily ? [] : sessionMistakes;
+  for (const miss of misses) {
     const detail = document.createElement('p');
     detail.className = 'hint';
     detail.textContent = `Worth another look: ${miss.situation} — ${miss.correction}`;
@@ -2535,9 +2585,8 @@ function settleDailyHand({ optimal, difficulty, line, review, coached = false })
     save();
     renderBattle();
     el('battleEndRow').hidden = false;
-    const full = `${line} Coach used — this Daily hand does not count. Try the same hand again.`;
+    const full = `${endSentence(line)} Coach used — this Daily hand does not count. Try the same hand again.`;
     el('masterLine')._dataset = { full };
-    el('masterPrompt').hidden = false;
     typewriter(el('masterLine'), full);
     advice = null;
     el('coachPanel').hidden = true;
@@ -2579,16 +2628,15 @@ function settleDailyHand({ optimal, difficulty, line, review, coached = false })
     renderSessionSummary(null, run);
   }
   const say = optimal
-    ? 'Good read. That was the best play.'
-    : 'Not quite. The better play was different — the review explains why.';
+    ? `Good read. That was the best play.${correctPlayWhy()}`
+    : `Not quite.${coachReason(review)}`;
   const verdict = run.finished
     ? (run.scored
         ? `Daily Drill #${run.number} complete: ${tally} of ${DAILY_HANDS} correct. Come back tomorrow for #${run.number + 1} (unlocks in ${formatDailyCountdown()}). Your streak is ${fmt(profile.daily.streak)}.${[3, 7, 14].includes(profile.daily.streak) ? ' Streak milestone!' : ''}`
         : `Practice replay done: ${tally} of ${DAILY_HANDS} correct. No new XP or score today.`)
-    : `Daily Drill · hand ${run.index + 1} of ${DAILY_HANDS}. ${tally} correct so far.`;
-  const full = `${line} ${say} ${verdict}`;
+    : `Next: hand ${run.index + 1} of ${DAILY_HANDS}. ${tally} correct so far.`;
+  const full = `${endSentence(line)} ${say} ${verdict}`;
   el('masterLine')._dataset = { full };
-  el('masterPrompt').hidden = false;
   typewriter(el('masterLine'), full);
 
   advice = null;
@@ -2608,7 +2656,7 @@ function toggleVpHold(index) {
   advice = null;
   el('coachPanel').hidden = true;
   const hint = el('holdHint');
-  if (hint) hint.hidden = true;
+  if (hint) hint.style.visibility = 'hidden';
   try { localStorage.setItem('pg_hold_hint', '1'); } catch {}
   haptics.buzz('tap', audio.isMuted());
   renderBattle();
@@ -2910,20 +2958,6 @@ el('btnNext').onclick = () => {
     return;
   }
   startHand();
-};
-
-function advanceCoachDialogue() {
-  // Let players reveal and read feedback before a second activation moves on.
-  if (finishTyping(el('masterLine')) || !handDone) return;
-  el('btnNext').click();
-}
-el('masterBox').onclick = advanceCoachDialogue;
-el('masterBox').onkeydown = (e) => {
-  if (e.key === 'Enter' || e.key === ' ') {
-    e.preventDefault();
-    e.stopPropagation();
-    advanceCoachDialogue();
-  }
 };
 
 // Keyboard play (src/rpg/keys.js). A key only ever clicks a visible, enabled
