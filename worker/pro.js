@@ -106,10 +106,25 @@ function parseKofiBody(raw, contentType = '') {
   return null;
 }
 
-function tierForKofi(data) {
+function shopItemMatchesLifetime(data, env) {
+  const configured = typeof env?.PRO_LIFETIME_ITEM === 'string' ? env.PRO_LIFETIME_ITEM.trim() : '';
+  if (!configured) return false;
+  const want = configured.toLowerCase();
+  const items = Array.isArray(data?.shop_items) ? data.shop_items : [];
+  return items.some((item) => {
+    if (!item || typeof item !== 'object') return false;
+    const codes = [item.direct_link_code, item.code, item.variant_code, item.item_code, item.product_code];
+    return codes.some((code) => typeof code === 'string' && code.trim().toLowerCase() === want);
+  });
+}
+
+export function tierForKofi(data, env) {
   const type = String(data?.type || '').toLowerCase();
   if (type === 'subscription') return { tier: 'monthly', expDays: 35 };
-  if (type === 'shop order' || type === 'donation') return { tier: 'lifetime', expDays: 0 };
+  if (type === 'donation') return null;
+  if (type === 'shop order') {
+    return shopItemMatchesLifetime(data, env) ? { tier: 'lifetime', expDays: 0 } : null;
+  }
   return null;
 }
 
@@ -123,7 +138,7 @@ export async function handleKofiWebhook(request, env) {
   if (String(data.verification_token || '') !== String(env.KOFI_TOKEN || '')) {
     return json({ ok: false, error: 'unauthorized' }, 401);
   }
-  const tierInfo = tierForKofi(data);
+  const tierInfo = tierForKofi(data, env);
   if (!tierInfo) return json({ ok: true, ignored: true });
   const email = normalizeEmail(data.email || data.from_email);
   if (!email) return json({ ok: false, error: 'missing_email' }, 400);
