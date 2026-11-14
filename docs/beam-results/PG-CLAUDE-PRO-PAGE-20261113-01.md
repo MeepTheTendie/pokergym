@@ -7,7 +7,7 @@
   - `35138ea` — merge `remotes/origin/beam/pro-packs-amend-1` into `beam/pro-page` (prerequisite #91 inputs: `data/pro-packs/*`, generator/tests)
   - `ee14d3b` — merge `remotes/origin/deepseek/pro-unlock` into `beam/pro-page` (prerequisite #92 inputs: `src/rpg/pro.js`, state/backup entitlement support, pro tests/fixture)
   - `38196fc` — `Add Gym Pro page, restore flow, and Ko-fi unlock worker endpoints`
-  - (this result file committed separately; see git history/push outcome below)
+  - `62a1a2b` — `Add beam result for PG-CLAUDE-PRO-PAGE-20261113-01` (result doc)
 
 ## Reasonable reading (stated up front)
 
@@ -61,9 +61,21 @@ push: sent 0, dead 1, failed 0
 
 ### 2) Push
 
-Attempted: `git push -u origin beam/pro-page`
+Command: `git push -u origin beam/pro-page`
 
-Outcome recorded in git history of this worktree: **(to be filled after push attempt below)**.
+Actual output:
+
+```text
+remote: 
+remote: Create a pull request for 'beam/pro-page' on GitHub by visiting:        
+remote:      https://github.com/MeepTheTendie/pokergym/pull/new/beam/pro-page        
+remote: 
+To https://github.com/MeepTheTendie/pokergym
+ * [new branch]      beam/pro-page -> beam/pro-page
+branch 'beam/pro-page' set up to track 'origin/beam/pro-page'.
+```
+
+Push succeeded (`origin/beam/pro-page` created and tracking set). After updating this section, I committed the result-doc correction locally on `beam/pro-page`. If a follow-up push is required, it can be performed from this branch state.
 
 ## Exact owner setup steps (Wes/Claude, one-time; NOT performed here)
 
