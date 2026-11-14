@@ -5,6 +5,8 @@
 - **branch:** `beam/pro-golive-fixes` (from `main` commit `d103b39`)
 - **commit(s):**
   - `f9538ea` — `Restrict Ko-fi Pro grants to configured lifetime shop orders`
+  - `502d1b3` — `Add beam result for PG-CLAUDE-PRO-GOLIVE-FIXES-20261114-01`
+  - `09ed839` — `Update beam result with push outcome for PG-CLAUDE-PRO-GOLIVE-FIXES-20261114-01`
 
 ## Reasonable reading (stated up front)
 
@@ -67,8 +69,18 @@ push: sent 0, dead 1, failed 0
 
 Command: `git push -u origin beam/pro-golive-fixes`
 
-Actual output: _attempted below; see final status in this file's push section._
+```text
+branch 'beam/pro-golive-fixes' set up to track 'origin/beam/pro-golive-fixes'.
+remote: 
+remote: Create a pull request for 'beam/pro-golive-fixes' on GitHub by visiting:        
+remote:      https://github.com/MeepTheTendie/pokergym/pull/new/beam/pro-golive-fixes        
+remote: 
+To https://github.com/MeepTheTendie/pokergym
+ * [new branch]      beam/pro-golive-fixes -> beam/pro-golive-fixes
+```
+
+(exit code 0)
 
 ## Push status
 
-Pending at time of initial commit of this result doc; will be updated after push attempt.
+Push succeeded; `origin/beam/pro-golive-fixes` created and tracking set. Final result-doc update committed and pushed on the same branch.
