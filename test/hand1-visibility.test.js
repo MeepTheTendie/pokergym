@@ -53,7 +53,8 @@ test('the Daily opener no longer fills the coach card', () => {
   assert.doesNotMatch(copy, /This is the Daily Drill: five hands across all four games/);
   assert.match(copy, /const DAILY_INTRO = 'Five hands, all four games — the coach grades each one\. '/);
   // The battle label already names the drill and the hand.
-  assert.match(src, /Daily Drill #\$\{dailyRun\.number\} · hand \$\{dailyRun\.index \+ 1\} of \$\{DAILY_HANDS\}/);
+  // It names the hand on the table, also after that hand settles.
+  assert.match(src, /Daily Drill #\$\{dailyRun\.number\} · hand \$\{Math\.min\(dailyRun\.index \+ \(handDone \? 0 : 1\), DAILY_HANDS\)\} of \$\{DAILY_HANDS\}/);
 });
 
 test('the first-hand nudge sits where the player can read it', () => {

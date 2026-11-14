@@ -67,6 +67,12 @@ const sentence = (text) => {
   const value = String(text ?? '').toLocaleLowerCase();
   return value ? value[0].toLocaleUpperCase() + value.slice(1) : value;
 };
+// Lesson lines are authored in caps for the old pixel screens. As coach tips in
+// the redesigned card they read as shouting, so tips show them as prose.
+const prose = (text) => String(text ?? '')
+  .toLocaleLowerCase()
+  .replace(/(^|[.!?]\s+)([a-z])/g, (_, lead, ch) => lead + ch.toLocaleUpperCase())
+  .replace(/\bi\b/g, 'I');
 // JavaScript motion (typing, smooth scroll, floats) defers to the CSS
 // prefers-reduced-motion rules so the setting is honoured by both layers.
 const reduceMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
@@ -1526,6 +1532,11 @@ function renderZones(zones) {
   newDeal = false;
 }
 
+function hideHoldHint() {
+  const hint = el('holdHint');
+  if (hint && !hint.hidden) hint.style.visibility = 'hidden';
+}
+
 function renderPlay() {
   if (gameId === 'videopoker') {
     renderZones([{ cards: round.hand, holds: round.holds, disabled: round.drawn, onCard: toggleVpHold }]);
@@ -1536,8 +1547,12 @@ function renderPlay() {
     if (hint && !round.drawn && !holdHintShown && !storedFlag('pg_hold_hint')) {
       holdHintShown = true;
       hint.hidden = false;
-      setTimeout(() => { hint.hidden = true; try { localStorage.setItem('pg_hold_hint', '1'); } catch {} }, 6000);
+      hint.style.visibility = '';
+      setTimeout(() => { hideHoldHint(); try { localStorage.setItem('pg_hold_hint', '1'); } catch {} }, 6000);
     }
+    // The hint keeps its line until the draw. Dropping it mid-hand moved the
+    // cards and the Draw button under the player's finger (playtest 2026-11-14).
+    if (hint && round.drawn) { hint.hidden = true; hint.style.visibility = ''; }
     if (round.drawn && hint) hint.hidden = true;
     return;
   }
@@ -1835,6 +1850,21 @@ function updateBattlePips() {
   pips.forEach((pip, i) => pip.classList.toggle('done', i < done));
 }
 
+// The header above the coach. Practice counts update when a hand settles, so
+// the header and the coach line never disagree ("0 of 5 done" beside "1 of 5
+// done"). The Daily keeps the number of the hand on the table.
+function renderBattleLabel(introductory = null) {
+  const label = document.querySelector('.battle-label');
+  if (!label) return;
+  const played = (profile?.activeSession ?? profile?.sessions?.[0])?.played ?? 0;
+  label.textContent = dailyMode && dailyRun
+    ? `Daily Drill #${dailyRun.number} · hand ${Math.min(dailyRun.index + (handDone ? 0 : 1), DAILY_HANDS)} of ${DAILY_HANDS}`
+    : drillMode
+      ? `${drillMode === 'weak' ? 'Weak-spot drill' : 'Master Drill'} · ${drillLabel ? sentence(drillLabel) : TRAINING_LABEL[gameId]} · ${played} of ${SESSION_HANDS}`
+      : introductory ? `First practice · ${sentence(introductory.label)}`
+      : shortSession ? `Five hands · ${played} of ${SESSION_HANDS} done` : `${canPractice(profile, gymId) ? 'Practice' : 'Gym challenge'} · ${handsWon} of ${HANDS_TO_WIN} good plays`;
+}
+
 function renderBattle() {
   renderPlay();
   renderStatus();
@@ -1991,12 +2021,7 @@ function startHand() {
     dailyIntro: dailyMode && dailyRun && dailyRun.index === 0,
   });
   el('masterPrompt').hidden = true;
-  document.querySelector('.battle-label').textContent = dailyMode && dailyRun
-    ? `Daily Drill #${dailyRun.number} · hand ${dailyRun.index + 1} of ${DAILY_HANDS}`
-    : drillMode
-      ? `${drillMode === 'weak' ? 'Weak-spot drill' : 'Master Drill'} · ${drillLabel ? sentence(drillLabel) : TRAINING_LABEL[gameId]} · ${profile.activeSession?.played ?? 0} of ${SESSION_HANDS}`
-      : introductory ? `First practice · ${sentence(introductory.label)}`
-      : shortSession ? `Five hands · ${profile.activeSession.played} of ${SESSION_HANDS} done` : `${canPractice(profile, gymId) ? 'Practice' : 'Gym challenge'} · ${handsWon} of ${HANDS_TO_WIN} good plays`;
+  renderBattleLabel(introductory);
 
   scheduleFirstNudge();
   revealHand();
@@ -2020,7 +2045,12 @@ function betterPlay(review) {
     : 'The better play was different. It is saved in Review my mistakes.';
 }
 
-function settleHand({ optimal, difficulty, line, review }) {
+// A correct play also says why, so the coach teaches on hits as well as misses.
+function goodRead(why) {
+  return why ? `Good read. ${endSentence(why)}` : 'Good read. That was the best play.';
+}
+
+function settleHand({ optimal, difficulty, line, review, why }) {
   if (handDone) return;
   handDone = true;
   analytics.handComplete(handToken(), {
@@ -2041,7 +2071,7 @@ function settleHand({ optimal, difficulty, line, review }) {
 
   const coached = coachedHand;
 
-  if (dailyMode) return settleDailyHand({ optimal, difficulty, line, review, coached });
+  if (dailyMode) return settleDailyHand({ optimal, difficulty, line, review, why, coached });
 
   // A coached hand is a learning rep: it earns XP and practice history but
   // never a point, a streak step, or a place on the exam card. That is the
@@ -2071,9 +2101,9 @@ function settleHand({ optimal, difficulty, line, review }) {
   el('battleEndRow').hidden = false;
 
   const say = coached
-    ? `${gym.leader}: That was the coach’s answer. Read the explanation — this hand does not count.`
+    ? `${gym.leader}: That was the coach’s answer. The coach’s panel explains it. This hand does not count.`
     : optimal
-      ? `${gym.leader}: Good read. That was the best play.`
+      ? `${gym.leader}: ${goodRead(why)}`
       : `${gym.leader}: Not quite. ${betterPlay(review)}`;
   const gainLine = coached
     ? (optimal ? `Learning rep: +${fmt(applied.gained)} XP. No score and no streak change.` : 'Coached hand. No score. Read the review below.')
@@ -2132,7 +2162,7 @@ function settleHand({ optimal, difficulty, line, review }) {
 
   const full = `${endSentence(line)} ${say} ${gainLine} ${verdict}`;
   el('masterLine')._dataset = { full };
-  el('masterPrompt').hidden = false;
+  el('masterPrompt').hidden = true;
   cancelAutoAdvance();
   typewriter(el('masterLine'), full, () => {
     if (dailyMode || awaitingBadge || reduceMotion()) return;
@@ -2145,17 +2175,23 @@ function settleHand({ optimal, difficulty, line, review }) {
     }, 3000);
   });
 
-  advice = null;
-  el('coachPanel').hidden = true;
-  el('why').hidden = true;
+  // A coached hand keeps the coach's panel on screen: the line above tells the
+  // player to read it. Apply is spent once the hand is over.
+  if (!coached) {
+    advice = null;
+    el('coachPanel').hidden = true;
+    el('why').hidden = true;
+  }
+  el('btnApply').disabled = true;
   el('btnNext').textContent = awaitingBadge ? 'Back to home' : 'Next hand';
+  renderBattleLabel();
   maybeShowTip();
 }
 
 function maybeShowTip() {
   if (!tutorialTips.length) return;
   const tip = tutorialTips.shift();
-  el('tipText').textContent = tip.text;
+  el('tipText').textContent = prose(tip.text);
   el('tipBox').hidden = false;
 }
 
@@ -2548,7 +2584,7 @@ function renderSessionSummary(session, daily = null) {
   box.hidden = false;
 }
 
-function settleDailyHand({ optimal, difficulty, line, review, coached = false }) {
+function settleDailyHand({ optimal, difficulty, line, review, why, coached = false }) {
   const run = dailyRun;
   if (coached) {
     // The Daily is a clean read. If the coach is ever opened through a stale
@@ -2559,7 +2595,7 @@ function settleDailyHand({ optimal, difficulty, line, review, coached = false })
     el('battleEndRow').hidden = false;
     const full = `${line} Coach used — this Daily hand does not count. Try the same hand again.`;
     el('masterLine')._dataset = { full };
-    el('masterPrompt').hidden = false;
+    el('masterPrompt').hidden = true;
     typewriter(el('masterLine'), full);
     advice = null;
     el('coachPanel').hidden = true;
@@ -2601,7 +2637,7 @@ function settleDailyHand({ optimal, difficulty, line, review, coached = false })
     renderSessionSummary(null, run);
   }
   const say = optimal
-    ? 'Good read. That was the best play.'
+    ? goodRead(why)
     : `Not quite. ${betterPlay(review)}`;
   const verdict = run.finished
     ? (run.scored
@@ -2610,7 +2646,7 @@ function settleDailyHand({ optimal, difficulty, line, review, coached = false })
     : `${tally} correct so far. Next: Daily Drill hand ${run.index + 1} of ${DAILY_HANDS}.`;
   const full = `${endSentence(line)} ${say} ${verdict}`;
   el('masterLine')._dataset = { full };
-  el('masterPrompt').hidden = false;
+  el('masterPrompt').hidden = true;
   typewriter(el('masterLine'), full);
 
   advice = null;
@@ -2629,8 +2665,7 @@ function toggleVpHold(index) {
   toggleHold(round, index);
   advice = null;
   el('coachPanel').hidden = true;
-  const hint = el('holdHint');
-  if (hint) hint.hidden = true;
+  hideHoldHint();
   try { localStorage.setItem('pg_hold_hint', '1'); } catch {}
   haptics.buzz('tap', audio.isMuted());
   renderBattle();
@@ -2656,10 +2691,12 @@ function doDraw() {
   // for learning; the decision score comes from the hold, not the payout.
   drawRound(round);
   round.holdBest = optimal;
+  const keptBest = round.hand.filter((_, i) => best.holds[i]);
   settleHand({
     optimal,
     difficulty: handDifficulty(round.result),
     review,
+    why: `${reasonFor(keptBest, variantById(round.variantId))} Average return: ${best.ev.toFixed(3)} per hand.`,
     line: `Result: ${round.winLabel}.`,
   });
 }
@@ -2689,7 +2726,8 @@ function bjAct(action) {
   else if (action === 'split') bjSplit(round);
   else return;
 
-  decisions.push({ action, optimal: Boolean(before.optimal?.includes(action)), review });
+  decisions.push({ action, optimal: Boolean(before.optimal?.includes(action)), review,
+    why: `${ACTION_LABEL[before.action]} averages ${before.ev.toFixed(3)} per hand, the best of your choices.` });
   trackDecision(action);
   advice = null;
   el('coachPanel').hidden = true;
@@ -2716,6 +2754,7 @@ function settleBlackjack() {
   settleHand({
     optimal: decisions.every((d) => d.optimal),
     review: decisions.find(d => !d.optimal)?.review,
+    why: decisions.length === 1 ? decisions[0].why : `${decisions.length} decisions, each one the best play.`,
     // handDifficulty reads a hand category, which blackjack rounds do not have
     // (round.result is a word). The difficulty here is the decision count: the
     // more places the player had to be right, the more a correct round is worth.
@@ -2817,11 +2856,15 @@ function buildAdvice() {
   if (gameId === 'videopoker') {
     const best = vpBest();
     const kept = round.hand.filter((_, i) => best.holds[i]);
+    const holdText = (holds) => {
+      const cards = round.hand.filter((_, i) => holds[i]).map(cardLabel);
+      return cards.length ? `Keep ${cards.join(' ')}` : 'Draw five new cards';
+    };
     return {
       holds: best.holds,
-      text: `Keep ${kept.length} card${kept.length === 1 ? '' : 's'}. ${reasonFor(kept, variantById(round.variantId))} Average return: ${best.ev.toFixed(3)} per hand.`,
-      why: `Best holds: ${best.options.slice(0, 3)
-        .map((o) => `${o.keptCount} kept, ${o.ev.toFixed(2)} average return`).join('  ')}`,
+      text: `${holdText(best.holds)}. ${reasonFor(kept, variantById(round.variantId))} Average return: ${best.ev.toFixed(3)} per hand.`,
+      why: `Top holds by average return: ${best.options.slice(0, 3)
+        .map((o) => `${holdText(o.holds)} (${o.ev.toFixed(2)})`).join('; ')}.`,
       apply: () => { setHolds(round, best.holds); renderBattle(); },
     };
   }
@@ -2881,6 +2924,7 @@ function showCoach() {
   if (!advice) return;
   el('advice').textContent = advice.text;
   el('why').hidden = true;
+  el('btnApply').disabled = false;
   el('coachPanel').hidden = false;
   // Opening the coach reveals the answer, so this hand is a learning rep: it can
   // still teach (XP, practice record) but it can never score or count.
@@ -2938,9 +2982,10 @@ el('btnNext').onclick = () => {
 };
 
 function advanceCoachDialogue() {
-  // Let players reveal and read feedback before a second activation moves on.
-  if (finishTyping(el('masterLine')) || !handDone) return;
-  el('btnNext').click();
+  // Tapping the coach card reveals the whole line at once. It never moves on:
+  // "Next hand" is the one continue button, and a tap meant to read the line
+  // was skipping the result (playtest 2026-11-14).
+  finishTyping(el('masterLine'));
 }
 el('masterBox').onclick = advanceCoachDialogue;
 el('masterBox').onkeydown = (e) => {

@@ -34,3 +34,19 @@ test('a missed hand names the better play and never calls the hold right', () =>
   assert.equal((src.match(/Not quite\. \$\{betterPlay\(review\)\}/g) || []).length, 2);
   assert.doesNotMatch(src, /here is why/);
 });
+
+test('tapping the coach card only reveals the line; Next hand is the one continue', () => {
+  const fn = src.match(/function advanceCoachDialogue\(\) \{[\s\S]*?\n\}/)[0];
+  assert.doesNotMatch(fn, /btnNext/);
+});
+
+test('Ask coach names the cards to keep', () => {
+  assert.match(src, /cards\.length \? `Keep \$\{cards\.join\(' '\)\}` : 'Draw five new cards'/);
+  assert.doesNotMatch(src, /kept, \$\{o\.ev\.toFixed\(2\)\} average return/);
+});
+
+test('a correct blackjack or video-poker play says why', () => {
+  assert.match(src, /function goodRead\(why\)/);
+  assert.match(src, /why: `\$\{reasonFor\(keptBest/);
+  assert.match(src, /averages \$\{before\.ev\.toFixed\(3\)\} per hand, the best of your choices\./);
+});
