@@ -131,6 +131,7 @@ export function cleanEntrySearch(search) {
   params.delete('d');
   params.delete('daily');
   params.delete('sh');
+  params.delete('pro');
   const rest = params.toString();
   return rest ? `?${rest}` : '';
 }
