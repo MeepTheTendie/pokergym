@@ -30,6 +30,7 @@ import {
 } from '../src/rpg/daily.js';
 import { parseEntryParams, isSharedDayCurrent, cleanEntrySearch, buildDailyShareText, shareUrl, inviteUrl, newShareId } from '../src/rpg/links.js';
 import { keyAction, shouldIgnoreKey } from '../src/rpg/keys.js';
+import { battleMessage } from '../src/rpg/battle-copy.js';
 import { createAnalytics } from '../src/rpg/analytics.js';
 import { captureDrillPlan, restoreDrillPlan, BLACKJACK_DRILLS, DRILL_HANDS, DRILL_GAMES, findDrill, drillPlanStartingWith } from '../src/rpg/drills.js';
 import { reelClipFor } from '../src/rpg/reel-clips.js';
@@ -1926,19 +1927,16 @@ function startHand() {
   });
   renderBattle();
   audio.sfx('deal');
-  const instructions = {
-    videopoker: 'Tap the cards you want to keep. The cards you leave alone are replaced when you press Draw. The coach will explain the best hold afterwards.',
-    blackjack: 'Look at your hand and the dealer’s upcard, then choose Hit, Stand, Double, or Split. Not sure? Ask the coach for a hint.',
-    baccarat: 'Answer the percentage question. Every number you need is in the odds panel below.',
-    holdem: 'Tap the five cards that make your best hand, then press Confirm five. Not sure? Ask the coach for a hint.',
-  };
   const message = el('masterLine');
   clearInterval(message._typer);
   message._typer = null;
-  const dailyIntro = dailyMode && dailyRun && dailyRun.index === 0
-    ? 'This is the Daily Drill: five hands across all four games. Make the play you think is best; the coach grades it and explains why after each hand. '
-    : '';
-  message.textContent = dailyIntro + instructions[gameId];
+  // The Daily Drill hides the coach button, so hand 1 leads with a short,
+  // actionable instruction instead of a paragraph that ends by pointing at a
+  // control that is not there.
+  message.textContent = battleMessage(gameId, {
+    daily: dailyMode,
+    dailyIntro: dailyMode && dailyRun && dailyRun.index === 0,
+  });
   el('masterPrompt').hidden = true;
   document.querySelector('.battle-label').textContent = dailyMode && dailyRun
     ? `Daily Drill #${dailyRun.number} · hand ${dailyRun.index + 1} of ${DAILY_HANDS}`
