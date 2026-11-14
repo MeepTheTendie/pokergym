@@ -36,7 +36,9 @@ img{max-width:100%}
 .pg-nav a[aria-current=page]{font-weight:700}
 .pg-cta{margin-left:auto;background:var(--ink);color:var(--paper);text-decoration:none;font-weight:700;font-size:15px;padding:12px 18px;border-radius:999px;white-space:nowrap}
 .pg-cta:hover{color:var(--paper);background:var(--felt)}
-@media (max-width:640px){.pg-header .wrap{gap:10px 16px}.pg-cta{font-size:14px;padding:10px 14px}.pg-nav{order:3;width:100%;gap:4px 20px}h1{letter-spacing:-.02em}}
+/* phones: brand + CTA share one row, the nav sits in a slim row under it */
+@media (max-width:640px){.pg-header .wrap{flex-wrap:wrap;gap:4px 12px;padding:10px 16px 6px}.pg-brand{font-size:17px;gap:8px}.pg-mark{width:32px;height:32px;border-radius:9px}.pg-cta{font-size:13px;padding:9px 12px}.pg-nav{order:3;width:100%;gap:0 20px;font-size:14px}.pg-nav a{padding:4px 0}h1{letter-spacing:-.02em}}
+@media (max-width:340px){.pg-brand{font-size:15px}.pg-cta{padding:8px 10px}}
 
 /* footer */
 .pg-footer{border-top:1px solid var(--line);margin-top:72px}

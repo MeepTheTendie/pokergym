@@ -43,7 +43,7 @@ visible in the data rather than implied by the event name.
 
 | Event | Fires when | Properties |
 |---|---|---|
-| `open_trainer` | The trainer page loads. Once per page load. | `entry`: `daily_link` (`?daily=1`), `share_link` (`?d=<n>` share grid), `practice_link` (`?practice=`), `drill_link` (`?drill=<scenario id>`, opens that authored hand first), `direct`; `returning`: has a local save; `days_since_last_visit`: days since the last local visit when a save exists; `preview`: true when the page loads hidden (bot-suspect load; it will not auto-start) |
+| `open_trainer` | The trainer page loads. Once per page load. | `entry`: `daily_link` (`?daily=1`), `share_link` (`?d=<n>` share grid), `practice_link` (`?practice=`), `drill_link` (`?drill=<scenario id>`, opens that authored hand first), `direct`; `returning`: has a local save; `days_since_last_visit`: days since the last local visit when a save exists; `preview`: true when the page loads hidden (bot-suspect load; it will not auto-start); `first_screen` (since the Nov 13, 2026 first-hand change): `quick_deal` when a brand-new visitor with no save and no link sees the single "Deal my first hand" screen, else `menu` |
 | `start_training` | The first hand of the page load is dealt (any mode). Once per page load. | `game`; `mode`: `daily`, `session`, `challenge`; `entry` |
 | `game_start` | A five-hand session, drill, or gym challenge begins, including a resumed one. Not fired for Daily Drill hands. | `game`: `blackjack`, `videopoker`, `baccarat`, `holdem`; `mode`: `session`, `master`, `weak` (drills), `challenge`; `resumed`; `entry`; `run_id` |
 | `hand_dealt` | A hand is dealt inside a live `game_start`/`start_daily` run. | `run_id`, `run_kind` (`session`/`daily`), `game`, `mode`, `entry`, `hand_index` (1-based), `hand_total` (5 for sessions/daily, 10 for a challenge), `event_version` |
@@ -84,6 +84,14 @@ real interaction follows.
 `decision_made` is deliberately a **stage**, not every action. A blackjack hand
 can contain several actions; `hand_complete.decisions` is the count. This keeps
 the funnel denominator equal to hands dealt.
+
+### First-hand funnel (no new events)
+
+The Nov 13 first-screen change reuses existing events. Saw the new screen:
+`open_trainer` with `first_screen = quick_deal` (exclude `preview: true`).
+Started a hand: `start_training` in the same page load (`$session_id`). Made a
+decision: `decision_made` with `hand_index = 1`. Compare the
+`open_trainer → start_training` rate for `quick_deal` before/after Nov 13.
 
 ## Landing page and guides (click tracking)
 

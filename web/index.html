@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0a1a14">
+<meta name="theme-color" content="#0F3D2E">
 <meta name="description" content="Play Poker Gym is a free casino trainer that coaches every blackjack, video poker, baccarat and Hold’em decision. Daily Drill, mistake review, no signup.">
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 <meta name="author" content="Play Poker Gym">
@@ -27,7 +27,9 @@
 <meta name="twitter:image:alt" content="Play Poker Gym: free four-game casino trainer. A five-card hand and a green and red Daily Drill result grid.">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="preload" href="fonts/Sora.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/InterTight-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/Inter-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="site.css">
 <link rel="stylesheet" href="styles.css">
 <script type="application/ld+json">
 {
@@ -90,7 +92,8 @@
 <div class="shell">
 
 <div class="topbar">
-  <span class="brand"><span class="brand-spade" aria-hidden="true">♠</span><span class="brand-copy"><b>Poker Gym</b><small>Four-game trainer</small></span></span>
+  <a class="brand" href="/" aria-label="Play Poker Gym home"><span class="brand-spade" aria-hidden="true">♠</span><span class="brand-copy"><b>Play Poker Gym</b><small>Four-game trainer</small></span></a>
+  <nav class="topnav" aria-label="Site"><a href="/guides/">Guides</a></nav>
   <button id="btnMap" class="pill-btn" type="button" hidden>Home</button>
   <button id="btnTitle" class="pill-btn" type="button" hidden>Start</button>
   <button id="btnSound" class="sound-toggle pill-btn" type="button" aria-pressed="true">Sound</button>
@@ -119,10 +122,10 @@
     </div>
   </div>
   <p class="hint" style="text-align:center;">Free to play. No signup, no deposits, no real money.</p>
-  <p class="hint" id="offlineStatus" role="status" style="text-align:center;"></p>
   <div style="text-align:center;"><button id="btnInstall" type="button" hidden>Install app</button></div>
   <p class="hint" id="installStatus" role="status" style="text-align:center;"></p>
   <p class="hint" id="installHelp" hidden style="text-align:center;">Plays in any browser. To keep it handy, use your browser’s install or add-to-home-screen option. On iPhone, tap Share, then Add to Home Screen. Clearing site data removes your save.</p>
+  <p class="hint" id="offlineStatus" role="status" style="text-align:center;"></p>
 </section>
 
 <!-- ============ CLASS SELECT ============ -->
@@ -145,6 +148,7 @@
 
 <!-- ============ GYM MAP ============ -->
 <section id="scr-map" class="screen" hidden>
+  <div class="map-main">
   <div class="window today-hero" id="todayCard">
     <div class="today-hero-head">
       <div class="today-hero-copy">
@@ -184,6 +188,9 @@
     <div id="shortSessions" aria-live="polite"></div>
     <p class="hint">Your last seven results, saved in this browser.</p>
   </div>
+  </div>
+
+  <div class="map-side">
 
   <div class="window trainer-card">
     <div class="section-header">
@@ -274,6 +281,7 @@
       <p id="backupStatus" class="hint" role="status"></p>
     </details>
   </details>
+  </div>
 </section>
 
 <!-- ============ REVIEW ============ -->
@@ -405,6 +413,18 @@
     <div class="paytable" id="paytable"></div>
   </details>
   </div>
+
+  <aside class="window related-guides" id="relatedGuides" aria-labelledby="relatedGuidesTitle">
+    <h2 id="relatedGuidesTitle">Related guides</h2>
+    <ul class="guide-links">
+      <li><a href="/guides/blackjack/" target="_blank" rel="noopener">Blackjack: three hit-or-stand decisions</a></li>
+      <li><a href="/guides/jacks-or-better/" target="_blank" rel="noopener">Jacks or Better: which cards to hold</a></li>
+      <li><a href="/guides/baccarat/" target="_blank" rel="noopener">Baccarat: banker, player or tie</a></li>
+      <li><a href="/guides/holdem-best-five/" target="_blank" rel="noopener">Hold’em: find the best five cards</a></li>
+      <li><a href="/guides/" target="_blank" rel="noopener">All strategy guides</a></li>
+    </ul>
+    <p class="hint">Guides open in a new tab, so this session keeps its place.</p>
+  </aside>
 </section>
 
 <p class="hint" style="text-align:center"><a href="/web/privacy" target="_blank" rel="noopener">Privacy</a></p>
