@@ -225,14 +225,16 @@ test('stats: probe and scripted automation visits are excluded', () => {
   assert.match(clause, /NOT IN \('Bot', 'Automation', 'AI Agent'\)/);
 });
 
-test('stats: unfurl-bot visits are excluded', () => {
+test('stats: unfurl-bot visits are excluded at 16:00 America/Chicago', () => {
   const clause = notTestClause();
   assert.match(clause, /properties\.\$viewport_width = 1366/);
   assert.match(clause, /properties\.\$viewport_height = 768/);
   assert.match(clause, /properties\.\$screen_width = 1920/);
   assert.match(clause, /properties\.\$screen_height = 1080/);
-  assert.match(clause, /toHour\(timestamp\) = 21/);
-  assert.match(clause, /toMinute\(timestamp\) <= 5/);
+  assert.match(clause, /toHour\(toTimeZone\(first_ts, 'America\/Chicago'\)\) = 16/);
+  assert.match(clause, /toMinute\(toTimeZone\(first_ts, 'America\/Chicago'\)\) <= 5/);
+  assert.match(clause, /toHour\(toTimeZone\(timestamp, 'America\/Chicago'\)\) = 16/);
+  assert.match(clause, /toMinute\(toTimeZone\(timestamp, 'America\/Chicago'\)\) <= 5/);
   assert.match(clause, /open_trainer/);
   assert.match(clause, /game_start/);
   assert.match(clause, /\$pageview/);
@@ -257,12 +259,14 @@ test('stats: an unfurl bot whose $pageview lands before open_trainer is excluded
   assert.match(clause, /IN \('\$pageview', 'open_trainer'\)/);
 });
 
-test('stats: a 1366x768 visitor at 21:01 who then fires game_start is kept', () => {
+test('stats: a 1366x768 visitor in the post window who then fires game_start is kept', () => {
   const clause = notTestClause();
   // The exclusion subquery must require no later interaction events, so a
-  // visitor who fires game_start survives the filter.
+  // visitor who fires game_start survives the filter. Q1 rescue is unchanged.
   assert.match(clause, /person_id NOT IN \(SELECT DISTINCT person_id FROM events WHERE event IN/);
   assert.match(clause, /'game_start'/);
+  assert.match(clause, /'start_training'/);
+  assert.match(clause, /'start_daily'/);
 });
 
 test('stats: a normal visitor is kept', () => {
