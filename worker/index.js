@@ -6,6 +6,7 @@ import { countBucket, dataPoint } from './count.js';
 import { isIngestPath, proxyPostHog } from './proxy.js';
 import { SECURITY_HEADERS } from './security.js';
 import { isPushEndpoint, sendPush, subscriptionId, validSubscription } from './push.js';
+import { handleProApi, isProApiPath } from './pro.js';
 
 // One reminder a day, 09:00 America/Chicago in winter / 08:00 in summer.
 // The copy says "a reminder", never "every day at a time", so DST is harmless.
@@ -180,6 +181,10 @@ export default {
     }
     if (url.pathname === '/push/unsubscribe' && request.method === 'POST') {
       return unsubscribe(request, env);
+    }
+    // Gym Pro: Ko-fi webhook and code-fetch/restore endpoints.
+    if (isProApiPath(url.pathname)) {
+      return handleProApi(request, env);
     }
     // Keep every visitor on one save/install origin. Redirect the whole www
     // host to the bare domain so browser-local saves and visitor counts do

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1a14">
+  <meta name="description" content="Gym Pro adds new training to Play Poker Gym: mistake-targeted practice packs, full stats history, and the Daily Drill archive. The core trainer stays free forever.">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Gym Pro — Play Poker Gym</title>
+  <link rel="icon" href="/web/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/web/site.css">
+  <style>
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: #08130f; color: #eef6f1; }
+    .wrap { max-width: 820px; margin: 0 auto; padding: 32px 20px 64px; }
+    a { color: #8fe3b0; }
+    h1, h2 { line-height: 1.15; }
+    .card { background: #102019; border: 1px solid #224132; border-radius: 14px; padding: 20px; margin: 18px 0; }
+    .price { font-size: 1.25rem; font-weight: 700; margin: 8px 0 4px; }
+    .muted { color: #b7c9bf; }
+    .btns { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+    .btn { display: inline-block; padding: 12px 16px; border-radius: 10px; background: #1f7a4d; color: #fff; text-decoration: none; font-weight: 700; }
+    .btn.alt { background: #244534; }
+    ul { padding-left: 22px; }
+    li { margin: 6px 0; }
+    .faq details { margin: 10px 0; }
+    .guard { border-left: 4px solid #3b7a57; padding-left: 12px; margin: 18px 0; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <p class="muted">Play Poker Gym</p>
+    <h1>Gym Pro</h1>
+    <p>Gym Pro is optional new training for players who want to go deeper. The core trainer stays free forever: four games, Daily Drill, coaching, mistake review, local save, offline play, and no signup. Nothing free today is ever gated.</p>
+
+    <section class="card" aria-labelledby="whats-in">
+      <h2 id="whats-in">What's in Gym Pro</h2>
+      <ul>
+        <li><strong>4 mistake-targeted practice packs (20 graded spots each):</strong> Blackjack soft hands, Blackjack pairs/splits, Jacks or Better holds (9/6), and Baccarat third-card rule. Every pack includes 3 free sample spots so you can try it before buying.</li>
+        <li><strong>Full stats history:</strong> see your accuracy by game and decision type over time, not just the last 7 days.</li>
+        <li><strong>Daily Drill archive:</strong> revisit past Daily Drills you missed.</li>
+        <li><strong>Pro tracks with completion certificates:</strong> Blackjack Pro (soft hands + splits) and Video Poker Pro (holds), with shareable certificates when you finish.</li>
+        <li><strong>Restore and manage access:</strong> unlock on this device with your Ko-fi email and manage your membership through Ko-fi.</li>
+      </ul>
+      <p class="guard"><strong>Learning the best play lowers the house edge; it never beats it.</strong> Gym Pro is training content only — not a way to win money and not real-money wagering.</p>
+    </section>
+
+    <section class="card" aria-labelledby="price">
+      <h2 id="price">Price</h2>
+      <p class="price">$6/month or $29 lifetime</p>
+      <p class="muted">The first 50 lifetime purchases are $29. After that, lifetime is planned to move to $39. Payments are handled by Ko-fi.</p>
+      <div class="btns">
+        <a class="btn" id="buy-monthly" href="https://ko-fi.com/playpokergym" data-plan="monthly" rel="noopener">Get Gym Pro monthly — $6/mo</a>
+        <a class="btn alt" id="buy-lifetime" href="https://ko-fi.com/playpokergym/shop" data-plan="lifetime" rel="noopener">Get Gym Pro lifetime — $29 once</a>
+      </div>
+      <p class="muted">Already purchased? <a href="/web/?pro=restore">Restore Pro on this device</a>.</p>
+      <p><strong>30-day refund:</strong> Didn't help? Email within 30 days for a full refund.</p>
+    </section>
+
+    <section class="card faq" aria-labelledby="faq">
+      <h2 id="faq">FAQ</h2>
+      <details><summary>Do I need Gym Pro to use Play Poker Gym?</summary><p>No. The full core trainer is free forever. Gym Pro adds new content only: practice packs, full stats history, the Daily Drill archive, and Pro track certificates.</p></details>
+      <details><summary>How does unlock work?</summary><p>After you buy through Ko-fi, go to <a href="/web/?pro=restore">Restore Pro</a>, enter the email you used at checkout, and this device will fetch and verify your signed unlock code. Your access is saved in your local game profile and can be kept in your manual backup.</p></details>
+      <details><summary>Can I use it without an account?</summary><p>Yes. There is no Poker Gym account or password. Progress and Pro access are stored on this device. You can export a backup before clearing browser data or changing devices.</p></details>
+      <details><summary>What about refunds and membership changes?</summary><p>If Gym Pro didn't help, email within 30 days for a full refund. Membership changes and billing are managed through Ko-fi.</p></details>
+      <details><summary>Will Gym Pro help me beat the house or win money?</summary><p>No. Learning correct play can lower the house edge under the simulator's rules, but it never beats it. Play Poker Gym is for learning and practice only.</p></details>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      function track(plan) {
+        try {
+          if (window.posthog && typeof window.posthog.capture === 'function') {
+            window.posthog.capture('checkout_click', { plan: plan });
+          }
+        } catch (_) {}
+      }
+      try {
+        if (window.posthog && typeof window.posthog.capture === 'function') {
+          window.posthog.capture('pro_page_view');
+        }
+      } catch (_) {}
+      document.querySelectorAll('[data-plan]').forEach(function (el) {
+        el.addEventListener('click', function () { track(el.getAttribute('data-plan')); });
+      });
+    })();
+  </script>
+</body>
+</html>

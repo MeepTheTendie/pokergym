@@ -35,6 +35,7 @@ import { createAnalytics } from '../src/rpg/analytics.js';
 import { captureDrillPlan, restoreDrillPlan, BLACKJACK_DRILLS, DRILL_HANDS, DRILL_GAMES, findDrill, drillPlanStartingWith } from '../src/rpg/drills.js';
 import { reelClipFor } from '../src/rpg/reel-clips.js';
 import { revealDelta } from '../src/ui/reveal.js';
+import { restorePro, proStatus } from '../src/rpg/pro.js';
 import { drawArt, drawTrainerBack } from './characters.js';
 import audio from './audio.js?v=20261017-vegas1';
 import haptics from './haptics.js';
@@ -174,7 +175,8 @@ let sharedDaily = entryParams.daily || isSharedDayCurrent(entryParams.day, daily
 const dailyLinkEntry = entryParams.daily ? 'daily_link' : sharedDaily ? 'share_link' : null;
 // The entry source for this page load, carried onto run-level events so starts
 // and completions can be split by daily link, practice link, or direct.
-const trainerEntry = dailyLinkEntry ?? (requestedDrill ? 'drill_link' : requestedReel ? 'reel_link' : entryParams.practice ? 'practice_link' : 'direct');
+const wantsProRestore = new URLSearchParams(location.search).get('pro') === 'restore';
+const trainerEntry = wantsProRestore ? 'pro_restore' : (dailyLinkEntry ?? (requestedDrill ? 'drill_link' : requestedReel ? 'reel_link' : entryParams.practice ? 'practice_link' : 'direct'));
 // Explicit entry links wait for a visible page before auto-starting. A real
 // visitor gets the promised run after 1.5 s of visibility or on the first
 // intentional tap/key; a hidden or inputless crawler never starts one.
@@ -200,7 +202,7 @@ function trackDecision(action) {
     analytics.decisionMade(handToken(), { handIndex: handNumber, action, mode: handMode() });
   }
 }
-if (['ref', 'd', 'daily'].some(k => new URLSearchParams(location.search).has(k))) {
+if (['ref', 'd', 'daily', 'pro'].some(k => new URLSearchParams(location.search).has(k))) {
   try { history.replaceState(history.state, '', location.pathname + cleanEntrySearch(location.search) + location.hash); } catch {}
 }
 
@@ -3056,6 +3058,76 @@ const daysSinceLastVisit = lastVisitDay ? dayGap(localDayKey(), lastVisitDay) : 
 // first-time visitor who comes back tomorrow still reports days_since_last_visit
 // as null, and the retention report cannot measure the gap.
 try { localStorage.setItem('pg_last_visit_day', localDayKey()); } catch {}
+
+async function handleProRestoreRequest(email) {
+  const status = el('proRestoreStatus');
+  const btn = el('btnProRestore');
+  const trimmed = String(email || '').trim();
+  if (!trimmed) { if (status) status.textContent = 'Enter the Ko-fi email you used at checkout.'; return; }
+  if (!profile) {
+    profile = createProfile(DEFAULT_CLASS);
+    profile.createdAt = new Date().toISOString();
+    save();
+    applyPalette(DEFAULT_CLASS);
+  }
+  if (btn) btn.disabled = true;
+  if (status) status.textContent = 'Fetching your unlock code…';
+  try {
+    const res = await fetch('/api/pro/restore', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email: trimmed }),
+    });
+    let data = null;
+    try { data = await res.json(); } catch {}
+    if (!res.ok || !data?.ok || typeof data.code !== 'string') {
+      const msg = data?.error === 'not_found' ? 'No Gym Pro purchase was found for that email yet.'
+        : data?.error === 'expired' ? 'That Gym Pro code has expired.'
+        : data?.error === 'unavailable' ? 'Gym Pro restore is not available yet. Please try again later.'
+        : 'Could not restore Gym Pro. Check the email and try again.';
+      if (status) status.textContent = msg;
+      return;
+    }
+    const updated = await restorePro(profile, data.code);
+    if (!updated) {
+      if (status) status.textContent = 'The unlock code could not be verified on this device.';
+      return;
+    }
+    profile = updated;
+    save();
+    const st = proStatus(profile);
+    window.trackEvent?.('pro_unlocked', { tier: st.tier, exp: st.exp });
+    if (status) status.textContent = st.tier === 'lifetime'
+      ? 'Gym Pro is unlocked on this device (lifetime).'
+      : 'Gym Pro is unlocked on this device.';
+    renderMap();
+  } catch {
+    if (status) status.textContent = 'Restore failed. Check your connection and try again.';
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+function showProRestoreUI() {
+  if (!profile) {
+    profile = createProfile(DEFAULT_CLASS);
+    profile.createdAt = new Date().toISOString();
+    save();
+    applyPalette(DEFAULT_CLASS);
+  }
+  renderMap();
+  show('scr-map');
+  const panel = el('proRestorePanel');
+  if (panel) panel.hidden = false;
+  const more = el('mapMore');
+  if (more) more.open = true;
+  const btn = el('btnProRestore');
+  if (btn && !btn.dataset.wired) {
+    btn.dataset.wired = '1';
+    btn.onclick = () => handleProRestoreRequest(el('proRestoreEmail')?.value || '');
+  }
+  try { panel?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch {}
+}
 const preview = document.visibilityState !== 'visible';
 analytics.openTrainer({
   entry: trainerEntry,
@@ -3154,7 +3226,9 @@ function startFromEntry() {
   scheduleStart();
   return true;
 }
-if (!startFromEntry()) {
+if (wantsProRestore) {
+  showProRestoreUI();
+} else if (!startFromEntry()) {
   if (profile) { renderMap(); show('scr-map'); }
   else { initTitle(); }
 }
