@@ -6,7 +6,7 @@
 - **commit(s):**
   - `f9538ea` — `Restrict Ko-fi Pro grants to configured lifetime shop orders`
   - `502d1b3` — `Add beam result for PG-CLAUDE-PRO-GOLIVE-FIXES-20261114-01`
-  - `09ed839` — `Update beam result with push outcome for PG-CLAUDE-PRO-GOLIVE-FIXES-20261114-01`
+  - `f8d8d0b` — `Update beam result with push outcome for PG-CLAUDE-PRO-GOLIVE-FIXES-20261114-01`
 
 ## Reasonable reading (stated up front)
 
