@@ -30,9 +30,11 @@ import {
 } from '../src/rpg/daily.js';
 import { parseEntryParams, isSharedDayCurrent, cleanEntrySearch, buildDailyShareText, shareUrl, inviteUrl, newShareId } from '../src/rpg/links.js';
 import { keyAction, shouldIgnoreKey } from '../src/rpg/keys.js';
+import { battleMessage } from '../src/rpg/battle-copy.js';
 import { createAnalytics } from '../src/rpg/analytics.js';
 import { captureDrillPlan, restoreDrillPlan, BLACKJACK_DRILLS, DRILL_HANDS, DRILL_GAMES, findDrill, drillPlanStartingWith } from '../src/rpg/drills.js';
 import { reelClipFor } from '../src/rpg/reel-clips.js';
+import { revealDelta } from '../src/ui/reveal.js';
 import { drawArt, drawTrainerBack } from './characters.js';
 import audio from './audio.js?v=20261017-vegas1';
 import haptics from './haptics.js';
@@ -1842,6 +1844,34 @@ function clearFirstNudge() {
   document.getElementById('btnDraw')?.classList.remove('nudge');
 }
 
+// The row that holds the legal actions for this game. On phones it is pinned
+// to the bottom of the viewport; on wider screens it scrolls with the page.
+function activeControlRow() {
+  if (gameId === 'blackjack') return el('rowActions');
+  if (gameId === 'baccarat') return el('rowBet');
+  if (gameId === 'holdem') return el('rowPick');
+  return document.querySelector('.battle-action-bar');
+}
+
+// The hand is only playable if the player can see their cards and reach the
+// buttons. If either is cut off, scroll the smallest amount that fixes it.
+function revealHand() {
+  const cards = el('zones');
+  const controls = activeControlRow();
+  if (!cards || !controls || controls.hidden || !cards.isConnected) return;
+  const cardBox = cards.getBoundingClientRect();
+  const controlBox = controls.getBoundingClientRect();
+  const pinned = getComputedStyle(controls).position === 'fixed';
+  const delta = revealDelta({
+    cardBottom: cardBox.bottom,
+    controlBottom: controlBox.bottom,
+    viewportHeight: window.innerHeight,
+    barTop: pinned ? controlBox.top : null,
+  });
+  if (delta <= 0) return;
+  window.scrollBy({ top: delta, behavior: reduceMotion() ? 'auto' : 'smooth' });
+}
+
 function scheduleFirstNudge() {
   if (handNumber !== 1) return;
   try { if (localStorage.getItem(FIRST_NUDGE_KEY)) return; } catch { /* storage blocked */ }
@@ -1851,7 +1881,7 @@ function scheduleFirstNudge() {
     if (handNumber !== 1 || handDone || decisionsThisHand > 0) return;
     if (document.visibilityState !== 'visible') return;
     const copy = {
-      blackjack: 'Your call — tap Hit, Stand, Double, or Split.',
+      blackjack: 'Tap Hit, Stand, Double, or Split.',
       videopoker: 'Tap the cards you want to keep, then press Draw.',
       baccarat: 'Pick Banker, Player, or Tie.',
       holdem: 'Tap your best five, then press Confirm five.',
@@ -1868,6 +1898,9 @@ function scheduleFirstNudge() {
     row?.classList.add('nudge');
     try { localStorage.setItem(FIRST_NUDGE_KEY, '1'); } catch { /* storage blocked */ }
     window.trackEvent?.('first_nudge', { game: gameId, mode: handMode() });
+    // The nudge is one more line in the coach card; on a short phone that can
+    // push the player's cards back under the pinned bar, so re-check the fit.
+    revealHand();
     firstNudgeTimer = setTimeout(clearFirstNudge, 9000);
   }, FIRST_NUDGE_DELAY_MS);
 }
@@ -1940,19 +1973,16 @@ function startHand() {
   });
   renderBattle();
   audio.sfx('deal');
-  const instructions = {
-    videopoker: 'Tap the cards you want to keep. The cards you leave alone are replaced when you press Draw. The coach will explain the best hold afterwards.',
-    blackjack: 'Look at your hand and the dealer’s upcard, then choose Hit, Stand, Double, or Split. Not sure? Ask the coach for a hint.',
-    baccarat: 'Answer the percentage question. Every number you need is in the odds panel below.',
-    holdem: 'Tap the five cards that make your best hand, then press Confirm five. Not sure? Ask the coach for a hint.',
-  };
   const message = el('masterLine');
   clearInterval(message._typer);
   message._typer = null;
-  const dailyIntro = dailyMode && dailyRun && dailyRun.index === 0
-    ? 'This is the Daily Drill: five hands across all four games. Make the play you think is best; the coach grades it and explains why after each hand. '
-    : '';
-  message.textContent = dailyIntro + instructions[gameId];
+  // The Daily Drill hides the coach button, so hand 1 leads with a short,
+  // actionable instruction instead of a paragraph that ends by pointing at a
+  // control that is not there.
+  message.textContent = battleMessage(gameId, {
+    daily: dailyMode,
+    dailyIntro: dailyMode && dailyRun && dailyRun.index === 0,
+  });
   el('masterPrompt').hidden = true;
   document.querySelector('.battle-label').textContent = dailyMode && dailyRun
     ? `Daily Drill #${dailyRun.number} · hand ${dailyRun.index + 1} of ${DAILY_HANDS}`
@@ -1962,6 +1992,7 @@ function startHand() {
       : shortSession ? `Five hands · ${profile.activeSession.played} of ${SESSION_HANDS} done` : `${canPractice(profile, gymId) ? 'Practice' : 'Gym challenge'} · ${handsWon} of ${HANDS_TO_WIN} good plays`;
 
   scheduleFirstNudge();
+  revealHand();
 
   // A natural settles before anybody gets to touch anything.
   if (gameId === 'blackjack' && round.settled) settleBlackjack();
