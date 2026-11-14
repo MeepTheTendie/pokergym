@@ -86,3 +86,93 @@ test('handleProApi dispatches by path', async () => {
   const res = await handleProApi(new Request('https://playpokergym.com/api/pro/restore', { method: 'POST', body: '{}' }), env);
   assert.equal(res.status, 503);
 });
+
+function makeKv() {
+  const store = new Map();
+  return {
+    store,
+    async get(key) { return store.has(key) ? store.get(key) : null; },
+    async put(key, value) { store.set(key, value); },
+  };
+}
+
+const PRIVATE_KEY_JWK = {
+  crv: 'Ed25519',
+  d: '_k7eoIsIWYI7Lsn7u8qEXRhh73kA5leycOz-26KrNd0',
+  x: '0nj7E167ATXNSmUS3p4KiEtAb10cf3ypp1VE6zWekz8',
+  kty: 'OKP',
+};
+
+function configuredEnv(overrides = {}) {
+  return {
+    KOFI_TOKEN: 'tok',
+    PRO_SIGNING_KEY: JSON.stringify(PRIVATE_KEY_JWK),
+    PRO_ENTITLEMENTS: makeKv(),
+    ...overrides,
+  };
+}
+
+function kofiRequest(data) {
+  return new Request('https://playpokergym.com/api/kofi', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+test('Ko-fi donation is ignored and does not grant Pro', async () => {
+  const env = configuredEnv({ PRO_LIFETIME_ITEM: 'LIFETIME29' });
+  const res = await handleKofiWebhook(kofiRequest({
+    verification_token: 'tok',
+    type: 'Donation',
+    email: 'tipper@example.com',
+    message_id: 'msg-donation-1',
+  }), env);
+  assert.equal(res.status, 200);
+  assert.deepEqual(await res.json(), { ok: true, ignored: true });
+  assert.equal(env.PRO_ENTITLEMENTS.store.size, 0);
+});
+
+test('Ko-fi shop order without configured lifetime item is ignored', async () => {
+  const env = configuredEnv();
+  const res = await handleKofiWebhook(kofiRequest({
+    verification_token: 'tok',
+    type: 'Shop Order',
+    email: 'buyer@example.com',
+    message_id: 'msg-shop-unset-1',
+    shop_items: [{ direct_link_code: 'LIFETIME29' }],
+  }), env);
+  assert.equal(res.status, 200);
+  assert.deepEqual(await res.json(), { ok: true, ignored: true });
+  assert.equal(env.PRO_ENTITLEMENTS.store.size, 0);
+});
+
+test('Ko-fi shop order for other items is ignored', async () => {
+  const env = configuredEnv({ PRO_LIFETIME_ITEM: 'LIFETIME29' });
+  const res = await handleKofiWebhook(kofiRequest({
+    verification_token: 'tok',
+    type: 'Shop Order',
+    email: 'buyer@example.com',
+    message_id: 'msg-shop-other-1',
+    shop_items: [{ direct_link_code: 'SOMETHING_ELSE' }, { direct_link_code: 'STICKER' }],
+  }), env);
+  assert.equal(res.status, 200);
+  assert.deepEqual(await res.json(), { ok: true, ignored: true });
+  assert.equal(env.PRO_ENTITLEMENTS.store.size, 0);
+});
+
+test('Ko-fi shop order containing lifetime item grants lifetime Pro', async () => {
+  const env = configuredEnv({ PRO_LIFETIME_ITEM: 'LIFETIME29' });
+  const res = await handleKofiWebhook(kofiRequest({
+    verification_token: 'tok',
+    type: 'Shop Order',
+    email: 'buyer@example.com',
+    message_id: 'msg-shop-life-1',
+    shop_items: [{ direct_link_code: 'SOMETHING_ELSE' }, { direct_link_code: 'LIFETIME29' }],
+  }), env);
+  assert.equal(res.status, 200);
+  assert.deepEqual(await res.json(), { ok: true, tier: 'lifetime' });
+  const keys = [...env.PRO_ENTITLEMENTS.store.keys()];
+  assert.ok(keys.some(k => k.startsWith('email:')), 'stores entitlement by email hash');
+  assert.equal(env.PRO_ENTITLEMENTS.store.get('msg:msg-shop-life-1'), '1', 'dedupes by message id');
+});
