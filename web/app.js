@@ -1746,7 +1746,7 @@ function renderPaytable() {
   } else if (gameId === 'baccarat') {
     const best = bacBest();
     for (const alt of best.alternatives) {
-      const on = !handDone && alt.side === best.side;
+      const on = handDone && alt.side === best.side;
       const p = best.probabilities[alt.side];
       rows.push(payRow(
         `${alt.side.toUpperCase()} ${(p * 100).toFixed(1)}%`,
@@ -2792,11 +2792,15 @@ function buildAdvice() {
   if (gameId === 'videopoker') {
     const best = vpBest();
     const kept = round.hand.filter((_, i) => best.holds[i]);
+    const keptLabels = kept.map(cardLabel).join(' ');
     return {
       holds: best.holds,
-      text: `Keep ${kept.length} card${kept.length === 1 ? '' : 's'}. ${reasonFor(kept, variantById(round.variantId))} Average return: ${best.ev.toFixed(3)} per hand.`,
+      text: `Keep ${keptLabels || 'no cards'}. ${reasonFor(kept, variantById(round.variantId))} Average return: ${best.ev.toFixed(3)} per hand.`,
       why: `Best holds: ${best.options.slice(0, 3)
-        .map((o) => `${o.keptCount} kept, ${o.ev.toFixed(2)} average return`).join('  ')}`,
+        .map((o) => {
+          const held = round.hand.filter((_, i) => o.holds[i]).map(cardLabel).join(' ');
+          return `${held || 'no cards'}, ${o.ev.toFixed(2)} average return`;
+        }).join('; ')}`,
       apply: () => { setHolds(round, best.holds); renderBattle(); },
     };
   }
