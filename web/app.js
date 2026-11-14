@@ -1610,7 +1610,9 @@ function renderStatus() {
       round.payout >= 25 ? 'high' : round.payout > 0 ? 'mid' : 'low');
     el('potentialText').textContent = round.payout > 0
       ? `${round.winLabel} pays ${round.payout} on this pay table.`
-      : 'The draw made no paying hand. The hold was still the right play.';
+      : round.holdBest
+        ? 'The draw made no paying hand. The hold was still the right play.'
+        : 'The draw made no paying hand, and a different hold was the better play.';
     return;
   }
 
@@ -1618,10 +1620,15 @@ function renderStatus() {
     if (handDone) {
       el('handGrade').textContent = outcomeLabel(round);
       setGauge(50, 'mid');
-      el('potentialText').textContent = 'The hand is over. The coach will explain the result.';
+      const miss = decisions.find((d) => !d.optimal);
+      el('potentialText').textContent = miss
+        ? `Better play: ${miss.review.correction}`
+        : 'Every decision this hand was the best play.';
       return;
     }
-    if (!coachedHand && !acted) {
+    // A hand can need several decisions (hit, then hit or stand again). Only
+    // the coach reveals the best play; a hit must not grade the next decision.
+    if (!coachedHand) {
       el('handGrade').textContent = 'Your call';
       setGauge(0, 'mid');
       el('potentialText').textContent = 'Choose your answer.';
@@ -1746,7 +1753,7 @@ function renderPaytable() {
   } else if (gameId === 'baccarat') {
     const best = bacBest();
     for (const alt of best.alternatives) {
-      const on = !handDone && alt.side === best.side;
+      const on = handDone && alt.side === best.side;
       const p = best.probabilities[alt.side];
       rows.push(payRow(
         `${alt.side.toUpperCase()} ${(p * 100).toFixed(1)}%`,
@@ -1998,6 +2005,21 @@ function startHand() {
   if (gameId === 'blackjack' && round.settled) settleBlackjack();
 }
 
+// A coach line ends in a full stop so the next sentence does not run on
+// ("You lose Good read.").
+function endSentence(text) {
+  const t = String(text ?? '').trim();
+  return !t || /[.!?]$/.test(t) ? t : `${t}.`;
+}
+
+// On a miss the coach names the better play right away instead of promising
+// a review the player may never open.
+function betterPlay(review) {
+  return review?.correction
+    ? `Better play: ${endSentence(review.correction)}`
+    : 'The better play was different. It is saved in Review my mistakes.';
+}
+
 function settleHand({ optimal, difficulty, line, review }) {
   if (handDone) return;
   handDone = true;
@@ -2052,12 +2074,12 @@ function settleHand({ optimal, difficulty, line, review }) {
     ? `${gym.leader}: That was the coach’s answer. Read the explanation — this hand does not count.`
     : optimal
       ? `${gym.leader}: Good read. That was the best play.`
-      : `${gym.leader}: Not quite. The better play was different — here is why.`;
+      : `${gym.leader}: Not quite. ${betterPlay(review)}`;
   const gainLine = coached
     ? (optimal ? `Learning rep: +${fmt(applied.gained)} XP. No score and no streak change.` : 'Coached hand. No score. Read the review below.')
     : optimal
       ? `+${fmt(applied.points)} points · ${fmt(profile.streak)}-hand streak · +${fmt(applied.gained)} XP`
-      : 'Your streak reset. The review explains the better play.';
+      : 'Your streak reset. This hand is saved in Review my mistakes.';
 
   let verdict;
   const exhausted = !shortSession && !passed && handsAtGym >= HANDS_TO_WIN;
@@ -2108,7 +2130,7 @@ function settleHand({ optimal, difficulty, line, review }) {
 
   if (shortSession && !profile.activeSession) renderSessionSummary(profile.sessions[0]);
 
-  const full = `${line} ${say} ${gainLine} ${verdict}`;
+  const full = `${endSentence(line)} ${say} ${gainLine} ${verdict}`;
   el('masterLine')._dataset = { full };
   el('masterPrompt').hidden = false;
   cancelAutoAdvance();
@@ -2580,13 +2602,13 @@ function settleDailyHand({ optimal, difficulty, line, review, coached = false })
   }
   const say = optimal
     ? 'Good read. That was the best play.'
-    : 'Not quite. The better play was different — the review explains why.';
+    : `Not quite. ${betterPlay(review)}`;
   const verdict = run.finished
     ? (run.scored
         ? `Daily Drill #${run.number} complete: ${tally} of ${DAILY_HANDS} correct. Come back tomorrow for #${run.number + 1} (unlocks in ${formatDailyCountdown()}). Your streak is ${fmt(profile.daily.streak)}.${[3, 7, 14].includes(profile.daily.streak) ? ' Streak milestone!' : ''}`
         : `Practice replay done: ${tally} of ${DAILY_HANDS} correct. No new XP or score today.`)
-    : `Daily Drill · hand ${run.index + 1} of ${DAILY_HANDS}. ${tally} correct so far.`;
-  const full = `${line} ${say} ${verdict}`;
+    : `${tally} correct so far. Next: Daily Drill hand ${run.index + 1} of ${DAILY_HANDS}.`;
+  const full = `${endSentence(line)} ${say} ${verdict}`;
   el('masterLine')._dataset = { full };
   el('masterPrompt').hidden = false;
   typewriter(el('masterLine'), full);
@@ -2755,11 +2777,14 @@ function heConfirm() {
   acted = true;
   trackDecision('confirm');
   const chosen = round.hand7.filter((_, i) => picked.has(i));
+  const optimal = playsBestFive(round.hand7, chosen);
   settleHand({
-    optimal: playsBestFive(round.hand7, chosen),
+    optimal,
     review: { quiz: bestFiveQuiz(round.hand7), situation: round.hand7.map(cardLabel).join(' '), chosen: chosen.map(cardLabel).join(' '), correction: `${round.result.label}: ${round.result.cards.map(cardLabel).join(' ')}. Choose five cards for the highest-ranking hand; equally ranked selections are accepted.` },
     difficulty: handDifficulty(round.result),
-    line: `You read the board. Your best five is ${round.result.label}.`,
+    line: optimal
+      ? `You read the board. Your best five is ${round.result.label}.`
+      : `Those five are not the best hand. The best five is ${round.result.label}.`,
   });
 }
 
