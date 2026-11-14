@@ -1,13 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { scenarios } from '../scripts/scenarios.mjs';
 
-const root = new URL('..', import.meta.url).pathname;
-const page = slug => `${root}public/guides/${slug}/index.html`;
-const sitemap = readFileSync(`${root}public/sitemap.xml`, 'utf8');
-const llms = readFileSync(`${root}public/llms.txt`, 'utf8');
-const llmsFull = readFileSync(`${root}public/llms-full.txt`, 'utf8');
+const root = fileURLToPath(new URL('..', import.meta.url));
+const page = slug => `${root}/public/guides/${slug}/index.html`;
+const sitemap = readFileSync(`${root}/public/sitemap.xml`, 'utf8');
+const llms = readFileSync(`${root}/public/llms.txt`, 'utf8');
+const llmsFull = readFileSync(`${root}/public/llms-full.txt`, 'utf8');
 
 test('every scenario has a page, a sitemap entry and an assistant entry', () => {
   assert.ok(scenarios.length >= 20);

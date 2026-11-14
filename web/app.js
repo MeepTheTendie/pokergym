@@ -30,8 +30,11 @@ import {
 } from '../src/rpg/daily.js';
 import { parseEntryParams, isSharedDayCurrent, cleanEntrySearch, buildDailyShareText, shareUrl, inviteUrl, newShareId } from '../src/rpg/links.js';
 import { keyAction, shouldIgnoreKey } from '../src/rpg/keys.js';
+import { battleMessage } from '../src/rpg/battle-copy.js';
 import { createAnalytics } from '../src/rpg/analytics.js';
 import { captureDrillPlan, restoreDrillPlan, BLACKJACK_DRILLS, DRILL_HANDS, DRILL_GAMES, findDrill, drillPlanStartingWith } from '../src/rpg/drills.js';
+import { reelClipFor } from '../src/rpg/reel-clips.js';
+import { revealDelta } from '../src/ui/reveal.js';
 import { drawArt, drawTrainerBack } from './characters.js';
 import audio from './audio.js?v=20261017-vegas1';
 import haptics from './haptics.js';
@@ -154,7 +157,9 @@ const entryParams = parseEntryParams(location.search);
 // A scenario link (?drill=<id>) names one authored hand, so a guide or video
 // can land on the exact decision it promised instead of a random deal.
 let requestedDrill = entryParams.drill ? findDrill(entryParams.drill) : null;
-let requestedGym = GYMS.find(gym => gym.game === (entryParams.practice ?? requestedDrill?.game)) ?? null;
+// A reel deeplink (?c=<clip>) deals the exact hand from a social video as hand 1.
+let requestedReel = reelClipFor(entryParams.clip);
+let requestedGym = GYMS.find(gym => gym.game === (entryParams.practice ?? requestedDrill?.game ?? requestedReel?.game)) ?? null;
 // A shared Daily Drill link (?d=<n>) highlights today's drill when n is within
 // one day of today's number; otherwise it is ignored silently. ref is read only
 // to strip it: it is never stored (no localStorage, cookie or sessionStorage).
@@ -163,7 +168,7 @@ let sharedDaily = entryParams.daily || isSharedDayCurrent(entryParams.day, daily
 const dailyLinkEntry = entryParams.daily ? 'daily_link' : sharedDaily ? 'share_link' : null;
 // The entry source for this page load, carried onto run-level events so starts
 // and completions can be split by daily link, practice link, or direct.
-const trainerEntry = dailyLinkEntry ?? (requestedDrill ? 'drill_link' : entryParams.practice ? 'practice_link' : 'direct');
+const trainerEntry = dailyLinkEntry ?? (requestedDrill ? 'drill_link' : requestedReel ? 'reel_link' : entryParams.practice ? 'practice_link' : 'direct');
 // Explicit entry links wait for a visible page before auto-starting. A real
 // visitor gets the promised run after 1.5 s of visibility or on the first
 // intentional tap/key; a hidden or inputless crawler never starts one.
@@ -237,6 +242,7 @@ el('btnConfirmRestore').onclick = () => {
     profile = restored; pendingRestore = null; round = null; shortSession = false;
     el('btnConfirmRestore').hidden = true;
     el('btnContinue').disabled = false;
+    el('btnContinue').hidden = false;
     renderMap(); show('scr-map');
     el('backupStatus').textContent = 'Progress restored on this browser. Nothing was uploaded.';
   } catch { el('backupStatus').textContent = 'Restore failed. Browser storage may be full or blocked.'; }
@@ -325,8 +331,21 @@ el('btnMap').onclick = () => { dailyMode = false; dailyRun = null; renderMap(); 
 el('btnTitle').onclick = () => { dailyMode = false; dailyRun = null; initTitle(); };
 
 /* ---------------- title ---------------- */
+// A brand-new visitor (no save, no link that promised something specific) gets
+// one action that deals a blackjack hand straight away. No resume control, no
+// style picker, no game menu: the data showed most visitors left before their
+// first hand, so the first screen asks for nothing but one tap.
+function isFirstVisitScreen() {
+  return !profile && !sharedDaily && !requestedGym;
+}
 function initTitle() {
+  const firstVisit = isFirstVisitScreen();
+  // Never show a disabled-looking resume button: hide it until there is a save.
+  el('btnContinue').hidden = !profile;
   el('btnContinue').disabled = !profile;
+  el('btnNew').hidden = firstVisit;
+  el('btnStart').textContent = firstVisit ? 'Deal my first hand' : 'Start training';
+  el('scr-title').classList.toggle('first-visit', firstVisit);
   // Without a save the daily is reachable only from a shared link (option a).
   // The Daily Drill is the built-in reason to come back; show it to everyone,
   // including first-time visitors with no save. The onclick path below creates
@@ -413,17 +432,22 @@ function initTitle() {
 }
 function enterTraining() {
   if (requestedGym) {
-    // A named scenario always wins over a resumed session, so the link cannot
-    // land on a different game than the one it promised.
-    const gym = requestedDrill && requestedGym
+    // A named scenario or reel deeplink always wins over a resumed session, so
+    // the link cannot land on a different game than the one it promised.
+    const gym = (requestedDrill || requestedReel) && requestedGym
       ? requestedGym
       : GYM_BY_ID[profile.activeSession?.gymId] ?? requestedGym;
     const scenario = requestedDrill && requestedDrill.game === gym.game ? requestedDrill : null;
+    const reel = requestedReel && requestedReel.game === gym.game ? requestedReel : null;
     requestedGym = null;
-    if (scenario) {
-      // A scenario link always opens fresh on the promised hand, even when an
+    if (reel) requestedReel = null;
+    if (scenario || reel) {
+      // A targeted link always opens fresh on the promised hand, even when an
       // unfinished session exists, so the page and the deal cannot disagree.
-      profile = { ...profile, activeSession: { gymId: gym.id, played: 0, optimal: 0, dealt: 0, startedAt: new Date().toISOString() } };
+      profile = { ...profile, activeSession: {
+        gymId: gym.id, played: 0, optimal: 0, dealt: 0, startedAt: new Date().toISOString(),
+        ...(reel ? { reelClip: reel.clip } : {}),
+      } };
     } else {
       profile = beginSession(profile, gym.id);
     }
@@ -619,7 +643,7 @@ function computeToday() {
   }
   if (daily.lastKey !== key) {
     return {
-      state: `Daily Drill #${number} is ready. Five hands, one from each game, the same drill for everyone today.`,
+      state: `Daily Drill #${number} is ready. Five hands across all four games, the same drill for everyone today.`,
       label: `Play Daily Drill #${number}`,
       action: () => startDaily('map'),
     };
@@ -668,6 +692,7 @@ function renderToday() {
   const key = dailyKey();
   const daily = dailyOf(profile);
   renderDailyHistory(daily.history, key);
+  renderDailySquares(daily, key);
   if (daily.lastKey === key) {
     const results = daily.history.find(entry => entry.key === key)?.results ?? [];
     const text = dailyShareText(key, results, dailyNumber(key));
@@ -693,6 +718,33 @@ function renderToday() {
     tip.innerHTML = TIP_HTML;
     actions.appendChild(tip);
   }
+}
+
+// The five squares under the Today card. Before today's drill is played they
+// are neutral placeholders; once the day is complete they show the real result
+// stored in daily.history, so a perfect run reads as five green squares instead
+// of the old hard-coded ✓✓✓✓✕ decoration.
+function renderDailySquares(daily, key) {
+  const host = el('dailySquares');
+  if (!host) return;
+  host.replaceChildren();
+  const played = daily.lastKey === key;
+  const results = played
+    ? (daily.history.find(entry => entry.key === key)?.results ?? [])
+    : [];
+  for (let i = 0; i < DAILY_HANDS; i++) {
+    const sq = document.createElement('span');
+    if (played && i < results.length) {
+      sq.className = 'sq ' + (results[i] ? 'sq-green' : 'sq-red');
+      sq.textContent = results[i] ? '✓' : '✕';
+    } else {
+      sq.className = 'sq sq-empty';
+    }
+    host.appendChild(sq);
+  }
+  host.setAttribute('aria-label', played
+    ? `Today's result: ${results.filter(Boolean).length} of ${results.length} correct`
+    : 'Daily Drill not played yet');
 }
 
 function renderDailyHistory(history, key) {
@@ -1612,6 +1664,12 @@ function renderStatus() {
   }
 
   // hold'em
+  if (!handDone && !coachedHand && !acted) {
+    el('handGrade').textContent = 'Your call';
+    setGauge(0, 'mid');
+    el('potentialText').textContent = 'Choose your answer.';
+    return;
+  }
   const cat = round.result.category;
   el('handGrade').textContent = round.result.label;
   setGauge((cat / 9) * 100, cat >= 5 ? 'high' : cat >= 3 ? 'mid' : 'low');
@@ -1724,10 +1782,13 @@ function setControls() {
 
   if (vp) {
     // A fresh hand is dealt automatically. DEAL stays disabled while a hand is
-    // live so it cannot be used to discard a bad deal and reroll for free.
+    // live so it cannot be used to discard a bad deal and reroll for free. In
+    // daily/session flow "Next hand" is the only continue once a hand settles,
+    // so a second gold DEAL beside it is hidden.
+    el('btnDeal').hidden = (dailyMode || shortSession) && handDone;
     el('btnDeal').disabled = !handDone;
     el('btnDraw').disabled = handDone;
-    el('btnDraw').classList.toggle('primary', !handDone);
+    el('btnDraw').classList.toggle('primary', !handDone && Array.isArray(round?.holds) && round.holds.some(Boolean));
     el('btnDeal').classList.toggle('primary', handDone);
     return;
   }
@@ -1741,7 +1802,12 @@ function setControls() {
     return;
   }
   if (gameId === 'baccarat') {
-    if (round?.quiz) {
+    const quiz = round?.quiz;
+    if (quiz) {
+      // House-edge and tie-payout questions are answered from the Odds panel;
+      // open it by default while the question is live so the numbers are in
+      // front of the player instead of hidden behind a collapsed summary.
+      if (!handDone && (quiz.type === 'select' || quiz.type === 'tieodds')) el('paytablePanel').open = true;
       renderQuizButtons();
       return;
     }
@@ -1778,6 +1844,34 @@ function clearFirstNudge() {
   document.getElementById('btnDraw')?.classList.remove('nudge');
 }
 
+// The row that holds the legal actions for this game. On phones it is pinned
+// to the bottom of the viewport; on wider screens it scrolls with the page.
+function activeControlRow() {
+  if (gameId === 'blackjack') return el('rowActions');
+  if (gameId === 'baccarat') return el('rowBet');
+  if (gameId === 'holdem') return el('rowPick');
+  return document.querySelector('.battle-action-bar');
+}
+
+// The hand is only playable if the player can see their cards and reach the
+// buttons. If either is cut off, scroll the smallest amount that fixes it.
+function revealHand() {
+  const cards = el('zones');
+  const controls = activeControlRow();
+  if (!cards || !controls || controls.hidden || !cards.isConnected) return;
+  const cardBox = cards.getBoundingClientRect();
+  const controlBox = controls.getBoundingClientRect();
+  const pinned = getComputedStyle(controls).position === 'fixed';
+  const delta = revealDelta({
+    cardBottom: cardBox.bottom,
+    controlBottom: controlBox.bottom,
+    viewportHeight: window.innerHeight,
+    barTop: pinned ? controlBox.top : null,
+  });
+  if (delta <= 0) return;
+  window.scrollBy({ top: delta, behavior: reduceMotion() ? 'auto' : 'smooth' });
+}
+
 function scheduleFirstNudge() {
   if (handNumber !== 1) return;
   try { if (localStorage.getItem(FIRST_NUDGE_KEY)) return; } catch { /* storage blocked */ }
@@ -1787,7 +1881,7 @@ function scheduleFirstNudge() {
     if (handNumber !== 1 || handDone || decisionsThisHand > 0) return;
     if (document.visibilityState !== 'visible') return;
     const copy = {
-      blackjack: 'Your call — tap Hit, Stand, Double, or Split.',
+      blackjack: 'Tap Hit, Stand, Double, or Split.',
       videopoker: 'Tap the cards you want to keep, then press Draw.',
       baccarat: 'Pick Banker, Player, or Tie.',
       holdem: 'Tap your best five, then press Confirm five.',
@@ -1804,6 +1898,9 @@ function scheduleFirstNudge() {
     row?.classList.add('nudge');
     try { localStorage.setItem(FIRST_NUDGE_KEY, '1'); } catch { /* storage blocked */ }
     window.trackEvent?.('first_nudge', { game: gameId, mode: handMode() });
+    // The nudge is one more line in the coach card; on a short phone that can
+    // push the player's cards back under the pinned bar, so re-check the fit.
+    revealHand();
     firstNudgeTimer = setTimeout(clearFirstNudge, 9000);
   }, FIRST_NUDGE_DELAY_MS);
 }
@@ -1837,19 +1934,26 @@ function startHand() {
   const introductory = shortSession && !dailyMode && !drillMode && gameId === 'blackjack'
     && profile.handsPlayed === 0 ? BLACKJACK_DRILLS.find(hand => hand.type === 'hard') : null;
   const drilled = drillMode ? drillHands[profile.activeSession?.played ?? 0] : introductory;
-  drillLabel = drilled?.label ?? '';
+  // A reel deeplink (/reel?c=<clip>) deals the exact hand from a social video as
+  // hand 1 of a fresh five-hand session, then continues into normal hands.
+  const reel = !dailyMode && !drillMode && !drilled
+    && profile.activeSession?.reelClip && (profile.activeSession.played ?? 0) === 0
+    ? reelClipFor(profile.activeSession.reelClip) : null;
+  drillLabel = (reel?.label ?? drilled?.label) ?? '';
   if (gameId === 'videopoker') {
     // The daily drill is the same for every trainer, so it always uses the
     // default pay table no matter which variant the player has selected.
     round = newVpRound(rng ?? Math.random, {
-      hand: drilled?.hand ?? null,
+      hand: reel?.hand ?? drilled?.hand ?? null,
       variantId: dailyMode ? DEFAULT_VARIANT.id : vpVariantId,
     });
     vpKickoff(round);
   } else if (gameId === 'blackjack') {
-    const rigged = drilled?.player
-      ? { player: drilled.player, dealer: [drilled.dealer, drilled.hole] }
-      : undefined;
+    const rigged = reel?.player
+      ? { player: reel.player, dealer: [reel.dealer, reel.hole] }
+      : drilled?.player
+        ? { player: drilled.player, dealer: [drilled.dealer, drilled.hole] }
+        : undefined;
     const deal = () => newBjRound(rng ?? Math.random, rigged);
     round = deal();
     // A natural is settled by the rules before the player has any choice. It is
@@ -1857,9 +1961,9 @@ function startHand() {
     // it instead. Daily's seeded stream stays deterministic for every player.
     for (let skip = 0; !rigged && round.settled && skip < 100; skip++) round = deal();
   } else if (gameId === 'baccarat') {
-    round = { quiz: quizFor(rng ?? Math.random) };
+    round = { quiz: reel?.quiz ?? quizFor(rng ?? Math.random) };
   } else {
-    round = newHeRound(rng ?? Math.random);
+    round = newHeRound(rng ?? Math.random, reel ? { hole: reel.hole, board: reel.board } : null);
   }
 
   analytics.handDealt(handToken(), {
@@ -1869,19 +1973,16 @@ function startHand() {
   });
   renderBattle();
   audio.sfx('deal');
-  const instructions = {
-    videopoker: 'Tap the cards you want to keep. The cards you leave alone are replaced when you press Draw. The coach will explain the best hold afterwards.',
-    blackjack: 'Look at your hand and the dealer’s upcard, then choose Hit, Stand, Double, or Split. Not sure? Ask the coach for a hint.',
-    baccarat: 'Answer the percentage question. Every number you need is in the odds panel below.',
-    holdem: 'Tap the five cards that make your best hand, then press Confirm five. Not sure? Ask the coach for a hint.',
-  };
   const message = el('masterLine');
   clearInterval(message._typer);
   message._typer = null;
-  const dailyIntro = dailyMode && dailyRun && dailyRun.index === 0
-    ? 'This is the Daily Drill: five hands, one from each game. Make the play you think is best; the coach grades it and explains why after each hand. '
-    : '';
-  message.textContent = dailyIntro + instructions[gameId];
+  // The Daily Drill hides the coach button, so hand 1 leads with a short,
+  // actionable instruction instead of a paragraph that ends by pointing at a
+  // control that is not there.
+  message.textContent = battleMessage(gameId, {
+    daily: dailyMode,
+    dailyIntro: dailyMode && dailyRun && dailyRun.index === 0,
+  });
   el('masterPrompt').hidden = true;
   document.querySelector('.battle-label').textContent = dailyMode && dailyRun
     ? `Daily Drill #${dailyRun.number} · hand ${dailyRun.index + 1} of ${DAILY_HANDS}`
@@ -1891,6 +1992,7 @@ function startHand() {
       : shortSession ? `Five hands · ${profile.activeSession.played} of ${SESSION_HANDS} done` : `${canPractice(profile, gymId) ? 'Practice' : 'Gym challenge'} · ${handsWon} of ${HANDS_TO_WIN} good plays`;
 
   scheduleFirstNudge();
+  revealHand();
 
   // A natural settles before anybody gets to touch anything.
   if (gameId === 'blackjack' && round.settled) settleBlackjack();
@@ -2183,6 +2285,7 @@ function renderSessionSummary(session, daily = null) {
     dailyBtn.textContent = `Play Daily Drill #${todayNum}`;
     dailyBtn.onclick = () => {
       analytics.recapTap({ button: 'daily_drill', run_id: recapRunId });
+      analytics.returnPromptClicked({ daily_done: dailyDone, run_id: recapRunId });
       startDaily('recap');
     };
     actions.appendChild(dailyBtn);
@@ -2232,6 +2335,21 @@ function renderSessionSummary(session, daily = null) {
   };
   actions.appendChild(challenge);
   box.appendChild(actions);
+
+  // Return hook: the five-hand recap carries one line pointing at the Daily
+  // Drill. Before today's drill is done, the existing primary "Play Daily Drill"
+  // button is the action (its tap also fires return_prompt_clicked), so there is
+  // no second gold button. After it is done, the line says when the next one
+  // unlocks and there is no button. No popup, email, account or streak claim.
+  if (!daily) {
+    const returnLine = document.createElement('p');
+    returnLine.className = 'hint';
+    returnLine.textContent = dailyDone
+      ? `Come back tomorrow for a fresh Daily Drill. The next one unlocks in ${formatDailyCountdown()}.`
+      : 'Come back tomorrow for a fresh Daily Drill.';
+    box.appendChild(returnLine);
+    analytics.returnPromptShown({ daily_done: dailyDone, run_id: recapRunId });
+  }
 
   // Two different ways to come back tomorrow. Explain both before anyone taps,
   // and keep the browser-notification action visually separate from the file.
@@ -2520,7 +2638,7 @@ function doDraw() {
     optimal,
     difficulty: handDifficulty(round.result),
     review,
-    line: `Result: ${round.winLabel}. Your hold was ${optimal ? 'the best play' : 'not the best play'}.`,
+    line: `Result: ${round.winLabel}.`,
   });
 }
 
@@ -2564,9 +2682,9 @@ function settleBlackjack() {
   // (for example from a malformed authored drill). A hand with no decision
   // never scores; deal again instead.
   if (!decisions.length) {
-    if (drillMode) {
-      // Authored drills are validated to avoid naturals. If one is ever
-      // malformed, settle it without a score rather than looping forever.
+    if (drillMode || profile?.activeSession?.reelClip) {
+      // Authored drills/reel hands are validated to avoid naturals. If one is
+      // ever malformed, settle it without a score rather than looping forever.
       settleHand({ optimal: false, difficulty: 1, line: outcomeLabel(round) });
       return;
     }
@@ -2873,6 +2991,7 @@ analytics.openTrainer({
   entry: trainerEntry,
   returning,
   days_since_last_visit: daysSinceLastVisit,
+  first_screen: isFirstVisitScreen() ? 'quick_deal' : 'menu',
   ...(preview ? { preview: true } : {}),
 });
 // Attach the save state to the stable device id created by the loader, so

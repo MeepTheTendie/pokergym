@@ -26,6 +26,8 @@ export const EVENTS = Object.freeze({
   DAILY_COMPLETE: 'daily_complete',   // five finished Daily Drill hands
   RECAP_VIEW: 'recap_view',           // five-hand recap shown
   RECAP_TAP: 'recap_tap',             // a recap button tapped
+  RETURN_PROMPT_SHOWN: 'return_prompt_shown',     // "come back tomorrow" prompt shown on the recap
+  RETURN_PROMPT_CLICKED: 'return_prompt_clicked', // that prompt's Daily Drill button tapped
 });
 
 export const GAMES = Object.freeze(['blackjack', 'videopoker', 'baccarat', 'holdem']);
@@ -228,6 +230,18 @@ export function createAnalytics({ send, ref = () => null } = {}) {
     /** A button on the five-hand recap was tapped. */
     recapTap(props = {}) {
       emit(EVENTS.RECAP_TAP, { ...props, event_version: EVENT_VERSION });
+      return true;
+    },
+
+    /** The "come back tomorrow" prompt was shown on the five-hand recap. */
+    returnPromptShown(props = {}) {
+      emit(EVENTS.RETURN_PROMPT_SHOWN, { ...props, event_version: EVENT_VERSION });
+      return true;
+    },
+
+    /** The prompt's Daily Drill button was tapped. */
+    returnPromptClicked(props = {}) {
+      emit(EVENTS.RETURN_PROMPT_CLICKED, { ...props, event_version: EVENT_VERSION });
       return true;
     },
   };

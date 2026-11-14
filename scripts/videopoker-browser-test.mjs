@@ -1,17 +1,16 @@
 // Video-poker table/coaching regression checks in isolated mobile Chromium.
 // Serve the repo, then: node scripts/videopoker-browser-test.mjs [trainer URL]
-import { spawn } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
+import { launchChromium } from './lib/chromium.mjs';
 
-const PORT = 9336;
 const BASE = process.argv[2] ?? 'http://127.0.0.1:8899/web/';
-const profilePath = await mkdtemp(path.join(tmpdir(), 'pokergym-analytics-'));
-const chrome = spawn('chromium', ['--headless=new', '--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage',
-  '--window-size=390,844', `--user-data-dir=${profilePath}`, `--remote-debugging-port=${PORT}`, 'about:blank'], { stdio: 'ignore' });
+const profilePath = await mkdtemp(path.join(tmpdir(), 'pokergym-videopoker-'));
+// Shared launcher: free port, bounded retries, Chromium stderr on failure.
+const browser = await launchChromium({ profileDir: profilePath, extraArgs: ['--window-size=390,844'] });
 
 let ws;
 try {
@@ -22,11 +21,8 @@ const evaluate = async (expression) => {
   if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description ?? 'eval error');
   return r.result.value;
 };
-let wsUrl;
-for (let i = 0; i < 60 && !wsUrl; i++) {
-  try { wsUrl = (await (await fetch(`http://127.0.0.1:${PORT}/json/list`)).json()).find((t) => t.type === 'page')?.webSocketDebuggerUrl; } catch {}
-  if (!wsUrl) await sleep(250);
-}
+const wsUrl = browser.page.webSocketDebuggerUrl;
+assert.ok(wsUrl, 'Chromium DevTools page available');
 ws = new WebSocket(wsUrl);
 await new Promise((r) => { ws.onopen = r; });
 ws.onmessage = (e) => { const m = JSON.parse(e.data); if (m.id && pending.has(m.id)) { const p = pending.get(m.id); pending.delete(m.id); m.error ? p.rej(new Error(m.error.message)) : p.res(m.result); } };
@@ -181,7 +177,7 @@ assert.equal(await evaluate('window.__vpJobs.length'), before, 'Synthetic change
 assert.deepEqual(runtimeErrors, [], 'No runtime errors');
 console.log('Daily uses the default table after variant practice and prevents changes.');
 } finally {
-  ws?.close(); chrome.kill('SIGTERM');
-  await new Promise(resolve => chrome.exitCode !== null ? resolve() : chrome.once('exit', resolve));
+  ws?.close();
+  await browser.close();
   await rm(profilePath, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 }

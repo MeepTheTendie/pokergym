@@ -12,11 +12,10 @@ function makeStorage() {
   };
 }
 
-function setupLoader(search) {
+function setupLoader(search, ls = makeStorage()) {
   const events = [];
   const registered = [];
   const identified = [];
-  const ls = makeStorage();
   const ss = makeStorage();
 
   const windowObj = {
@@ -121,4 +120,38 @@ test('first-touch is not overwritten by a later visit', () => {
   globalThis.eval(readFileSync(new URL('../web/posthog-loader.js', import.meta.url), 'utf8'));
   assert.equal(JSON.parse(secondLs.getItem('pg_first_touch_v1')).utm_source, 'first');
   assert.equal(JSON.parse(secondLs.getItem('pg_first_touch_v1')).sh, 'a');
+});
+
+test('crew test link (?pg_test=1) sends nothing and marks the browser', () => {
+  const { events, registered, identified, ls, windowObj } = setupLoader('?pg_test=1&ref=share&sh=abc');
+  assert.deepEqual(events, []);
+  assert.deepEqual(registered, []);
+  assert.deepEqual(identified, []);
+  assert.equal(ls.getItem('pg_internal_v1'), '1');
+  assert.equal(windowObj.__pgInternal, true);
+});
+
+test('a marked browser stays out on later untagged visits; pg_test=0 clears it', () => {
+  const ls = makeStorage();
+  setupLoader('?pg_test=1', ls);
+  const later = setupLoader('?ref=share&sh=x', ls);
+  assert.deepEqual(later.events, []);
+  assert.deepEqual(later.registered, []);
+  const cleared = setupLoader('?pg_test=0&ref=share&sh=x', ls);
+  assert.equal(ls.getItem('pg_internal_v1'), null);
+  assert.deepEqual(cleared.events, [['share_arrival', { sh: 'x', ref: 'share' }]]);
+});
+
+test('a pasted link with a stray backtick is treated as a test visit', () => {
+  for (const search of ['?utm_source=fb&utm_content=nine-vs-three%60', '?utm_content=ig-bio`']) {
+    const { events, registered } = setupLoader(search + '&ref=share&sh=y');
+    assert.deepEqual(events, [], search);
+    assert.deepEqual(registered, [], search);
+  }
+});
+
+test('ordinary visits are still counted', () => {
+  const { registered, ls } = setupLoader('?utm_source=fb&utm_content=p4-QF');
+  assert.ok(registered.length > 0);
+  assert.equal(ls.getItem('pg_internal_v1'), null);
 });

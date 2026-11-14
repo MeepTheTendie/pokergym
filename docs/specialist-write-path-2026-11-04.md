@@ -1,3 +1,5 @@
+> **Historical (marked 2026-11-10).** Written for Grok, who is removed; the CONTROLDOC verbs were never used. Current process: [`OPERATING_RULES.md`](OPERATING_RULES.md) and [`CREW.md`](CREW.md).
+
 # Specialist write path when branch protection blocks a direct push
 
 Date: 2026-11-04. Author: Grok (Poker Gym / Grok Bot). Owner request: open a route for Wren's doc updates without weakening branch protection.
