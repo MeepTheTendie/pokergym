@@ -34,6 +34,7 @@ import { battleMessage } from '../src/rpg/battle-copy.js';
 import { createAnalytics } from '../src/rpg/analytics.js';
 import { captureDrillPlan, restoreDrillPlan, BLACKJACK_DRILLS, DRILL_HANDS, DRILL_GAMES, findDrill, drillPlanStartingWith } from '../src/rpg/drills.js';
 import { reelClipFor } from '../src/rpg/reel-clips.js';
+import { revealDelta } from '../src/ui/reveal.js';
 import { drawArt, drawTrainerBack } from './characters.js';
 import audio from './audio.js?v=20261017-vegas1';
 import haptics from './haptics.js';
@@ -1829,6 +1830,34 @@ function clearFirstNudge() {
   document.getElementById('btnDraw')?.classList.remove('nudge');
 }
 
+// The row that holds the legal actions for this game. On phones it is pinned
+// to the bottom of the viewport; on wider screens it scrolls with the page.
+function activeControlRow() {
+  if (gameId === 'blackjack') return el('rowActions');
+  if (gameId === 'baccarat') return el('rowBet');
+  if (gameId === 'holdem') return el('rowPick');
+  return document.querySelector('.battle-action-bar');
+}
+
+// The hand is only playable if the player can see their cards and reach the
+// buttons. If either is cut off, scroll the smallest amount that fixes it.
+function revealHand() {
+  const cards = el('zones');
+  const controls = activeControlRow();
+  if (!cards || !controls || controls.hidden || !cards.isConnected) return;
+  const cardBox = cards.getBoundingClientRect();
+  const controlBox = controls.getBoundingClientRect();
+  const pinned = getComputedStyle(controls).position === 'fixed';
+  const delta = revealDelta({
+    cardBottom: cardBox.bottom,
+    controlBottom: controlBox.bottom,
+    viewportHeight: window.innerHeight,
+    barTop: pinned ? controlBox.top : null,
+  });
+  if (delta <= 0) return;
+  window.scrollBy({ top: delta, behavior: reduceMotion() ? 'auto' : 'smooth' });
+}
+
 function scheduleFirstNudge() {
   if (handNumber !== 1) return;
   try { if (localStorage.getItem(FIRST_NUDGE_KEY)) return; } catch { /* storage blocked */ }
@@ -1838,7 +1867,7 @@ function scheduleFirstNudge() {
     if (handNumber !== 1 || handDone || decisionsThisHand > 0) return;
     if (document.visibilityState !== 'visible') return;
     const copy = {
-      blackjack: 'Your call — tap Hit, Stand, Double, or Split.',
+      blackjack: 'Tap Hit, Stand, Double, or Split.',
       videopoker: 'Tap the cards you want to keep, then press Draw.',
       baccarat: 'Pick Banker, Player, or Tie.',
       holdem: 'Tap your best five, then press Confirm five.',
@@ -1855,6 +1884,9 @@ function scheduleFirstNudge() {
     row?.classList.add('nudge');
     try { localStorage.setItem(FIRST_NUDGE_KEY, '1'); } catch { /* storage blocked */ }
     window.trackEvent?.('first_nudge', { game: gameId, mode: handMode() });
+    // The nudge is one more line in the coach card; on a short phone that can
+    // push the player's cards back under the pinned bar, so re-check the fit.
+    revealHand();
     firstNudgeTimer = setTimeout(clearFirstNudge, 9000);
   }, FIRST_NUDGE_DELAY_MS);
 }
@@ -1946,6 +1978,7 @@ function startHand() {
       : shortSession ? `Five hands · ${profile.activeSession.played} of ${SESSION_HANDS} done` : `${canPractice(profile, gymId) ? 'Practice' : 'Gym challenge'} · ${handsWon} of ${HANDS_TO_WIN} good plays`;
 
   scheduleFirstNudge();
+  revealHand();
 
   // A natural settles before anybody gets to touch anything.
   if (gameId === 'blackjack' && round.settled) settleBlackjack();

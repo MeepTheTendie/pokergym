@@ -14,10 +14,13 @@ test('session hands keep the coach hint, daily hands never point at the hidden c
   assert.doesNotMatch(battleMessage('holdem', { daily: true }), /Ask the coach/);
 });
 
-test('the daily intro is one short sentence, not the old two-sentence paragraph', () => {
+test('the daily intro is one short line, not the old paragraph', () => {
   const line = battleMessage('blackjack', { daily: true, dailyIntro: true });
-  assert.ok(line.startsWith('Daily Drill:'), 'intro is one short sentence, first');
-  assert.doesNotMatch(line, /all four games\. Make the play you think is best; the coach grades it and explains why/,
+  // The battle label already says "Daily Drill #N · hand 1 of 5", so the coach
+  // line spends no words repeating it.
+  assert.ok(line.startsWith('Five hands, all four games'), 'short opener comes first');
+  assert.doesNotMatch(line, /^This is the Daily Drill/);
+  assert.doesNotMatch(line, /Make the play you think is best; the coach grades it and explains why/,
     'the verbose two-sentence opening is gone');
   assert.ok(line.includes('choose Hit, Stand, Double, or Split'), 'action is still stated');
   assert.ok(line.length < 200, `daily hand-1 line stays short (${line.length} chars)`);

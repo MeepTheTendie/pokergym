@@ -12,7 +12,7 @@ const INSTRUCTIONS = {
 // The Daily Drill opens hand 1 with a short, actionable line rather than a
 // paragraph: a player auto-started into the drill should see the move to make,
 // not a wall of text that ends by pointing at a button that is not there.
-const DAILY_INTRO = 'Daily Drill: five hands across four games. Make the play you think is best — the coach grades it after. ';
+const DAILY_INTRO = 'Five hands, all four games — the coach grades each one. ';
 
 /**
  * The coach line shown when a hand is dealt.

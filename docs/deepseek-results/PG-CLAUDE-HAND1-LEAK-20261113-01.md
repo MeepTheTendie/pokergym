@@ -1,134 +1,166 @@
-# PG-CLAUDE-HAND1-LEAK-20261113-01 — Daily Drill hand-1 drop-off
+# PG-CLAUDE-HAND1-LEAK-20261113-01 — why Daily Drill hand 1 loses the player
 
 - **task:** `PG-CLAUDE-HAND1-LEAK-20261113-01` (from Claude, integrator)
 - **status:** PASS — pushed, not merged
 - **branch:** `deepseek/hand1-leak` (from `origin/main` @ `aa6a09a`)
-- **commits:** `f61abe1` (fix); this result file + screenshots committed separately
-- **bounds:** no `worker/`, `wrangler` config, tracking-event or Metricool changes;
-  no game-rule changes; no merge.
+- **bounds:** no `worker/`, no wrangler config, no tracking events or properties,
+  no Metricool, no game rules. Not merged.
+- **verified on:** local `npm run serve` (`127.0.0.1:8899`, current `main` + this
+  branch) at 390×844, 360×740, 1366×768 and 1440×900. **Not verified on the live
+  site** — this branch is not deployed.
 
-## The cause
+## Symptom
 
-The Daily Drill's hand 1 is **blackjack** for every recent day (the V2 plan
-rotates blackjack to the front, `src/rpg/daily.js:78-86`). Confirmed for the
-10 days ending 2026-11-13 — every plan begins `blackjack` (for example
-`2026-11-13 → blackjack,holdem,baccarat,holdem,videopoker`).
+PostHog, last 30 days (to 2026-11-13 18:05 CT), cohorts 709897 and 644643
+excluded, one run per `start_daily`:
 
-Hand 1 lands the player on the **battle screen** with a decision already live.
-The task's three hypotheses were checked against a real headless-Chromium render
-of `?daily=1` at both target sizes (raw CDP; Chromium here is Microsoft Edge
-`msedge.exe`, since no `chromium`/Playwright binary is installed — the repo's own
-`scripts/screenshots.mjs` uses the same `chromium`/CDP path):
+- 40 Daily runs dealt hand 1; **25 never made a decision** (`decision_made`
+  with `hand_index = 1`).
+- 24 distinct people, not ~39: the other 15 come from five-hand sessions, which
+  I did not reproduce as a leak (see "What I could not reproduce").
+- Every non-deciding session was counted: none of the 25 carried
+  `preview: true`, so this is not hidden preview loads.
 
-1. **Are the action buttons below the fold? — No.** `#rowActions` (Hit / Stand /
-   Double / Split) is already pinned to the bottom of the viewport
-   (`web/styles.css:767-783`), so the buttons are visible without scrolling at
-   both 390×844 and 360×740. This is not the leak.
-2. **Does the intro text push the cards down? — Partly.** The hand-1 coach line
-   was a dense two-sentence paragraph (the verbose `dailyIntro` + a long
-   instruction), which made the coach card 284–304 px tall. At 360×740 that
-   pushed the player's own cards to y≈677, **behind the fixed action bar**
-   (top 675). The dealer's upcard stayed visible, but the player's own cards and
-   the "Your move." line were cut off.
-3. **Does `?daily=1` auto-start before the player has seen anything? — Yes.**
-   `web/app.js:2963-3040` shows the map/title screen, then after 1.5 s of
-   visibility teleports the visitor into a live blackjack hand. That is a
-   deliberate earlier fix (auto-start), so it is not changed here.
+## What hand 1 is
 
-The biggest cause I can show is a **self-contradictory hand-1 prompt** on top of
-that auto-start. The coach line for blackjack/hold'em ended with
-*"Not sure? Ask the coach for a hint."*, but the Daily Drill deliberately hides
-the **Ask coach** button (`el('btnAsk').hidden = dailyMode || handDone`,
-`web/app.js:1765`) so the clean read cannot be farmed. A player auto-started into
-hand 1 was shown a wall of text that ended by pointing at a button that is not
-there — and no immediate, above-the-fold "your move" cue. In the data that maps
-directly to the 24 of 25 hand-1 stoppers who never made a decision.
+`dailyPlanV2()` rotates the plan so hand 1 is **blackjack** (`src/rpg/daily.js`).
+The drill renders `#scr-battle`: scene header, coach card (`Master Baron`, the
+daily opener plus the game instruction, status box), then the table, then the
+action row (`#rowActions`: Hit / Stand / Double / Split). A `?daily=1` link
+auto-starts the run 1.5 s after the page becomes visible (`startFromEntry`), so
+hand 1 is dealt to a visitor who has tapped nothing.
 
-### Before / after (headless render, `?daily=1`, hand 1)
+## Cause (measured, not guessed)
 
-Screenshots: `PG-CLAUDE-HAND1-LEAK-20261113-01-{before,after}-{390x844,360x740}.png`.
+The hand-1 screen is simply taller than the first viewport, and the layout only
+pins the action row on phones (`@media (max-width: 640px)`). Measured with
+Playwright on `main` before this branch:
 
-| measure | before 390×844 | after 390×844 | before 360×740 | after 360×740 |
-| --- | --- | --- | --- | --- |
-| coach line (`#masterLine`) | 101 px | 81 px | 122 px | 81 px |
-| coach card | 284 px | 264 px | 304 px | 264 px |
-| player's cards top (`#zones .card`) | 532 / 657 | 512 / 637 | 553 / 677 | 512 / 637 |
-| action row (`#rowActions`, fixed) | 779–844 | 779–844 | 675–740 | 675–740 |
-| document height | 1036 | 1016 | 1056 | 1016 |
-| `btnAsk` visible | hidden | hidden | hidden | hidden |
+| viewport | player's cards | action row | verdict |
+|---|---|---|---|
+| 390×844 | 526–763 | 779–844 (pinned) | fine |
+| 360×740 | 526–763 | bar top **675** | cards hidden **88 px behind the bar** |
+| 1366×768 | 506–767 | **791–839** | **buttons entirely below the fold**, nudge below them too |
+| 1440×900 | 506–767 | 791–839 | fine |
 
-Before, the player's cards at 360×740 sat at y=677 — under the fixed action bar
-(y=675). After, they sit at y=637, clear of the bar.
+Two independent defects, both silent:
 
-**Before** coach line:
+1. **1366×768 laptop: the decision buttons are off screen.** They sit 23 px below
+   the fold, with nothing to suggest scrolling; the one-time nudge is rendered
+   underneath them, so it is invisible in exactly the case it exists for. This is
+   the single largest bucket in the data: **12 of the 25** non-deciding runs are
+   desktop at exactly 1366×768 (the other desktop runs are 945–1893 px tall).
+2. **360×740 phone: the pinned bar covers the player's own cards** by 88 px, so
+   the screen asks for a decision on a hand it is hiding. 4 of the 7 mobile
+   non-deciders had a 637–668 px tall viewport, the same class.
 
-```text
-This is the Daily Drill: five hands across all four games. Make the play you
-think is best; the coach grades it and explains why after each hand. Look at
-your hand and the dealer’s upcard, then choose Hit, Stand, Double, or Split.
-Not sure? Ask the coach for a hint.
-```
+The five-line Daily opener is the largest block in the coach card (266 characters
+of coach text on hand 1 versus 151 after this change) and pushes the table down;
+the whole card is 284 px on desktop and 304 px on phones.
 
-**After** coach line (no dead hint, one short intro sentence):
+### Entry, device and preview split
 
-```text
-Daily Drill: five hands across four games. Make the play you think is best —
-the coach grades it after. Look at your hand and the dealer’s upcard, then
-choose Hit, Stand, Double, or Split.
-```
+| split | runs dealt hand 1 | no decision |
+|---|---|---|
+| entry `daily_link` | 29 | 22 |
+| entry `map` | 6 | 3 |
+| entry `replay`, `title`, `recap` | 5 | 0 |
+| Desktop | 24 | 18 (12 at 1366×768) |
+| Mobile | 16 | 7 (4 at 637–668 px tall) |
+| `open_trainer.preview = true` | 0 | 0 |
 
-## The fix
+`?daily=1` did start a hand before the player had chosen anything — that is what
+the deeplink is for — but it is not the differentiator: mobile daily-link runs
+leak less than desktop daily-link runs, and `map` (button-tap) runs leak too. The
+variable that moves is viewport height.
 
-`web/app.js` no longer inlines the hand-1 copy. The copy now lives in a pure,
-unit-testable module:
+### What is not a real player
 
-- **`src/rpg/battle-copy.js`** — `battleMessage(gameId, { daily, dailyIntro })`.
-  - Shortens the Daily Drill intro from two sentences to one
-    (*"Daily Drill: five hands across four games. Make the play you think is
-    best — the coach grades it after."*).
-  - Strips *"Not sure? Ask the coach for a hint."* whenever `daily` is set, so
-    the Daily Drill never points at the hidden coach button.
-  - Leaves the five-hand session copy byte-for-byte unchanged (the hint is still
-    shown there, where the coach button exists).
-- **`web/app.js`** imports it and calls it in `startHand()`.
+5 of the 25 runs send **no event at all after the deal** (two report a
+`Google-Safety` user agent), which looks like link-preview/unfurl fetches. They
+account for part of the "dealt a hand and never tapped" count. I left tracking
+alone, as instructed; the report should stop counting these runs as players.
 
-No game rules, tracking events, worker or analytics changed. Videopoker and
-baccarat instructions are untouched in both modes.
+## Fix (cause fix, not a stopgap)
+
+1. **Short opener** — `web/app.js`: hand 1 of the Daily now opens with
+   "Five hands, all four games — the coach grades each one." plus the per-game
+   move, instead of the five-line explanation already carried by the
+   `Daily Drill #317 · hand 1 of 5` label. 266 → 151 characters. The blackjack
+   and hold'em lines also lose the "Not sure? Ask the coach for a hint."
+   sentence in Daily mode, where the coach button is hidden.
+2. **Reveal the hand on deal** — `web/app.js` `revealHand()`, pure rule in
+   `src/ui/reveal.js`: after every deal (and again when the nudge appears) it
+   scrolls only as far as needed so that the cards clear the pinned bar and the
+   action row is inside the viewport. It does nothing when the hand already
+   fits, and honours `prefers-reduced-motion`.
+3. **Nudge where the player is looking** — `web/index.html`: `#firstNudge`
+   moved into the status box above the table. In the hand panel it was behind
+   the pinned bar on phones and below the fold on laptops. Copy drops the
+   duplicated "Your call" (the grade row already says it). The `first_nudge`
+   event is unchanged.
+
+After (same harness):
+
+| viewport | scroll | cards | action row | verdict |
+|---|---|---|---|---|
+| 390×844 | 0 px | 465–702 | 779–844 | no scroll needed |
+| 360×740 | 56 px | 429–667 | 675–740 | cards clear the bar by 8 px |
+| 1366×768 | 39 px | 426–687 | 711–759 | buttons inside the viewport |
+| 1440×900 | 0 px | 465–726 | 750–798 | no scroll needed |
+
+Since every hand re-checks, the same guarantee now covers hands 2–5 (video
+poker, baccarat and hold'em all measured with cards 8 px clear of the bar at
+360×740, and buttons in view at 1366×768).
+
+## Evidence
+
+Screenshots, 360×740 and 1366×768, before and after (headless Chromium, fresh
+profile, `?daily=1`, hand 1 dealt):
+
+| before | after |
+|---|---|
+| `PG-CLAUDE-HAND1-LEAK-20261113-01-before-desktop-1366x768.png` — cards, no buttons | `PG-CLAUDE-HAND1-LEAK-20261113-01-after-1366x768.png` — buttons visible |
+| `PG-CLAUDE-HAND1-LEAK-20261113-01-before-360x740.png` — cards behind the bar | `PG-CLAUDE-HAND1-LEAK-20261113-01-after-360x740.png` — cards and buttons visible |
+| `PG-CLAUDE-HAND1-LEAK-20261113-01-before-390x844.png` — already fine | `PG-CLAUDE-HAND1-LEAK-20261113-01-after-390x844.png` |
+| — | `PG-CLAUDE-HAND1-LEAK-20261113-01-after-phone-nudge.png` — nudge readable above the table |
+
+Interaction check at all three sizes: `#btnHit` is inside the viewport, is the
+topmost element at its centre, and tapping it produces the coach grade (the
+daily hand then settles normally). No page errors. The Daily also advanced
+hand 1 → 2 → 3 in the same run without errors.
 
 ## Tests
 
-New `test/battle-copy.test.js` (4 tests): the session hint is preserved; the
-Daily Drill never references the coach; the daily intro is one short sentence
-(not the old two-sentence paragraph); videopoker/baccarat are unchanged; unknown
-games return an empty instruction without throwing.
+- `test/hand1-visibility.test.js` (new, 8 tests): the reveal arithmetic at the
+  measured 1366×768, 360×740 and 390×844 numbers; no scroll when the hand fits;
+  missing boxes never move the page; the reveal is wired into `startHand()` and
+  the nudge; the opener is short; the nudge lives in the status box once.
+- `src/ui/reveal.js` (new, pure) is the rule the browser code calls.
 
-```text
-$ npm test
-ℹ tests 389
-ℹ suites 0
-ℹ pass 389
+```
+$ node --test test/hand1-visibility.test.js
+ℹ tests 8
+ℹ pass 8
 ℹ fail 0
-ℹ cancelled 0
-ℹ skipped 0
-ℹ todo 0
-ℹ duration_ms 5959.9717
+
+$ npm test
+ℹ tests 393
+ℹ pass 393
+ℹ fail 0
+ℹ duration_ms 6455.838055
 ```
 
-The new-module tests were also run in isolation first
-(`node --test test/battle-copy.test.js` → 4 pass).
+## Not changed / notes for the integrator
 
-## Verification
-
-- `node -e` over `src/rpg/daily.js` printed the V2 plan for 10 recent days; all
-  begin with `blackjack`.
-- Headless render of `http://127.0.0.1:<port>/web/index.html?daily=1` (Edge via
-  CDP, the repo's `chromium`/CDP approach) captured the `#masterLine`,
-  `#masterLineText`, `#zones` card tops, and the fixed `#rowActions` rect before
-  and after the change, at 390×844 and 360×740 (table above). The change moved
-  the player's cards above the fixed action bar at 360×740 and shortened the
-  coach card by 20–40 px.
-- `git diff --check` is clean.
-
-## Handoff
-
-Pushed to `deepseek/hand1-leak`. Claude reviews and merges once `test` is green.
+- No changes to `worker/`, wrangler config, `docs/analytics-events.md` events,
+  Metricool, or any game rule. `first_nudge` still fires once per device with
+  the same properties.
+- `docs/PokerGymControlDoc.md` says the nudge appears "one line above them"
+  (the controls). It now appears in the status box above the table, still above
+  the controls; that sentence needs a one-line update when this merges.
+- Worth a separate, tracking-side follow-up (not done here): exclude
+  link-preview fetches (zero events after `hand_dealt`, `Google-Safety`-style
+  user agents) from "player" counts, or they keep inflating the hand-1 leak.
+- Suggested deploy-queue note: this touches the first screen every Daily link
+  opens, so it is the right next product deploy once Claude has reviewed.
