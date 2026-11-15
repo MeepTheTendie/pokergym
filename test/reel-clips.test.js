@@ -89,3 +89,22 @@ test('reel Nov 15/17/18 slate slugs deal the described blackjack decisions', () 
     assert.ok(best.optimal.includes(want), `${slug} should ${want}, got ${best.optimal}`);
   }
 });
+
+test('reel Nov 20/21 slate slugs deal the described decisions', () => {
+  for (const [slug, want] of [['fours-vs-five', 'split'], ['double-11-vs-ten', 'double'], ['hit-16-vs-seven', 'hit'], ['hit-18-vs-ten', 'hit']]) {
+    const clip = reelClipFor(slug);
+    assert.ok(clip, slug);
+    const r = newBjRound(Math.random, { player: clip.player, dealer: [clip.dealer, clip.hole] });
+    const best = bestAction(r);
+    assert.ok(best.optimal.includes(want), `${slug} should ${want}, got ${best.optimal}`);
+  }
+  // Video poker: best hold keeps exactly the four suited cards (drops the
+  // straight's 9♥ / the pair's 7♦).
+  for (const [slug, drop] of [['break-a-straight', 4], ['throw-away-your-pair', 0]]) {
+    const clip = reelClipFor(slug);
+    assert.ok(clip, slug);
+    assert.equal(clip.game, 'videopoker');
+    const best = bestHold(clip.hand);
+    assert.deepEqual(best.holds.map(Boolean), [0, 1, 2, 3, 4].map((i) => i !== drop), slug);
+  }
+});
