@@ -134,6 +134,46 @@ const SLUGS = {
     dealer: C(9, 1),              // 9♥
     hole: C(10, 0),               // 10♠
   },
+  // Nov 20/21 slate (Claude, video owner; posted on #41 2026-11-14 with a
+  // Sun Nov 15 10 AM CT veto window). EVs: docs/video/slate-20261120-21.md.
+  'break-a-straight': {
+    game: 'videopoker',
+    label: 'BREAK UP A STRAIGHT',
+    hand: [C(13, 0), C(12, 0), C(11, 0), C(10, 0), C(9, 1)], // K♠ Q♠ J♠ 10♠ 9♥
+  },
+  'fours-vs-five': {
+    game: 'blackjack',
+    label: 'FOURS AGAINST A FIVE',
+    player: [C(4, 1), C(4, 3)],   // 4♥ 4♣ = 8
+    dealer: C(5, 0),              // 5♠
+    hole: C(10, 2),               // 10♦
+  },
+  'double-11-vs-ten': {
+    game: 'blackjack',
+    label: 'HARD 11 AGAINST A TEN',
+    player: [C(6, 1), C(5, 0)],   // 6♥ 5♠ = 11
+    dealer: C(13, 2),             // K♦
+    hole: C(7, 3),                // 7♣
+  },
+  'throw-away-your-pair': {
+    game: 'videopoker',
+    label: 'LOW PAIR OR FOUR TO A FLUSH',
+    hand: [C(7, 2), C(7, 1), C(2, 1), C(11, 1), C(13, 1)], // 7♦ 7♥ 2♥ J♥ K♥
+  },
+  'hit-16-vs-seven': {
+    game: 'blackjack',
+    label: 'HARD 16 AGAINST A SEVEN',
+    player: [C(10, 0), C(6, 1)],  // 10♠ 6♥ = 16
+    dealer: C(7, 2),              // 7♦
+    hole: C(10, 3),               // 10♣
+  },
+  'hit-18-vs-ten': {
+    game: 'blackjack',
+    label: 'SOFT 18 AGAINST A TEN',
+    player: [C(14, 1), C(7, 2)],  // A♥ 7♦ = soft 18
+    dealer: C(10, 0),             // 10♠
+    hole: C(9, 3),                // 9♣
+  },
 };
 
 // Accept "p1-QF", "p1-AF", "p1", case-insensitively, or one of the Nov 13+
