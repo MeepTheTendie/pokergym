@@ -101,7 +101,7 @@ may be lost if the page navigates before the SDK loads.
 
 | Event | Fires when | Properties |
 |---|---|---|
-| `cta_click` | A landing call to action is clicked. | `cta`: `open_trainer`, `start_training`, `start_daily` (the button's intent); `location` |
+| `cta_click` | A landing call to action is clicked. | `cta`: `open_trainer`, `start_training`, `start_daily`, `hero_hand` (the button's intent; `hero_hand` is the playable hero hand, with `location` `hero_hit` / `hero_stand`); `location` |
 | `challenge_friend` | Landing "Challenge a friend" link. | `location` |
 | `open_guide` | Landing guide link. | `guide` |
 | `guide_cta_play` | A guide's play button. | `guide`, `game` |
