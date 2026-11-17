@@ -213,6 +213,19 @@ const SLUGS = {
     dealer: C(3, 2),              // 3♦
     hole: C(10, 3),               // 10♣
   },
+  // Tue Nov 17 fill (docs/video/slate-20261117-fill.md).
+  'keep-the-fives': {
+    game: 'videopoker',
+    label: 'LOW PAIR OR KING-QUEEN',
+    hand: [C(5, 0), C(5, 1), C(13, 2), C(12, 3), C(8, 1)], // 5♠ 5♥ K♦ Q♣ 8♥
+  },
+  'dont-double-11-vs-ace': {
+    game: 'blackjack',
+    label: 'HARD 11 AGAINST AN ACE',
+    player: [C(6, 1), C(5, 3)],   // 6♥ 5♣ = 11
+    dealer: C(14, 0),             // A♠
+    hole: C(9, 2),                // 9♦
+  },
   // Nov 18/19 backfill (docs/video/slate-20261118-19-backfill.md).
   'queen-jack-not-king': {
     game: 'videopoker',

@@ -145,3 +145,13 @@ test('reel Nov 18/19 backfill slugs deal the described decisions', () => {
   }
 });
 
+test('reel Tue Nov 17 fill slugs deal the described decisions', () => {
+  const bj = reelClipFor('dont-double-11-vs-ace');
+  const r = newBjRound(Math.random, { player: bj.player, dealer: [bj.dealer, bj.hole] });
+  const best = bestAction(r);
+  assert.deepEqual(best.optimal, ['hit'], `11 vs A (S17) should hit, got ${best.optimal}`);
+  const vp = reelClipFor('keep-the-fives');
+  assert.equal(vp.game, 'videopoker');
+  assert.deepEqual(bestHold(vp.hand).holds.map(Boolean), [true, true, false, false, false]);
+});
+
