@@ -1,4 +1,4 @@
-import { deserialize, serialize, validMistakeQuiz, validMistakeBox, validMistakeDue, SESSION_HANDS, count, text, game, list, dayKey } from './state.js';
+import { deserialize, serialize, validMistakeQuiz, validMistakeBox, validMistakeDue, SESSION_HANDS, count, text, game, list, dayKey, isValidProField } from './state.js';
 import { GYMS, GYM_BY_ID } from './gyms.js';
 import { validDailyGames, validDailyPlan, DAILY_HANDS } from './daily.js';
 
@@ -33,7 +33,8 @@ export function readBackup(raw) {
       (p.mistakes != null && !list(p.mistakes, 20, m => m && game(m.game) && text(m.situation, 600) && text(m.chosen, 600) && text(m.correction, 1200) && (m.box == null || validMistakeBox(m.box)) && (m.due == null || validMistakeDue(m.due)) && (m.mastered == null || typeof m.mastered === 'boolean') && (m.reviews == null || count(m.reviews)) && (m.quiz == null || validMistakeQuiz(m.quiz, m.game)) && (m.retries == null || (m.quiz && count(m.retries.attempted) && count(m.retries.correct) && m.retries.correct <= m.retries.attempted)))) ||
       (p.activeSession != null && (!session(p.activeSession) || p.activeSession.played >= SESSION_HANDS)) ||
       (p.daily != null && !daily(p.daily)) ||
-      (p.sessions != null && !list(p.sessions, 30, s => session(s) && s.played === SESSION_HANDS && text(s.completedAt, 100)))) throw new Error('Invalid backup');
+      (p.sessions != null && !list(p.sessions, 30, s => session(s) && s.played === SESSION_HANDS && text(s.completedAt, 100))) ||
+      (p.pro !== undefined && !isValidProField(p.pro))) throw new Error('Invalid backup');
   return p;
 }
 export function writeBackup(profile) {

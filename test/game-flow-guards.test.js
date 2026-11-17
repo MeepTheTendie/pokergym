@@ -10,7 +10,7 @@ test('the Daily Drill owns its deal and never inherits a drill bank', () => {
 });
 
 test('a coached Daily hand is practice-only and replays the same hand', () => {
-  assert.match(src, /settleDailyHand\(\{ optimal, difficulty, line, review, coached \}\)/);
+  assert.match(src, /settleDailyHand\(\{ optimal, difficulty, line, review, why, coached \}\)/);
   assert.match(src, /if \(coached\) \{\s*\n\s*\/\/ The Daily is a clean read/);
   assert.match(src, /this Daily hand does not count\. Try the same hand again\./);
   assert.match(src, /el\('btnNext'\)\.textContent = 'Try hand again';/);

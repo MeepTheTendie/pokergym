@@ -38,7 +38,9 @@ if (status && window.top === window && document.querySelector('link[rel="manifes
     }
   });
   if ('serviceWorker' in navigator && window.isSecureContext) {
-    status.textContent = 'Downloading offline practice…';
+    // No mid-screen "downloading" banner: it competed with the first deal.
+    // The status line only speaks once the download has an outcome.
+    status.textContent = '';
     // The worker script sits at the site root so it controls more than /web/:
     // index.html imports its game modules from /src/, which a /web/-scoped
     // worker could never intercept. Drop any pre-root worker registration

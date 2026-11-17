@@ -87,10 +87,11 @@ export const CREW_TEST_COHORT_ID = 709897;
 // SQL fragment (HogQL) that drops this project's own probe traffic and the
 // automation above.
 // Unfurl bots: link-preview crawlers that survive PostHog's own bot filter.
-// They arrive 0-5 minutes after a scheduled post (UNFURL_POST_HOUR_UTC), with a
+// They arrive 0-5 minutes after a scheduled post (16:00 America/Chicago), with a
 // 1366x768 viewport, their first event is open_trainer, and they never interact.
 // Reporting only: events are never dropped, only excluded from these counts.
-export const UNFURL_POST_HOUR_UTC = 21;
+export const UNFURL_POST_HOUR_LOCAL = 16;
+export const UNFURL_POST_TIMEZONE = 'America/Chicago';
 export const UNFURL_POST_WINDOW_MINUTES = 5;
 
 export function notTestClause() {
@@ -131,10 +132,10 @@ export function notTestClause() {
       )
       WHERE (
         first_event IN ('$pageview', 'open_trainer')
-        AND toHour(first_ts) = ${UNFURL_POST_HOUR_UTC}
-        AND toMinute(first_ts) <= ${UNFURL_POST_WINDOW_MINUTES}
+        AND toHour(toTimeZone(first_ts, '${UNFURL_POST_TIMEZONE}')) = ${UNFURL_POST_HOUR_LOCAL}
+        AND toMinute(toTimeZone(first_ts, '${UNFURL_POST_TIMEZONE}')) <= ${UNFURL_POST_WINDOW_MINUTES}
         AND first_ts > toDateTime('2026-10-18')
-        AND person_id IN (SELECT DISTINCT person_id FROM events WHERE event = 'open_trainer' AND properties.$viewport_width = 1366 AND properties.$viewport_height = 768 AND properties.$screen_width = 1920 AND properties.$screen_height = 1080 AND toHour(timestamp) = ${UNFURL_POST_HOUR_UTC} AND toMinute(timestamp) <= ${UNFURL_POST_WINDOW_MINUTES})
+        AND person_id IN (SELECT DISTINCT person_id FROM events WHERE event = 'open_trainer' AND properties.$viewport_width = 1366 AND properties.$viewport_height = 768 AND properties.$screen_width = 1920 AND properties.$screen_height = 1080 AND toHour(toTimeZone(timestamp, '${UNFURL_POST_TIMEZONE}')) = ${UNFURL_POST_HOUR_LOCAL} AND toMinute(toTimeZone(timestamp, '${UNFURL_POST_TIMEZONE}')) <= ${UNFURL_POST_WINDOW_MINUTES})
         AND person_id NOT IN (SELECT DISTINCT person_id FROM events WHERE event IN ('game_start', 'start_training', 'decision_made', 'hand_complete', 'recap_tap', 'start_daily', 'daily_complete', 'share'))
       ) OR (
         pageviews = 1

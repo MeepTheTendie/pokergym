@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { build } from './build.mjs';
-import { GUIDES, localLinks } from './portable-links.mjs';
+import { GUIDES, localLinks, localStylesheet } from './portable-links.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const staging = await mkdtemp(path.join(tmpdir(), 'pokergym-itch-'));
@@ -13,6 +13,11 @@ try {
   // Ship the complete recall-to-practice routine without requiring the cloud host.
   await rm(path.join(staging, 'guides'), { recursive: true, force: true });
   await rm(path.join(staging, 'sitemap.xml'), { force: true });
+  const sitePath = path.join(staging, 'web/site.css');
+  await writeFile(sitePath, localStylesheet(await readFile(sitePath, 'utf8')));
+  // Privacy shares the site header/footer; its trainer links are already relative.
+  const privacyPath = path.join(staging, 'web/privacy.html');
+  await writeFile(privacyPath, localLinks(await readFile(privacyPath, 'utf8')));
   const guides = GUIDES;
   for (const guide of guides) {
     const html = await readFile(path.join(root, `public/guides/${guide}/index.html`), 'utf8');
@@ -34,7 +39,8 @@ try {
   const game = await readFile(path.join(staging, 'web/index.html'), 'utf8');
   // The game links the cloud's extensionless /web/privacy; inside the ZIP that
   // absolute path points at the host's root, so link the bundled file instead.
-  const portableGame = game.replace(/href="\/web\/privacy"/g, 'href="privacy.html"').replace('<p class="hint" id="offlineStatus"',
+  // localLinks also maps the header's site/guides links and the related-guide links.
+  const portableGame = localLinks(game).replace('<p class="hint" id="offlineStatus"',
     '<p class="hint" style="text-align:center;"><a id="portableWeeklySample" href="weekly-sample.html" target="_blank" rel="noopener">TRY THE FIVE-DECISION WEEKLY SAMPLE</a></p><details id="portableGuides"><summary>THREE-DECISION LEARNING GUIDES</summary>' + guides.map(guide => `<p><a href="guide-${guide}.html" target="_blank" rel="noopener">${{blackjack: 'Blackjack', baccarat: 'Baccarat', 'jacks-or-better': 'Jacks or Better', 'holdem-best-five': 'Hold’em best five'}[guide]}</a></p>`).join('') + '</details><p class="hint" id="offlineStatus"');
   await writeFile(path.join(staging, 'web/index.html'), portableGame.replace('<link rel="manifest" href="manifest.webmanifest">', ''));
   // Keep module-relative assets intact; the entry point must be at the ZIP root.

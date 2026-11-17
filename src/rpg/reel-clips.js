@@ -134,6 +134,123 @@ const SLUGS = {
     dealer: C(9, 1),              // 9♥
     hole: C(10, 0),               // 10♠
   },
+  // Nov 20/21 slate (Claude, video owner; posted on #41 2026-11-14 with a
+  // Sun Nov 15 10 AM CT veto window). EVs: docs/video/slate-20261120-21.md.
+  'break-a-straight': {
+    game: 'videopoker',
+    label: 'BREAK UP A STRAIGHT',
+    hand: [C(13, 0), C(12, 0), C(11, 0), C(10, 0), C(9, 1)], // K♠ Q♠ J♠ 10♠ 9♥
+  },
+  'fours-vs-five': {
+    game: 'blackjack',
+    label: 'FOURS AGAINST A FIVE',
+    player: [C(4, 1), C(4, 3)],   // 4♥ 4♣ = 8
+    dealer: C(5, 0),              // 5♠
+    hole: C(10, 2),               // 10♦
+  },
+  'double-11-vs-ten': {
+    game: 'blackjack',
+    label: 'HARD 11 AGAINST A TEN',
+    player: [C(6, 1), C(5, 0)],   // 6♥ 5♠ = 11
+    dealer: C(13, 2),             // K♦
+    hole: C(7, 3),                // 7♣
+  },
+  'throw-away-your-pair': {
+    game: 'videopoker',
+    label: 'LOW PAIR OR FOUR TO A FLUSH',
+    hand: [C(7, 2), C(7, 1), C(2, 1), C(11, 1), C(13, 1)], // 7♦ 7♥ 2♥ J♥ K♥
+  },
+  'hit-16-vs-seven': {
+    game: 'blackjack',
+    label: 'HARD 16 AGAINST A SEVEN',
+    player: [C(10, 0), C(6, 1)],  // 10♠ 6♥ = 16
+    dealer: C(7, 2),              // 7♦
+    hole: C(10, 3),               // 10♣
+  },
+  'hit-18-vs-ten': {
+    game: 'blackjack',
+    label: 'SOFT 18 AGAINST A TEN',
+    player: [C(14, 1), C(7, 2)],  // A♥ 7♦ = soft 18
+    dealer: C(10, 0),             // 10♠
+    hole: C(9, 3),                // 9♣
+  },
+  // Nov 22/23 slate (docs/video/slate-20261122-23.md).
+  'drop-the-ace': {
+    game: 'videopoker',
+    label: 'THROW AWAY THE ACE',
+    hand: [C(14, 0), C(13, 1), C(12, 1), C(5, 3), C(2, 2)], // A♠ K♥ Q♥ 5♣ 2♦
+  },
+  'eights-vs-ace': {
+    game: 'blackjack',
+    label: 'EIGHTS AGAINST AN ACE',
+    player: [C(8, 0), C(8, 1)],   // 8♠ 8♥ = 16
+    dealer: C(14, 2),             // A♦
+    hole: C(9, 3),                // 9♣
+  },
+  'split-nines-vs-six': {
+    game: 'blackjack',
+    label: 'NINES AGAINST A SIX',
+    player: [C(9, 1), C(9, 3)],   // 9♥ 9♣ = 18
+    dealer: C(6, 0),              // 6♠
+    hole: C(10, 2),               // 10♦
+  },
+  'draw-five-new': {
+    game: 'videopoker',
+    label: 'THROW AWAY ALL FIVE',
+    hand: [C(9, 0), C(7, 1), C(5, 2), C(3, 3), C(2, 1)], // 9♠ 7♥ 5♦ 3♣ 2♥
+  },
+  'fives-vs-nine': {
+    game: 'blackjack',
+    label: 'FIVES AGAINST A NINE',
+    player: [C(5, 1), C(5, 3)],   // 5♥ 5♣ = 10
+    dealer: C(9, 0),              // 9♠
+    hole: C(10, 2),               // 10♦
+  },
+  'hit-12-vs-three': {
+    game: 'blackjack',
+    label: 'HARD 12 AGAINST A THREE',
+    player: [C(10, 0), C(2, 1)],  // 10♠ 2♥ = 12
+    dealer: C(3, 2),              // 3♦
+    hole: C(10, 3),               // 10♣
+  },
+  // Tue Nov 17 fill (docs/video/slate-20261117-fill.md).
+  'keep-the-fives': {
+    game: 'videopoker',
+    label: 'LOW PAIR OR KING-QUEEN',
+    hand: [C(5, 0), C(5, 1), C(13, 2), C(12, 3), C(8, 1)], // 5♠ 5♥ K♦ Q♣ 8♥
+  },
+  'dont-double-11-vs-ace': {
+    game: 'blackjack',
+    label: 'HARD 11 AGAINST AN ACE',
+    player: [C(6, 1), C(5, 3)],   // 6♥ 5♣ = 11
+    dealer: C(14, 0),             // A♠
+    hole: C(9, 2),                // 9♦
+  },
+  // Nov 18/19 backfill (docs/video/slate-20261118-19-backfill.md).
+  'queen-jack-not-king': {
+    game: 'videopoker',
+    label: 'KING, QUEEN, JACK: KEEP TWO',
+    hand: [C(13, 0), C(12, 1), C(11, 1), C(5, 2), C(3, 3)], // K♠ Q♥ J♥ 5♦ 3♣
+  },
+  'jacks-over-royal-draw': {
+    game: 'videopoker',
+    label: 'JACKS OR THREE TO A ROYAL',
+    hand: [C(13, 1), C(12, 1), C(11, 1), C(11, 0), C(3, 2)], // K♥ Q♥ J♥ J♠ 3♦
+  },
+  'soft17-vs-three': {
+    game: 'blackjack',
+    label: 'SOFT 17 AGAINST A THREE',
+    player: [C(14, 1), C(6, 0)],  // A♥ 6♠ = soft 17
+    dealer: C(3, 2),              // 3♦
+    hole: C(10, 3),               // 10♣
+  },
+  'hit-15-vs-ten': {
+    game: 'blackjack',
+    label: 'HARD 15 AGAINST A TEN',
+    player: [C(10, 1), C(5, 3)],  // 10♥ 5♣ = 15
+    dealer: C(10, 0),             // 10♠
+    hole: C(9, 3),                // 9♣
+  },
 };
 
 // Accept "p1-QF", "p1-AF", "p1", case-insensitively, or one of the Nov 13+

@@ -18,7 +18,7 @@ await mkdir(path.join(output, 'web'), { recursive: true });
 const files = ['index.html', 'app.js', 'audio.js', 'sound-controls.js', 'haptics.js', 'vp-coach-worker.js',
   'characters.js', 'styles.css', 'manifest.webmanifest',
   'icon.svg', 'icon-maskable.svg', 'offline.js', 'feedback.js', 'privacy.html',
-  'posthog-loader.js', 'push.js', 'landing.js', 'site.css'];
+  'posthog-loader.js', 'push.js', 'landing.js', 'site.css', 'pro.html'];
 for (const file of files) await cp(path.join(root, 'web', file), path.join(output, 'web', file));
 for (const folder of ['assets', 'fonts']) {
   await mkdir(path.join(output, 'web', folder), { recursive: true });
@@ -48,6 +48,8 @@ try {
 }
 
 await cp(path.join(root, 'web/landing.html'), path.join(output, 'index.html'));
+await mkdir(path.join(output, 'pro'), { recursive: true });
+await cp(path.join(root, 'web/pro.html'), path.join(output, 'pro/index.html'));
 await cp(path.join(root, 'public/sitemap.xml'), path.join(output, 'sitemap.xml'));
 await cp(path.join(root, 'public/robots.txt'), path.join(output, 'robots.txt'));
 await cp(path.join(root, 'public/llms.txt'), path.join(output, 'llms.txt'));

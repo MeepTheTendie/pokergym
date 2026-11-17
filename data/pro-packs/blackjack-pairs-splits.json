@@ -1,0 +1,873 @@
+{
+  "packId": "blackjack-pairs-splits",
+  "title": "Blackjack Pairs and Splits",
+  "description": "20 graded pair decisions using exact expected value from the blackjack engine.",
+  "spotCount": 20,
+  "freeSampleCount": 3,
+  "generatedFrom": "existing scenario/strategy engine (no hand-written EVs or correct actions)",
+  "spots": [
+    {
+      "id": "bj-pair-01",
+      "leak": "pair-split",
+      "setup": {
+        "playerRanks": [
+          14,
+          14
+        ],
+        "playerHand": "A-A",
+        "dealerUpRank": 6,
+        "dealerUpcard": "6",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "split",
+      "correctActionLabel": "Split",
+      "engine": {
+        "ev": 0.682366,
+        "evGap": 0.492392,
+        "alternatives": [
+          {
+            "action": "split",
+            "label": "Split",
+            "ev": 0.682366
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": 0.189975
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.188458
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.145699
+          }
+        ]
+      },
+      "explanation": "Always split aces: two chances to make strong hands beats one soft 12.",
+      "free": true
+    },
+    {
+      "id": "bj-pair-02",
+      "leak": "pair-split",
+      "setup": {
+        "playerRanks": [
+          14,
+          14
+        ],
+        "playerHand": "A-A",
+        "dealerUpRank": 10,
+        "dealerUpcard": "10",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "split",
+      "correctActionLabel": "Split",
+      "engine": {
+        "ev": 0.182301,
+        "evGap": 0.248397,
+        "alternatives": [
+          {
+            "action": "split",
+            "label": "Split",
+            "ev": 0.182301
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": -0.066096
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -0.505416
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.538797
+          }
+        ]
+      },
+      "explanation": "Split aces even against a 10; one soft 12 is a poor starting point.",
+      "free": true
+    },
+    {
+      "id": "bj-pair-03",
+      "leak": "pair-split",
+      "setup": {
+        "playerRanks": [
+          8,
+          8
+        ],
+        "playerHand": "8-8",
+        "dealerUpRank": 10,
+        "dealerUpcard": "10",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "split",
+      "correctActionLabel": "Split",
+      "engine": {
+        "ev": -0.474307,
+        "evGap": 0.060804,
+        "alternatives": [
+          {
+            "action": "split",
+            "label": "Split",
+            "ev": -0.474307
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": -0.535111
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.536853
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -1.070222
+          }
+        ]
+      },
+      "explanation": "Split 8s against a 10 to escape hard 16, the worst common total.",
+      "free": true
+    },
+    {
+      "id": "bj-pair-04",
+      "leak": "pair-split",
+      "setup": {
+        "playerRanks": [
+          8,
+          8
+        ],
+        "playerHand": "8-8",
+        "dealerUpRank": 14,
+        "dealerUpcard": "A",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "split",
+      "correctActionLabel": "Split",
+      "engine": {
+        "ev": -0.363608,
+        "evGap": 0.149099,
+        "alternatives": [
+          {
+            "action": "split",
+            "label": "Split",
+            "ev": -0.363608
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": -0.512706
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.663258
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -1.025412
+          }
+        ]
+      },
+      "explanation": "Split 8s vs ace: hard 16 is still a losing hand, so splitting loses less."
+    },
+    {
+      "id": "bj-pair-05",
+      "leak": "pair-split",
+      "setup": {
+        "playerRanks": [
+          8,
+          8
+        ],
+        "playerHand": "8-8",
+        "dealerUpRank": 6,
+        "dealerUpcard": "6",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "split",
+      "correctActionLabel": "Split",
+      "engine": {
+        "ev": 0.405962,
+        "evGap": 0.563457,
+        "alternatives": [
+          {
+            "action": "split",
+            "label": "Split",
+            "ev": 0.405962
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.157495
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": -0.425873
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -0.851746
+          }
+        ]
+      },
+      "explanation": "Split 8s against a 6; two hands starting at 8 beat standing on 16."
+    },
+    {
+      "id": "bj-pair-06",
+      "leak": "pair-9s-stand",
+      "setup": {
+        "playerRanks": [
+          9,
+          9
+        ],
+        "playerHand": "9-9",
+        "dealerUpRank": 7,
+        "dealerUpcard": "7",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "stand",
+      "correctActionLabel": "Stand",
+      "engine": {
+        "ev": 0.399576,
+        "evGap": 0.030948,
+        "alternatives": [
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": 0.399576
+          },
+          {
+            "action": "split",
+            "label": "Split",
+            "ev": 0.368628
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": -0.587076
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -1.174151
+          }
+        ]
+      },
+      "explanation": "Stand on 18 vs 7; splitting 9s gives up a strong made total."
+    },
+    {
+      "id": "bj-pair-07",
+      "leak": "pair-split",
+      "setup": {
+        "playerRanks": [
+          9,
+          9
+        ],
+        "playerHand": "9-9",
+        "dealerUpRank": 9,
+        "dealerUpcard": "9",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "split",
+      "correctActionLabel": "Split",
+      "engine": {
+        "ev": -0.081017,
+        "evGap": 0.104218,
+        "alternatives": [
+          {
+            "action": "split",
+            "label": "Split",
+            "ev": -0.081017
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.185235
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": -0.613461
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -1.226923
+          }
+        ]
+      },
+      "explanation": "Split 9s against a 9 because two hands starting at 9 outplay standing on 18."
+    },
+    {
+      "id": "bj-pair-08",
+      "leak": "pair-9s-stand",
+      "setup": {
+        "playerRanks": [
+          9,
+          9
+        ],
+        "playerHand": "9-9",
+        "dealerUpRank": 10,
+        "dealerUpcard": "10",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "stand",
+      "correctActionLabel": "Stand",
+      "engine": {
+        "ev": -0.17108,
+        "evGap": 0.118907,
+        "alternatives": [
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.17108
+          },
+          {
+            "action": "split",
+            "label": "Split",
+            "ev": -0.289987
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": -0.644119
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -1.288237
+          }
+        ]
+      },
+      "explanation": "Stand on 18 vs 10; splitting exposes more money to a strong upcard."
+    },
+    {
+      "id": "bj-pair-09",
+      "leak": "pair-9s-stand",
+      "setup": {
+        "playerRanks": [
+          9,
+          9
+        ],
+        "playerHand": "9-9",
+        "dealerUpRank": 14,
+        "dealerUpcard": "A",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "stand",
+      "correctActionLabel": "Stand",
+      "engine": {
+        "ev": -0.093071,
+        "evGap": 0.028988,
+        "alternatives": [
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.093071
+          },
+          {
+            "action": "split",
+            "label": "Split",
+            "ev": -0.122059
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": -0.625523
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -1.251047
+          }
+        ]
+      },
+      "explanation": "Stand on 18 vs ace; the split is close but standing keeps the better total."
+    },
+    {
+      "id": "bj-pair-10",
+      "leak": "pair-split",
+      "setup": {
+        "playerRanks": [
+          7,
+          7
+        ],
+        "playerHand": "7-7",
+        "dealerUpRank": 7,
+        "dealerUpcard": "7",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "split",
+      "correctActionLabel": "Split",
+      "engine": {
+        "ev": -0.048248,
+        "evGap": 0.283935,
+        "alternatives": [
+          {
+            "action": "split",
+            "label": "Split",
+            "ev": -0.048248
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": -0.332183
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.479132
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -0.693326
+          }
+        ]
+      },
+      "explanation": "Split 7s vs 7: hard 14 is weak, and matching the dealer favors splitting."
+    },
+    {
+      "id": "bj-pair-11",
+      "leak": "pair-no-split",
+      "setup": {
+        "playerRanks": [
+          7,
+          7
+        ],
+        "playerHand": "7-7",
+        "dealerUpRank": 8,
+        "dealerUpcard": "8",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "hit",
+      "correctActionLabel": "Hit",
+      "engine": {
+        "ev": -0.377871,
+        "evGap": 0.011123,
+        "alternatives": [
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": -0.377871
+          },
+          {
+            "action": "split",
+            "label": "Split",
+            "ev": -0.388994
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.515766
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -0.781662
+          }
+        ]
+      },
+      "explanation": "Hit 7s vs 8; splitting is not worth it when the dealer shows strength."
+    },
+    {
+      "id": "bj-pair-12",
+      "leak": "pair-split",
+      "setup": {
+        "playerRanks": [
+          6,
+          6
+        ],
+        "playerHand": "6-6",
+        "dealerUpRank": 6,
+        "dealerUpcard": "6",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "split",
+      "correctActionLabel": "Split",
+      "engine": {
+        "ev": 0.158438,
+        "evGap": 0.313144,
+        "alternatives": [
+          {
+            "action": "split",
+            "label": "Split",
+            "ev": 0.158438
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.154706
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": -0.175156
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -0.350311
+          }
+        ]
+      },
+      "explanation": "Split 6s vs 6 (DAS rules): hard 12 improves into two hands against weakness."
+    },
+    {
+      "id": "bj-pair-13",
+      "leak": "pair-no-split",
+      "setup": {
+        "playerRanks": [
+          6,
+          6
+        ],
+        "playerHand": "6-6",
+        "dealerUpRank": 7,
+        "dealerUpcard": "7",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "hit",
+      "correctActionLabel": "Hit",
+      "engine": {
+        "ev": -0.220478,
+        "evGap": 0.028751,
+        "alternatives": [
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": -0.220478
+          },
+          {
+            "action": "split",
+            "label": "Split",
+            "ev": -0.249229
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.477738
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -0.521267
+          }
+        ]
+      },
+      "explanation": "Hit 6s vs 7; do not split into a dealer hand that often makes 17."
+    },
+    {
+      "id": "bj-pair-14",
+      "leak": "pair-4s-no-split",
+      "setup": {
+        "playerRanks": [
+          4,
+          4
+        ],
+        "playerHand": "4-4",
+        "dealerUpRank": 5,
+        "dealerUpcard": "5",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "split",
+      "correctActionLabel": "Split",
+      "engine": {
+        "ev": 0.110579,
+        "evGap": 0.027317,
+        "alternatives": [
+          {
+            "action": "split",
+            "label": "Split",
+            "ev": 0.110579
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.083263
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": 0.027103
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.15631
+          }
+        ]
+      },
+      "explanation": "Hit 4s vs 5 in this game; you cannot split and 8 is a hand to build, not double."
+    },
+    {
+      "id": "bj-pair-15",
+      "leak": "pair-4s-no-split",
+      "setup": {
+        "playerRanks": [
+          4,
+          4
+        ],
+        "playerHand": "4-4",
+        "dealerUpRank": 6,
+        "dealerUpcard": "6",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "split",
+      "correctActionLabel": "Split",
+      "engine": {
+        "ev": 0.166849,
+        "evGap": 0.042612,
+        "alternatives": [
+          {
+            "action": "split",
+            "label": "Split",
+            "ev": 0.166849
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.124237
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": 0.103469
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.147552
+          }
+        ]
+      },
+      "explanation": "Hit 4s vs 6; splitting fours is not available here, so treat it as hard 8."
+    },
+    {
+      "id": "bj-pair-16",
+      "leak": "pair-split",
+      "setup": {
+        "playerRanks": [
+          3,
+          3
+        ],
+        "playerHand": "3-3",
+        "dealerUpRank": 7,
+        "dealerUpcard": "7",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "split",
+      "correctActionLabel": "Split",
+      "engine": {
+        "ev": -0.05118,
+        "evGap": 0.103478,
+        "alternatives": [
+          {
+            "action": "split",
+            "label": "Split",
+            "ev": -0.05118
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": -0.154657
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.473963
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -0.890381
+          }
+        ]
+      },
+      "explanation": "Split 3s vs 7: hard 6 is terrible, and two draws from 3 have better prospects."
+    },
+    {
+      "id": "bj-pair-17",
+      "leak": "pair-split",
+      "setup": {
+        "playerRanks": [
+          2,
+          2
+        ],
+        "playerHand": "2-2",
+        "dealerUpRank": 7,
+        "dealerUpcard": "7",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "split",
+      "correctActionLabel": "Split",
+      "engine": {
+        "ev": 0.008665,
+        "evGap": 0.09834,
+        "alternatives": [
+          {
+            "action": "split",
+            "label": "Split",
+            "ev": 0.008665
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": -0.089675
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.474621
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -0.949243
+          }
+        ]
+      },
+      "explanation": "Split 2s vs 7 to break up hard 4 when the dealer is not dominant."
+    },
+    {
+      "id": "bj-pair-18",
+      "leak": "pair-split",
+      "setup": {
+        "playerRanks": [
+          2,
+          2
+        ],
+        "playerHand": "2-2",
+        "dealerUpRank": 3,
+        "dealerUpcard": "3",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "split",
+      "correctActionLabel": "Split",
+      "engine": {
+        "ev": -0.007915,
+        "evGap": 0.073952,
+        "alternatives": [
+          {
+            "action": "split",
+            "label": "Split",
+            "ev": -0.007915
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": -0.081868
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.251293
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -0.502586
+          }
+        ]
+      },
+      "explanation": "Split 2s vs 3; hard 4 plays poorly, so start two hands instead."
+    },
+    {
+      "id": "bj-pair-19",
+      "leak": "pair-never-split-10s",
+      "setup": {
+        "playerRanks": [
+          10,
+          10
+        ],
+        "playerHand": "10-10",
+        "dealerUpRank": 6,
+        "dealerUpcard": "6",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "stand",
+      "correctActionLabel": "Stand",
+      "engine": {
+        "ev": 0.702826,
+        "evGap": 0.136059,
+        "alternatives": [
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": 0.702826
+          },
+          {
+            "action": "split",
+            "label": "Split",
+            "ev": 0.566767
+          },
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": -0.852241
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -1.704482
+          }
+        ]
+      },
+      "explanation": "Never split 10s: 20 is a premium total even against a dealer 6."
+    },
+    {
+      "id": "bj-pair-20",
+      "leak": "pair-5s-as-hard-10",
+      "setup": {
+        "playerRanks": [
+          5,
+          5
+        ],
+        "playerHand": "5-5",
+        "dealerUpRank": 10,
+        "dealerUpcard": "10",
+        "rules": "6 decks, dealer stands on soft 17, double after split, no surrender"
+      },
+      "correctAction": "hit",
+      "correctActionLabel": "Hit",
+      "engine": {
+        "ev": 0.027224,
+        "evGap": 0.03172,
+        "alternatives": [
+          {
+            "action": "hit",
+            "label": "Hit",
+            "ev": 0.027224
+          },
+          {
+            "action": "double",
+            "label": "Double",
+            "ev": -0.004496
+          },
+          {
+            "action": "stand",
+            "label": "Stand",
+            "ev": -0.541033
+          },
+          {
+            "action": "split",
+            "label": "Split",
+            "ev": -0.623058
+          }
+        ]
+      },
+      "explanation": "Do not split 5s; treat them as hard 10 and hit against a dealer 10."
+    }
+  ]
+}

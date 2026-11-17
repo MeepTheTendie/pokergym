@@ -1,0 +1,2748 @@
+{
+  "packId": "jacks-or-better-holds-96",
+  "title": "Jacks or Better Holds (9/6)",
+  "description": "20 graded 9/6 Jacks or Better hold decisions using exact draw expected value from the video poker engine.",
+  "spotCount": 20,
+  "freeSampleCount": 3,
+  "generatedFrom": "existing scenario/strategy engine (no hand-written EVs or correct actions)",
+  "spots": [
+    {
+      "id": "vp96-01",
+      "leak": "vp-high-pair",
+      "setup": {
+        "hand": [
+          {
+            "r": 11,
+            "s": 0,
+            "card": "J0"
+          },
+          {
+            "r": 11,
+            "s": 1,
+            "card": "J1"
+          },
+          {
+            "r": 7,
+            "s": 2,
+            "card": "72"
+          },
+          {
+            "r": 4,
+            "s": 3,
+            "card": "43"
+          },
+          {
+            "r": 2,
+            "s": 0,
+            "card": "20"
+          }
+        ],
+        "handDisplay": "J0 J1 72 43 20",
+        "variant": "jacks-or-better",
+        "payTable": "9/6 (full house 9, flush 6)"
+      },
+      "correctAction": {
+        "holds": [
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        "heldIndices": [
+          0,
+          1
+        ],
+        "heldCards": [
+          "J0",
+          "J1"
+        ],
+        "label": "Hold J0, J1"
+      },
+      "engine": {
+        "ev": 1.53654,
+        "evGap": 0.120259,
+        "alternatives": [
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              false,
+              false
+            ],
+            "heldCards": [
+              "J0",
+              "J1"
+            ],
+            "ev": 1.53654
+          },
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "J0",
+              "J1",
+              "72"
+            ],
+            "ev": 1.416281
+          },
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              true,
+              false
+            ],
+            "heldCards": [
+              "J0",
+              "J1",
+              "43"
+            ],
+            "ev": 1.416281
+          },
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              false,
+              true
+            ],
+            "heldCards": [
+              "J0",
+              "J1",
+              "20"
+            ],
+            "ev": 1.416281
+          },
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "J0",
+              "J1",
+              "72",
+              "43"
+            ],
+            "ev": 1.212766
+          }
+        ]
+      },
+      "explanation": "Keeping the pair gives the best expected return (1.537 credits).",
+      "free": true
+    },
+    {
+      "id": "vp96-02",
+      "leak": "vp-high-pair",
+      "setup": {
+        "hand": [
+          {
+            "r": 14,
+            "s": 0,
+            "card": "A0"
+          },
+          {
+            "r": 14,
+            "s": 1,
+            "card": "A1"
+          },
+          {
+            "r": 9,
+            "s": 2,
+            "card": "92"
+          },
+          {
+            "r": 5,
+            "s": 3,
+            "card": "53"
+          },
+          {
+            "r": 3,
+            "s": 0,
+            "card": "30"
+          }
+        ],
+        "handDisplay": "A0 A1 92 53 30",
+        "variant": "jacks-or-better",
+        "payTable": "9/6 (full house 9, flush 6)"
+      },
+      "correctAction": {
+        "holds": [
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        "heldIndices": [
+          0,
+          1
+        ],
+        "heldCards": [
+          "A0",
+          "A1"
+        ],
+        "label": "Hold A0, A1"
+      },
+      "engine": {
+        "ev": 1.53654,
+        "evGap": 0.120259,
+        "alternatives": [
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              false,
+              false
+            ],
+            "heldCards": [
+              "A0",
+              "A1"
+            ],
+            "ev": 1.53654
+          },
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "A0",
+              "A1",
+              "92"
+            ],
+            "ev": 1.416281
+          },
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              true,
+              false
+            ],
+            "heldCards": [
+              "A0",
+              "A1",
+              "53"
+            ],
+            "ev": 1.416281
+          },
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              false,
+              true
+            ],
+            "heldCards": [
+              "A0",
+              "A1",
+              "30"
+            ],
+            "ev": 1.416281
+          },
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "A0",
+              "A1",
+              "92",
+              "53"
+            ],
+            "ev": 1.212766
+          }
+        ]
+      },
+      "explanation": "Keeping the pair gives the best expected return (1.537 credits).",
+      "free": true
+    },
+    {
+      "id": "vp96-03",
+      "leak": "vp-trips",
+      "setup": {
+        "hand": [
+          {
+            "r": 8,
+            "s": 0,
+            "card": "80"
+          },
+          {
+            "r": 8,
+            "s": 1,
+            "card": "81"
+          },
+          {
+            "r": 8,
+            "s": 2,
+            "card": "82"
+          },
+          {
+            "r": 13,
+            "s": 3,
+            "card": "K3"
+          },
+          {
+            "r": 4,
+            "s": 0,
+            "card": "40"
+          }
+        ],
+        "handDisplay": "80 81 82 K3 40",
+        "variant": "jacks-or-better",
+        "payTable": "9/6 (full house 9, flush 6)"
+      },
+      "correctAction": {
+        "holds": [
+          true,
+          true,
+          true,
+          false,
+          false
+        ],
+        "heldIndices": [
+          0,
+          1,
+          2
+        ],
+        "heldCards": [
+          "80",
+          "81",
+          "82"
+        ],
+        "label": "Hold 80, 81, 82"
+      },
+      "engine": {
+        "ev": 4.302498,
+        "evGap": 0.451434,
+        "alternatives": [
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "80",
+              "81",
+              "82"
+            ],
+            "ev": 4.302498
+          },
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "80",
+              "81",
+              "82",
+              "K3"
+            ],
+            "ev": 3.851064
+          },
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              false,
+              true
+            ],
+            "heldCards": [
+              "80",
+              "81",
+              "82",
+              "40"
+            ],
+            "ev": 3.851064
+          },
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              true,
+              true
+            ],
+            "heldCards": [
+              "80",
+              "81",
+              "82",
+              "K3",
+              "40"
+            ],
+            "ev": 3
+          },
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              false,
+              false
+            ],
+            "heldCards": [
+              "80",
+              "81"
+            ],
+            "ev": 0.581869
+          }
+        ]
+      },
+      "explanation": "Keeping the three of a kind gives the best expected return (4.302 credits).",
+      "free": true
+    },
+    {
+      "id": "vp96-04",
+      "leak": "vp-4-to-royal",
+      "setup": {
+        "hand": [
+          {
+            "r": 10,
+            "s": 0,
+            "card": "100"
+          },
+          {
+            "r": 11,
+            "s": 0,
+            "card": "J0"
+          },
+          {
+            "r": 12,
+            "s": 0,
+            "card": "Q0"
+          },
+          {
+            "r": 13,
+            "s": 0,
+            "card": "K0"
+          },
+          {
+            "r": 9,
+            "s": 1,
+            "card": "91"
+          }
+        ],
+        "handDisplay": "100 J0 Q0 K0 91",
+        "variant": "jacks-or-better",
+        "payTable": "9/6 (full house 9, flush 6)"
+      },
+      "correctAction": {
+        "holds": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "heldIndices": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "heldCards": [
+          "100",
+          "J0",
+          "Q0",
+          "K0"
+        ],
+        "label": "Hold 100, J0, Q0, K0"
+      },
+      "engine": {
+        "ev": 7.893617,
+        "evGap": 3.893617,
+        "alternatives": [
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "100",
+              "J0",
+              "Q0",
+              "K0"
+            ],
+            "ev": 7.893617
+          },
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              true,
+              true
+            ],
+            "heldCards": [
+              "100",
+              "J0",
+              "Q0",
+              "K0",
+              "91"
+            ],
+            "ev": 4
+          },
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              false,
+              true
+            ],
+            "heldCards": [
+              "100",
+              "J0",
+              "Q0",
+              "91"
+            ],
+            "ev": 0.723404
+          },
+          {
+            "holds": [
+              false,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "J0",
+              "Q0",
+              "K0"
+            ],
+            "ev": 0.674376
+          },
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "100",
+              "J0",
+              "Q0"
+            ],
+            "ev": 0.653099
+          }
+        ]
+      },
+      "explanation": "Four to a flush is stronger here than breaking it up; hold the four suited cards and draw one."
+    },
+    {
+      "id": "vp96-05",
+      "leak": "vp-4-to-royal",
+      "setup": {
+        "hand": [
+          {
+            "r": 10,
+            "s": 0,
+            "card": "100"
+          },
+          {
+            "r": 11,
+            "s": 0,
+            "card": "J0"
+          },
+          {
+            "r": 12,
+            "s": 0,
+            "card": "Q0"
+          },
+          {
+            "r": 13,
+            "s": 0,
+            "card": "K0"
+          },
+          {
+            "r": 2,
+            "s": 1,
+            "card": "21"
+          }
+        ],
+        "handDisplay": "100 J0 Q0 K0 21",
+        "variant": "jacks-or-better",
+        "payTable": "9/6 (full house 9, flush 6)"
+      },
+      "correctAction": {
+        "holds": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "heldIndices": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "heldCards": [
+          "100",
+          "J0",
+          "Q0",
+          "K0"
+        ],
+        "label": "Hold 100, J0, Q0, K0"
+      },
+      "engine": {
+        "ev": 7.978723,
+        "evGap": 7.293247,
+        "alternatives": [
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "100",
+              "J0",
+              "Q0",
+              "K0"
+            ],
+            "ev": 7.978723
+          },
+          {
+            "holds": [
+              false,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "J0",
+              "Q0",
+              "K0"
+            ],
+            "ev": 0.685476
+          },
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "100",
+              "J0",
+              "Q0"
+            ],
+            "ev": 0.679001
+          },
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              true,
+              false
+            ],
+            "heldCards": [
+              "100",
+              "J0",
+              "K0"
+            ],
+            "ev": 0.582794
+          },
+          {
+            "holds": [
+              true,
+              false,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "100",
+              "Q0",
+              "K0"
+            ],
+            "ev": 0.582794
+          }
+        ]
+      },
+      "explanation": "Four to a flush is stronger here than breaking it up; hold the four suited cards and draw one."
+    },
+    {
+      "id": "vp96-06",
+      "leak": "vp-open-straight-draw",
+      "setup": {
+        "hand": [
+          {
+            "r": 9,
+            "s": 0,
+            "card": "90"
+          },
+          {
+            "r": 10,
+            "s": 0,
+            "card": "100"
+          },
+          {
+            "r": 11,
+            "s": 0,
+            "card": "J0"
+          },
+          {
+            "r": 12,
+            "s": 0,
+            "card": "Q0"
+          },
+          {
+            "r": 4,
+            "s": 1,
+            "card": "41"
+          }
+        ],
+        "handDisplay": "90 100 J0 Q0 41",
+        "variant": "jacks-or-better",
+        "payTable": "9/6 (full house 9, flush 6)"
+      },
+      "correctAction": {
+        "holds": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "heldIndices": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "heldCards": [
+          "90",
+          "100",
+          "J0",
+          "Q0"
+        ],
+        "label": "Hold 90, 100, J0, Q0"
+      },
+      "engine": {
+        "ev": 3.659574,
+        "evGap": 2.792784,
+        "alternatives": [
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "90",
+              "100",
+              "J0",
+              "Q0"
+            ],
+            "ev": 3.659574
+          },
+          {
+            "holds": [
+              false,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "100",
+              "J0",
+              "Q0"
+            ],
+            "ev": 0.86679
+          },
+          {
+            "holds": [
+              true,
+              false,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "90",
+              "J0",
+              "Q0"
+            ],
+            "ev": 0.585569
+          },
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "90",
+              "100",
+              "J0"
+            ],
+            "ev": 0.579093
+          },
+          {
+            "holds": [
+              false,
+              false,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "J0",
+              "Q0"
+            ],
+            "ev": 0.523158
+          }
+        ]
+      },
+      "explanation": "Four to a flush is stronger here than breaking it up; hold the four suited cards and draw one."
+    },
+    {
+      "id": "vp96-07",
+      "leak": "vp-4-to-straight-flush",
+      "setup": {
+        "hand": [
+          {
+            "r": 5,
+            "s": 0,
+            "card": "50"
+          },
+          {
+            "r": 6,
+            "s": 0,
+            "card": "60"
+          },
+          {
+            "r": 7,
+            "s": 0,
+            "card": "70"
+          },
+          {
+            "r": 8,
+            "s": 0,
+            "card": "80"
+          },
+          {
+            "r": 13,
+            "s": 1,
+            "card": "K1"
+          }
+        ],
+        "handDisplay": "50 60 70 80 K1",
+        "variant": "jacks-or-better",
+        "payTable": "9/6 (full house 9, flush 6)"
+      },
+      "correctAction": {
+        "holds": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "heldIndices": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "heldCards": [
+          "50",
+          "60",
+          "70",
+          "80"
+        ],
+        "label": "Hold 50, 60, 70, 80"
+      },
+      "engine": {
+        "ev": 3.531915,
+        "evGap": 3.052729,
+        "alternatives": [
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "50",
+              "60",
+              "70",
+              "80"
+            ],
+            "ev": 3.531915
+          },
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "50",
+              "60",
+              "70"
+            ],
+            "ev": 0.479186
+          },
+          {
+            "holds": [
+              false,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "60",
+              "70",
+              "80"
+            ],
+            "ev": 0.479186
+          },
+          {
+            "holds": [
+              false,
+              false,
+              false,
+              false,
+              true
+            ],
+            "heldCards": [
+              "K1"
+            ],
+            "ev": 0.474869
+          },
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              true,
+              false
+            ],
+            "heldCards": [
+              "50",
+              "60",
+              "80"
+            ],
+            "ev": 0.382979
+          }
+        ]
+      },
+      "explanation": "Four to a flush is stronger here than breaking it up; hold the four suited cards and draw one."
+    },
+    {
+      "id": "vp96-08",
+      "leak": "vp-4-to-flush",
+      "setup": {
+        "hand": [
+          {
+            "r": 2,
+            "s": 0,
+            "card": "20"
+          },
+          {
+            "r": 5,
+            "s": 0,
+            "card": "50"
+          },
+          {
+            "r": 9,
+            "s": 0,
+            "card": "90"
+          },
+          {
+            "r": 11,
+            "s": 0,
+            "card": "J0"
+          },
+          {
+            "r": 3,
+            "s": 1,
+            "card": "31"
+          }
+        ],
+        "handDisplay": "20 50 90 J0 31",
+        "variant": "jacks-or-better",
+        "payTable": "9/6 (full house 9, flush 6)"
+      },
+      "correctAction": {
+        "holds": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "heldIndices": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "heldCards": [
+          "20",
+          "50",
+          "90",
+          "J0"
+        ],
+        "label": "Hold 20, 50, 90, J0"
+      },
+      "engine": {
+        "ev": 1.212766,
+        "evGap": 0.743358,
+        "alternatives": [
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "20",
+              "50",
+              "90",
+              "J0"
+            ],
+            "ev": 1.212766
+          },
+          {
+            "holds": [
+              false,
+              false,
+              false,
+              true,
+              false
+            ],
+            "heldCards": [
+              "J0"
+            ],
+            "ev": 0.469408
+          },
+          {
+            "holds": [
+              false,
+              false,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "90",
+              "J0"
+            ],
+            "ev": 0.420845
+          },
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              true,
+              false
+            ],
+            "heldCards": [
+              "20",
+              "50",
+              "J0"
+            ],
+            "ev": 0.396855
+          },
+          {
+            "holds": [
+              true,
+              false,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "20",
+              "90",
+              "J0"
+            ],
+            "ev": 0.396855
+          }
+        ]
+      },
+      "explanation": "Four to a flush is stronger here than breaking it up; hold the four suited cards and draw one."
+    },
+    {
+      "id": "vp96-09",
+      "leak": "vp-4-to-flush",
+      "setup": {
+        "hand": [
+          {
+            "r": 2,
+            "s": 0,
+            "card": "20"
+          },
+          {
+            "r": 5,
+            "s": 0,
+            "card": "50"
+          },
+          {
+            "r": 9,
+            "s": 0,
+            "card": "90"
+          },
+          {
+            "r": 7,
+            "s": 0,
+            "card": "70"
+          },
+          {
+            "r": 3,
+            "s": 1,
+            "card": "31"
+          }
+        ],
+        "handDisplay": "20 50 90 70 31",
+        "variant": "jacks-or-better",
+        "payTable": "9/6 (full house 9, flush 6)"
+      },
+      "correctAction": {
+        "holds": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "heldIndices": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "heldCards": [
+          "20",
+          "50",
+          "90",
+          "70"
+        ],
+        "label": "Hold 20, 50, 90, 70"
+      },
+      "engine": {
+        "ev": 1.148936,
+        "evGap": 0.755782,
+        "alternatives": [
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "20",
+              "50",
+              "90",
+              "70"
+            ],
+            "ev": 1.148936
+          },
+          {
+            "holds": [
+              false,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "50",
+              "90",
+              "70"
+            ],
+            "ev": 0.393154
+          },
+          {
+            "holds": [
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "heldCards": [],
+            "ev": 0.36145
+          },
+          {
+            "holds": [
+              false,
+              false,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "90"
+            ],
+            "ev": 0.316015
+          },
+          {
+            "holds": [
+              false,
+              false,
+              false,
+              false,
+              true
+            ],
+            "heldCards": [
+              "31"
+            ],
+            "ev": 0.315017
+          }
+        ]
+      },
+      "explanation": "Four to a flush is stronger here than breaking it up; hold the four suited cards and draw one."
+    },
+    {
+      "id": "vp96-10",
+      "leak": "vp-open-straight-draw",
+      "setup": {
+        "hand": [
+          {
+            "r": 10,
+            "s": 0,
+            "card": "100"
+          },
+          {
+            "r": 11,
+            "s": 1,
+            "card": "J1"
+          },
+          {
+            "r": 12,
+            "s": 2,
+            "card": "Q2"
+          },
+          {
+            "r": 13,
+            "s": 3,
+            "card": "K3"
+          },
+          {
+            "r": 6,
+            "s": 0,
+            "card": "60"
+          }
+        ],
+        "handDisplay": "100 J1 Q2 K3 60",
+        "variant": "jacks-or-better",
+        "payTable": "9/6 (full house 9, flush 6)"
+      },
+      "correctAction": {
+        "holds": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "heldIndices": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "heldCards": [
+          "100",
+          "J1",
+          "Q2",
+          "K3"
+        ],
+        "label": "Hold 100, J1, Q2, K3"
+      },
+      "engine": {
+        "ev": 0.87234,
+        "evGap": 0.386679,
+        "alternatives": [
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "100",
+              "J1",
+              "Q2",
+              "K3"
+            ],
+            "ev": 0.87234
+          },
+          {
+            "holds": [
+              false,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "J1",
+              "Q2",
+              "K3"
+            ],
+            "ev": 0.485661
+          },
+          {
+            "holds": [
+              false,
+              true,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "J1",
+              "Q2"
+            ],
+            "ev": 0.485415
+          },
+          {
+            "holds": [
+              false,
+              true,
+              false,
+              true,
+              false
+            ],
+            "heldCards": [
+              "J1",
+              "K3"
+            ],
+            "ev": 0.473574
+          },
+          {
+            "holds": [
+              false,
+              false,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "Q2",
+              "K3"
+            ],
+            "ev": 0.473574
+          }
+        ]
+      },
+      "explanation": "The four-card draw has higher expected value than keeping a weaker made piece or drawing more cards."
+    },
+    {
+      "id": "vp96-11",
+      "leak": "vp-broadway-draw",
+      "setup": {
+        "hand": [
+          {
+            "r": 14,
+            "s": 0,
+            "card": "A0"
+          },
+          {
+            "r": 13,
+            "s": 1,
+            "card": "K1"
+          },
+          {
+            "r": 12,
+            "s": 2,
+            "card": "Q2"
+          },
+          {
+            "r": 11,
+            "s": 3,
+            "card": "J3"
+          },
+          {
+            "r": 2,
+            "s": 0,
+            "card": "20"
+          }
+        ],
+        "handDisplay": "A0 K1 Q2 J3 20",
+        "variant": "jacks-or-better",
+        "payTable": "9/6 (full house 9, flush 6)"
+      },
+      "correctAction": {
+        "holds": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "heldIndices": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "heldCards": [
+          "A0",
+          "K1",
+          "Q2",
+          "J3"
+        ],
+        "label": "Hold A0, K1, Q2, J3"
+      },
+      "engine": {
+        "ev": 0.595745,
+        "evGap": 0.098057,
+        "alternatives": [
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "A0",
+              "K1",
+              "Q2",
+              "J3"
+            ],
+            "ev": 0.595745
+          },
+          {
+            "holds": [
+              false,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "K1",
+              "Q2",
+              "J3"
+            ],
+            "ev": 0.497687
+          },
+          {
+            "holds": [
+              false,
+              false,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "Q2",
+              "J3"
+            ],
+            "ev": 0.485661
+          },
+          {
+            "holds": [
+              false,
+              true,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "K1",
+              "Q2"
+            ],
+            "ev": 0.469874
+          },
+          {
+            "holds": [
+              false,
+              true,
+              false,
+              true,
+              false
+            ],
+            "heldCards": [
+              "K1",
+              "J3"
+            ],
+            "ev": 0.469874
+          }
+        ]
+      },
+      "explanation": "The four-card draw has higher expected value than keeping a weaker made piece or drawing more cards."
+    },
+    {
+      "id": "vp96-12",
+      "leak": "vp-two-pair",
+      "setup": {
+        "hand": [
+          {
+            "r": 9,
+            "s": 0,
+            "card": "90"
+          },
+          {
+            "r": 9,
+            "s": 1,
+            "card": "91"
+          },
+          {
+            "r": 5,
+            "s": 2,
+            "card": "52"
+          },
+          {
+            "r": 5,
+            "s": 3,
+            "card": "53"
+          },
+          {
+            "r": 14,
+            "s": 0,
+            "card": "A0"
+          }
+        ],
+        "handDisplay": "90 91 52 53 A0",
+        "variant": "jacks-or-better",
+        "payTable": "9/6 (full house 9, flush 6)"
+      },
+      "correctAction": {
+        "holds": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "heldIndices": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "heldCards": [
+          "90",
+          "91",
+          "52",
+          "53"
+        ],
+        "label": "Hold 90, 91, 52, 53"
+      },
+      "engine": {
+        "ev": 2.595745,
+        "evGap": 0.595745,
+        "alternatives": [
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "90",
+              "91",
+              "52",
+              "53"
+            ],
+            "ev": 2.595745
+          },
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              true,
+              true
+            ],
+            "heldCards": [
+              "90",
+              "91",
+              "52",
+              "53",
+              "A0"
+            ],
+            "ev": 2
+          },
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              false,
+              false
+            ],
+            "heldCards": [
+              "90",
+              "91"
+            ],
+            "ev": 0.830096
+          },
+          {
+            "holds": [
+              false,
+              false,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "52",
+              "53"
+            ],
+            "ev": 0.830096
+          },
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              false,
+              true
+            ],
+            "heldCards": [
+              "90",
+              "91",
+              "A0"
+            ],
+            "ev": 0.677151
+          }
+        ]
+      },
+      "explanation": "The four-card draw has higher expected value than keeping a weaker made piece or drawing more cards."
+    },
+    {
+      "id": "vp96-13",
+      "leak": "vp-quads",
+      "setup": {
+        "hand": [
+          {
+            "r": 11,
+            "s": 0,
+            "card": "J0"
+          },
+          {
+            "r": 11,
+            "s": 1,
+            "card": "J1"
+          },
+          {
+            "r": 11,
+            "s": 2,
+            "card": "J2"
+          },
+          {
+            "r": 11,
+            "s": 3,
+            "card": "J3"
+          },
+          {
+            "r": 4,
+            "s": 0,
+            "card": "40"
+          }
+        ],
+        "handDisplay": "J0 J1 J2 J3 40",
+        "variant": "jacks-or-better",
+        "payTable": "9/6 (full house 9, flush 6)"
+      },
+      "correctAction": {
+        "holds": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "heldIndices": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "heldCards": [
+          "J0",
+          "J1",
+          "J2",
+          "J3"
+        ],
+        "label": "Hold J0, J1, J2, J3"
+      },
+      "engine": {
+        "ev": 25,
+        "evGap": 21.617021,
+        "alternatives": [
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "J0",
+              "J1",
+              "J2",
+              "J3"
+            ],
+            "ev": 25
+          },
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              true,
+              true
+            ],
+            "heldCards": [
+              "J0",
+              "J1",
+              "J2",
+              "J3",
+              "40"
+            ],
+            "ev": 25
+          },
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "J0",
+              "J1",
+              "J2"
+            ],
+            "ev": 3.382979
+          },
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              true,
+              false
+            ],
+            "heldCards": [
+              "J0",
+              "J1",
+              "J3"
+            ],
+            "ev": 3.382979
+          },
+          {
+            "holds": [
+              true,
+              false,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "J0",
+              "J2",
+              "J3"
+            ],
+            "ev": 3.382979
+          }
+        ]
+      },
+      "explanation": "Keeping the four of a kind gives the best expected return (25.000 credits)."
+    },
+    {
+      "id": "vp96-14",
+      "leak": "vp-high-pair",
+      "setup": {
+        "hand": [
+          {
+            "r": 10,
+            "s": 0,
+            "card": "100"
+          },
+          {
+            "r": 10,
+            "s": 1,
+            "card": "101"
+          },
+          {
+            "r": 7,
+            "s": 2,
+            "card": "72"
+          },
+          {
+            "r": 3,
+            "s": 3,
+            "card": "33"
+          },
+          {
+            "r": 2,
+            "s": 0,
+            "card": "20"
+          }
+        ],
+        "handDisplay": "100 101 72 33 20",
+        "variant": "jacks-or-better",
+        "payTable": "9/6 (full house 9, flush 6)"
+      },
+      "correctAction": {
+        "holds": [
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        "heldIndices": [
+          0,
+          1
+        ],
+        "heldCards": [
+          "100",
+          "101"
+        ],
+        "label": "Hold 100, 101"
+      },
+      "engine": {
+        "ev": 0.823682,
+        "evGap": 0.148381,
+        "alternatives": [
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              false,
+              false
+            ],
+            "heldCards": [
+              "100",
+              "101"
+            ],
+            "ev": 0.823682
+          },
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "100",
+              "101",
+              "72"
+            ],
+            "ev": 0.675301
+          },
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              true,
+              false
+            ],
+            "heldCards": [
+              "100",
+              "101",
+              "33"
+            ],
+            "ev": 0.675301
+          },
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              false,
+              true
+            ],
+            "heldCards": [
+              "100",
+              "101",
+              "20"
+            ],
+            "ev": 0.675301
+          },
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "100",
+              "101",
+              "72",
+              "33"
+            ],
+            "ev": 0.382979
+          }
+        ]
+      },
+      "explanation": "Keeping the pair gives the best expected return (0.824 credits)."
+    },
+    {
+      "id": "vp96-15",
+      "leak": "vp-low-pair-vs-high-cards",
+      "setup": {
+        "hand": [
+          {
+            "r": 9,
+            "s": 0,
+            "card": "90"
+          },
+          {
+            "r": 9,
+            "s": 1,
+            "card": "91"
+          },
+          {
+            "r": 14,
+            "s": 2,
+            "card": "A2"
+          },
+          {
+            "r": 13,
+            "s": 3,
+            "card": "K3"
+          },
+          {
+            "r": 4,
+            "s": 0,
+            "card": "40"
+          }
+        ],
+        "handDisplay": "90 91 A2 K3 40",
+        "variant": "jacks-or-better",
+        "payTable": "9/6 (full house 9, flush 6)"
+      },
+      "correctAction": {
+        "holds": [
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        "heldIndices": [
+          0,
+          1
+        ],
+        "heldCards": [
+          "90",
+          "91"
+        ],
+        "label": "Hold 90, 91"
+      },
+      "engine": {
+        "ev": 0.823682,
+        "evGap": 0.148381,
+        "alternatives": [
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              false,
+              false
+            ],
+            "heldCards": [
+              "90",
+              "91"
+            ],
+            "ev": 0.823682
+          },
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "90",
+              "91",
+              "A2"
+            ],
+            "ev": 0.675301
+          },
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              true,
+              false
+            ],
+            "heldCards": [
+              "90",
+              "91",
+              "K3"
+            ],
+            "ev": 0.675301
+          },
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              false,
+              true
+            ],
+            "heldCards": [
+              "90",
+              "91",
+              "40"
+            ],
+            "ev": 0.675301
+          },
+          {
+            "holds": [
+              false,
+              false,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "A2",
+              "K3"
+            ],
+            "ev": 0.479001
+          }
+        ]
+      },
+      "explanation": "Keeping the pair gives the best expected return (0.824 credits)."
+    },
+    {
+      "id": "vp96-16",
+      "leak": "vp-3-to-royal",
+      "setup": {
+        "hand": [
+          {
+            "r": 14,
+            "s": 0,
+            "card": "A0"
+          },
+          {
+            "r": 13,
+            "s": 0,
+            "card": "K0"
+          },
+          {
+            "r": 12,
+            "s": 0,
+            "card": "Q0"
+          },
+          {
+            "r": 5,
+            "s": 1,
+            "card": "51"
+          },
+          {
+            "r": 2,
+            "s": 2,
+            "card": "22"
+          }
+        ],
+        "handDisplay": "A0 K0 Q0 51 22",
+        "variant": "jacks-or-better",
+        "payTable": "9/6 (full house 9, flush 6)"
+      },
+      "correctAction": {
+        "holds": [
+          true,
+          true,
+          true,
+          false,
+          false
+        ],
+        "heldIndices": [
+          0,
+          1,
+          2
+        ],
+        "heldCards": [
+          "A0",
+          "K0",
+          "Q0"
+        ],
+        "label": "Hold A0, K0, Q0"
+      },
+      "engine": {
+        "ev": 0.927845,
+        "evGap": 0.397533,
+        "alternatives": [
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "A0",
+              "K0",
+              "Q0"
+            ],
+            "ev": 0.927845
+          },
+          {
+            "holds": [
+              false,
+              true,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "K0",
+              "Q0"
+            ],
+            "ev": 0.530311
+          },
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              false,
+              false
+            ],
+            "heldCards": [
+              "A0",
+              "K0"
+            ],
+            "ev": 0.512057
+          },
+          {
+            "holds": [
+              true,
+              false,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "A0",
+              "Q0"
+            ],
+            "ev": 0.512057
+          },
+          {
+            "holds": [
+              false,
+              false,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "Q0"
+            ],
+            "ev": 0.442553
+          }
+        ]
+      },
+      "explanation": "Three suited high cards offer strong royal/flush/straight potential; hold them over weaker alternatives."
+    },
+    {
+      "id": "vp96-17",
+      "leak": "vp-hold-high-cards",
+      "setup": {
+        "hand": [
+          {
+            "r": 14,
+            "s": 0,
+            "card": "A0"
+          },
+          {
+            "r": 11,
+            "s": 1,
+            "card": "J1"
+          },
+          {
+            "r": 8,
+            "s": 2,
+            "card": "82"
+          },
+          {
+            "r": 4,
+            "s": 3,
+            "card": "43"
+          },
+          {
+            "r": 2,
+            "s": 0,
+            "card": "20"
+          }
+        ],
+        "handDisplay": "A0 J1 82 43 20",
+        "variant": "jacks-or-better",
+        "payTable": "9/6 (full house 9, flush 6)"
+      },
+      "correctAction": {
+        "holds": [
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        "heldIndices": [
+          0,
+          1
+        ],
+        "heldCards": [
+          "A0",
+          "J1"
+        ],
+        "label": "Hold A0, J1"
+      },
+      "engine": {
+        "ev": 0.478261,
+        "evGap": 0.007356,
+        "alternatives": [
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              false,
+              false
+            ],
+            "heldCards": [
+              "A0",
+              "J1"
+            ],
+            "ev": 0.478261
+          },
+          {
+            "holds": [
+              false,
+              true,
+              false,
+              false,
+              false
+            ],
+            "heldCards": [
+              "J1"
+            ],
+            "ev": 0.470905
+          },
+          {
+            "holds": [
+              true,
+              false,
+              false,
+              false,
+              false
+            ],
+            "heldCards": [
+              "A0"
+            ],
+            "ev": 0.453559
+          },
+          {
+            "holds": [
+              true,
+              false,
+              false,
+              false,
+              true
+            ],
+            "heldCards": [
+              "A0",
+              "20"
+            ],
+            "ev": 0.4037
+          },
+          {
+            "holds": [
+              false,
+              true,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "J1",
+              "82"
+            ],
+            "ev": 0.359914
+          }
+        ]
+      },
+      "explanation": "Holding A0, J1 maximizes expected value at 0.478 credits for this 9/6 hand."
+    },
+    {
+      "id": "vp96-18",
+      "leak": "vp-open-straight-draw",
+      "setup": {
+        "hand": [
+          {
+            "r": 7,
+            "s": 0,
+            "card": "70"
+          },
+          {
+            "r": 8,
+            "s": 1,
+            "card": "81"
+          },
+          {
+            "r": 9,
+            "s": 2,
+            "card": "92"
+          },
+          {
+            "r": 10,
+            "s": 3,
+            "card": "103"
+          },
+          {
+            "r": 3,
+            "s": 0,
+            "card": "30"
+          }
+        ],
+        "handDisplay": "70 81 92 103 30",
+        "variant": "jacks-or-better",
+        "payTable": "9/6 (full house 9, flush 6)"
+      },
+      "correctAction": {
+        "holds": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "heldIndices": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "heldCards": [
+          "70",
+          "81",
+          "92",
+          "103"
+        ],
+        "label": "Hold 70, 81, 92, 103"
+      },
+      "engine": {
+        "ev": 0.680851,
+        "evGap": 0.323581,
+        "alternatives": [
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              true,
+              false
+            ],
+            "heldCards": [
+              "70",
+              "81",
+              "92",
+              "103"
+            ],
+            "ev": 0.680851
+          },
+          {
+            "holds": [
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "heldCards": [],
+            "ev": 0.35727
+          },
+          {
+            "holds": [
+              false,
+              false,
+              false,
+              true,
+              false
+            ],
+            "heldCards": [
+              "103"
+            ],
+            "ev": 0.325019
+          },
+          {
+            "holds": [
+              false,
+              true,
+              false,
+              false,
+              false
+            ],
+            "heldCards": [
+              "81"
+            ],
+            "ev": 0.321386
+          },
+          {
+            "holds": [
+              false,
+              false,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "92"
+            ],
+            "ev": 0.321386
+          }
+        ]
+      },
+      "explanation": "The four-card draw has higher expected value than keeping a weaker made piece or drawing more cards."
+    },
+    {
+      "id": "vp96-19",
+      "leak": "vp-3-to-straight-flush",
+      "setup": {
+        "hand": [
+          {
+            "r": 6,
+            "s": 0,
+            "card": "60"
+          },
+          {
+            "r": 7,
+            "s": 0,
+            "card": "70"
+          },
+          {
+            "r": 8,
+            "s": 0,
+            "card": "80"
+          },
+          {
+            "r": 10,
+            "s": 1,
+            "card": "101"
+          },
+          {
+            "r": 11,
+            "s": 2,
+            "card": "J2"
+          }
+        ],
+        "handDisplay": "60 70 80 101 J2",
+        "variant": "jacks-or-better",
+        "payTable": "9/6 (full house 9, flush 6)"
+      },
+      "correctAction": {
+        "holds": [
+          true,
+          true,
+          true,
+          false,
+          false
+        ],
+        "heldIndices": [
+          0,
+          1,
+          2
+        ],
+        "heldCards": [
+          "60",
+          "70",
+          "80"
+        ],
+        "label": "Hold 60, 70, 80"
+      },
+      "engine": {
+        "ev": 0.617946,
+        "evGap": 0.139848,
+        "alternatives": [
+          {
+            "holds": [
+              true,
+              true,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "60",
+              "70",
+              "80"
+            ],
+            "ev": 0.617946
+          },
+          {
+            "holds": [
+              false,
+              false,
+              false,
+              false,
+              true
+            ],
+            "heldCards": [
+              "J2"
+            ],
+            "ev": 0.478098
+          },
+          {
+            "holds": [
+              false,
+              true,
+              true,
+              true,
+              true
+            ],
+            "heldCards": [
+              "70",
+              "80",
+              "101",
+              "J2"
+            ],
+            "ev": 0.404255
+          },
+          {
+            "holds": [
+              false,
+              false,
+              false,
+              true,
+              true
+            ],
+            "heldCards": [
+              "101",
+              "J2"
+            ],
+            "ev": 0.387296
+          },
+          {
+            "holds": [
+              false,
+              false,
+              true,
+              false,
+              true
+            ],
+            "heldCards": [
+              "80",
+              "J2"
+            ],
+            "ev": 0.35572
+          }
+        ]
+      },
+      "explanation": "Three suited high cards offer strong royal/flush/straight potential; hold them over weaker alternatives."
+    },
+    {
+      "id": "vp96-20",
+      "leak": "vp-suited-high-cards",
+      "setup": {
+        "hand": [
+          {
+            "r": 14,
+            "s": 0,
+            "card": "A0"
+          },
+          {
+            "r": 13,
+            "s": 0,
+            "card": "K0"
+          },
+          {
+            "r": 4,
+            "s": 1,
+            "card": "41"
+          },
+          {
+            "r": 7,
+            "s": 2,
+            "card": "72"
+          },
+          {
+            "r": 9,
+            "s": 3,
+            "card": "93"
+          }
+        ],
+        "handDisplay": "A0 K0 41 72 93",
+        "variant": "jacks-or-better",
+        "payTable": "9/6 (full house 9, flush 6)"
+      },
+      "correctAction": {
+        "holds": [
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        "heldIndices": [
+          0,
+          1
+        ],
+        "heldCards": [
+          "A0",
+          "K0"
+        ],
+        "label": "Hold A0, K0"
+      },
+      "engine": {
+        "ev": 0.554117,
+        "evGap": 0.100603,
+        "alternatives": [
+          {
+            "holds": [
+              true,
+              true,
+              false,
+              false,
+              false
+            ],
+            "heldCards": [
+              "A0",
+              "K0"
+            ],
+            "ev": 0.554117
+          },
+          {
+            "holds": [
+              true,
+              false,
+              false,
+              false,
+              false
+            ],
+            "heldCards": [
+              "A0"
+            ],
+            "ev": 0.453514
+          },
+          {
+            "holds": [
+              false,
+              true,
+              false,
+              false,
+              false
+            ],
+            "heldCards": [
+              "K0"
+            ],
+            "ev": 0.453514
+          },
+          {
+            "holds": [
+              true,
+              false,
+              true,
+              false,
+              false
+            ],
+            "heldCards": [
+              "A0",
+              "41"
+            ],
+            "ev": 0.344126
+          },
+          {
+            "holds": [
+              false,
+              true,
+              false,
+              false,
+              true
+            ],
+            "heldCards": [
+              "K0",
+              "93"
+            ],
+            "ev": 0.344126
+          }
+        ]
+      },
+      "explanation": "Holding A0, K0 maximizes expected value at 0.554 credits for this 9/6 hand."
+    }
+  ]
+}
