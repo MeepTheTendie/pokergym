@@ -1970,14 +1970,16 @@ function startHand() {
   // of a random deal. The coach still grades the hand exactly as always.
   // A new player's first practice hand must offer a decision, rather than
   // randomly ending on a natural. Daily and authored drills keep their deals.
-  const introductory = shortSession && !dailyMode && !drillMode && gameId === 'blackjack'
-    && profile.handsPlayed === 0 ? BLACKJACK_DRILLS.find(hand => hand.type === 'hard') : null;
-  const drilled = drillMode ? drillHands[profile.activeSession?.played ?? 0] : introductory;
   // A reel deeplink (/reel?c=<clip>) deals the exact hand from a social video as
-  // hand 1 of a fresh five-hand session, then continues into normal hands.
-  const reel = !dailyMode && !drillMode && !drilled
+  // hand 1 of a fresh five-hand session, then continues into normal hands. It
+  // wins over the new-player introductory hand: reel visitors are almost all
+  // new players, and the caption promised them this exact hand.
+  const reel = !dailyMode && !drillMode
     && profile.activeSession?.reelClip && (profile.activeSession.played ?? 0) === 0
     ? reelClipFor(profile.activeSession.reelClip) : null;
+  const introductory = !reel && shortSession && !dailyMode && !drillMode && gameId === 'blackjack'
+    && profile.handsPlayed === 0 ? BLACKJACK_DRILLS.find(hand => hand.type === 'hard') : null;
+  const drilled = drillMode ? drillHands[profile.activeSession?.played ?? 0] : introductory;
   drillLabel = (reel?.label ?? drilled?.label) ?? '';
   if (gameId === 'videopoker') {
     // The daily drill is the same for every trainer, so it always uses the
