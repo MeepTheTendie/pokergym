@@ -108,3 +108,21 @@ test('reel Nov 20/21 slate slugs deal the described decisions', () => {
     assert.deepEqual(best.holds.map(Boolean), [0, 1, 2, 3, 4].map((i) => i !== drop), slug);
   }
 });
+
+test('reel Nov 22/23 slate slugs deal the described decisions', () => {
+  for (const [slug, want] of [['eights-vs-ace', 'split'], ['split-nines-vs-six', 'split'], ['fives-vs-nine', 'double'], ['hit-12-vs-three', 'hit']]) {
+    const clip = reelClipFor(slug);
+    assert.ok(clip, slug);
+    const r = newBjRound(Math.random, { player: clip.player, dealer: [clip.dealer, clip.hole] });
+    const best = bestAction(r);
+    assert.ok(best.optimal.includes(want), `${slug} should ${want}, got ${best.optimal}`);
+  }
+  // drop-the-ace keeps exactly K♥ Q♥; draw-five-new holds nothing.
+  for (const [slug, keep] of [['drop-the-ace', [1, 2]], ['draw-five-new', []]]) {
+    const clip = reelClipFor(slug);
+    assert.ok(clip, slug);
+    assert.equal(clip.game, 'videopoker');
+    const best = bestHold(clip.hand);
+    assert.deepEqual(best.holds.map(Boolean), [0, 1, 2, 3, 4].map((i) => keep.includes(i)), slug);
+  }
+});
