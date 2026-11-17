@@ -46,6 +46,13 @@ default. Override in `%LOCALAPPDATA%\pokergym-opencode-dispatch\config.ps1`
 **Install (once, in PowerShell):**
 `irm https://raw.githubusercontent.com/MeepTheTendie/pokergym/main/automation/opencode-dispatch/install.ps1 | iex`
 
+**Wake from sleep (recommended):** the desktop suspends when idle, and a user timer cannot run while
+it sleeps. After `install.sh`, run once:
+`curl -fsSL https://raw.githubusercontent.com/MeepTheTendie/pokergym/main/automation/opencode-dispatch/install-wake.sh | bash`
+It swaps in a system timer with `WakeSystem=true` (RTC alarm wakes the machine every 15 min), waits for
+the network, and holds a sleep inhibitor while a task runs. `WAKE_EVERY=30min` before `bash` to wake less
+often. Suspend only (not power-off/hibernate); BIOS "wake on RTC" must not be disabled.
+
 **Check it:** `powershell -File "$env:LOCALAPPDATA\pokergym-opencode-dispatch\bin\dispatch.ps1" -DryRun`
 
 **Remove:** `Unregister-ScheduledTask 'PokerGym OpenCode Dispatcher' -Confirm:$false`
