@@ -213,6 +213,44 @@ const SLUGS = {
     dealer: C(3, 2),              // 3♦
     hole: C(10, 3),               // 10♣
   },
+  // Tue Nov 17 fill (docs/video/slate-20261117-fill.md).
+  'keep-the-fives': {
+    game: 'videopoker',
+    label: 'LOW PAIR OR KING-QUEEN',
+    hand: [C(5, 0), C(5, 1), C(13, 2), C(12, 3), C(8, 1)], // 5♠ 5♥ K♦ Q♣ 8♥
+  },
+  'dont-double-11-vs-ace': {
+    game: 'blackjack',
+    label: 'HARD 11 AGAINST AN ACE',
+    player: [C(6, 1), C(5, 3)],   // 6♥ 5♣ = 11
+    dealer: C(14, 0),             // A♠
+    hole: C(9, 2),                // 9♦
+  },
+  // Nov 18/19 backfill (docs/video/slate-20261118-19-backfill.md).
+  'queen-jack-not-king': {
+    game: 'videopoker',
+    label: 'KING, QUEEN, JACK: KEEP TWO',
+    hand: [C(13, 0), C(12, 1), C(11, 1), C(5, 2), C(3, 3)], // K♠ Q♥ J♥ 5♦ 3♣
+  },
+  'jacks-over-royal-draw': {
+    game: 'videopoker',
+    label: 'JACKS OR THREE TO A ROYAL',
+    hand: [C(13, 1), C(12, 1), C(11, 1), C(11, 0), C(3, 2)], // K♥ Q♥ J♥ J♠ 3♦
+  },
+  'soft17-vs-three': {
+    game: 'blackjack',
+    label: 'SOFT 17 AGAINST A THREE',
+    player: [C(14, 1), C(6, 0)],  // A♥ 6♠ = soft 17
+    dealer: C(3, 2),              // 3♦
+    hole: C(10, 3),               // 10♣
+  },
+  'hit-15-vs-ten': {
+    game: 'blackjack',
+    label: 'HARD 15 AGAINST A TEN',
+    player: [C(10, 1), C(5, 3)],  // 10♥ 5♣ = 15
+    dealer: C(10, 0),             // 10♠
+    hole: C(9, 3),                // 9♣
+  },
 };
 
 // Accept "p1-QF", "p1-AF", "p1", case-insensitively, or one of the Nov 13+

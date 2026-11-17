@@ -126,3 +126,32 @@ test('reel Nov 22/23 slate slugs deal the described decisions', () => {
     assert.deepEqual(best.holds.map(Boolean), [0, 1, 2, 3, 4].map((i) => keep.includes(i)), slug);
   }
 });
+
+test('reel Nov 18/19 backfill slugs deal the described decisions', () => {
+  for (const [slug, want] of [['soft17-vs-three', 'double'], ['hit-15-vs-ten', 'hit']]) {
+    const clip = reelClipFor(slug);
+    assert.ok(clip, slug);
+    const r = newBjRound(Math.random, { player: clip.player, dealer: [clip.dealer, clip.hole] });
+    const best = bestAction(r);
+    assert.ok(best.optimal.includes(want), `${slug} should ${want}, got ${best.optimal}`);
+  }
+  // queen-jack-not-king keeps Q♥ J♥; jacks-over-royal-draw keeps the two jacks.
+  for (const [slug, keep] of [['queen-jack-not-king', [1, 2]], ['jacks-over-royal-draw', [2, 3]]]) {
+    const clip = reelClipFor(slug);
+    assert.ok(clip, slug);
+    assert.equal(clip.game, 'videopoker');
+    const best = bestHold(clip.hand);
+    assert.deepEqual(best.holds.map(Boolean), [0, 1, 2, 3, 4].map((i) => keep.includes(i)), slug);
+  }
+});
+
+test('reel Tue Nov 17 fill slugs deal the described decisions', () => {
+  const bj = reelClipFor('dont-double-11-vs-ace');
+  const r = newBjRound(Math.random, { player: bj.player, dealer: [bj.dealer, bj.hole] });
+  const best = bestAction(r);
+  assert.deepEqual(best.optimal, ['hit'], `11 vs A (S17) should hit, got ${best.optimal}`);
+  const vp = reelClipFor('keep-the-fives');
+  assert.equal(vp.game, 'videopoker');
+  assert.deepEqual(bestHold(vp.hand).holds.map(Boolean), [true, true, false, false, false]);
+});
+
