@@ -174,6 +174,45 @@ const SLUGS = {
     dealer: C(10, 0),             // 10♠
     hole: C(9, 3),                // 9♣
   },
+  // Nov 22/23 slate (docs/video/slate-20261122-23.md).
+  'drop-the-ace': {
+    game: 'videopoker',
+    label: 'THROW AWAY THE ACE',
+    hand: [C(14, 0), C(13, 1), C(12, 1), C(5, 3), C(2, 2)], // A♠ K♥ Q♥ 5♣ 2♦
+  },
+  'eights-vs-ace': {
+    game: 'blackjack',
+    label: 'EIGHTS AGAINST AN ACE',
+    player: [C(8, 0), C(8, 1)],   // 8♠ 8♥ = 16
+    dealer: C(14, 2),             // A♦
+    hole: C(9, 3),                // 9♣
+  },
+  'split-nines-vs-six': {
+    game: 'blackjack',
+    label: 'NINES AGAINST A SIX',
+    player: [C(9, 1), C(9, 3)],   // 9♥ 9♣ = 18
+    dealer: C(6, 0),              // 6♠
+    hole: C(10, 2),               // 10♦
+  },
+  'draw-five-new': {
+    game: 'videopoker',
+    label: 'THROW AWAY ALL FIVE',
+    hand: [C(9, 0), C(7, 1), C(5, 2), C(3, 3), C(2, 1)], // 9♠ 7♥ 5♦ 3♣ 2♥
+  },
+  'fives-vs-nine': {
+    game: 'blackjack',
+    label: 'FIVES AGAINST A NINE',
+    player: [C(5, 1), C(5, 3)],   // 5♥ 5♣ = 10
+    dealer: C(9, 0),              // 9♠
+    hole: C(10, 2),               // 10♦
+  },
+  'hit-12-vs-three': {
+    game: 'blackjack',
+    label: 'HARD 12 AGAINST A THREE',
+    player: [C(10, 0), C(2, 1)],  // 10♠ 2♥ = 12
+    dealer: C(3, 2),              // 3♦
+    hole: C(10, 3),               // 10♣
+  },
 };
 
 // Accept "p1-QF", "p1-AF", "p1", case-insensitively, or one of the Nov 13+
