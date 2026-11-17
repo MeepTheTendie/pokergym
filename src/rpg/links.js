@@ -69,6 +69,24 @@ export function classifyRef(value) {
   return PUBLISHED_REFS.includes(text) ? text : 'other';
 }
 
+// Normalize a campaign/attribution value before it is forwarded (worker) or
+// recorded (posthog-loader): strip surrounding whitespace and any trailing run
+// of backticks or quotes, so a value copied out of a Markdown code span or a
+// quoted string (e.g. `ig-bio` + `` ` ``) records as `ig-bio`. Empty/missing
+// input becomes ''. Applied to utm_* / c / ref so a stray trailing backtick
+// cannot split one campaign into two buckets.
+export function cleanCampaign(value) {
+  if (value === undefined || value === null) return '';
+  let text = String(value);
+  let prev;
+  do {
+    prev = text;
+    text = text.trim();
+    text = text.replace(/[`'"\u2018\u2019\u201c\u201d]+$/, '');
+  } while (text !== prev);
+  return text;
+}
+
 // Landing-page entry: ?daily=1 promotes today's Daily Drill on the title screen.
 export const DAILY_ENTRY_URL = '/web/?daily=1';
 
