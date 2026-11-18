@@ -29,7 +29,7 @@ status: **PASS**
 - `Beam (OpenCode) <beam-opencode@users.noreply.github.com>`
 
 ## Commits
-- (this result file committed on branch `beam/dispatch-smoke-20261117`)
+- `af6a230` (`beam/dispatch-smoke-20261117`) — `PG-CLAUDE-DISPATCH-SMOKE-20261117-04: smoke check (npm ci && npm test pass)`
 
 ## Bounds respected
 - One new docs file only; no product/test/tracking/config changes.
