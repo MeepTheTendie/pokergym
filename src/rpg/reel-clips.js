@@ -271,6 +271,14 @@ const SLUGS = {
     dealer: C(3, 1),              // 3♥
     hole: C(10, 3),               // 10♣
   },
+  // Reveal-timing re-cut (docs/video/renders-revealtest/README.md): replaces hit-12-vs-three, Mon Nov 23 4 PM.
+  'twos-vs-seven': {
+    game: 'blackjack',
+    label: 'TWO 2s AGAINST A 7',
+    player: [C(2, 0), C(2, 2)],   // 2♠ 2♦
+    dealer: C(7, 1),              // 7♥
+    hole: C(10, 3),               // 10♣
+  },
 };
 
 // Accept "p1-QF", "p1-AF", "p1", case-insensitively, or one of the Nov 13+
