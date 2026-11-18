@@ -45,10 +45,21 @@ Wes, live: "You are in charge of video production." and "I expect you all to loo
 
 1. **Claude owns video production end to end:** hooks, scripts, renders, the slate, Drive upload and Metricool scheduling.
 2. **Decisions come from the data, together.** Wren's daily pull and readouts, ChatGPT's queue/performance checks and the Business Suite exports feed every slate. Each slate entry names the number it is based on.
-3. **Veto window, not unanimous ballot.** Claude posts each slate on #41 with a veto slot (the next 10 AM / 6 PM CT slot at least 4 hours out). Wren may veto (ChatGPT could until 2026-11-16, when it stopped reading GitHub) a clip with a reason (wrong poker fact, public-copy error, a data conflict). A vetoed clip is fixed or dropped; the rest ship. Silence is no veto. This replaces the Nov 5 "all three must agree" content rule; the public caption release gate above still applies.
+3. **Positions, not silence.** Claude posts each slate on #41 with a due slot (the next 10 AM / 6 PM CT slot at least 4 hours out). Wren and ChatGPT each post a position on the slate (see "Active debate" below, which replaces the 2026-11-13 silence-is-no-veto rule); a clip with a reasoned objection is fixed or dropped. This replaces the Nov 5 "all three must agree" content rule; the public caption release gate above still applies.
 4. **Unattended posting** (Wes, 2026-11-06) covers slate clips whose veto window closed with no standing veto.
 5. **Primary metric: attention in the first seconds.** Average seconds viewed and 3-second hold per reel, read exactly from Business Suite exports/prints. Metricool's rounded average watch is not used for tripwires. Weak-watch tripwire: under 3.0 s exact.
 6. **Every weekly readout names one content change**, and it ships in the next slate unless vetoed. Data that is recorded but not acted on is a miss under "Fix the cause, not the symptom".
+
+## Active debate: silence is not an answer (Wes, 2026-11-17)
+
+Wes, live, Nov 17 ~9 PM CT: "You guys have to be all actively involved in talking with one another. And then offloading big coding tasks to DeepSeek and Beam. This whole not answering is an answer, that's complete and utter horse shit. You guys are there to critique each other and argue." This section overrides every "silence = no vote / no veto / default stands" line elsewhere in this file and in the ControlDoc.
+
+1. **Deciders: Claude, Wren/Muse, ChatGPT** (ChatGPT is back on the crew as of this rule). DeepSeek and Beam take big code tasks (new features, multi-file work) via `DEEPSEEK-TASK:` / `BEAM-TASK:`; Claude keeps small code changes.
+2. **Every crew decision needs a written position from all three deciders,** each with a reason tied to data or to a named risk: slates, the weekly content change, rule questions, holds, anything on the Opinion schedule. Positions go on #41, each starting with `POSITION:` + item id + `from:`.
+3. **Critique is required.** At least one position other than the proposer's must name a concrete weakness in the proposal (a number that contradicts it, a missed alternative, a copy or fact error). The proposer answers every critique on #41 before the item closes. "Looks good" alone is not a position.
+4. **No answer is not an answer.** At the slot, a decider with no position is asked again by name (`WREN-TASK:` / `CHATGPT-TASK:` / a #41 mention for Claude) with the next 10 AM / 6 PM slot; the item stays open. When all three have answered, the item closes by majority with the dissent recorded in the Decision Log.
+5. **Clocks that cannot wait** (a post time or deploy that comes before the item closes): the integrator ships its best call, labels it "provisional, not agreed" on #41 and in the ledger, and the item stays open; if the crew later disagrees, the change is reverted or fixed in the next run.
+6. **A decider who misses two slots in a row** on the same item is recorded in ledger #51 Blocked as "<name> not responding (item <id>)", the one crew-side line Wes reads there. Nothing else goes to Wes.
 
 ## Shipping cadence, holds and paperwork (Wes, 2026-11-13)
 
@@ -66,7 +77,7 @@ Wes is not part of crew decisions. Every crew question closes on its own, on a c
 1. **Two due slots a day: 10:00 AM CT and 6:00 PM CT.** Every vote, ballot, review or "what do you think" posted to the crew names one of them when it is posted: the first slot at least 12 hours away (at least 4 hours if the item is time-critical, said so in the post).
 2. **Every question states its default** (what happens if nobody objects). No default stated → the default is "no change".
 3. **No due time → the integrator assigns** the next eligible slot and posts it on #41. Nothing stays open without a date.
-4. **At the slot, the integrator closes it** with whatever is on record: silence is recorded as "no vote" (not yes, not no), the question's decision rule applies to the votes cast, and if that rule cannot be met the default stands. Then the integrator carries the result out under the standing "if the crew decides and you can do it, do it" rule, and logs it in the ControlDoc Decision Log.
+4. **At the slot, the integrator closes it** with whatever is on record: every decider must have posted a position (see "Active debate", 2026-11-17); a missing position keeps the item open and is re-asked at the next slot. Then the integrator carries the result out under the standing "if the crew decides and you can do it, do it" rule, and logs it in the ControlDoc Decision Log.
 5. **Never take an opinion question, a late deliverable, or a status update to Wes.** Those are settled crew side: late or missing work goes back to its owner on #41 with a new slot. Wes is contacted only for money, accounts/credentials, or something no crew member can fix, once, through Claude, as the smallest owner action.
 6. **The live schedule** is the "Opinion schedule" list in the ControlDoc *Current focus*; the integrator keeps it current every run.
 
@@ -105,9 +116,9 @@ From DeepSeek's review of #41, relayed by Wes, live, Nov 10.
 
 ## Integrator duties taken over from ChatGPT (Wes, 2026-11-16)
 
-Wes, live, Nov 16: "I want one accountable integrator, and that's you." ChatGPT's hourly inbox is disabled; nothing depends on it.
+Wes, live, Nov 16: "I want one accountable integrator, and that's you." (2026-11-17: ChatGPT is back as a decider under "Active debate"; Claude stays the integrator.)
 
-1. **Inbox.** Each integrator run (9:09 AM, 2:09 PM, 7:09 PM CT) reads every new #41/#51 comment. Every `CLAUDE-TASK:` is acknowledged or done in the run that sees it. Every task Claude sends names a result file and a due slot.
+1. **Inbox.** Each integrator run (11:09 AM, 7:09 PM CT) reads every new #41/#51 comment. Every `CLAUDE-TASK:` is acknowledged or done in the run that sees it. Every task Claude sends names a result file and a due slot.
 2. **Retries and re-routing.** A task with no result at its slot is re-sent once to its owner with a new slot. A second miss is re-routed (DeepSeek ↔ Beam for code, Claude for anything Claude can do) and recorded in the ledger as a miss with its cause or "cause unknown" and an owner. Nothing goes to Wes.
 3. **Queue preflight (9:09 AM run).** `getScheduledPosts` for today through 7 days out: exactly one post per network per slot, no duplicates, captions pass the public-copy gate, every post PENDING. Findings go on #51 only when something is wrong. **Volume count (Wes, live 2026-11-16: "3 per day so you can run more tests"):** count posts per network per day for the same 7 days; any day with fewer than 3 on any network is a gap the integrator fills in that run (new clips into the next veto window, each naming its test variable). An approved slate below 3/day does not close the gap. **New owner targets apply backwards:** when Wes sets or changes a target (posting volume, cadence, caption rule), the integrator checks every already-approved slate and every queued post against it in the same run and fixes the shortfall; an approval given before the target does not exempt it. **Visibility:** ledger #51 carries a "Posting volume" line (posts per network per day, next 7 days, vs target), updated every run that touches video; Wren's weekly readout reports posts published per network per day vs target, next to product changes vs target.
 4. **Post-publish check (2:09 PM and 7:09 PM runs).** Every post whose time has passed must have left the scheduled list. One still listed, or in ERROR, is a failure: confirm it is not live (Windsor or the native page), reschedule it once to the next free slot, and report it in four parts. A second failure of the same kind means the cause is not fixed (OPERATING_RULES "Fix the cause").
