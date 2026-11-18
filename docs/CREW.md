@@ -8,8 +8,8 @@ The single roster. If another doc names a different owner, this file and [`OPERA
 |---|---|---|---|
 | **Wes** (owner) | Money, accounts, credentials, anything no agent can fix; posts crew-written copy (~20 min/week) | Crew votes, reviews, status, late work (OPERATING_RULES "Crew opinion deadlines") | Claude only, for those cases |
 | **Claude** (integrator, the one accountable operator since 2026-11-16) | Monitors #41/#51 and makes sure every task gets an answer; dispatch, retries and re-routing for all agents; opens and merges every PR on green `test`; deploy check; ledger #51; Opinion schedule and closing votes; video production; **all** Metricool scheduling, queue preflight and post-publish checks; Drive→Metricool media handoff; daily hold-time tripwire; dashboard upkeep | Analytics reports (Wren's) | `CLAUDE-TASK:` on #41/#51, or `docs/claude-tasks/*.md` |
-| **Wren/Muse** | Daily analytics pull (~10 AM CT), weekly readouts, per-clip funnel, tracking reviews, ControlDoc Wren Status | Opening PRs (her token can't); publishing | `WREN-TASK:` on #41 (she polls every 15 min) |
-| **ChatGPT** | **Removed from the crew by Wes, 2026-11-16 ~10:30 PM CT (live).** No duties, no tasks, no vetoes. | Everything: nothing is routed to it | |
+| **Wren/Muse** | Decider: a position with reasons on every crew decision and slate (OPERATING_RULES "Active debate"); daily analytics pull (~10 AM CT), weekly readouts, per-clip funnel, tracking reviews, ControlDoc Wren Status | Opening PRs (her token can't); publishing | `WREN-TASK:` on #41 (she polls every 15 min) |
+| **ChatGPT** | **Decider again (Wes, live, 2026-11-17 ~9 PM CT):** a position with reasons on every crew decision and slate; critiques Claude's and Wren's calls | Metricool scheduling, merging (Claude) | `CHATGPT-TASK:` on #41 |
 | **DeepSeek** (OpenCode) | Site and test code tasks (e.g. Pro unlock #92, ig-bio backtick fix) | Merging; publishing | `DEEPSEEK-TASK:` on #41; woken by the desktop dispatcher |
 | **Beam** (OpenCode) | Site code tasks (Pro packs #91, `/reel?c=` deep link #90, attribution); read-only code checks | Merging; publishing | `BEAM-TASK:` on #41; woken by the desktop dispatcher |
 | **Codex** | No standing duties (its daily systemd job was retired Nov 6) | — | `CODEX-TASK:` on #41 if ever needed |
@@ -44,6 +44,6 @@ The single roster. If another doc names a different owner, this file and [`OPERA
 
 | Run | When (CT) | Does |
 |---|---|---|
-| Crew integrator | 9:09 AM, 2:09 PM, 7:09 PM daily (owner usage budget; no hourly runs) | Inbox for #41/#51, dispatch and retries, PRs, merges, Opinion schedule, ledger, video scheduling, Metricool queue preflight (9:09) and post-publish checks (2:09, 7:09) |
+| Crew integrator | 11:09 AM and 7:09 PM daily (owner usage budget, 2026-11-17) | Inbox for #41/#51, dispatch and retries, PRs, merges, Opinion schedule, ledger, video scheduling, Metricool queue preflight (9:09) and post-publish checks (2:09, 7:09) |
 | Daily video hold-time check | 12:43 PM, weekdays | Reel watch-time tripwire on #51 |
 | Playtest | Fri, 7:41 PM | Plays the live site as a new visitor per [`playtest/PLAYTEST.md`](playtest/PLAYTEST.md); report in `docs/playtest/`, fixes tasked on #41 |
