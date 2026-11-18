@@ -175,3 +175,15 @@ test('reel twos-vs-seven deals a pair of 2s vs 7 that should split', () => {
   const r = newBjRound(Math.random, { player: clip.player, dealer: [clip.dealer, clip.hole] });
   assert.deepEqual(bestAction(r).optimal, ['split']);
 });
+
+test('reel Wed Nov 25 slate slugs deal the described decisions', () => {
+  for (const [slug, want] of [['aces-vs-ace', 'split'], ['double-soft18-vs-three', 'double']]) {
+    const clip = reelClipFor(slug);
+    assert.ok(clip, slug);
+    const r = newBjRound(Math.random, { player: clip.player, dealer: [clip.dealer, clip.hole] });
+    assert.deepEqual(bestAction(r).optimal, [want], `${slug} should ${want}`);
+  }
+  const vp = reelClipFor('fives-not-the-straight');
+  assert.equal(vp.game, 'videopoker');
+  assert.deepEqual(bestHold(vp.hand).holds.map(Boolean), [true, true, false, false, false]);
+});

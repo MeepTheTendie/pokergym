@@ -279,6 +279,26 @@ const SLUGS = {
     dealer: C(7, 1),              // 7♥
     hole: C(10, 3),               // 10♣
   },
+  // Wed Nov 25 slate (docs/video/slate-20261125.md).
+  'fives-not-the-straight': {
+    game: 'videopoker',
+    label: 'THROW AWAY A STRAIGHT DRAW',
+    hand: [C(5, 3), C(5, 2), C(6, 1), C(7, 0), C(8, 3)], // 5♣ 5♦ 6♥ 7♠ 8♣
+  },
+  'aces-vs-ace': {
+    game: 'blackjack',
+    label: 'TWO ACES AGAINST AN ACE',
+    player: [C(14, 0), C(14, 2)], // A♠ A♦
+    dealer: C(14, 1),             // A♥
+    hole: C(9, 3),                // 9♣
+  },
+  'double-soft18-vs-three': {
+    game: 'blackjack',
+    label: 'DOUBLE ON 18',
+    player: [C(14, 2), C(7, 3)],  // A♦ 7♣ = soft 18
+    dealer: C(3, 0),              // 3♠
+    hole: C(10, 1),               // 10♥
+  },
 };
 
 // Accept "p1-QF", "p1-AF", "p1", case-insensitively, or one of the Nov 13+
