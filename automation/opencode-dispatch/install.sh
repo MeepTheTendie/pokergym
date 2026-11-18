@@ -58,7 +58,13 @@ WantedBy=timers.target
 EOF
 
 systemctl --user daemon-reload
-systemctl --user enable --now pokergym-opencode-dispatch.timer
+if [[ -f /etc/systemd/system/pokergym-opencode-dispatch.timer ]]; then
+  # install-wake.sh already set up the system (wake-from-sleep) timer; keep the user timer off.
+  systemctl --user disable --now pokergym-opencode-dispatch.timer 2>/dev/null || true
+  echo 'Wake-from-sleep system timer found: user timer left disabled (scripts refreshed).'
+else
+  systemctl --user enable --now pokergym-opencode-dispatch.timer
+fi
 echo
 echo 'Installed. First tick records existing #41 tasks as a baseline (they are not replayed).'
 echo "Dry run:  $BIN/dispatch.sh --dry-run"
