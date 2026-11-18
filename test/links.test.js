@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   PUBLISHED_REFS, classifyRef, shareUrl, inviteUrl, buildDailyShareText,
   parseEntryParams, isSharedDayCurrent, cleanEntrySearch,
-  REFERRER_REFS, refFromReferrer,
+  REFERRER_REFS, refFromReferrer, cleanCampaign,
 } from '../src/rpg/links.js';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -25,10 +25,32 @@ test("classifyRef maps 'none', blank and missing to 'none'", () => {
   assert.equal(classifyRef('none'), 'other'); // 'none' as a literal value is not a published ref
 });
 
-test("classifyRef maps junk to 'other'", () => {
+test('classifyRef maps junk to \'other\'', () => {
   for (const junk of ['SHARE', 'Share', 'share ', ' hn', 'web games', 'x'.repeat(64), '__proto__',
     'constructor', 'toString', 'hasOwnProperty', 'share,invite', '<script>', '0']) {
     assert.equal(classifyRef(junk), 'other', junk);
+  }
+});
+
+test('cleanCampaign keeps clean campaign values unchanged', () => {
+  for (const value of ['ig-bio', 'p1-QF', 'hooktest1112', 'wes-daily', 'ig', 'reels', 'x']) {
+    assert.equal(cleanCampaign(value), value);
+  }
+});
+
+test('cleanCampaign strips trailing backticks, quotes and whitespace', () => {
+  assert.equal(cleanCampaign('ig-bio`'), 'ig-bio');
+  assert.equal(cleanCampaign('ig-bio``'), 'ig-bio');
+  assert.equal(cleanCampaign('ig-bio\'`'), 'ig-bio');
+  assert.equal(cleanCampaign('ig-bio"'), 'ig-bio');
+  assert.equal(cleanCampaign(' ig-bio` '), 'ig-bio');
+  assert.equal(cleanCampaign('\tig-bio\u201d\n'), 'ig-bio');
+  assert.equal(cleanCampaign('p1-QF`\u2019'), 'p1-QF');
+});
+
+test('cleanCampaign returns empty for empty, blank or backtick-only values', () => {
+  for (const value of [undefined, null, '', '   ', '`', '``', '\'"`', ' \t\n ', '\u2018\u2019']) {
+    assert.equal(cleanCampaign(value), '', String(value));
   }
 });
 

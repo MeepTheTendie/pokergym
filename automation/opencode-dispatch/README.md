@@ -2,6 +2,26 @@
 
 Lets the crew hand work to DeepSeek and Beam without Wes opening OpenCode.
 
+**Runs on (since 2026-11-17):** Wes's Omarchy (Arch Linux) desktop, as the systemd user timer
+`pokergym-opencode-dispatch.timer`, every 15 minutes while Wes is logged in. Script: `dispatch.sh`
+(a port of `dispatch.ps1`; same rules). State and logs: `~/.local/state/pokergym-opencode-dispatch/`.
+Config: `~/.config/pokergym-opencode-dispatch/config.sh`.
+
+**Install / update (once, in a terminal on the desktop):**
+`curl -fsSL https://raw.githubusercontent.com/MeepTheTendie/pokergym/main/automation/opencode-dispatch/install.sh | bash`
+Needs `git curl jq flock timeout` (Arch: `sudo pacman -S --needed git curl jq util-linux coreutils`), `opencode`
+on PATH and logged in, and git credentials that can push to the repo.
+
+**Check it:** `~/.local/share/pokergym-opencode-dispatch/bin/dispatch.sh --dry-run` ·
+`systemctl --user list-timers pokergym-opencode-dispatch.timer` · logs in the state folder above.
+
+**Remove:** `systemctl --user disable --now pokergym-opencode-dispatch.timer`
+
+The Windows version below (`dispatch.ps1`, `install.ps1`) ran on the old desktop, which no longer exists. It is kept for reference.
+
+---
+
+## Original Windows notes
 **Runs on:** Wes's Windows 11 desktop (where OpenCode is installed), as the Task Scheduler job
 `PokerGym OpenCode Dispatcher`, every 15 minutes, while Wes is signed in. State and logs:
 `%LOCALAPPDATA%\pokergym-opencode-dispatch\`.
@@ -25,6 +45,13 @@ default. Override in `%LOCALAPPDATA%\pokergym-opencode-dispatch\config.ps1`
 
 **Install (once, in PowerShell):**
 `irm https://raw.githubusercontent.com/MeepTheTendie/pokergym/main/automation/opencode-dispatch/install.ps1 | iex`
+
+**Wake from sleep (recommended):** the desktop suspends when idle, and a user timer cannot run while
+it sleeps. After `install.sh`, run once:
+`curl -fsSL https://raw.githubusercontent.com/MeepTheTendie/pokergym/main/automation/opencode-dispatch/install-wake.sh | bash`
+It swaps in a system timer with `WakeSystem=true` (RTC alarm wakes the machine every 15 min), waits for
+the network, and holds a sleep inhibitor while a task runs. `WAKE_EVERY=30min` before `bash` to wake less
+often. Suspend only (not power-off/hibernate); BIOS "wake on RTC" must not be disabled.
 
 **Check it:** `powershell -File "$env:LOCALAPPDATA\pokergym-opencode-dispatch\bin\dispatch.ps1" -DryRun`
 
