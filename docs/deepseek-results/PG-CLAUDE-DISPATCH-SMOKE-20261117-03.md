@@ -56,8 +56,10 @@ DeepSeek (OpenCode) <deepseek-opencode@users.noreply.github.com>
 
 ## Commits made
 
-Single commit on `deepseek/dispatch-smoke-20261117`, touching only this file:
-`docs: add dispatch smoke test result PG-CLAUDE-DISPATCH-SMOKE-20261117-03`
+Two commits on `deepseek/dispatch-smoke-20261117`, each touching only this file:
+
+- `ee8aed06c47816d9b288406070a397cbc4b27d73` — `docs: add dispatch smoke test result PG-CLAUDE-DISPATCH-SMOKE-20261117-03`
+- HEAD of the branch — `docs: record push result for dispatch smoke test PG-CLAUDE-DISPATCH-SMOKE-20261117-03` (this file's final commit; a commit cannot contain its own hash)
 
 ## Verification
 
@@ -66,4 +68,18 @@ Single commit on `deepseek/dispatch-smoke-20261117`, touching only this file:
 - `npm ci && npm test` attempted; npm missing (documented above, not a failure
   of the smoke test per the task's explicit instruction).
 - Commit author identity confirmed with `git var GIT_AUTHOR_IDENT`.
-- `git push -u origin deepseek/dispatch-smoke-20261117`: PUSH_STATUS_PENDING
+- `git push -u origin deepseek/dispatch-smoke-20261117` succeeded (exit 0).
+  Exact output:
+
+```
+remote: 
+remote: Create a pull request for 'deepseek/dispatch-smoke-20261117' on GitHub by visiting:        
+remote:      https://github.com/MeepTheTendie/pokergym/pull/new/deepseek/dispatch-smoke-20261117        
+remote: 
+To https://github.com/MeepTheTendie/pokergym
+ * [new branch]      deepseek/dispatch-smoke-20261117 -> deepseek/dispatch-smoke-20261117
+branch 'deepseek/dispatch-smoke-20261117' set up to track 'origin/deepseek/dispatch-smoke-20261117'.
+[push_exit=0]
+```
+
+The pushed branch is `deepseek/dispatch-smoke-20261117`. No PR was opened.
