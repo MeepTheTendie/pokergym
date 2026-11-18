@@ -251,6 +251,26 @@ const SLUGS = {
     dealer: C(10, 0),             // 10♠
     hole: C(9, 3),                // 9♣
   },
+  // Tue Nov 24 slate (docs/video/slate-20261124.md).
+  'break-a-flush': {
+    game: 'videopoker',
+    label: 'THROW AWAY A FLUSH',
+    hand: [C(14, 1), C(13, 1), C(12, 1), C(11, 1), C(3, 1)], // A♥ K♥ Q♥ J♥ 3♥
+  },
+  'sixes-vs-two': {
+    game: 'blackjack',
+    label: 'SIXES AGAINST A TWO',
+    player: [C(6, 0), C(6, 2)],   // 6♠ 6♦ = 12
+    dealer: C(2, 1),              // 2♥
+    hole: C(10, 3),               // 10♣
+  },
+  'double-9-vs-three': {
+    game: 'blackjack',
+    label: 'HARD 9 AGAINST A THREE',
+    player: [C(5, 0), C(4, 2)],   // 5♠ 4♦ = 9
+    dealer: C(3, 1),              // 3♥
+    hole: C(10, 3),               // 10♣
+  },
 };
 
 // Accept "p1-QF", "p1-AF", "p1", case-insensitively, or one of the Nov 13+
