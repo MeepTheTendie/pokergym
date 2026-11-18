@@ -30,6 +30,7 @@ status: **PASS**
 
 ## Commits
 - `af6a230` (`beam/dispatch-smoke-20261117`) — `PG-CLAUDE-DISPATCH-SMOKE-20261117-04: smoke check (npm ci && npm test pass)`
+- `4765ec3` (`beam/dispatch-smoke-20261117`) — `PG-CLAUDE-DISPATCH-SMOKE-20261117-04: record commit hash in result file` (result-file touch-up)
 
 ## Bounds respected
 - One new docs file only; no product/test/tracking/config changes.
