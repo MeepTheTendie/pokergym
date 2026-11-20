@@ -28,7 +28,7 @@ export const scenarios = [
     answer: 'Yes. Always split aces, against every dealer upcard from 2 to ace, including a 10.',
     why: [
       'Two aces together are a soft 12, one of the worst starting hands. Split, each ace becomes the start of a hand where any ten-value card (about 31% of the shoe) makes 21. That is why aces, along with eights, are the pair basic strategy splits against everything.',
-      'Split vs hit, per 1 unit bet (coach, six decks, dealer stands on soft 17, double after split): vs 2 +0.49 vs +0.08 \u00b7 vs 3 +0.53 vs +0.10 \u00b7 vs 4 +0.58 vs +0.13 \u00b7 vs 5 +0.63 vs +0.16 \u00b7 vs 6 +0.68 vs +0.19 \u00b7 vs 7 +0.48 vs +0.16 \u00b7 vs 8 +0.36 vs +0.09 \u00b7 vs 9 +0.24 vs 0.00 \u00b7 vs 10 +0.18 vs \u22120.07 \u00b7 vs ace +0.12 vs \u22120.02. The split wins by at least 14 cents per dollar against every card, so there is no exception to learn.',
+      'Split vs hit, per 1 unit bet (coach, six decks, dealer stands on soft 17, double after split, split aces get one card each, no resplitting aces): vs 2 +0.49 vs +0.08 \u00b7 vs 3 +0.53 vs +0.10 \u00b7 vs 4 +0.58 vs +0.13 \u00b7 vs 5 +0.63 vs +0.16 \u00b7 vs 6 +0.68 vs +0.19 \u00b7 vs 7 +0.48 vs +0.16 \u00b7 vs 8 +0.36 vs +0.09 \u00b7 vs 9 +0.24 vs 0.00 \u00b7 vs 10 +0.18 vs \u22120.07 \u00b7 vs ace +0.12 vs \u22120.02. The split wins by at least 14 cents per dollar against every card, so there is no exception to learn.',
     ],
     cta: ['Play this exact hand', '/web/?drill=bj-aa-v10&ref=guide'],
     related: [['blackjack-88-vs-10-split', '8-8 against a 10: split or hit?'], ['blackjack-1010-vs-6-stand', '10-10 against a 6: split or stand?'], ['blackjack-99-vs-7-stand', '9-9 against a 7: split or stand?']],
