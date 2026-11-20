@@ -24,7 +24,7 @@ export const scenarios = [
     slug: 'blackjack-aces-vs-10-split',
     seoTitle: 'Should you always split aces? Yes, even vs a 10 (2026)',
     title: 'Should you always split aces in blackjack?',
-    description: 'Yes. Split aces against every dealer card, 2 through ace. Against a 10 splitting is worth about +18 cents per dollar vs \u22127 for hitting. EVs for every upcard, practice free.',
+    description: 'Yes. Split aces against every dealer card, 2 through ace. Vs a 10 the split is worth about +18 cents per dollar, hitting \u22127. EV for every upcard.',
     answer: 'Yes. Always split aces, against every dealer upcard from 2 to ace, including a 10.',
     why: [
       'Two aces together are a soft 12, one of the worst starting hands. Split, each ace becomes the start of a hand where any ten-value card (about 31% of the shoe) makes 21. That is why aces, along with eights, are the pair basic strategy splits against everything.',
