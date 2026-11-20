@@ -319,6 +319,26 @@ const SLUGS = {
     label: 'DUMP THE PAIR',
     hand: [C(12, 0), C(11, 0), C(10, 0), C(3, 2), C(3, 3)], // Q♠ J♠ 10♠ 3♦ 3♣
   },
+  // Fri Nov 27 slate (docs/video/slate-20261127.md).
+  'double-on-17': {
+    game: 'blackjack',
+    label: 'DOUBLE ON 17',
+    player: [C(14, 0), C(6, 1)],  // A♠ 6♥ = soft 17
+    dealer: C(3, 2),              // 3♦
+    hole: C(10, 3),               // 10♣
+  },
+  'soft13-vs-six': {
+    game: 'blackjack',
+    label: 'ACE-TWO AGAINST A 6',
+    player: [C(14, 3), C(2, 2)],  // A♣ 2♦ = soft 13
+    dealer: C(6, 0),              // 6♠
+    hole: C(10, 1),               // 10♥
+  },
+  'three-to-a-royal': {
+    game: 'videopoker',
+    label: 'KEEP THREE, NOT FOUR',
+    hand: [C(13, 1), C(12, 1), C(11, 1), C(10, 0), C(4, 2)], // K♥ Q♥ J♥ 10♠ 4♦
+  },
 };
 
 // Accept "p1-QF", "p1-AF", "p1", case-insensitively, or one of the Nov 13+
