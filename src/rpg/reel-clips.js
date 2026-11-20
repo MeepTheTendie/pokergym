@@ -279,6 +279,46 @@ const SLUGS = {
     dealer: C(7, 1),              // 7♥
     hole: C(10, 3),               // 10♣
   },
+  // Wed Nov 25 slate (docs/video/slate-20261125.md).
+  'fives-not-the-straight': {
+    game: 'videopoker',
+    label: 'THROW AWAY A STRAIGHT DRAW',
+    hand: [C(5, 3), C(5, 2), C(6, 1), C(7, 0), C(8, 3)], // 5♣ 5♦ 6♥ 7♠ 8♣
+  },
+  'aces-vs-ace': {
+    game: 'blackjack',
+    label: 'TWO ACES AGAINST AN ACE',
+    player: [C(14, 0), C(14, 2)], // A♠ A♦
+    dealer: C(14, 1),             // A♥
+    hole: C(9, 3),                // 9♣
+  },
+  'double-soft18-vs-three': {
+    game: 'blackjack',
+    label: 'DOUBLE ON 18',
+    player: [C(14, 2), C(7, 3)],  // A♦ 7♣ = soft 18
+    dealer: C(3, 0),              // 3♠
+    hole: C(10, 1),               // 10♥
+  },
+  // Thu Nov 26 slate (docs/video/slate-20261126.md).
+  'soft15-vs-five': {
+    game: 'blackjack',
+    label: 'ACE-FOUR AGAINST A 5',
+    player: [C(14, 3), C(4, 2)],  // A♣ 4♦ = soft 15
+    dealer: C(5, 0),              // 5♠
+    hole: C(10, 1),               // 10♥
+  },
+  'double-on-14': {
+    game: 'blackjack',
+    label: 'DOUBLE ON 14',
+    player: [C(14, 1), C(3, 0)],  // A♥ 3♠ = soft 14
+    dealer: C(6, 2),              // 6♦
+    hole: C(10, 3),               // 10♣
+  },
+  'dump-the-threes': {
+    game: 'videopoker',
+    label: 'DUMP THE PAIR',
+    hand: [C(12, 0), C(11, 0), C(10, 0), C(3, 2), C(3, 3)], // Q♠ J♠ 10♠ 3♦ 3♣
+  },
 };
 
 // Accept "p1-QF", "p1-AF", "p1", case-insensitively, or one of the Nov 13+
