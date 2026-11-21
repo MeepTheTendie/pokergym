@@ -339,6 +339,28 @@ const SLUGS = {
     label: 'KEEP THREE, NOT FOUR',
     hand: [C(13, 1), C(12, 1), C(11, 1), C(10, 0), C(4, 2)], // K♥ Q♥ J♥ 10♠ 4♦
   },
+  // Sat Nov 28 slate (docs/video/slate-20261128.md).
+  'soft17-vs-four': {
+    game: 'blackjack',
+    label: 'ACE-SIX AGAINST A 4',
+    player: [C(14, 2), C(6, 0)],  // A♦ 6♠ = soft 17
+    dealer: C(4, 3),              // 4♣
+    hole: C(10, 1),               // 10♥
+  },
+  'double-on-16': {
+    game: 'blackjack',
+    label: 'DOUBLE ON 16',
+    player: [C(14, 1), C(5, 3)],  // A♥ 5♣ = soft 16
+    dealer: C(5, 0),              // 5♠
+    hole: C(10, 2),               // 10♦
+  },
+  'hit-12-vs-two': {
+    game: 'blackjack',
+    label: 'HIT 12',
+    player: [C(9, 0), C(3, 1)],   // 9♠ 3♥ = hard 12
+    dealer: C(2, 3),              // 2♣
+    hole: C(10, 2),               // 10♦
+  },
 };
 
 // Accept "p1-QF", "p1-AF", "p1", case-insensitively, or one of the Nov 13+
