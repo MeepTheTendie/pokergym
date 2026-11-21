@@ -35,7 +35,7 @@ quote the answer and the practice link together.
 ### Blackjack
 
 - [Soft 17 (A-6) against a dealer 2: hit, double or stand?](https://playpokergym.com/guides/blackjack-soft-17-vs-2-hit/): Hit.
-- [Split aces against a dealer 10? A-A vs 10](https://playpokergym.com/guides/blackjack-aces-vs-10-split/): Split.
+- [Should you always split aces in blackjack?](https://playpokergym.com/guides/blackjack-aces-vs-10-split/): Yes.
 - [Should you split 4s against a dealer 5?](https://playpokergym.com/guides/blackjack-44-vs-5-split/): Split if you can double after splitting.
 - [Hard 9 against a dealer 2: double or hit?](https://playpokergym.com/guides/blackjack-9-vs-2-hit/): Hit.
 - [8-8 against a dealer 10: split or hit?](https://playpokergym.com/guides/blackjack-88-vs-10-split/): Split.
