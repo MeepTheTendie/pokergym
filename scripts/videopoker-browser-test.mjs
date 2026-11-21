@@ -144,11 +144,12 @@ await evaluate(`(() => {
 })()`);
 await waitFor('window.__vpReplies.length === 3');
 await evaluate('document.getElementById("btnAsk").click()');
-const expected = await evaluate('window.__vpReplies[2].data.result.ev.toFixed(3)');
-assert.ok((await evaluate('document.getElementById("advice").textContent')).includes('Average return: ' + expected + ' per hand.'), 'Pending worker uses synchronous coaching for the current table');
+// Coach copy reads EV as cents back per $1 bet (src/ui/ev-copy.js returnPerDollar, playtest 2026-11-20).
+const expected = (await evaluate('window.__vpReplies[2].data.result.ev * 100')).toFixed(1) + '¢ back per $1 bet';
+assert.ok((await evaluate('document.getElementById("advice").textContent')).includes('Average return: ' + expected + '.'), 'Pending worker uses synchronous coaching for the current table');
 // Distinct sentinel makes this deterministic even when two tables share an EV.
 await evaluate('window.__vpReplies[1].data.result.ev = -123; releaseVp(2); releaseVp(1); document.getElementById("btnAsk").click()');
-assert.ok((await evaluate('document.getElementById("advice").textContent')).includes('Average return: ' + expected + ' per hand.'), 'Coach keeps newest table answer after stale reply');
+assert.ok((await evaluate('document.getElementById("advice").textContent')).includes('Average return: ' + expected + '.'), 'Coach keeps newest table answer after stale reply');
 console.log('Pay-table changes recompute coaching; stale replies cannot replace current advice.');
 
 // Carry a nondefault practice selection into the shared Daily Drill.
