@@ -1795,9 +1795,11 @@ function setControls() {
   el('btnDraw').hidden = !vp;
   el('rowVariant').hidden = !vp;
   if (vp) renderVariantSelect();
-  el('rowActions').hidden = gameId !== 'blackjack';
-  el('rowBet').hidden = gameId !== 'baccarat';
-  el('rowPick').hidden = gameId !== 'holdem';
+  el('rowActions').hidden = gameId !== 'blackjack' || handDone;
+  el('rowBet').hidden = gameId !== 'baccarat' || handDone;
+  el('rowPick').hidden = gameId !== 'holdem' || handDone;
+  const battleActionBar = document.querySelector('.battle-action-bar');
+  if (battleActionBar) battleActionBar.hidden = handDone;
   el('btnAsk').disabled = handDone;
   // The daily drill is scored as a clean read: no coach, so nobody can farm the
   // streak by copying answers. Hide it after a hand so a dead disabled control
@@ -2027,6 +2029,16 @@ function startHand() {
 
   scheduleFirstNudge();
   revealHand();
+
+  // On a small screen a new hand can open with the table scrolled out of view
+  // (the previous hand's scroll position carries over). Pull the table back
+  // into view so the cards and the action row are visible.
+  if (window.innerWidth <= 640) {
+    document.querySelector('.battle-table')?.scrollIntoView({
+      block: 'start',
+      behavior: reduceMotion() ? 'auto' : 'smooth',
+    });
+  }
 
   // A natural settles before anybody gets to touch anything.
   if (gameId === 'blackjack' && round.settled) settleBlackjack();
