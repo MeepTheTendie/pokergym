@@ -67,9 +67,9 @@ Why: Seventeen only wins when the dealer busts, and a dealer 2 busts about 35% o
 Page: https://playpokergym.com/guides/blackjack-soft-17-vs-2-hit/
 Practice: https://playpokergym.com/web/?drill=bj-soft17-v2&ref=guide
 
-### Split aces against a dealer 10? A-A vs 10
-Split. Aces are split against every dealer card, including a 10.
-Why: Two aces together are a soft 12, one of the worst starting hands. Split, each ace becomes the start of a hand where any ten-value card (about 31% of the shoe) makes 21.
+### Should you always split aces in blackjack?
+Yes. Always split aces, against every dealer upcard from 2 to ace, including a 10.
+Why: Two aces together are a soft 12, one of the worst starting hands. Split, each ace becomes the start of a hand where any ten-value card (about 31% of the shoe) makes 21. That is why aces, along with eights, are the pair basic strategy splits against everything.
 Page: https://playpokergym.com/guides/blackjack-aces-vs-10-split/
 Practice: https://playpokergym.com/web/?drill=bj-aa-v10&ref=guide
 
