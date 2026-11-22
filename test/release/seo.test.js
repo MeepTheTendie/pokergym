@@ -160,3 +160,35 @@ test('meta descriptions fit the 25–160 characters search engines show', async 
     assert.ok(text.length >= 25 && text.length <= 160, `${file}: description is ${text.length} characters`);
   }
 });
+
+test('the guide hub targets search words and declares its list and breadcrumb', async () => {
+  const html = await read('public/guides/index.html');
+  assert.match(html, /<title>Casino Strategy Guides: Blackjack, Video Poker &amp; Baccarat<\/title>/);
+  assert.match(html, /<h1>Casino Strategy Guides: Blackjack, Video Poker &amp; Baccarat<\/h1>/);
+  const nodes = jsonLd(html);
+  const list = nodes.find((node) => node['@type'] === 'CollectionPage')?.mainEntity;
+  assert.equal(list?.['@type'], 'ItemList');
+  const linked = new Set([...html.matchAll(/<li><a href="(\/guides\/[^"]+\/)"/g)].map((m) => `https://playpokergym.com${m[1]}`));
+  assert.equal(list.itemListElement.length, linked.size, 'ItemList covers every guide on the hub');
+  for (const item of list.itemListElement) assert.ok(linked.has(item.url), `${item.url} is linked on the hub`);
+  assert.ok(nodes.some((node) => node['@type'] === 'BreadcrumbList'), 'BreadcrumbList');
+});
+
+test('guide titles fit in a search result (65 characters or fewer)', async () => {
+  const { readdir } = await import('node:fs/promises');
+  const guides = (await readdir(path.join(root, 'public/guides'), { withFileTypes: true }))
+    .filter((d) => d.isDirectory()).map((d) => `public/guides/${d.name}/index.html`);
+  for (const file of ['public/guides/index.html', ...guides]) {
+    const raw = /<title>([^<]*)<\/title>/.exec(await read(file))?.[1] ?? '';
+    const text = raw.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+    assert.ok(text.length <= 65, `${file}: title is ${text.length} characters`);
+  }
+});
+
+test('13 vs 2 FAQ gives the basic-strategy answer on the page and in FAQPage markup', async () => {
+  const html = await read('public/guides/blackjack-13-vs-2-stand/index.html');
+  const faq = jsonLd(html).find((node) => node['@type'] === 'FAQPage');
+  const answer = faq.mainEntity.find((q) => q.name === 'Do you hit 13 against a 2?').acceptedAnswer.text;
+  assert.match(answer, /Stand on hard 13 against a dealer 2 through 6, and hit it against 7 through ace/);
+  assert.ok(html.includes(`<p>${answer}</p>`), 'visible answer matches the markup');
+});

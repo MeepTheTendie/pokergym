@@ -2,6 +2,7 @@
 // scenario list the pages are built from. Run after build-scenarios.mjs.
 //   node scripts/build-index.mjs
 import { readFileSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { scenarios } from './scenarios.mjs';
 
@@ -17,11 +18,36 @@ const LONG_GUIDES = [
   '/guides/holdem-best-five/', '/guides/weekly-01/',
 ];
 
+// Per-page <lastmod>: the date the page's HTML last changed in git, so search
+// engines re-crawl the pages that actually changed. A page with uncommitted
+// changes (being edited in this run) gets today's date in America/Chicago.
+// Without git history (e.g. a tarball) it falls back to UPDATED.
+const SOURCE = {
+  '/': 'web/landing.html',
+  '/web/': 'web/index.html',
+  '/web/privacy': 'web/privacy.html',
+};
+const sourceFor = url => SOURCE[url] ?? `public${url}index.html`;
+const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago' }).format(new Date());
+function git(args) {
+  return execFileSync('git', args, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+}
+function lastmod(url) {
+  const file = sourceFor(url);
+  try {
+    if (git(['status', '--porcelain', '--', file])) return today();
+    return git(['log', '-1', '--format=%cs', '--', file]) || UPDATED;
+  } catch {
+    return UPDATED;
+  }
+}
+
 function sitemap() {
+  const row = (url, priority) => `  <url><loc>${BASE}${url}</loc><lastmod>${lastmod(url)}</lastmod><priority>${priority}</priority></url>`;
   const rows = [
-    ...CORE.map(([url, priority]) => `  <url><loc>${BASE}${url}</loc><lastmod>${UPDATED}</lastmod><priority>${priority}</priority></url>`),
-    ...LONG_GUIDES.map(url => `  <url><loc>${BASE}${url}</loc><lastmod>${UPDATED}</lastmod><priority>0.8</priority></url>`),
-    ...scenarios.map(s => `  <url><loc>${BASE}/guides/${s.slug}/</loc><lastmod>${UPDATED}</lastmod><priority>0.7</priority></url>`),
+    ...CORE.map(([url, priority]) => row(url, priority)),
+    ...LONG_GUIDES.map(url => row(url, 0.8)),
+    ...scenarios.map(s => row(`/guides/${s.slug}/`, 0.7)),
   ];
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${rows.join('\n')}\n</urlset>\n`;
 }
