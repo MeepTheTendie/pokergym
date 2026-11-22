@@ -199,3 +199,15 @@ test('reel Thu Nov 26 slate slugs deal the described decisions', () => {
   assert.equal(vp.game, 'videopoker');
   assert.deepEqual(bestHold(vp.hand).holds.map(Boolean), [true, true, true, false, false]);
 });
+
+test('reel Fri Nov 27 slate slugs deal the described decisions', () => {
+  for (const slug of ['double-on-17', 'soft13-vs-six']) {
+    const clip = reelClipFor(slug);
+    assert.ok(clip, slug);
+    const r = newBjRound(Math.random, { player: clip.player, dealer: [clip.dealer, clip.hole] });
+    assert.deepEqual(bestAction(r).optimal, ['double'], `${slug} should double`);
+  }
+  const vp = reelClipFor('three-to-a-royal');
+  assert.equal(vp.game, 'videopoker');
+  assert.deepEqual(bestHold(vp.hand).holds.map(Boolean), [true, true, true, false, false]);
+});
