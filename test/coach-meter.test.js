@@ -48,5 +48,5 @@ test('Ask coach names the cards to keep', () => {
 test('a correct blackjack or video-poker play says why', () => {
   assert.match(src, /function goodRead\(why\)/);
   assert.match(src, /why: `\$\{reasonFor\(keptBest/);
-  assert.match(src, /averages \$\{before\.ev\.toFixed\(3\)\} per hand, the best of your choices\./);
+  assert.match(src, /why: `\$\{ACTION_LABEL\[before\.action\]\} \$\{resultPerDollar\(before\.ev\)\}, the best of your choices\./);
 });

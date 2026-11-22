@@ -7,6 +7,7 @@ import {
   VARIANTS, variantById, DEFAULT_VARIANT, rowForWin,
 } from '../src/games/videopoker.js';
 import { bestHold } from '../src/coach/videopoker.js';
+import { reasonFor } from '../src/coach/videopoker-reason.js';
 import {
   newRound as newBjRound, legalActions, sumHand, outcomeLabel,
   hit as bjHit, stand as bjStand, double as bjDouble, split as bjSplit,
@@ -35,6 +36,7 @@ import { createAnalytics } from '../src/rpg/analytics.js';
 import { captureDrillPlan, restoreDrillPlan, BLACKJACK_DRILLS, DRILL_HANDS, DRILL_GAMES, findDrill, drillPlanStartingWith } from '../src/rpg/drills.js';
 import { reelClipFor } from '../src/rpg/reel-clips.js';
 import { revealDelta } from '../src/ui/reveal.js';
+import { resultPerDollar, returnPerDollar, perDollarShort, blackjackCorrection } from '../src/ui/ev-copy.js';
 import { restorePro, proStatus } from '../src/rpg/pro.js';
 import { drawArt, drawTrainerBack } from './characters.js';
 import audio from './audio.js?v=20261017-vegas1';
@@ -701,6 +703,14 @@ function renderToday() {
   const daily = dailyOf(profile);
   renderDailyHistory(daily.history, key);
   renderDailySquares(daily, key);
+  // A finished drill must not leave the hero asking a question the player just
+  // answered. Reset to the question when a new day's drill is ready.
+  const title = el('todayTitle');
+  if (title) {
+    title.textContent = daily.lastKey === key
+      ? `You got ${(daily.history.find(entry => entry.key === key)?.results ?? []).filter(Boolean).length} out of ${DAILY_HANDS} today.`
+      : 'Can you get 5 out of 5?';
+  }
   if (daily.lastKey === key) {
     const results = daily.history.find(entry => entry.key === key)?.results ?? [];
     const text = dailyShareText(key, results, dailyNumber(key));
@@ -1460,7 +1470,7 @@ function renderPotential() {
   el('potentialText').textContent =
     g.label === 'No paying pair'
       ? 'Nothing here pays. Even the best hold still loses on average.'
-      : `Best available return: ${best.ev.toFixed(2)} per hand on this pay table.`;
+      : `Best available return: ${returnPerDollar(best.ev)} on this pay table.`;
 }
 
 /* ---------------- battle: cards on the table ---------------- */
@@ -1655,7 +1665,7 @@ function renderStatus() {
     el('handGrade').textContent = best.action ? ACTION_LABEL[best.action] : 'Deal';
     setGauge((best.ev + 1) * 40, best.ev >= 0.1 ? 'high' : best.ev >= -0.1 ? 'mid' : 'low');
     el('potentialText').textContent = best.action
-      ? `Best play: ${ACTION_LABEL[best.action]} · average result ${best.ev.toFixed(2)} per hand`
+      ? `Best play: ${ACTION_LABEL[best.action]} · ${resultPerDollar(best.ev)}`
       : 'Natural. There is no decision left to make.';
     return;
   }
@@ -2023,6 +2033,7 @@ function startHand() {
   message.textContent = battleMessage(gameId, {
     daily: dailyMode,
     dailyIntro: dailyMode && dailyRun && dailyRun.index === 0,
+    quizType: gameId === 'baccarat' ? round?.quiz?.type : null,
   });
   el('masterPrompt').hidden = true;
   renderBattleLabel(introductory);
@@ -2115,10 +2126,10 @@ function settleHand({ optimal, difficulty, line, review, why }) {
   el('battleEndRow').hidden = false;
 
   const say = coached
-    ? `${gym.leader}: That was the coach’s answer. The coach’s panel explains it. This hand does not count.`
+    ? 'That was the coach’s answer. The coach’s panel explains it. This hand does not count.'
     : optimal
-      ? `${gym.leader}: ${goodRead(why)}`
-      : `${gym.leader}: Not quite. ${betterPlay(review)}`;
+      ? goodRead(why)
+      : `Not quite. ${betterPlay(review)}`;
   const gainLine = coached
     ? (optimal ? `Learning rep: +${fmt(applied.gained)} XP. No score and no streak change.` : 'Coached hand. No score. Read the review below.')
     : optimal
@@ -2699,7 +2710,7 @@ function doDraw() {
     quiz: { choices: Array.from({ length: 32 }, (_, mask) => mask.toString(2).padStart(5, '0')),
       optimal: best.optimal.map(pattern => pattern.map(Number).join('')) },
     chosen: 'Hold ' + (round.hand.filter((_, i) => round.holds[i]).map(cardLabel).join(' ') || 'none'),
-    correction: 'Hold ' + (round.hand.filter((_, i) => best.holds[i]).map(cardLabel).join(' ') || 'none') + `. Average return: ${best.ev.toFixed(3)} per hand on this pay table.`,
+    correction: 'Hold ' + (round.hand.filter((_, i) => best.holds[i]).map(cardLabel).join(' ') || 'none') + `. Average return: ${returnPerDollar(best.ev)} on this pay table.`,
   };
   // The pay table lists the average return per hand. The draw result is shown
   // for learning; the decision score comes from the hold, not the payout.
@@ -2710,7 +2721,7 @@ function doDraw() {
     optimal,
     difficulty: handDifficulty(round.result),
     review,
-    why: `${reasonFor(keptBest, variantById(round.variantId))} Average return: ${best.ev.toFixed(3)} per hand.`,
+    why: `${reasonFor(keptBest, variantById(round.variantId))} Average return: ${returnPerDollar(best.ev)}.`,
     line: `Result: ${round.winLabel}.`,
   });
 }
@@ -2727,12 +2738,15 @@ function bjAct(action) {
   acted = true;
   const before = bjBest(round); // grade against the state the player is deciding in
   if (!legalActions(round).includes(action)) return;
+  const betterCopy = blackjackCorrection(before.alternatives, action);
   const review = {
     situation: `${round.hands[round.activeHand].cards.map(cardLabel).join(' ')} against ${cardLabel(round.dealerUpcard)}`,
     chosen: ACTION_LABEL[action],
     type: bjSituationType(round),
     quiz: { choices: legalActions(round), optimal: before.optimal ?? [before.action] },
-    correction: `${ACTION_LABEL[before.action]}. Average result: ${before.ev.toFixed(3)} per hand under this gym’s rules.`,
+    correction: betterCopy
+      ? `${betterCopy} Under this gym’s rules.`
+      : `${ACTION_LABEL[before.action]}. Average result: ${resultPerDollar(before.ev)} under this gym’s rules.`,
   };
   if (action === 'hit') bjHit(round);
   else if (action === 'stand') bjStand(round);
@@ -2741,7 +2755,7 @@ function bjAct(action) {
   else return;
 
   decisions.push({ action, optimal: Boolean(before.optimal?.includes(action)), review,
-    why: `${ACTION_LABEL[before.action]} averages ${before.ev.toFixed(3)} per hand, the best of your choices.` });
+    why: `${ACTION_LABEL[before.action]} ${resultPerDollar(before.ev)}, the best of your choices.` });
   trackDecision(action);
   advice = null;
   el('coachPanel').hidden = true;
@@ -2842,28 +2856,6 @@ function heConfirm() {
 }
 
 /* ---------------- coach ---------------- */
-function reasonFor(kept, variant = vpVariant()) {
-  const pairPays = variant.minPairRank <= 14;
-  const counts = {};
-  for (const c of kept) counts[c.r] = (counts[c.r] ?? 0) + 1;
-  const groups = Object.values(counts).sort((a, b) => b - a);
-  const pairs = groups.filter((n) => n === 2).length;
-  if (groups.includes(4)) return 'Four of a kind already pays, so keep all five cards.';
-  if (groups.includes(3)) return 'Three of a kind. Keep the trips and draw two.';
-  if (!pairPays && pairs > 0) return 'That pair does not pay, but it is still the best draw.';
-  if (pairs === 2) return 'Two pair. Keep both pairs for four shots at a full house.';
-  if (pairs === 1) {
-    const r = Number(Object.keys(counts).find((k) => counts[k] === 2));
-    return r >= 11
-      ? 'Jacks or better pays, so build on the pair.'
-      : 'The pair is below jacks, so it pays nothing. It is still the best hold.';
-  }
-  if (kept.length >= 3 && new Set(kept.map((c) => c.s)).size === 1) return `${kept.length} cards to a flush. Go for it.`;
-  if (kept.length === 5) return 'This hand already pays, so keep all five cards.';
-  if (kept.length === 4) return 'Four cards to an outside straight draw, with eight outs.';
-  return 'This is the best chance of a paying hand from these cards.';
-}
-
 function buildAdvice() {
   if (handDone) return null;
 
@@ -2876,9 +2868,10 @@ function buildAdvice() {
     };
     return {
       holds: best.holds,
-      text: `${holdText(best.holds)}. ${reasonFor(kept, variantById(round.variantId))} Average return: ${best.ev.toFixed(3)} per hand.`,
-      why: `Top holds by average return: ${best.options.slice(0, 3)
-        .map((o) => `${holdText(o.holds)} (${o.ev.toFixed(2)})`).join('; ')}.`,
+      text: `${holdText(best.holds)}. ${reasonFor(kept, variantById(round.variantId))} Average return: ${returnPerDollar(best.ev)}.`,
+      why: `Top holds by return per $1 bet: ${best.options.slice(0, 3)
+        .map((o) => `${holdText(o.holds)} (${Math.round(o.ev * 100)}¢)`)
+        .join('; ')}.`,
       apply: () => { setHolds(round, best.holds); renderBattle(); },
     };
   }
@@ -2892,9 +2885,9 @@ function buildAdvice() {
     }
     if (!best.action) return null;
     return {
-      text: `${ACTION_LABEL[best.action]}. Average result: ${best.ev.toFixed(3)} per hand.`,
-      why: best.alternatives
-        .map((o) => `${o.label}: ${o.ev >= 0 ? '+' : ''}${o.ev.toFixed(2)}`).join('  '),
+      text: `${ACTION_LABEL[best.action]}. On average it ${resultPerDollar(best.ev)}.`,
+      why: `Per $1 bet: ${best.alternatives
+        .map((o) => `${o.label} ${perDollarShort(o.ev)}`).join(' · ')}.`,
       apply: () => bjAct(best.action),
     };
   }

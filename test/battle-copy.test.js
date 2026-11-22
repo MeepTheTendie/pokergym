@@ -35,6 +35,15 @@ test('videopoker and baccarat instructions are unchanged in either mode', () => 
   assert.equal(battleMessage('baccarat', { daily: true }), battleMessage('baccarat'));
 });
 
+test('the commission question points at its own numbers, not the closed odds panel', () => {
+  const commission = battleMessage('baccarat', { quizType: 'commission' });
+  assert.match(commission, /numbers you need are in the question/i);
+  assert.doesNotMatch(commission, /odds panel/);
+  // The house-edge and tie-payout questions do open the Odds panel.
+  assert.match(battleMessage('baccarat', { quizType: 'select' }), /odds panel below/);
+  assert.match(battleMessage('baccarat', { quizType: 'tieodds' }), /odds panel below/);
+});
+
 test('unknown games yield an empty instruction without throwing', () => {
   assert.equal(battleMessage('craps'), '');
   assert.equal(battleMessage('craps', { daily: true, dailyIntro: true }), battleMessage('craps', { dailyIntro: true }));
