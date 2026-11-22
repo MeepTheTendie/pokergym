@@ -676,7 +676,8 @@ img.badge { padding: 4px; background: var(--felt); }
   .battle-action-bar,
   #rowActions:not([hidden]),
   #rowBet:not([hidden]),
-  #rowPick:not([hidden]) {
+  #rowPick:not([hidden]),
+  #battleEndRow:not([hidden]) {
     position: fixed;
     left: 0;
     right: 0;

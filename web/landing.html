@@ -150,7 +150,7 @@
 <link rel="stylesheet" href="/web/site.css">
 <style>
 .landing h2{margin-top:0}
-.hero{display:flex;flex-wrap:wrap;gap:40px 56px;align-items:center;padding-top:64px;padding-bottom:56px}
+.hero{display:flex;flex-wrap:wrap;gap:40px 56px;align-items:center;padding-top:56px;padding-bottom:36px}
 .hero-copy{flex:1 1 400px;min-width:0}
 .hero h1{font-size:clamp(42px,5.4vw,64px);line-height:1}
 .hero h1 span{color:var(--felt)}
@@ -167,7 +167,7 @@
 .card i{position:absolute;bottom:8px;right:10px;font-style:normal;font-size:clamp(34px,4.4vw,44px);line-height:1}
 .card.red{color:var(--card-red)}
 .card.back{box-sizing:border-box;border:4px solid var(--card);background:repeating-linear-gradient(45deg,var(--gold) 0 6px,var(--gold-2) 6px 12px)}
-.moves{margin-top:26px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.moves{margin-top:16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .move{font:800 22px/1 var(--display);padding:18px;border-radius:16px;border:2px solid var(--gold);background:transparent;color:#F6F4EE;cursor:pointer;min-height:56px}
 .move:hover{background:rgba(232,181,58,.15)}
 .move-main{background:var(--gold);color:var(--ink)}
@@ -231,7 +231,7 @@ footer{border-top:1px solid var(--line);margin-top:72px;padding:28px 0 96px}
 .sticky-cta .cta{display:block;text-align:center}
 .sticky-cta.away{transform:translateY(110%);visibility:hidden}
 .sticky-cta{transition:transform .2s ease}
-@media (max-width:720px){.sticky-cta{display:block}.hero{padding-top:28px;gap:20px}.hero-copy{display:contents}.hero>*,.hero-copy>*{flex:1 1 100%;min-width:0}.hero .kicker{order:1;margin-bottom:-8px}.hero h1{order:2}.table{order:3;padding:20px}.hero .lede{order:4;margin:0}.trust{order:5;margin:0}}
+@media (max-width:720px){.sticky-cta{display:block}.hero{padding-top:16px;gap:16px}.hero-copy{display:contents}.hero>*,.hero-copy>*{flex:1 1 100%;min-width:0}.hero .kicker{order:1;margin-bottom:-10px}.hero h1{order:2;font-size:clamp(30px,8vw,40px)}.table{order:3;padding:12px}.hero .lede{order:4;margin:0}.trust{order:5;margin:0}.cards{gap:8px}.card{width:clamp(60px,8.5vw,72px)}.seat{margin:12px 0 6px}.moves{margin-top:12px;gap:8px}.move{padding:12px;font-size:18px;min-height:48px}.table-top{font-size:12px}}
 </style>
 </head>
 <body class="landing">
