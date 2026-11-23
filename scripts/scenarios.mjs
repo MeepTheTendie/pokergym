@@ -2,6 +2,10 @@
 // both read this list, so a page cannot exist without being indexed and linked.
 // Fields: slug, title, description, answer, why[2], cta[label,url],
 // related[[slug,label]], faq[[q,a]].
+// Optional (blackjack): seoTitle, updated (dateModified), chart{label, hand
+// (ranks the engine test checks the row with), up,
+// cells: one letter per dealer upcard 2..9,10,A (S/H/D/P), note}, and
+// changes[] ("what changes the answer"; [text](/guides/slug/) makes a link).
 export const scenarios = [
   {
     slug: 'blackjack-soft-17-vs-2-hit',
@@ -222,18 +226,28 @@ export const scenarios = [
 
   {
     slug: 'blackjack-16-vs-10-hit',
+    seoTitle: 'Hit 16 vs Dealer 10 in Blackjack? Yes \u2014 Here\u2019s Why (2026)',
     title: '16 against a dealer 10: hit or stand?',
-    description: 'Hit 16 against a 10. Standing cannot improve the hand, and the dealer makes 17 or better most of the time. Practice the exact deal free.',
-    answer: 'Hit. Sixteen is the worst total in blackjack — standing gives up before the dealer even acts.',
+    description: 'Yes, hit hard 16 vs a dealer 10: it loses less than standing. Surrender beats both if offered. Chart for 16 vs every upcard, plus free practice.',
+    updated: '2026-11-23',
+    answer: 'Hit. If the table offers surrender, surrender instead; standing on 16 against a 10 is the weaker play.',
     why: [
-      'You cannot win by standing on 16 against a 10 unless the dealer busts, and a 10 upcard busts less often than any other card.',
-      'Hitting gives you a chance to make 17 to 21. Some of those hands still lose, but the alternative loses more often.',
+      'Standing on 16 only wins when the dealer busts, and a dealer 10 busts only about 23% of the time (six decks, after the dealer has checked for blackjack). It makes 20 about 37% of the time.',
+      'Hitting gives you a chance to make 17 to 21. Some of those hands still lose, but the alternative loses more often. For 10-6 from a full six-deck shoe, the trainer\u2019s engine puts hitting at about \u22120.53 per unit bet and standing at about \u22120.54. The gap is small, which is why the hand feels like a coin flip, but hitting is the better play.',
+    ],
+    chart: { label: 'Hard 16', hand: [10, 6], up: '10', cells: 'SSSSSHHHHH', note: 'With late surrender: surrender 16 against a 9, 10 or ace. A pair of 8s is also 16, but it is split against every upcard.' },
+    changes: [
+      'Surrender. If late surrender is offered, surrender 16 against a 9, 10 or ace (and 15 against a 10). You keep half your bet, a loss of 50 cents per dollar, which beats the roughly 53 cents that hitting loses here.',
+      'Dealer hits or stands on soft 17, four decks or eight: without surrender, two-card 16 against a 10 stays a hit.',
+      'A pair of 8s. If your 16 is 8-8, split it instead. Basic strategy splits 8s against every upcard, including a 10: [8-8 against a 10](/guides/blackjack-88-vs-10-split/).',
+      'Card counting. With the Hi-Lo count, players stand on 16 against a 10 when the true count is zero or higher. It is the best-known count-based change in the game. Basic strategy assumes you are not counting, so it hits.',
     ],
     cta: ['Play this exact hand', '/web/?drill=bj-16-v10&ref=guide'],
     related: [['blackjack-88-vs-10-split', '8-8 against a 10: split or hit?'], ['blackjack-12-vs-2-hit', '12 against a 2: hit or stand?'], ['blackjack-17-vs-10-stand', '17 against a 10: hit or stand?']],
     faq: [
-      ['Should you ever stand on 16 against a 10?', 'Only if surrender is offered, and then surrender is better than hitting. Otherwise hit.'],
-      ['Does the count change the 16 decision?', 'At extreme true counts it can, but basic strategy assumes a fresh shoe and says hit.'],
+      ['Should you ever stand on 16 against a 10?', 'Not in basic strategy. If surrender is offered, surrender; otherwise hit. Only card counters stand, at a positive or zero Hi-Lo true count.'],
+      ['Is it better to surrender 16 against a 10?', 'Yes, when late surrender is allowed. Surrender loses exactly half the bet; hitting loses about 53 cents per dollar in the trainer\u2019s six-deck game.'],
+      ['Does the count change the 16 decision?', 'Yes. With the Hi-Lo count, stand on 16 against a 10 when the true count is zero or higher. Basic strategy assumes no count and says hit.'],
     ],
   },
   {
@@ -254,34 +268,55 @@ export const scenarios = [
   },
   {
     slug: 'blackjack-11-vs-10-double',
+    seoTitle: 'Double 11 vs Dealer 10 in Blackjack? Yes \u2014 Here\u2019s Why (2026)',
     title: '11 against a dealer 10: double or hit?',
-    description: 'Double 11 against a 10 when doubling is allowed. You are a favourite to make a strong hand and the extra bet is +EV. Practice free.',
+    description: 'Yes, double 11 vs a dealer 10: it earns more than hitting. Hit only vs an ace in stand-on-soft-17 shoes. Chart for 11 vs every upcard + free practice.',
+    updated: '2026-11-23',
     answer: 'Double, if the table allows it. Otherwise hit.',
     why: [
-      'Eleven is the best doubling total. Any ten, jack, queen or king makes 21, and an ace makes a soft 22 that plays as 12.',
-      'The dealer 10 is strong, which is exactly why you want the extra unit in while you still have the edge on the next card.',
+      'Eleven is the best doubling total. Any ten, jack, queen or king makes 21, a 9 makes 20, and no single card can bust you.',
+      'The dealer 10 is strong, but once it has checked for blackjack you are still the favourite. For 6-5 from a full six-deck shoe, the trainer\u2019s engine puts doubling at about +0.18 per unit bet and hitting at about +0.12, so the double earns roughly 6 cents more per dollar.',
+    ],
+    chart: { label: 'Hard 11', hand: [6, 5], up: '10', cells: 'DDDDDDDDDH', note: 'If the dealer hits soft 17, double 11 against an ace too.' },
+    changes: [
+      'Dealer hits soft 17. Double 11 against an ace as well, so 11 becomes a double against every upcard. In single- and double-deck games, 11 is a double against everything too.',
+      'No-hole-card games. In European-style games where the dealer takes your doubled bet when it turns over a blackjack, hit 11 against a 10 or an ace.',
+      'Three or more cards. An 11 like 4-3-4 can\u2019t be doubled in most casinos (the trainer only doubles your first two cards), so hit it.',
+      'After a split. With double after split (the trainer\u2019s rule), double a new 11 the same way. Without it, hit.',
     ],
     cta: ['Practice five blackjack hands', '/web/?practice=blackjack&ref=guide'],
     related: [['blackjack-10-vs-9-double', '10 against a 9: double or hit?'], ['blackjack-16-vs-10-hit', '16 against a 10: hit or stand?'], ['blackjack-11-vs-ace-hit', '11 against an ace: double or hit?']],
     faq: [
-      ['Do you double 11 against an ace?', 'In most rule sets you hit 11 against an ace, because the dealer is less likely to bust and the ace is a strong upcard.'],
+      ['Do you double 11 against an ace?', 'It depends on one rule. In a multi-deck game where the dealer stands on soft 17 (the trainer\u2019s rules), hit. If the dealer hits soft 17, or in single- and double-deck games, double.'],
       ['Double or hit if doubles are restricted?', 'Hit. The decision is still profitable, just not doubled.'],
+      ['Do you double 11 against a 10 with no hole card?', 'No. In European no-hole-card games, where a dealer blackjack also takes the doubled part of your bet, hit 11 against a 10.'],
     ],
   },
   {
     slug: 'blackjack-10-vs-9-double',
+    seoTitle: 'Double 10 vs Dealer 9 in Blackjack? Yes \u2014 Here\u2019s Why (2026)',
     title: '10 against a dealer 9: double or hit?',
-    description: 'Double 10 against a 9. The extra bet is worth it against every upcard except a 10 or ace. Practice the decision free.',
+    description: 'Yes, double 10 vs a dealer 9. Hit only vs a 10 or an ace. Rules that change it, hard 10 vs every upcard, and a free drill to practice the call.',
+    updated: '2026-11-23',
     answer: 'Double against a 9. Hit against a 10 or an ace.',
     why: [
-      'Ten against a 9 is close, and the double is what makes it profitable: you are betting more on a hand that is slightly ahead.',
-      'Against a 10 or ace the dealer is too strong, so the same total is a hit rather than a double.',
+      'Ten against a 9 is close, and the double is what makes it pay: you are betting more on a hand that is slightly ahead. For 6-4 from a full six-deck shoe, the trainer\u2019s engine puts doubling at about +0.15 per unit bet and hitting at about +0.12.',
+      'Against a 10 or ace the dealer is too strong, so the same total is a hit rather than a double. Against a 10, hitting is worth about +0.03 and doubling about \u22120.01.',
+    ],
+    chart: { label: 'Hard 10', hand: [6, 4], up: '9', cells: 'DDDDDDDDHH', note: 'A pair of 5s plays as a hard 10: double it, never split it.' },
+    changes: [
+      'Dealer hits or stands on soft 17, four decks or eight: 10 against a 9 is a double, and 10 against a 10 or an ace is a hit.',
+      'Three or more cards. A 10 like 4-3-3 can\u2019t be doubled in most casinos (the trainer only doubles your first two cards), so hit it.',
+      'Pair of 5s. 5-5 is a 10, so double it against 2 through 9 and hit it against a 10 or an ace: [5-5 against a 6](/guides/blackjack-55-vs-6-double/).',
+      'After a split. With double after split (the trainer\u2019s rule), a new 10 against a 9 is still a double. Without it, hit.',
+      'Card counting. With the Hi-Lo count, players also double 10 against a 10 or an ace at high positive counts (a true count of about +4). Basic strategy hits both.',
     ],
     cta: ['Practice five blackjack hands', '/web/?practice=blackjack&ref=guide'],
     related: [['blackjack-11-vs-10-double', '11 against a 10: double or hit?'], ['blackjack-55-vs-6-double', '5-5 against a 6: split or double?'], ['blackjack-9-vs-2-hit', 'Hard 9 against a 2: double or hit?'], ['blackjack-11-vs-ace-hit', '11 against an ace: double or hit?']],
     faq: [
       ['Do you double 10 against every card?', 'No. Double against 2 through 9; hit against 10 and ace.'],
-      ['Does the double change if the dealer hits soft 17?', 'Only at the margins. 10 against 9 stays a double in common rule sets.'],
+      ['Does the double change if the dealer hits soft 17?', 'No. In four- to eight-deck games, 10 against a 9 is a double whether the dealer hits or stands on soft 17.'],
+      ['Should you double 10 against a 10?', 'No. Basic strategy hits 10 against a 10. In the trainer\u2019s six-deck game hitting is worth about +0.03 per unit bet and doubling about \u22120.01.'],
     ],
   },
   {
@@ -334,18 +369,27 @@ export const scenarios = [
   },
   {
     slug: 'blackjack-1010-vs-6-stand',
+    seoTitle: 'Split 10s vs Dealer 6 in Blackjack? No \u2014 Stand on 20 (2026)',
     title: '10-10 against a 6: split or stand?',
-    description: 'Never split tens. Twenty is the second-best hand in the game; splitting it trades a winner for two uncertain hands. Practice free.',
+    description: 'No, never split 10s vs a 6. Stand on 20: it earns more than two split hands. Chart for 10-10 vs every upcard, the count exception, free practice.',
+    updated: '2026-11-23',
     answer: 'Stand. Never split tens, whatever the dealer shows.',
     why: [
-      'Twenty beats every dealer total except 21, and the dealer busts often from a 6. Splitting gives that away.',
-      'The only reason to split is to improve a weak total. Twenty is not weak, so the split loses money in every count you will meet.',
+      'Twenty beats every dealer total except 21, and a dealer 6 busts about 42% of the time. Splitting gives that away.',
+      'Each split hand starts from a single ten and has to be built again, with a second bet on the table. For 10-10 against a 6, the trainer\u2019s engine puts standing at about +0.70 per unit bet and splitting, both hands counted, at about +0.57. Against every other upcard the split is further behind.',
+    ],
+    chart: { label: '10-10', hand: [10, 10], up: '6', cells: 'SSSSSSSSSS', note: 'The same goes for any two ten-value cards, such as king-queen: stand on 20.' },
+    changes: [
+      'Dealer hits or stands on soft 17, any number of decks, double after split or not: basic strategy stands on 10-10 against every upcard.',
+      'Surrender never applies: 20 is far too strong to give up half the bet.',
+      'Card counting is the only exception. With the Hi-Lo count, splitting 10s against a 6 becomes correct at a true count of about +4, and against a 5 at about +5. Without a count, never split them.',
     ],
     cta: ['Play this exact hand', '/web/?drill=bj-tt-v6&ref=guide'],
     related: [['blackjack-55-vs-6-double', '5-5 against a 6: split or double?'], ['blackjack-99-vs-7-stand', '9-9 against a 7: split or stand?']],
     faq: [
-      ['Is splitting tens ever correct?', 'Only at extreme positive counts in a counting system, and even then it is marginal. Basic strategy never splits tens.'],
-      ['What if the dealer shows a 6?', 'Stand. A 6 is the dealer’s worst card and 20 is already the winner most of the time.'],
+      ['Is splitting tens ever correct?', 'Only for card counters at high positive counts (a Hi-Lo true count of about +4 against a 6, +5 against a 5). Basic strategy never splits tens.'],
+      ['What if the dealer shows a 6?', 'Stand. A 6 is one of the dealer\u2019s two weakest cards, and 20 is already the winner most of the time.'],
+      ['Can you split a king and a queen?', 'Many casinos let you split any two ten-value cards, but you shouldn\u2019t. King-queen is a hard 20, so stand.'],
     ],
   },
   {

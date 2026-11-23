@@ -61,6 +61,40 @@ const GAME_FAQ = {
   'free-': ['Do I need an account or money to practice?', 'No. Play Poker Gym runs in the browser with no signup, no download and no real money; progress is saved on your device.'],
 };
 
+// Optional depth sections (scenarios.mjs: chart, changes). The rules line
+// matches the trainer (src/games/blackjack.js GAME) and GAME_FAQ above.
+export const BJ_RULES = 'Six decks, dealer stands on soft 17, double on any first two cards, double after split allowed, no surrender, and the dealer checks for blackjack before you act, so a dealer blackjack never takes a double or split bet. These are the rules the free trainer deals and grades with.';
+export const UPCARDS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'A'];
+export const PLAY = { S: 'Stand', H: 'Hit', D: 'Double', P: 'Split' };
+
+// Escapes, then turns [label](/path/) into a link. Only site-relative paths.
+function inline(text) {
+  return esc(text).replace(/\[([^\]]+)\]\((\/[^)\s]+)\)/g, (_, label, href) => `<a href="${href}">${label}</a>`);
+}
+
+function depth(s) {
+  if (!s.chart && !s.changes) return '';
+  const out = [];
+  if (s.chart) {
+    const { label, up, cells, note } = s.chart;
+    if (cells.length !== UPCARDS.length) throw new Error(`${s.slug}: chart needs ${UPCARDS.length} cells`);
+    const td = [...cells].map((c, i) => {
+      const play = PLAY[c];
+      if (!play) throw new Error(`${s.slug}: unknown chart cell ${c}`);
+      return UPCARDS[i] === up ? `<td><strong>${play}</strong></td>` : `<td>${play}</td>`;
+    }).join('');
+    out.push(`<h2>${esc(label)} against every dealer upcard</h2>
+<div class="table-scroll"><table class="chart-row"><caption>Basic strategy for ${esc(label)}: six decks, dealer stands on soft 17</caption>
+<thead><tr><th scope="col">Dealer shows</th>${UPCARDS.map(u => `<th scope="col">${u}</th>`).join('')}</tr></thead>
+<tbody><tr><th scope="row">${esc(label)}</th>${td}</tr></tbody></table></div>${note ? `\n<p class="note">${inline(note)}</p>` : ''}`);
+  }
+  out.push(`<h2>Rules this answer assumes</h2>\n<p>${esc(BJ_RULES)}</p>`);
+  if (s.changes) out.push(`<h2>What changes the answer</h2>\n<ul>\n${s.changes.map(c => `<li>${inline(c)}</li>`).join('\n')}\n</ul>`);
+  const drill = s.cta[1].includes('drill=') ? ` or <a href="${esc(s.cta[1])}">replay this exact hand</a>` : '';
+  out.push(`<h2>Practice it</h2>\n<p>Reading the answer is the easy part. <a href="/web/?practice=blackjack&amp;ref=guide">Play five blackjack hands in the free trainer</a>${drill}: you make the call first, then the coach grades it and shows the value of every option. Missed hands come back for review. For the whole chart, see the <a href="/guides/blackjack-basic-strategy-trainer/">basic strategy trainer guide</a>.</p>`);
+  return `\n${out.join('\n')}`;
+}
+
 function enrich(s, all) {
   const prefix = Object.keys(GAME_FAQ).find(p => s.slug.startsWith(p));
   const faq = [...s.faq];
@@ -89,7 +123,7 @@ function page(s) {
     headline: s.title,
     description: s.description,
     datePublished: UPDATED,
-    dateModified: UPDATED,
+    dateModified: s.updated || UPDATED,
     author: { '@type': 'Organization', name: 'Play Poker Gym' },
     mainEntityOfPage: url,
   };
@@ -133,7 +167,7 @@ ${header('guides')}
 </div>
 <div class="play-row"><a class="cta" href="${s.cta[1]}">${esc(s.cta[0])} \u2192</a><span class="note">The coach grades your call and explains it. Free, no signup.</span></div>
 <h2>Why</h2>
-${s.why.map(p => `<p>${esc(p)}</p>`).join('\n')}
+${s.why.map(p => `<p>${esc(p)}</p>`).join('\n')}${depth(s)}
 <p class="note">The trainer grades every decision against basic strategy, 9/6 Jacks or Better, or the standard baccarat tableau \u2014 the same answer you just read.</p>
 <section class="faq">
 <h2>Questions</h2>
