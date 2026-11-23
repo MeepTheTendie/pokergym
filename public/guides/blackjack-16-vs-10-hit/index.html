@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Blackjack 16 vs 10: hit or stand? (2026) — Play Poker Gym</title>
-<meta name="description" content="Hit 16 against a 10. Standing cannot improve the hand, and the dealer makes 17 or better most of the time. Practice the exact deal free.">
+<title>Hit 16 vs Dealer 10 in Blackjack? Yes — Here’s Why (2026)</title>
+<meta name="description" content="Yes, hit hard 16 vs a dealer 10: it loses less than standing. Surrender beats both if offered. Chart for 16 vs every upcard, plus free practice.">
 <link rel="canonical" href="https://playpokergym.com/guides/blackjack-16-vs-10-hit/">
-<meta property="og:title" content="Blackjack 16 vs 10: hit or stand? (2026)">
-<meta property="og:description" content="Hit 16 against a 10. Standing cannot improve the hand, and the dealer makes 17 or better most of the time. Practice the exact deal free.">
+<meta property="og:title" content="Hit 16 vs Dealer 10 in Blackjack? Yes — Here’s Why (2026)">
+<meta property="og:description" content="Yes, hit hard 16 vs a dealer 10: it loses less than standing. Surrender beats both if offered. Chart for 16 vs every upcard, plus free practice.">
 <meta property="og:type" content="article"><meta property="og:url" content="https://playpokergym.com/guides/blackjack-16-vs-10-hit/">
 <meta property="og:image" content="https://playpokergym.com/og.png"><meta property="og:site_name" content="Play Poker Gym">
 <meta name="twitter:card" content="summary_large_image">
@@ -22,10 +22,10 @@
   "@graph": [
     {
       "@type": "Article",
-      "headline": "Blackjack 16 vs 10: hit or stand? (2026)",
-      "description": "Hit 16 against a 10. Standing cannot improve the hand, and the dealer makes 17 or better most of the time. Practice the exact deal free.",
+      "headline": "Hit 16 vs Dealer 10 in Blackjack? Yes — Here’s Why (2026)",
+      "description": "Yes, hit hard 16 vs a dealer 10: it loses less than standing. Surrender beats both if offered. Chart for 16 vs every upcard, plus free practice.",
       "datePublished": "2026-11-04",
-      "dateModified": "2026-11-04",
+      "dateModified": "2026-11-23",
       "author": {
         "@type": "Organization",
         "name": "Play Poker Gym"
@@ -40,7 +40,15 @@
           "name": "Should you ever stand on 16 against a 10?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Only if surrender is offered, and then surrender is better than hitting. Otherwise hit."
+            "text": "Not in basic strategy. If surrender is offered, surrender; otherwise hit. Only card counters stand, at a positive or zero Hi-Lo true count."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is it better to surrender 16 against a 10?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, when late surrender is allowed. Surrender loses exactly half the bet; hitting loses about 53 cents per dollar in the trainer’s six-deck game."
           }
         },
         {
@@ -48,15 +56,7 @@
           "name": "Does the count change the 16 decision?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "At extreme true counts it can, but basic strategy assumes a fresh shoe and says hit."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Which blackjack rules is this answer for?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Six decks, dealer stands on soft 17, double after split allowed, no surrender. The free trainer grades with those exact rules and shows the expected value of each option."
+            "text": "Yes. With the Hi-Lo count, stand on 16 against a 10 when the true count is zero or higher. Basic strategy assumes no count and says hit."
           }
         }
       ]
@@ -79,7 +79,7 @@
         {
           "@type": "ListItem",
           "position": 3,
-          "name": "Blackjack 16 vs 10: hit or stand? (2026)",
+          "name": "Hit 16 vs Dealer 10 in Blackjack? Yes — Here’s Why (2026)",
           "item": "https://playpokergym.com/guides/blackjack-16-vs-10-hit/"
         }
       ]
@@ -106,21 +106,37 @@
 <h1>16 against a dealer 10: hit or stand?</h1>
 <div class="felt answer-card">
 <p class="kicker">The answer</p>
-<p class="answer">Hit. Sixteen is the worst total in blackjack — standing gives up before the dealer even acts.</p>
+<p class="answer">Hit. If the table offers surrender, surrender instead; standing on 16 against a 10 is the weaker play.</p>
 </div>
 <div class="play-row"><a class="cta" href="/web/?drill=bj-16-v10&ref=guide">Play this exact hand →</a><span class="note">The coach grades your call and explains it. Free, no signup.</span></div>
 <h2>Why</h2>
-<p>You cannot win by standing on 16 against a 10 unless the dealer busts, and a 10 upcard busts less often than any other card.</p>
-<p>Hitting gives you a chance to make 17 to 21. Some of those hands still lose, but the alternative loses more often.</p>
+<p>Standing on 16 only wins when the dealer busts, and a dealer 10 busts only about 23% of the time (six decks, after the dealer has checked for blackjack). It makes 20 about 37% of the time.</p>
+<p>Hitting gives you a chance to make 17 to 21. Some of those hands still lose, but the alternative loses more often. For 10-6 from a full six-deck shoe, the trainer’s engine puts hitting at about −0.53 per unit bet and standing at about −0.54. The gap is small, which is why the hand feels like a coin flip, but hitting is the better play.</p>
+<h2>Hard 16 against every dealer upcard</h2>
+<div class="table-scroll"><table class="chart-row"><caption>Basic strategy for Hard 16: six decks, dealer stands on soft 17</caption>
+<thead><tr><th scope="col">Dealer shows</th><th scope="col">2</th><th scope="col">3</th><th scope="col">4</th><th scope="col">5</th><th scope="col">6</th><th scope="col">7</th><th scope="col">8</th><th scope="col">9</th><th scope="col">10</th><th scope="col">A</th></tr></thead>
+<tbody><tr><th scope="row">Hard 16</th><td>Stand</td><td>Stand</td><td>Stand</td><td>Stand</td><td>Stand</td><td>Hit</td><td>Hit</td><td>Hit</td><td><strong>Hit</strong></td><td>Hit</td></tr></tbody></table></div>
+<p class="note">With late surrender: surrender 16 against a 9, 10 or ace. A pair of 8s is also 16, but it is split against every upcard.</p>
+<h2>Rules this answer assumes</h2>
+<p>Six decks, dealer stands on soft 17, double on any first two cards, double after split allowed, no surrender, and the dealer checks for blackjack before you act, so a dealer blackjack never takes a double or split bet. These are the rules the free trainer deals and grades with.</p>
+<h2>What changes the answer</h2>
+<ul>
+<li>Surrender. If late surrender is offered, surrender 16 against a 9, 10 or ace (and 15 against a 10). You keep half your bet, a loss of 50 cents per dollar, which beats the roughly 53 cents that hitting loses here.</li>
+<li>Dealer hits or stands on soft 17, four decks or eight: without surrender, two-card 16 against a 10 stays a hit.</li>
+<li>A pair of 8s. If your 16 is 8-8, split it instead. Basic strategy splits 8s against every upcard, including a 10: <a href="/guides/blackjack-88-vs-10-split/">8-8 against a 10</a>.</li>
+<li>Card counting. With the Hi-Lo count, players stand on 16 against a 10 when the true count is zero or higher. It is the best-known count-based change in the game. Basic strategy assumes you are not counting, so it hits.</li>
+</ul>
+<h2>Practice it</h2>
+<p>Reading the answer is the easy part. <a href="/web/?practice=blackjack&amp;ref=guide">Play five blackjack hands in the free trainer</a> or <a href="/web/?drill=bj-16-v10&amp;ref=guide">replay this exact hand</a>: you make the call first, then the coach grades it and shows the value of every option. Missed hands come back for review. For the whole chart, see the <a href="/guides/blackjack-basic-strategy-trainer/">basic strategy trainer guide</a>.</p>
 <p class="note">The trainer grades every decision against basic strategy, 9/6 Jacks or Better, or the standard baccarat tableau — the same answer you just read.</p>
 <section class="faq">
 <h2>Questions</h2>
 <h3>Should you ever stand on 16 against a 10?</h3>
-<p>Only if surrender is offered, and then surrender is better than hitting. Otherwise hit.</p>
+<p>Not in basic strategy. If surrender is offered, surrender; otherwise hit. Only card counters stand, at a positive or zero Hi-Lo true count.</p>
+<h3>Is it better to surrender 16 against a 10?</h3>
+<p>Yes, when late surrender is allowed. Surrender loses exactly half the bet; hitting loses about 53 cents per dollar in the trainer’s six-deck game.</p>
 <h3>Does the count change the 16 decision?</h3>
-<p>At extreme true counts it can, but basic strategy assumes a fresh shoe and says hit.</p>
-<h3>Which blackjack rules is this answer for?</h3>
-<p>Six decks, dealer stands on soft 17, double after split allowed, no surrender. The free trainer grades with those exact rules and shows the expected value of each option.</p>
+<p>Yes. With the Hi-Lo count, stand on 16 against a 10 when the true count is zero or higher. Basic strategy assumes no count and says hit.</p>
 </section>
 </article>
 <aside>

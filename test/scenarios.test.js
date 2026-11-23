@@ -47,3 +47,17 @@ test('the guide hub lists every scenario', () => {
   const hub = readFileSync(`${root}public/guides/index.html`, 'utf8');
   for (const s of scenarios) assert.match(hub, new RegExp(`/guides/${s.slug}/`), s.slug);
 });
+
+// Depth sections: every chart row must match the trainer's own engine for the
+// chart's two-card hand, from a full six-deck shoe, against each upcard.
+test('every strategy chart row matches the coach engine', async () => {
+  const { roundWith, UPCARDS, bestAction, clearCache } = await import('./blackjack-helpers.mjs');
+  const LETTER = { stand: 'S', hit: 'H', double: 'D', split: 'P' };
+  const charted = scenarios.filter(s => s.chart);
+  assert.ok(charted.length >= 4);
+  for (const s of charted) {
+    assert.ok(s.slug.startsWith('blackjack-'), s.slug);
+    const row = UPCARDS.map(up => { clearCache(); return LETTER[bestAction(roundWith(s.chart.hand, up)).action]; }).join('');
+    assert.equal(s.chart.cells, row, `${s.slug}: chart row`);
+  }
+});

@@ -192,3 +192,33 @@ test('13 vs 2 FAQ gives the basic-strategy answer on the page and in FAQPage mar
   assert.match(answer, /Stand on hard 13 against a dealer 2 through 6, and hit it against 7 through ace/);
   assert.ok(html.includes(`<p>${answer}</p>`), 'visible answer matches the markup');
 });
+
+test('position 6-9 blackjack guides answer in the title and carry the depth sections', async () => {
+  const pages = {
+    'blackjack-16-vs-10-hit': [/^Hit 16 vs Dealer 10 in Blackjack\? Yes/, /^Yes, hit hard 16/, '<td><strong>Hit</strong></td>'],
+    'blackjack-11-vs-10-double': [/^Double 11 vs Dealer 10 in Blackjack\? Yes/, /^Yes, double 11/, '<td><strong>Double</strong></td>'],
+    'blackjack-10-vs-9-double': [/^Double 10 vs Dealer 9 in Blackjack\? Yes/, /^Yes, double 10/, '<td><strong>Double</strong></td>'],
+    'blackjack-1010-vs-6-stand': [/^Split 10s vs Dealer 6 in Blackjack\? No/, /^No, never split 10s/, '<td><strong>Stand</strong></td>'],
+  };
+  const decode = (t) => t.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+  for (const [slug, [title, description, cell]] of Object.entries(pages)) {
+    const html = await read(`public/guides/${slug}/index.html`);
+    assert.match(decode(/<title>([^<]*)<\/title>/.exec(html)[1]), title, `${slug}: title`);
+    assert.match(decode(meta(html, 'name', 'description')), description, `${slug}: description`);
+    for (const heading of ['against every dealer upcard</h2>', '<h2>Rules this answer assumes</h2>', '<h2>What changes the answer</h2>', '<h2>Practice it</h2>']) {
+      assert.ok(html.includes(heading), `${slug}: ${heading}`);
+    }
+    assert.ok(html.includes(cell), `${slug}: highlighted chart cell`);
+    assert.ok(html.includes('href="/web/?practice=blackjack&amp;ref=guide"'), `${slug}: trainer link`);
+    const words = html.replace(/[\s\S]*<main[^>]*>|<\/main>[\s\S]*/g, '').replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+    assert.ok(words >= 450, `${slug}: ${words} words`);
+    const faq = jsonLd(html).find((node) => node['@type'] === 'FAQPage');
+    assert.ok(faq.mainEntity.length >= 3, `${slug}: FAQ count`);
+    for (const q of faq.mainEntity) {
+      const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      assert.ok(html.includes(`<h3>${esc(q.name)}</h3>\n<p>${esc(q.acceptedAnswer.text)}</p>`), `${slug}: visible FAQ matches markup: ${q.name}`);
+    }
+    const article = jsonLd(html).find((node) => node['@type'] === 'Article');
+    assert.equal(article.dateModified, '2026-11-23', `${slug}: dateModified`);
+  }
+});
