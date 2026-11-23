@@ -9,6 +9,16 @@ const INSTRUCTIONS = {
   holdem: 'Tap the five cards that make your best hand, then press Confirm five. Not sure? Ask the coach for a hint.',
 };
 
+// The commission question carries its own bet and percentage, and the Odds
+// panel stays shut for it. Only the house-edge and tie-payout questions are
+// answered from the panel.
+const BACCARAT_PANEL_INSTRUCTION = 'Answer the percentage question. Every number you need is in the odds panel below.';
+const BACCARAT_QUESTION_INSTRUCTION = 'Answer the percentage question. The numbers you need are in the question.';
+
+function baccaratInstruction(quizType) {
+  return quizType === 'commission' ? BACCARAT_QUESTION_INSTRUCTION : BACCARAT_PANEL_INSTRUCTION;
+}
+
 // The Daily Drill opens hand 1 with a short, actionable line rather than a
 // paragraph: a player auto-started into the drill should see the move to make,
 // not a wall of text that ends by pointing at a button that is not there.
@@ -17,10 +27,12 @@ const DAILY_INTRO = 'Five hands, all four games — the coach grades each one. '
 /**
  * The coach line shown when a hand is dealt.
  * @param {string} gameId one of `videopoker`, `blackjack`, `baccarat`, `holdem`
- * @param {{ daily?: boolean, dailyIntro?: boolean }} [opts]
+ * @param {{ daily?: boolean, dailyIntro?: boolean, quizType?: string }} [opts]
  */
-export function battleMessage(gameId, { daily = false, dailyIntro = false } = {}) {
-  let instruction = INSTRUCTIONS[gameId] ?? '';
+export function battleMessage(gameId, { daily = false, dailyIntro = false, quizType = null } = {}) {
+  let instruction = gameId === 'baccarat'
+    ? baccaratInstruction(quizType)
+    : (INSTRUCTIONS[gameId] ?? '');
   if (daily) {
     // The coach button is hidden during the Daily Drill, so never send the
     // player looking for it.
