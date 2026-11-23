@@ -221,3 +221,12 @@ test('reel Sat Nov 28 slate slugs deal the described decisions', () => {
     assert.deepEqual(bestAction(r).optimal, [play], `${slug} should ${play}`);
   }
 });
+
+test('reel Mon Nov 30 slate slugs deal the described decisions', () => {
+  for (const [slug, want] of [['stand-13-vs-two', 'stand'], ['split-fours-vs-six', 'split'], ['sevens-vs-seven', 'split']]) {
+    const clip = reelClipFor(slug);
+    assert.ok(clip, slug);
+    const r = newBjRound(Math.random, { player: clip.player, dealer: [clip.dealer, clip.hole] });
+    assert.deepEqual(bestAction(r).optimal, [want], `${slug} should ${want}`);
+  }
+});

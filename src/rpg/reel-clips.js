@@ -134,6 +134,30 @@ const SLUGS = {
     dealer: C(9, 1),              // 9♥
     hole: C(10, 0),               // 10♠
   },
+  // Mon Nov 30 slate (Claude, video owner): first STAND-answer claim,
+  // a positive-EV low-pair split, and a FB 4 PM puzzle opener.
+  // EVs: docs/video/slate-20261130.md.
+  'stand-13-vs-two': {
+    game: 'blackjack',
+    label: 'THIRTEEN AGAINST A TWO',
+    player: [C(10, 1), C(3, 0)],  // 10♥ 3♠ = hard 13
+    dealer: C(2, 3),              // 2♣
+    hole: C(9, 2),                // 9♦
+  },
+  'split-fours-vs-six': {
+    game: 'blackjack',
+    label: 'FOURS AGAINST A SIX',
+    player: [C(4, 1), C(4, 3)],   // 4♥ 4♣ = 8
+    dealer: C(6, 0),              // 6♠
+    hole: C(10, 2),               // 10♦
+  },
+  'sevens-vs-seven': {
+    game: 'blackjack',
+    label: 'SEVENS AGAINST A SEVEN',
+    player: [C(7, 0), C(7, 2)],   // 7♠ 7♦ = 14
+    dealer: C(7, 1),              // 7♥
+    hole: C(10, 3),               // 10♣
+  },
   // Nov 20/21 slate (Claude, video owner; posted on #41 2026-11-14 with a
   // Sun Nov 15 10 AM CT veto window). EVs: docs/video/slate-20261120-21.md.
   'break-a-straight': {
