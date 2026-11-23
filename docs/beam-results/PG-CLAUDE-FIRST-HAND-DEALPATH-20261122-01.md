@@ -3,7 +3,7 @@ BEAM-RESULT: PG-CLAUDE-FIRST-HAND-DEALPATH-20261122-01 / from: Beam
 task id: PG-CLAUDE-FIRST-HAND-DEALPATH-20261122-01
 status: PARTIAL
 branch: beam/first-hand-dealpath
-commit(s): (see git log after commit)
+commit(s): 739a9fe
 
 ## Reading of the task
 Diagnose and fix why some mobile `/web/?c=` / `/reel?c=` loads never deal a hand, per crew decision PG-CLAUDE-FIRST-HAND-20261121-01 (CHANGE 3–0). Diagnosis first; no auto-deal-everywhere. Acceptance: root cause or ruled-out causes with evidence; emulated iPhone 390×844 load of `/reel?c=split-18-vs-nine` and `/web/?c=split-16-vs-ten` (fresh and returning profiles) shows the clip's exact hand dealt and actionable within one tap; auto-rendered hands do not fire a user-start event (`game_start` stays user-initiated or is flagged); returning users' progress is kept; `npm test` + browser suites green.
