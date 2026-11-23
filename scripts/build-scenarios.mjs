@@ -41,6 +41,17 @@ export function seoTitle(s) {
   return `${t} (2026)`;
 }
 
+// Search results cut titles at roughly 60–65 characters, so the brand suffix
+// shrinks or drops before the search words do. The page's own words always
+// come first; Google shows the site name separately anyway.
+export const TITLE_MAX = 65;
+export function pageTitle(t) {
+  for (const suffix of [' \u2014 Play Poker Gym', ' | Poker Gym', '']) {
+    if (t.length + suffix.length <= TITLE_MAX) return t + suffix;
+  }
+  return t;
+}
+
 // Questions every learner asks about a hand, appended when a page has fewer than three.
 const GAME_FAQ = {
   'blackjack-': ['Which blackjack rules is this answer for?', 'Six decks, dealer stands on soft 17, double after split allowed, no surrender. The free trainer grades with those exact rules and shows the expected value of each option.'],
@@ -93,7 +104,7 @@ function page(s) {
   return `<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${esc(s.title)} — Play Poker Gym</title>
+<title>${esc(pageTitle(s.title))}</title>
 <meta name="description" content="${esc(s.description)}">
 <link rel="canonical" href="${url}">
 <meta property="og:title" content="${esc(s.title)}">
@@ -170,6 +181,41 @@ const EXISTING = [
   ['Drill pack 01', '/guides/weekly-01/', 'Five blackjack decisions with a return-practice routine.'],
 ];
 
+const HUB_TITLE = 'Casino Strategy Guides: Blackjack, Video Poker & Baccarat';
+
+// CollectionPage + ItemList (every guide on the hub, in page order) +
+// BreadcrumbList, so search engines read the hub as the index of the guides.
+function hubSchema() {
+  const items = [
+    ...GROUPS.flatMap(([, match]) => scenarios.filter(s => match(s.slug)).map(s => [`${BASE}/guides/${s.slug}/`, s.title])),
+    ...EXISTING.map(([name, href]) => [`${BASE}${href}`, name]),
+  ];
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'CollectionPage',
+        name: HUB_TITLE,
+        url: `${BASE}/guides/`,
+        isPartOf: { '@type': 'WebSite', name: 'Play Poker Gym', url: `${BASE}/` },
+        mainEntity: {
+          '@type': 'ItemList',
+          name: HUB_TITLE,
+          numberOfItems: items.length,
+          itemListElement: items.map(([url, name], i) => ({ '@type': 'ListItem', position: i + 1, url, name })),
+        },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Play Poker Gym', item: `${BASE}/` },
+          { '@type': 'ListItem', position: 2, name: 'Guides', item: `${BASE}/guides/` },
+        ],
+      },
+    ],
+  };
+}
+
 function hub() {
   const sections = GROUPS.map(([name, match]) => {
     const rows = scenarios.filter(s => match(s.slug));
@@ -179,10 +225,10 @@ function hub() {
   return `<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Guides: one decision at a time — Play Poker Gym</title>
-<meta name="description" content="Play Poker Gym (playpokergym.com) guides: each answers one blackjack, video poker, baccarat or Hold'em decision, with a free drill link. No signup.">
+<title>${esc(HUB_TITLE)}</title>
+<meta name="description" content="Free casino strategy guides: blackjack basic strategy, Jacks or Better video poker holds, baccarat and Hold'em odds. Each with a free drill. No signup.">
 <link rel="canonical" href="${BASE}/guides/">
-<meta property="og:title" content="Guides: one decision at a time">
+<meta property="og:title" content="${esc(HUB_TITLE)}">
 <meta property="og:description" content="One question, one answer, one drill. Free practice with no signup.">
 <meta property="og:type" content="website"><meta property="og:url" content="${BASE}/guides/">
 <meta property="og:image" content="${BASE}/og.png"><meta property="og:site_name" content="Play Poker Gym">
@@ -190,13 +236,16 @@ function hub() {
 <meta name="robots" content="index,follow,max-image-preview:large">
 <link rel="sitemap" type="application/xml" href="/sitemap.xml">
 ${HEAD_ASSETS}
+<script type="application/ld+json">
+${JSON.stringify(hubSchema(), null, 2)}
+</script>
 </head><body>
 ${header('guides')}
 <main id="main">
 <div class="wrap hub-head">
 <p class="kicker">Guides \u00b7 ${scenarios.length} decisions</p>
-<h1>One decision at a time</h1>
-<p class="lede">Each guide answers one question in its first sentence, shows the reasoning, then deals you that exact hand to practice.</p>
+<h1>${esc(HUB_TITLE)}</h1>
+<p class="lede">Free basic strategy for blackjack, 9/6 Jacks or Better video poker, baccarat and Hold\u2019em odds. Each guide answers one question in its first sentence, shows the reasoning, then deals you that exact hand to practice.</p>
 <div class="game-grid">
 ${sections}
 </div>

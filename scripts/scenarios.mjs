@@ -13,7 +13,7 @@ export const scenarios = [
       'The ace means you cannot bust on the next card, so hitting is free improvement: it brings the hand to about break-even. Doubling is almost as good (about half a cent worse), which is why some charts list double against a 2 under hits-soft-17 rules; against 3 through 6 the double becomes the clear play.',
     ],
     cta: ['Play this exact hand', '/web/?drill=bj-soft17-v2&ref=guide'],
-    related: [['blackjack-soft-18-vs-3-double', 'Soft 18 against a 3: double or stand?'], ['blackjack-soft-18-vs-9', 'Soft 18 against a 9: hit or stand?'], ['blackjack-12-vs-2-hit', '12 against a 2: hit or stand?']],
+    related: [['blackjack-soft-18-vs-3-double', 'Soft 18 against a 3: double or stand?'], ['blackjack-soft-18-vs-9', 'Soft 18 against a 9: hit or stand?'], ['blackjack-12-vs-2-hit', '12 against a 2: hit or stand?'], ['blackjack-soft-16-hands', 'Soft 16 (A-5): hit, double or stand?']],
     faq: [
       ['Should you ever stand on soft 17?', 'No. Soft 17 is never a stand in basic strategy. Hit it against 2, 7, 8, 9, 10 and ace, and double it against 3 through 6 when doubling is allowed.'],
       ['Do you double soft 17 against a 2?', 'Under the standard stands-on-soft-17 rules, no: hitting is slightly better. Some hits-soft-17 charts double it against a 2; the difference is under one cent per dollar.'],
@@ -50,7 +50,7 @@ export const scenarios = [
       'A 5 is one of the dealer\u2019s weakest cards. With double after split, each 4 that catches a 6 or 7 becomes a 10 or 11 you can double, so the coach rates splitting at about +0.11 of your bet against +0.08 for hitting. Take away the double after split and that edge disappears, so hit.',
     ],
     cta: ['Play this exact hand', '/web/?drill=bj-44-v5&ref=guide'],
-    related: [['blackjack-55-vs-6-double', '5-5 against a 6: split or double?'], ['blackjack-88-vs-10-split', '8-8 against a 10: split or hit?'], ['blackjack-aces-vs-10-split', 'Should you always split aces?']],
+    related: [['blackjack-55-vs-6-double', '5-5 against a 6: split or double?'], ['blackjack-88-vs-10-split', '8-8 against a 10: split or hit?'], ['blackjack-aces-vs-10-split', 'Should you always split aces?'], ['blackjack-22-vs-9-hit', 'Should you split 2s? The 2-2 rule']],
     faq: [
       ['Do you split 4s against a 4?', 'Only against 5 and 6, and only with double after split. Against a 4 and every other card, hit the hard 8.'],
       ['Should you double 4-4 as a hard 8?', 'No. Hard 8 is never a double in six-deck basic strategy; the hand is too far from 21.'],
@@ -133,7 +133,7 @@ export const scenarios = [
       'Splitting turns one hopeless 16 into two hands that each start with an 8. Neither is a favourite, but both are better than the single 16 you would otherwise hold.',
     ],
     cta: ['Play this exact hand', '/web/?drill=bj-88-v10&ref=guide'],
-    related: [['blackjack-soft-18-vs-9', 'Soft 18 against a 9: hit or stand?'], ['video-poker-two-pair-hold-both', 'Two pair: hold both or chase trips?']],
+    related: [['blackjack-soft-18-vs-9', 'Soft 18 against a 9: hit or stand?'], ['video-poker-two-pair-hold-both', 'Two pair: hold both or chase trips?'], ['blackjack-22-vs-9-hit', 'Should you split 2s? The 2-2 rule']],
     faq: [
       ['Do you always split eights?', 'Yes. Against every dealer upcard, splitting two 8s is better than hitting, standing or doubling a 16.'],
       ['Should you split eights against a 10 when doubling is allowed?', 'Yes. The split is still correct; the alternative is standing on 16, which is the worst hand you can hold.'],
@@ -149,7 +149,7 @@ export const scenarios = [
       'That number is why small pairs need implied odds. You miss most flops, so the pot has to pay enough when you do hit.',
     ],
     cta: ['Practice five Hold\u2019em hands', '/web/?practice=holdem&ref=guide'],
-    related: [['holdem-flush-draw-odds-by-the-river', 'Flush draw on the flop: how often do you get there?'], ['blackjack-88-vs-10-split', '8-8 against a 10: split or hit?']],
+    related: [['holdem-flush-draw-odds-by-the-river', 'Flush draw on the flop: how often do you get there?'], ['blackjack-88-vs-10-split', '8-8 against a 10: split or hit?'], ['holdem-ak-vs-pocket-pair', 'AK against a pocket pair: who is ahead?']],
     faq: [
       ['What are the odds of flopping a set with a pocket pair?', 'About 11.8%, or roughly 1 in 8.5.'],
       ['Does a set beat a flush draw?', 'A set is already a made hand. A flush draw on the flop completes by the river about 35% of the time.'],
@@ -230,7 +230,7 @@ export const scenarios = [
       'Hitting gives you a chance to make 17 to 21. Some of those hands still lose, but the alternative loses more often.',
     ],
     cta: ['Play this exact hand', '/web/?drill=bj-16-v10&ref=guide'],
-    related: [['blackjack-88-vs-10-split', '8-8 against a 10: split or hit?'], ['blackjack-12-vs-2-hit', '12 against a 2: hit or stand?']],
+    related: [['blackjack-88-vs-10-split', '8-8 against a 10: split or hit?'], ['blackjack-12-vs-2-hit', '12 against a 2: hit or stand?'], ['blackjack-17-vs-10-stand', '17 against a 10: hit or stand?']],
     faq: [
       ['Should you ever stand on 16 against a 10?', 'Only if surrender is offered, and then surrender is better than hitting. Otherwise hit.'],
       ['Does the count change the 16 decision?', 'At extreme true counts it can, but basic strategy assumes a fresh shoe and says hit.'],
@@ -246,7 +246,7 @@ export const scenarios = [
       'Only a ten-value card busts your 12. Every other card improves the hand, so hitting wins more over time even though you will sometimes bust. Our coach scores hit ahead of stand here.',
     ],
     cta: ['Practice five blackjack hands', '/web/?practice=blackjack&ref=guide'],
-    related: [['blackjack-16-vs-10-hit', '16 against a 10: hit or stand?'], ['blackjack-11-vs-10-double', '11 against a 10: double or hit?']],
+    related: [['blackjack-16-vs-10-hit', '16 against a 10: hit or stand?'], ['blackjack-11-vs-10-double', '11 against a 10: double or hit?'], ['blackjack-9-vs-2-hit', 'Hard 9 against a 2: double or hit?']],
     faq: [
       ['Is 12 against a 2 really a hit?', 'Yes. Standard basic strategy hits hard 12 against a 2 and a 3, and stands against 4 through 6. The edge is small but hitting is the better play.'],
       ['What about 12 against a 7?', 'Hit. The dealer is likely to make a pat hand, so standing on 12 gives up.'],
@@ -262,7 +262,7 @@ export const scenarios = [
       'The dealer 10 is strong, which is exactly why you want the extra unit in while you still have the edge on the next card.',
     ],
     cta: ['Practice five blackjack hands', '/web/?practice=blackjack&ref=guide'],
-    related: [['blackjack-10-vs-9-double', '10 against a 9: double or hit?'], ['blackjack-16-vs-10-hit', '16 against a 10: hit or stand?']],
+    related: [['blackjack-10-vs-9-double', '10 against a 9: double or hit?'], ['blackjack-16-vs-10-hit', '16 against a 10: hit or stand?'], ['blackjack-11-vs-ace-hit', '11 against an ace: double or hit?']],
     faq: [
       ['Do you double 11 against an ace?', 'In most rule sets you hit 11 against an ace, because the dealer is less likely to bust and the ace is a strong upcard.'],
       ['Double or hit if doubles are restricted?', 'Hit. The decision is still profitable, just not doubled.'],
@@ -278,7 +278,7 @@ export const scenarios = [
       'Against a 10 or ace the dealer is too strong, so the same total is a hit rather than a double.',
     ],
     cta: ['Practice five blackjack hands', '/web/?practice=blackjack&ref=guide'],
-    related: [['blackjack-11-vs-10-double', '11 against a 10: double or hit?'], ['blackjack-55-vs-6-double', '5-5 against a 6: split or double?']],
+    related: [['blackjack-11-vs-10-double', '11 against a 10: double or hit?'], ['blackjack-55-vs-6-double', '5-5 against a 6: split or double?'], ['blackjack-9-vs-2-hit', 'Hard 9 against a 2: double or hit?'], ['blackjack-11-vs-ace-hit', '11 against an ace: double or hit?']],
     faq: [
       ['Do you double 10 against every card?', 'No. Double against 2 through 9; hit against 10 and ace.'],
       ['Does the double change if the dealer hits soft 17?', 'Only at the margins. 10 against 9 stays a double in common rule sets.'],
@@ -294,7 +294,7 @@ export const scenarios = [
       'Against a 9 or better the hand is not strong enough to stand, so the same total turns into a hit.',
     ],
     cta: ['Play this exact hand', '/web/?drill=bj-soft18-v10&ref=guide'],
-    related: [['blackjack-soft-18-vs-9', 'Soft 18 against a 9: hit or stand?'], ['blackjack-12-vs-2-hit', '12 against a 2: hit or stand?']],
+    related: [['blackjack-soft-18-vs-9', 'Soft 18 against a 9: hit or stand?'], ['blackjack-12-vs-2-hit', '12 against a 2: hit or stand?'], ['blackjack-soft-16-hands', 'Soft 16 (A-5): hit, double or stand?']],
     faq: [
       ['Why is soft 18 different from hard 18?', 'The ace can drop to one, so hitting cannot bust you. That makes drawing and doubling far safer than with a hard total.'],
       ['What if doubling is not allowed?', 'Stand against 2 through 8 and hit against 9, 10 and ace.'],
@@ -358,7 +358,7 @@ export const scenarios = [
       'At 9/6 the long-run return is about 99.5% with perfect play. No other Jacks or Better variant available to casual players is kinder.',
     ],
     cta: ['Practice five video poker hands', '/web/?practice=videopoker&ref=guide'],
-    related: [['video-poker-pair-of-jacks-or-four-to-a-flush', 'Pair of jacks or four to a flush?'], ['video-poker-two-pair-hold-both', 'Two pair: hold both or chase trips?']],
+    related: [['video-poker-pair-of-jacks-or-four-to-a-flush', 'Pair of jacks or four to a flush?'], ['video-poker-two-pair-hold-both', 'Two pair: hold both or chase trips?'], ['video-poker-nothing-hand-hold', 'What do you hold with nothing?'], ['video-poker-strategy-trainer', 'Jacks or Better strategy trainer']],
     faq: [
       ['Is 9/6 the same as 9/6/4?', 'The extra number usually refers to the straight payout. Check the whole table, not just the first two numbers.'],
       ['What is the return of 9/6 Jacks or Better?', 'About 99.54% with perfect play, which is why the strategy matters more than the luck.'],
@@ -486,7 +486,7 @@ export const scenarios = [
       'Five-hand sessions keep the practice short, and the daily drill mixes video poker with the other three games.',
     ],
     cta: ['Start a five-hand session', '/web/?practice=videopoker&ref=guide'],
-    related: [['video-poker-96-pay-table', 'What does 9/6 mean?'], ['free-blackjack-trainer', 'Free blackjack trainer']],
+    related: [['video-poker-96-pay-table', 'What does 9/6 mean?'], ['free-blackjack-trainer', 'Free blackjack trainer'], ['video-poker-nothing-hand-hold', 'What do you hold with nothing?'], ['video-poker-strategy-trainer', 'Jacks or Better strategy trainer']],
     faq: [
       ['Which pay table does it use?', '9/6 Jacks or Better, the standard pay table to learn first.'],
       ['Can I practise a specific hand?', 'Yes. The scenario guides link to the exact hand, and you can replay a drill any time.'],
@@ -518,7 +518,7 @@ export const scenarios = [
       'Every selection is graded, so the mistakes you repeat are the ones you see again in the next session.',
     ],
     cta: ['Start a five-hand session', '/web/?practice=holdem&ref=guide'],
-    related: [['holdem-flush-draw-odds-by-the-river', 'Flush draw: odds by the river?'], ['free-daily-poker-drill', 'Free daily poker drill']],
+    related: [['holdem-flush-draw-odds-by-the-river', 'Flush draw: odds by the river?'], ['free-daily-poker-drill', 'Free daily poker drill'], ['holdem-ak-vs-pocket-pair', 'AK against a pocket pair: who is ahead?']],
     faq: [
       ["Is this a poker odds trainer or a hand-reading trainer?", "Hand reading first: choosing the best five from seven cards. The odds guides cover the maths separately."],
       ['Does it teach betting strategy?', 'No. It grades hand selection and the odds behind common draws, not bet sizing.'],
@@ -551,7 +551,7 @@ export const scenarios = [
       'Examples it will grade you on: hit hard 16 against a 10, double 11 against a 10, split 8-8 against a 10, stand 9-9 against a 7, and hit soft 18 against a 9 but double it against a 3.',
     ],
     cta: ['Practice five blackjack hands', '/web/?practice=blackjack&ref=guide'],
-    related: [['blackjack-16-vs-10-hit', '16 against a 10: hit or stand?'], ['blackjack-88-vs-10-split', '8-8 against a 10: split or hit?'], ['free-blackjack-trainer-alternatives', 'Blackjack trainer alternatives compared']],
+    related: [['blackjack-16-vs-10-hit', '16 against a 10: hit or stand?'], ['blackjack-88-vs-10-split', '8-8 against a 10: split or hit?'], ['free-blackjack-trainer-alternatives', 'Blackjack trainer alternatives compared'], ['blackjack-9-vs-2-hit', 'Hard 9 against a 2: double or hit?']],
     faq: [
       ['What rules does the blackjack trainer use?', 'Six decks, dealer stands on all 17s, double after split allowed, no resplitting aces, no surrender, and blackjack pays 3:2.'],
       ['Is it a chart or a game?', 'A game. You play five-hand sessions and each decision is graded; missed hands come back on a spaced schedule.'],
@@ -578,6 +578,7 @@ export const scenarios = [
   },
   {
     slug: 'baccarat-strategy-trainer',
+    seoTitle: 'Baccarat strategy trainer: learn the odds and tableau (2026)',
     title: 'Baccarat strategy trainer: learn the odds and the tableau free',
     description: 'Play Poker Gym (playpokergym.com) is a free baccarat strategy trainer: scored questions on the third-card rules and the cheapest bet. No signup, no real money.',
     answer: 'The only real baccarat strategy is picking the cheapest bet: Banker (1.06% house edge after the 5% commission), then Player (1.24%), and avoiding Tie. Play Poker Gym drills that for free at playpokergym.com.',
@@ -596,6 +597,7 @@ export const scenarios = [
   },
   {
     slug: 'free-blackjack-trainer-alternatives',
+    seoTitle: 'Blackjack trainer alternatives: free charts and apps (2026)',
     title: 'Blackjack trainer alternatives: charts, apps and Play Poker Gym',
     description: 'How Play Poker Gym (playpokergym.com) compares with Wizard of Odds and BlackjackInfo strategy charts and blackjack trainer apps. Free, no signup, four games.',
     answer: 'Use a strategy chart (Wizard of Odds, BlackjackInfo) to look an answer up; use Play Poker Gym at playpokergym.com when you want to practise it: free, no signup, graded hands in blackjack, video poker, baccarat and Hold\u2019em.',
@@ -614,6 +616,7 @@ export const scenarios = [
   },
   {
     slug: 'free-poker-gym-which-site',
+    seoTitle: 'Which Poker Gym? Play Poker Gym at playpokergym.com (2026)',
     title: 'Which Poker Gym is this? Play Poker Gym at playpokergym.com',
     description: 'Play Poker Gym (playpokergym.com) is a free four-game casino trainer for blackjack, video poker, baccarat and Hold\u2019em. It is not pokergym.me or pokergym.app.',
     answer: 'Play Poker Gym is the free four-game casino trainer at playpokergym.com. It is a separate product from pokergym.me and pokergym.app, which also use the name Poker Gym.',
@@ -678,7 +681,7 @@ export const scenarios = [
       'Doubling is never right here. It is the same card you would draw anyway, with twice the money on a hand that is behind, so the coach puts it near \u22121.01 per dollar. The choice is hit or stand, and the answer is hit at every count you will meet.',
     ],
     cta: ['Practice five blackjack hands', '/web/?practice=blackjack&ref=guide'],
-    related: [['blackjack-16-vs-10-hit', '16 against a 10: hit or stand?'], ['blackjack-13-vs-2-stand', '13 against a 2: hit or stand?'], ['blackjack-basic-strategy-trainer', 'Practice basic strategy free']],
+    related: [['blackjack-16-vs-10-hit', '16 against a 10: hit or stand?'], ['blackjack-13-vs-2-stand', '13 against a 2: hit or stand?'], ['blackjack-basic-strategy-trainer', 'Practice basic strategy free'], ['blackjack-17-vs-10-stand', '17 against a 10: hit or stand?']],
     faq: [
       ['Should you hit on 15 in blackjack?', 'Against a 10, a 9 and a 7 through ace, yes. Against a 2 through 6, stand: the dealer is likely to bust and your 15 already beats a bust.'],
       ['Is 15 vs 10 a surrender hand?', 'Not in most rule sets. Surrender is usually offered only against 9, 10 and ace on the first two cards, and 15 vs 10 is one of the hands where surrendering is correct when it is available. This trainer uses rules with no surrender.'],
@@ -718,7 +721,7 @@ export const scenarios = [
     cta: ['Practice five blackjack hands', '/web/?practice=blackjack&ref=guide'],
     related: [['blackjack-12-vs-2-hit', '12 against a 2: hit or stand?'], ['blackjack-15-vs-10-hit', '15 against a 10: hit or stand?'], ['blackjack-basic-strategy-trainer', 'Practice basic strategy free']],
     faq: [
-      ['Do you hit 13 against a 2?', 'No. Stand on 13 against a 2 and a 3. Hit it against 4 through 6 you stand as well, and hit from 7 upward.'],
+      ['Do you hit 13 against a 2?', 'No. Stand on hard 13 against a dealer 2 through 6, and hit it against 7 through ace.'],
       ['Why is 12 vs 2 a hit but 13 vs 2 a stand?', 'A 12 busts only on a ten-value card. A 13 also busts on a 9, so there are more ways to ruin the hand and fewer good cards to draw. Standing becomes the better losing option.'],
       ['Is standing on 13 vs 2 a mistake?', 'No, though the margin is small. Hitting is only about 1.4 cents per dollar worse, which is why players who hit it do not lose much \u2014 but they do lose.'],
     ],
