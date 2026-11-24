@@ -134,6 +134,30 @@ const SLUGS = {
     dealer: C(9, 1),              // 9♥
     hole: C(10, 0),               // 10♠
   },
+  // Sun Nov 29 slate (Claude, video owner): two re-cuts of FB-proven hands
+  // under new tags (same cards as split-18-vs-nine / split-16-vs-ten, new
+  // opener) plus a hard-11 probe. EVs: docs/video/slate-20261129.md.
+  'break-18-recut': {
+    game: 'blackjack',
+    label: 'NINES AGAINST A NINE',
+    player: [C(9, 2), C(9, 3)],   // 9♦ 9♣ = 18
+    dealer: C(9, 1),              // 9♥
+    hole: C(10, 0),               // 10♠
+  },
+  'hit-11-vs-ace': {
+    game: 'blackjack',
+    label: 'ELEVEN AGAINST AN ACE',
+    player: [C(6, 0), C(5, 1)],   // 6♠ 5♥ = hard 11
+    dealer: C(14, 2),             // A♦
+    hole: C(9, 3),                // 9♣
+  },
+  'eights-vs-king-recut': {
+    game: 'blackjack',
+    label: 'EIGHTS AGAINST A KING',
+    player: [C(8, 1), C(8, 3)],   // 8♥ 8♣ = 16
+    dealer: C(13, 2),             // K♦
+    hole: C(6, 0),                // 6♠
+  },
   // Nov 20/21 slate (Claude, video owner; posted on #41 2026-11-14 with a
   // Sun Nov 15 10 AM CT veto window). EVs: docs/video/slate-20261120-21.md.
   'break-a-straight': {
