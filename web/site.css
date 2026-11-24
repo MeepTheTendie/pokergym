@@ -91,6 +91,7 @@ article p{max-width:66ch;color:var(--ink-2)}
 .game-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px}
 .game-card h2{margin:0 0 4px;font-size:24px}
 .game-card .count{font-size:14px;color:var(--muted);margin:0 0 10px}
+.game-card .intro{font-size:15px;color:var(--muted);margin:0 0 10px;line-height:1.45}
 .drill-band{margin-top:56px}
 .drill-band .wrap{display:flex;flex-wrap:wrap;gap:20px 40px;align-items:center;justify-content:space-between}
 .drill-band h2{margin:0;color:#F6F4EE;font-size:clamp(26px,3.6vw,36px)}

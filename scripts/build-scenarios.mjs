@@ -200,12 +200,19 @@ for (const scenario of scenarios) {
 
 // Hub page: one crawlable index so the scenario pages are not orphans even
 // before the existing guides link to them.
+// Each hub section opens with a short, original intro (what the guides answer
+// and the rules they assume), so /guides/ is more than a bare link list.
 const GROUPS = [
-  ['Blackjack', slug => slug.startsWith('blackjack-')],
-  ['Video poker', slug => slug.startsWith('video-poker-')],
-  ['Baccarat', slug => slug.startsWith('baccarat-')],
-  ["Hold'em", slug => slug.startsWith('holdem-')],
-  ['Free trainers', slug => slug.startsWith('free-')],
+  ['Blackjack', slug => slug.startsWith('blackjack-'),
+    'When to hit, stand, double or split with a specific hand against each dealer upcard. Every answer assumes six decks, the dealer standing on soft 17 and double after split, the same rules the free trainer deals and grades.'],
+  ['Video poker', slug => slug.startsWith('video-poker-'),
+    'Which cards to hold in full-pay 9/6 Jacks or Better, the version that pays 9 for a full house and 6 for a flush. Most guides settle a hold that looks close, like a low pair against four to a flush.'],
+  ['Baccarat', slug => slug.startsWith('baccarat-'),
+    'Baccarat has no playing decisions, so these guides explain the third-card rules and what each bet costs you. Banker carries the lowest house edge, even after the 5% commission.'],
+  ["Hold'em", slug => slug.startsWith('holdem-'),
+    'Drawing odds and preflop matchups: how often a flush draw, straight draw or pocket pair comes in, and who is ahead when AK meets a pocket pair. Every answer counts only the cards you can see.'],
+  ['Free trainers', slug => slug.startsWith('free-'),
+    'What the free trainer covers for each game and how it compares with charts and other apps. Everything runs in the browser with no signup, no download and no real money.'],
 ];
 const EXISTING = [
   ['Blackjack decisions', '/guides/blackjack/', 'Hard 16, soft 18 and a split decision.'],
@@ -251,10 +258,10 @@ function hubSchema() {
 }
 
 function hub() {
-  const sections = GROUPS.map(([name, match]) => {
+  const sections = GROUPS.map(([name, match, intro]) => {
     const rows = scenarios.filter(s => match(s.slug));
     if (!rows.length) return '';
-    return `<section class="game-card"><h2>${esc(name)}</h2><p class="count">${rows.length} guide${rows.length === 1 ? '' : 's'}</p>\n<ul class="links">\n${rows.map(s => `<li><a href="/guides/${s.slug}/">${esc(s.title)}</a></li>`).join('\n')}\n</ul></section>`;
+    return `<section class="game-card"><h2>${esc(name)}</h2><p class="count">${rows.length} guide${rows.length === 1 ? '' : 's'}</p>\n<p class="intro">${esc(intro)}</p>\n<ul class="links">\n${rows.map(s => `<li><a href="/guides/${s.slug}/">${esc(s.title)}</a></li>`).join('\n')}\n</ul></section>`;
   }).join('\n');
   return `<!doctype html>
 <html lang="en"><head>

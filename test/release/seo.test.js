@@ -222,3 +222,35 @@ test('position 6-9 blackjack guides answer in the title and carry the depth sect
     assert.equal(article.dateModified, '2026-11-23', `${slug}: dateModified`);
   }
 });
+
+test('the homepage body links popular strategy questions to live guides', async () => {
+  const html = await read('web/landing.html');
+  const sitemap = await read('public/sitemap.xml');
+  const start = html.indexOf('<section class="wrap" id="popular-questions"');
+  assert.ok(start > 0, 'popular-questions section present');
+  const block = html.slice(start, html.indexOf('</section>', start));
+  assert.match(block, /<h2 id="questions-heading">Popular strategy questions<\/h2>/);
+  const links = [...block.matchAll(/<li><a href="([^"]+)"[^>]*>([^<]+)<\/a><\/li>/g)];
+  assert.ok(links.length >= 6 && links.length <= 8, `6-8 question links, got ${links.length}`);
+  for (const [, href, text] of links) {
+    assert.match(href, /^\/guides\/[a-z0-9-]+\/$/, `${href}: guide URL`);
+    assert.ok(sitemap.includes(`<loc>https://playpokergym.com${href}</loc>`), `${href} is in the sitemap`);
+    assert.match(text, /\?$/, `${href}: question-style anchor`);
+  }
+  assert.match(block, /<a href="\/guides\/"[^>]*>See every strategy guide/);
+});
+
+test('every /guides/ hub section opens with an intro', async () => {
+  const html = await read('public/guides/index.html');
+  const sections = [...html.matchAll(/<section class="game-card"><h2>([^<]+)<\/h2>([\s\S]*?)<\/section>/g)];
+  assert.ok(sections.length >= 5, 'five game sections');
+  const intros = new Set();
+  for (const [, name, body] of sections) {
+    const intro = /<p class="intro">([^<]+)<\/p>/.exec(body)?.[1] ?? '';
+    const words = intro.split(/\s+/).filter(Boolean).length;
+    assert.ok(words >= 15 && words <= 60, `${name}: intro of 1-2 sentences (${words} words)`);
+    assert.ok(body.indexOf('class="intro"') < body.indexOf('<ul class="links">'), `${name}: intro sits above the links`);
+    intros.add(intro);
+  }
+  assert.equal(intros.size, sections.length, 'each intro is unique');
+});
