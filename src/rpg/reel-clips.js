@@ -384,6 +384,26 @@ const SLUGS = {
     player: [C(9, 0), C(3, 1)],   // 9♠ 3♥ = hard 12
     dealer: C(2, 3),              // 2♣
     hole: C(10, 2),               // 10♦
+  },  // Tue Dec 1 slate (Claude, video owner): framing pair 4 (claim 9 AM /
+  // puzzle noon) and a JoB FB 4 PM probe. EVs: docs/video/slate-20261201.md.
+  'double-14-vs-five': {
+    game: 'blackjack',
+    label: 'DOUBLE ON 14',
+    player: [C(14, 1), C(3, 3)],  // A♥ 3♣ = soft 14
+    dealer: C(5, 0),              // 5♠
+    hole: C(10, 2),               // 10♦
+  },
+  'soft16-vs-four': {
+    game: 'blackjack',
+    label: 'ACE-FIVE AGAINST A 4',
+    player: [C(14, 2), C(5, 0)],  // A♦ 5♠ = soft 16
+    dealer: C(4, 3),              // 4♣
+    hole: C(10, 1),               // 10♥
+  },
+  'keep-the-ace': {
+    game: 'videopoker',
+    label: 'KEEP THE ACE',
+    hand: [C(14, 0), C(13, 1), C(12, 2), C(11, 3), C(4, 0)], // A♠ K♥ Q♦ J♣ 4♠
   },
 };
 

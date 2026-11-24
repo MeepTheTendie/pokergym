@@ -222,6 +222,20 @@ test('reel Sat Nov 28 slate slugs deal the described decisions', () => {
   }
 });
 
+test('reel Tue Dec 1 slate slugs deal the described decisions', () => {
+  for (const [slug, want] of [['double-14-vs-five', 'double'], ['soft16-vs-four', 'double']]) {
+    const clip = reelClipFor(slug);
+    assert.ok(clip, slug);
+    const r = newBjRound(Math.random, { player: clip.player, dealer: [clip.dealer, clip.hole] });
+    assert.deepEqual(bestAction(r).optimal, [want], `${slug} should ${want}`);
+  }
+  // keep-the-ace holds A K Q J and draws to the straight (drops only the 4).
+  const clip = reelClipFor('keep-the-ace');
+  assert.ok(clip);
+  assert.equal(clip.game, 'videopoker');
+  assert.deepEqual(bestHold(clip.hand).holds.map(Boolean), [true, true, true, true, false]);
+});
+
 test('reel Sun Nov 29 slate slugs deal the described decisions', () => {
   for (const [slug, want] of [['break-18-recut', 'split'], ['hit-11-vs-ace', 'hit'], ['eights-vs-king-recut', 'split']]) {
     const clip = reelClipFor(slug);
