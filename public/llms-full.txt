@@ -140,8 +140,8 @@ Page: https://playpokergym.com/guides/holdem-flush-draw-odds-by-the-river/
 Practice: https://playpokergym.com/web/?practice=holdem&ref=guide
 
 ### 16 against a dealer 10: hit or stand?
-Hit. Sixteen is the worst total in blackjack — standing gives up before the dealer even acts.
-Why: You cannot win by standing on 16 against a 10 unless the dealer busts, and a 10 upcard busts less often than any other card.
+Hit. If the table offers surrender, surrender instead; standing on 16 against a 10 is the weaker play.
+Why: Standing on 16 only wins when the dealer busts, and a dealer 10 busts only about 23% of the time (six decks, after the dealer has checked for blackjack). It makes 20 about 37% of the time.
 Page: https://playpokergym.com/guides/blackjack-16-vs-10-hit/
 Practice: https://playpokergym.com/web/?drill=bj-16-v10&ref=guide
 
@@ -153,13 +153,13 @@ Practice: https://playpokergym.com/web/?practice=blackjack&ref=guide
 
 ### 11 against a dealer 10: double or hit?
 Double, if the table allows it. Otherwise hit.
-Why: Eleven is the best doubling total. Any ten, jack, queen or king makes 21, and an ace makes a soft 22 that plays as 12.
+Why: Eleven is the best doubling total. Any ten, jack, queen or king makes 21, a 9 makes 20, and no single card can bust you.
 Page: https://playpokergym.com/guides/blackjack-11-vs-10-double/
 Practice: https://playpokergym.com/web/?practice=blackjack&ref=guide
 
 ### 10 against a dealer 9: double or hit?
 Double against a 9. Hit against a 10 or an ace.
-Why: Ten against a 9 is close, and the double is what makes it profitable: you are betting more on a hand that is slightly ahead.
+Why: Ten against a 9 is close, and the double is what makes it pay: you are betting more on a hand that is slightly ahead. For 6-4 from a full six-deck shoe, the trainer’s engine puts doubling at about +0.15 per unit bet and hitting at about +0.12.
 Page: https://playpokergym.com/guides/blackjack-10-vs-9-double/
 Practice: https://playpokergym.com/web/?practice=blackjack&ref=guide
 
@@ -183,7 +183,7 @@ Practice: https://playpokergym.com/web/?practice=blackjack&ref=guide
 
 ### 10-10 against a 6: split or stand?
 Stand. Never split tens, whatever the dealer shows.
-Why: Twenty beats every dealer total except 21, and the dealer busts often from a 6. Splitting gives that away.
+Why: Twenty beats every dealer total except 21, and a dealer 6 busts about 42% of the time. Splitting gives that away.
 Page: https://playpokergym.com/guides/blackjack-1010-vs-6-stand/
 Practice: https://playpokergym.com/web/?drill=bj-tt-v6&ref=guide
 

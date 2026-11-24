@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Blackjack 10-10 vs 6: split or stand? (2026) — Play Poker Gym</title>
-<meta name="description" content="Never split tens. Twenty is the second-best hand in the game; splitting it trades a winner for two uncertain hands. Practice free.">
+<title>Split 10s vs Dealer 6 in Blackjack? No — Stand on 20 (2026)</title>
+<meta name="description" content="No, never split 10s vs a 6. Stand on 20: it earns more than two split hands. Chart for 10-10 vs every upcard, the count exception, free practice.">
 <link rel="canonical" href="https://playpokergym.com/guides/blackjack-1010-vs-6-stand/">
-<meta property="og:title" content="Blackjack 10-10 vs 6: split or stand? (2026)">
-<meta property="og:description" content="Never split tens. Twenty is the second-best hand in the game; splitting it trades a winner for two uncertain hands. Practice free.">
+<meta property="og:title" content="Split 10s vs Dealer 6 in Blackjack? No — Stand on 20 (2026)">
+<meta property="og:description" content="No, never split 10s vs a 6. Stand on 20: it earns more than two split hands. Chart for 10-10 vs every upcard, the count exception, free practice.">
 <meta property="og:type" content="article"><meta property="og:url" content="https://playpokergym.com/guides/blackjack-1010-vs-6-stand/">
 <meta property="og:image" content="https://playpokergym.com/og.png"><meta property="og:site_name" content="Play Poker Gym">
 <meta name="twitter:card" content="summary_large_image">
@@ -22,10 +22,10 @@
   "@graph": [
     {
       "@type": "Article",
-      "headline": "Blackjack 10-10 vs 6: split or stand? (2026)",
-      "description": "Never split tens. Twenty is the second-best hand in the game; splitting it trades a winner for two uncertain hands. Practice free.",
+      "headline": "Split 10s vs Dealer 6 in Blackjack? No — Stand on 20 (2026)",
+      "description": "No, never split 10s vs a 6. Stand on 20: it earns more than two split hands. Chart for 10-10 vs every upcard, the count exception, free practice.",
       "datePublished": "2026-11-04",
-      "dateModified": "2026-11-04",
+      "dateModified": "2026-11-23",
       "author": {
         "@type": "Organization",
         "name": "Play Poker Gym"
@@ -40,7 +40,7 @@
           "name": "Is splitting tens ever correct?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Only at extreme positive counts in a counting system, and even then it is marginal. Basic strategy never splits tens."
+            "text": "Only for card counters at high positive counts (a Hi-Lo true count of about +4 against a 6, +5 against a 5). Basic strategy never splits tens."
           }
         },
         {
@@ -48,15 +48,15 @@
           "name": "What if the dealer shows a 6?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Stand. A 6 is the dealer’s worst card and 20 is already the winner most of the time."
+            "text": "Stand. A 6 is one of the dealer’s two weakest cards, and 20 is already the winner most of the time."
           }
         },
         {
           "@type": "Question",
-          "name": "Which blackjack rules is this answer for?",
+          "name": "Can you split a king and a queen?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Six decks, dealer stands on soft 17, double after split allowed, no surrender. The free trainer grades with those exact rules and shows the expected value of each option."
+            "text": "Many casinos let you split any two ten-value cards, but you shouldn’t. King-queen is a hard 20, so stand."
           }
         }
       ]
@@ -79,7 +79,7 @@
         {
           "@type": "ListItem",
           "position": 3,
-          "name": "Blackjack 10-10 vs 6: split or stand? (2026)",
+          "name": "Split 10s vs Dealer 6 in Blackjack? No — Stand on 20 (2026)",
           "item": "https://playpokergym.com/guides/blackjack-1010-vs-6-stand/"
         }
       ]
@@ -110,17 +110,32 @@
 </div>
 <div class="play-row"><a class="cta" href="/web/?drill=bj-tt-v6&ref=guide">Play this exact hand →</a><span class="note">The coach grades your call and explains it. Free, no signup.</span></div>
 <h2>Why</h2>
-<p>Twenty beats every dealer total except 21, and the dealer busts often from a 6. Splitting gives that away.</p>
-<p>The only reason to split is to improve a weak total. Twenty is not weak, so the split loses money in every count you will meet.</p>
+<p>Twenty beats every dealer total except 21, and a dealer 6 busts about 42% of the time. Splitting gives that away.</p>
+<p>Each split hand starts from a single ten and has to be built again, with a second bet on the table. For 10-10 against a 6, the trainer’s engine puts standing at about +0.70 per unit bet and splitting, both hands counted, at about +0.57. Against every other upcard the split is further behind.</p>
+<h2>10-10 against every dealer upcard</h2>
+<div class="table-scroll"><table class="chart-row"><caption>Basic strategy for 10-10: six decks, dealer stands on soft 17</caption>
+<thead><tr><th scope="col">Dealer shows</th><th scope="col">2</th><th scope="col">3</th><th scope="col">4</th><th scope="col">5</th><th scope="col">6</th><th scope="col">7</th><th scope="col">8</th><th scope="col">9</th><th scope="col">10</th><th scope="col">A</th></tr></thead>
+<tbody><tr><th scope="row">10-10</th><td>Stand</td><td>Stand</td><td>Stand</td><td>Stand</td><td><strong>Stand</strong></td><td>Stand</td><td>Stand</td><td>Stand</td><td>Stand</td><td>Stand</td></tr></tbody></table></div>
+<p class="note">The same goes for any two ten-value cards, such as king-queen: stand on 20.</p>
+<h2>Rules this answer assumes</h2>
+<p>Six decks, dealer stands on soft 17, double on any first two cards, double after split allowed, no surrender, and the dealer checks for blackjack before you act, so a dealer blackjack never takes a double or split bet. These are the rules the free trainer deals and grades with.</p>
+<h2>What changes the answer</h2>
+<ul>
+<li>Dealer hits or stands on soft 17, any number of decks, double after split or not: basic strategy stands on 10-10 against every upcard.</li>
+<li>Surrender never applies: 20 is far too strong to give up half the bet.</li>
+<li>Card counting is the only exception. With the Hi-Lo count, splitting 10s against a 6 becomes correct at a true count of about +4, and against a 5 at about +5. Without a count, never split them.</li>
+</ul>
+<h2>Practice it</h2>
+<p>Reading the answer is the easy part. <a href="/web/?practice=blackjack&amp;ref=guide">Play five blackjack hands in the free trainer</a> or <a href="/web/?drill=bj-tt-v6&amp;ref=guide">replay this exact hand</a>: you make the call first, then the coach grades it and shows the value of every option. Missed hands come back for review. For the whole chart, see the <a href="/guides/blackjack-basic-strategy-trainer/">basic strategy trainer guide</a>.</p>
 <p class="note">The trainer grades every decision against basic strategy, 9/6 Jacks or Better, or the standard baccarat tableau — the same answer you just read.</p>
 <section class="faq">
 <h2>Questions</h2>
 <h3>Is splitting tens ever correct?</h3>
-<p>Only at extreme positive counts in a counting system, and even then it is marginal. Basic strategy never splits tens.</p>
+<p>Only for card counters at high positive counts (a Hi-Lo true count of about +4 against a 6, +5 against a 5). Basic strategy never splits tens.</p>
 <h3>What if the dealer shows a 6?</h3>
-<p>Stand. A 6 is the dealer’s worst card and 20 is already the winner most of the time.</p>
-<h3>Which blackjack rules is this answer for?</h3>
-<p>Six decks, dealer stands on soft 17, double after split allowed, no surrender. The free trainer grades with those exact rules and shows the expected value of each option.</p>
+<p>Stand. A 6 is one of the dealer’s two weakest cards, and 20 is already the winner most of the time.</p>
+<h3>Can you split a king and a queen?</h3>
+<p>Many casinos let you split any two ten-value cards, but you shouldn’t. King-queen is a hard 20, so stand.</p>
 </section>
 </article>
 <aside>
