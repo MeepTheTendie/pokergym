@@ -230,3 +230,17 @@ test('reel Sun Nov 29 slate slugs deal the described decisions', () => {
     assert.deepEqual(bestAction(r).optimal, [want], `${slug} should ${want}`);
   }
 });
+
+test('reel Wed Dec 2 slate slugs deal the described decisions', () => {
+  for (const [slug, want] of [['nine-vs-four', 'double'], ['double-18-vs-four', 'double']]) {
+    const clip = reelClipFor(slug);
+    assert.ok(clip, slug);
+    const r = newBjRound(Math.random, { player: clip.player, dealer: [clip.dealer, clip.hole] });
+    assert.deepEqual(bestAction(r).optimal, [want], `${slug} should ${want}`);
+  }
+  // drop-the-king-queen holds the 9-8-7 three to a straight flush, not suited K-Q.
+  const clip = reelClipFor('drop-the-king-queen');
+  assert.ok(clip);
+  assert.equal(clip.game, 'videopoker');
+  assert.deepEqual(bestHold(clip.hand).holds.map(Boolean), [false, false, true, true, true]);
+});

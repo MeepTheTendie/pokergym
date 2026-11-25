@@ -90,6 +90,27 @@ const PAIRS = { 1: P1, 2: P2, 3: P3, 4: P4, 5: P5, 6: P6 };
 // slate (docs/reviews/2026-11-10-slate-renders/render_slate.py); ranks carry
 // the decision, suits do not affect blackjack EV.
 const SLUGS = {
+  // Wed Dec 2 slate (Claude, video owner): framing pair 5 (puzzle 9 AM /
+  // claim noon) and a JoB FB 4 PM probe. EVs: docs/video/slate-20261202.md.
+  'nine-vs-four': {
+    game: 'blackjack',
+    label: 'HARD 9 AGAINST A 4',
+    player: [C(5, 0), C(4, 2)],   // 5♠ 4♦ = hard 9
+    dealer: C(4, 3),              // 4♣
+    hole: C(10, 1),               // 10♥
+  },
+  'double-18-vs-four': {
+    game: 'blackjack',
+    label: 'DOUBLE SOFT 18 AGAINST A 4',
+    player: [C(14, 3), C(7, 2)],  // A♣ 7♦ = soft 18
+    dealer: C(4, 1),              // 4♥
+    hole: C(10, 0),               // 10♠
+  },
+  'drop-the-king-queen': {
+    game: 'videopoker',
+    label: 'DROP THE SUITED K-Q',
+    hand: [C(13, 0), C(12, 0), C(9, 1), C(8, 1), C(7, 1)], // K♠ Q♠ 9♥ 8♥ 7♥
+  },
   'nine-vs-three': {
     game: 'blackjack',
     label: 'HARD 9 AGAINST A THREE',
