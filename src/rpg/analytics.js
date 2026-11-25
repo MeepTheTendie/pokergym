@@ -107,13 +107,14 @@ export function createAnalytics({ send, ref = () => null } = {}) {
     },
 
     /** A five-hand session or gym run begins (including a resumed one). */
-    gameStart({ game, mode, resumed = false, entry } = {}) {
+    gameStart({ game, mode, resumed = false, entry, ...rest } = {}) {
       if (!GAMES.includes(game)) return null;
       // Starting a new run abandons any unfinished one.
       for (const [token, run] of live) if (run.kind === 'session') live.delete(token);
       const token = begin('session', game, mode, entry);
       const props = { game, mode, resumed: Boolean(resumed), run_id: token, event_version: EVENT_VERSION };
       if (entry) props.entry = entry;
+      for (const [k, v] of Object.entries(rest)) if (v !== undefined) props[k] = v;
       emit(EVENTS.GAME_START, props);
       return token;
     },
@@ -187,13 +188,15 @@ export function createAnalytics({ send, ref = () => null } = {}) {
     },
 
     /** A Daily Drill run begins, from any entry path. */
-    startDaily({ entry, number, resumed = false, scored = true, shared = false } = {}) {
+    startDaily({ entry, number, resumed = false, scored = true, shared = false, ...rest } = {}) {
       for (const [token, run] of live) if (run.kind === 'daily') live.delete(token);
       const token = begin('daily', 'daily', 'daily', entry);
-      emit(EVENTS.START_DAILY, {
+      const dailyProps = {
         entry, number, resumed: Boolean(resumed), scored: Boolean(scored), shared: Boolean(shared),
         run_id: token, event_version: EVENT_VERSION,
-      });
+      };
+      for (const [k, v] of Object.entries(rest)) if (v !== undefined) dailyProps[k] = v;
+      emit(EVENTS.START_DAILY, dailyProps);
       return token;
     },
 
