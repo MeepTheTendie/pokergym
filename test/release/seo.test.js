@@ -11,6 +11,7 @@ const pages = [
   { file: 'web/landing.html', url: 'https://playpokergym.com/', types: ['Organization', 'WebSite', 'WebApplication', 'FAQPage'] },
   { file: 'web/index.html', url: 'https://playpokergym.com/web/', types: ['Organization', 'WebSite', 'WebApplication'] },
   { file: 'web/privacy.html', url: 'https://playpokergym.com/web/privacy', types: ['Organization', 'WebSite', 'WebPage'] },
+  { file: 'web/about.html', url: 'https://playpokergym.com/about/', types: ['Organization', 'WebSite', 'AboutPage', 'BreadcrumbList'] },
   { file: 'public/guides/blackjack/index.html', url: 'https://playpokergym.com/guides/blackjack/', types: ['Article', 'BreadcrumbList', 'FAQPage', 'LearningResource'] },
   { file: 'public/guides/jacks-or-better/index.html', url: 'https://playpokergym.com/guides/jacks-or-better/', types: ['Article', 'BreadcrumbList', 'FAQPage', 'LearningResource'] },
   { file: 'public/guides/baccarat/index.html', url: 'https://playpokergym.com/guides/baccarat/', types: ['Article', 'BreadcrumbList', 'FAQPage', 'LearningResource'] },
@@ -152,7 +153,7 @@ test('meta descriptions fit the 25–160 characters search engines show', async 
   const { readdir } = await import('node:fs/promises');
   const guides = (await readdir(path.join(root, 'public/guides'), { withFileTypes: true }))
     .filter((d) => d.isDirectory()).map((d) => `public/guides/${d.name}/index.html`);
-  const files = ['web/landing.html', 'web/index.html', 'web/privacy.html', 'public/guides/index.html', ...guides];
+  const files = ['web/landing.html', 'web/index.html', 'web/privacy.html', 'web/about.html', 'public/guides/index.html', ...guides];
   for (const file of files) {
     const html = await read(file);
     const raw = /<meta\s+name="description"\s+content="([^"]*)"/i.exec(html)?.[1] ?? '';
@@ -253,4 +254,33 @@ test('every /guides/ hub section opens with an intro', async () => {
     intros.add(intro);
   }
   assert.equal(intros.size, sections.length, 'each intro is unique');
+});
+
+test('the /about/ page explains who builds the site and how answers are computed, and every guide links to it', async () => {
+  const { readdir } = await import('node:fs/promises');
+  const html = await read('web/about.html');
+  const sitemap = await read('public/sitemap.xml');
+  assert.match(sitemap, /<url><loc>https:\/\/playpokergym\.com\/about\/<\/loc><lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/, 'About is in the sitemap with a lastmod');
+  const title = /<title>([^<]*)<\/title>/.exec(html)?.[1] ?? '';
+  assert.equal(title, 'About Play Poker Gym: How the Strategy Answers Are Computed');
+  assert.ok(title.length <= 65, `title is ${title.length} characters`);
+  assert.match(html, /<h1>About Play Poker Gym<\/h1>/);
+  assert.equal(link(html, 'canonical'), 'https://playpokergym.com/about/');
+  const nodes = jsonLd(html);
+  const about = nodes.find((node) => node['@type'] === 'AboutPage');
+  assert.equal(about?.url, 'https://playpokergym.com/about/');
+  assert.equal(about.about['@id'], 'https://playpokergym.com/#organization');
+  assert.equal(about.breadcrumb['@id'], nodes.find((node) => node['@type'] === 'BreadcrumbList')['@id']);
+  assert.ok(!nodes.some((node) => /Review|AggregateRating/.test(node['@type'])), 'no review or rating markup');
+  for (const heading of ['Who builds it', 'How the answers are computed', 'Rules the answers assume', 'Free, with no signup', 'Play responsibly']) {
+    assert.ok(html.includes(`<h2>${heading}</h2>`), `section: ${heading}`);
+  }
+  assert.match(await read('public/llms.txt'), /https:\/\/playpokergym\.com\/about\//, 'llms.txt lists About');
+  const guides = (await readdir(path.join(root, 'public/guides'), { withFileTypes: true }))
+    .filter((d) => d.isDirectory()).map((d) => `public/guides/${d.name}/index.html`);
+  for (const file of ['public/guides/index.html', 'web/landing.html', 'web/privacy.html', ...guides]) {
+    const page = await read(file);
+    const footer = page.slice(page.lastIndexOf('<footer'), page.lastIndexOf('</footer>'));
+    assert.ok(footer.includes('href="/about/"'), `${file}: footer links /about/`);
+  }
 });

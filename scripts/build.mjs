@@ -50,6 +50,9 @@ try {
 await cp(path.join(root, 'web/landing.html'), path.join(output, 'index.html'));
 await mkdir(path.join(output, 'pro'), { recursive: true });
 await cp(path.join(root, 'web/pro.html'), path.join(output, 'pro/index.html'));
+// Hand-built About page (E-E-A-T): served at /about/ (assets add the trailing slash).
+await mkdir(path.join(output, 'about'), { recursive: true });
+await cp(path.join(root, 'web/about.html'), path.join(output, 'about/index.html'));
 await cp(path.join(root, 'public/sitemap.xml'), path.join(output, 'sitemap.xml'));
 await cp(path.join(root, 'public/robots.txt'), path.join(output, 'robots.txt'));
 await cp(path.join(root, 'public/llms.txt'), path.join(output, 'llms.txt'));

@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0F3D2E">
+<title>About Play Poker Gym: How the Strategy Answers Are Computed</title>
+<meta name="description" content="Who builds Play Poker Gym, how its blackjack, video poker, baccarat and Hold’em answers are computed, and the table rules every guide assumes.">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+<meta name="author" content="Play Poker Gym">
+<link rel="canonical" href="https://playpokergym.com/about/">
+<link rel="sitemap" type="application/xml" href="/sitemap.xml">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Play Poker Gym">
+<meta property="og:title" content="About Play Poker Gym: How the Strategy Answers Are Computed">
+<meta property="og:description" content="Who builds Play Poker Gym, how the coach computes every blackjack, video poker, baccarat and Hold’em answer, and the rules the guides assume.">
+<meta property="og:url" content="https://playpokergym.com/about/">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://playpokergym.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Play Poker Gym: free four-game casino trainer. A five-card hand and a green and red Daily Drill result grid.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="About Play Poker Gym: How the Strategy Answers Are Computed">
+<meta name="twitter:description" content="How the coach computes every blackjack, video poker, baccarat and Hold’em answer, and the rules the guides assume.">
+<meta name="twitter:image" content="https://playpokergym.com/og.png">
+<meta name="twitter:image:alt" content="Play Poker Gym: free four-game casino trainer. A five-card hand and a green and red Daily Drill result grid.">
+<link rel="icon" href="/web/icon.svg" type="image/svg+xml">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://playpokergym.com/#organization",
+      "name": "Play Poker Gym",
+      "alternateName": "Poker Gym",
+      "url": "https://playpokergym.com/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://playpokergym.com/web/icon-512.png",
+        "width": 512,
+        "height": 512
+      },
+      "sameAs": ["https://github.com/MeepTheTendie/pokergym", "https://www.instagram.com/playpokergym/", "https://ko-fi.com/playpokergym"],
+      "disambiguatingDescription": "Free four-game casino card trainer at playpokergym.com. Not affiliated with pokergym.me or pokergym.app.",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "meep@mail.grokbot.com",
+        "contactType": "customer support",
+        "availableLanguage": "English"
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://playpokergym.com/#website",
+      "url": "https://playpokergym.com/",
+      "name": "Play Poker Gym",
+      "alternateName": "Poker Gym",
+      "inLanguage": "en",
+      "publisher": {"@id": "https://playpokergym.com/#organization"}
+    },
+    {
+      "@type": "AboutPage",
+      "@id": "https://playpokergym.com/about/#webpage",
+      "url": "https://playpokergym.com/about/",
+      "name": "About Play Poker Gym: How the Strategy Answers Are Computed",
+      "description": "Who builds Play Poker Gym, how its blackjack, video poker, baccarat and Hold’em answers are computed, and the table rules every guide assumes.",
+      "inLanguage": "en",
+      "datePublished": "2026-11-25",
+      "dateModified": "2026-11-25",
+      "about": {"@id": "https://playpokergym.com/#organization"},
+      "mainEntity": {"@id": "https://playpokergym.com/#organization"},
+      "isPartOf": {"@id": "https://playpokergym.com/#website"},
+      "publisher": {"@id": "https://playpokergym.com/#organization"},
+      "breadcrumb": {"@id": "https://playpokergym.com/about/#breadcrumb"}
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://playpokergym.com/about/#breadcrumb",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Play Poker Gym", "item": "https://playpokergym.com/"},
+        {"@type": "ListItem", "position": 2, "name": "About", "item": "https://playpokergym.com/about/"}
+      ]
+    }
+  ]
+}
+</script>
+<link rel="preload" href="/web/fonts/InterTight-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/web/fonts/Inter-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/web/site.css">
+<style>
+.prose{padding-top:40px}
+.prose h1{margin-bottom:8px}
+.prose li{margin-bottom:12px}
+.prose a,.prose code{overflow-wrap:anywhere}
+.prose table{margin:8px 0 24px}
+.prose th,.prose td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="pg-header"><div class="wrap">
+<a class="pg-brand" href="/"><span class="pg-mark"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C9 6 4 9 4 13.5a4 4 0 0 0 7 2.6L10 21h4l-1-4.9a4 4 0 0 0 7-2.6C20 9 15 6 12 2z" fill="#E8B53A"/></svg></span>Play Poker Gym</a>
+<nav class="pg-nav" aria-label="Main">
+<a href="/web/">Trainer</a>
+<a href="/guides/">Guides</a>
+<a href="/web/?daily=1">Daily Drill</a>
+</nav>
+<a class="pg-cta" href="/web/?daily=1">Today’s 5 hands</a>
+</div></header>
+<main id="main" class="wrap prose">
+<p class="crumbs"><a href="/">Play Poker Gym</a> / About</p>
+<h1>About Play Poker Gym</h1>
+<p class="note">Updated November 25, 2026</p>
+<p>Play Poker Gym (playpokergym.com) is a free browser trainer for four casino card games: blackjack, Jacks or Better video poker, baccarat and Texas Hold’em hand reading. You play short five-hand sessions, and a coach grades each decision and explains why. Missed decisions come back for review on a spaced schedule, and a shared Daily Drill deals five hands each day. The <a href="/guides/">strategy guides</a> answer one decision per page and link to a drill for that exact hand.</p>
+
+<h2>Who builds it</h2>
+<p>Play Poker Gym is an independent project. Its owner builds it with AI assistance, and the artwork and music are original. The source code is public on <a href="https://github.com/MeepTheTendie/pokergym">GitHub</a>, including the coach engines described below and the tests that check them. Questions, corrections and ideas go to <a href="mailto:meep@mail.grokbot.com?subject=Poker%20Gym%20feedback">meep@mail.grokbot.com</a>. Play Poker Gym is not affiliated with pokergym.me, pokergym.app or any casino.</p>
+
+<h2>How the answers are computed</h2>
+<p>Every grade the trainer gives is computed in your browser by the same code that runs the game. The guides state the answer that code reaches under the rules listed in the next section.</p>
+<ul>
+<li><strong>Blackjack.</strong> The coach calculates the exact expected value of each legal action (hit, stand, double and split) by working through every card still left in the shoe, weighted by how many of each rank remain. It uses no lookup table and no random sampling. Because the round ends at once when the dealer has a natural, the coach only compares actions in hands where the dealer does not have blackjack. Split hands use one documented simplification that moves the expected value only in the fourth decimal place. The strategy charts on the guides are checked against this engine and against standard six-deck basic strategy for these rules.</li>
+<li><strong>Video poker.</strong> For each deal the coach tries all 32 ways to hold or discard the five cards and averages the payout over every possible draw from the 47 unseen cards. The hold with the highest expected return is the answer. The guides use the full-pay 9/6 Jacks or Better pay table; the trainer can also grade Bonus Poker, Double Double Bonus and Deuces Wild against their own pay tables.</li>
+<li><strong>Baccarat.</strong> Baccarat odds come from an exact walk through every possible deal from an eight-deck shoe under the standard third-card rules, not from simulation. A baccarat player makes no drawing decisions, so the trainer quizzes you on the odds and on which bet carries the lowest house edge, using these exact figures.</li>
+<li><strong>Texas Hold’em.</strong> The trainer asks you to pick the best five cards from the seven you can see and accepts any five that make a hand of equal strength. Drawing odds on the Hold’em guides count your outs among the cards you cannot see (47 after the flop, 46 after the turn), using only the visible cards. Play Poker Gym does not teach a complete betting or bluffing strategy.</li>
+</ul>
+
+<h2>Rules the answers assume</h2>
+<div class="table-scroll"><table>
+<thead><tr><th scope="col">Game</th><th scope="col">Rules</th></tr></thead>
+<tbody>
+<tr><td>Blackjack</td><td>Six decks. Dealer stands on all 17s (S17). Blackjack pays 3:2. Double on any first two cards, double after split allowed (DAS). No resplitting aces, no surrender, up to four hands after splits.</td></tr>
+<tr><td>Video poker</td><td>Jacks or Better, 9/6 pay table (full house pays 9, flush pays 6), one 52-card deck per deal.</td></tr>
+<tr><td>Baccarat</td><td>Eight decks. Standard third-card rules. Banker wins pay 1:1 less a 5% commission, Player pays 1:1, Tie pays 8:1, and a tie pushes Player and Banker bets.</td></tr>
+<tr><td>Texas Hold’em</td><td>Best five cards out of seven (two hole cards and five on the board). The ace can play high or low in a straight.</td></tr>
+</tbody>
+</table></div>
+<p>Different table rules can change some answers, for example a dealer who hits soft 17, fewer decks, surrender, or a lower video poker pay table. Guides note this where it matters.</p>
+
+<h2>Free, with no signup</h2>
+<p>The trainer and every guide are free to use in a web browser. There is no account to create and nothing to download, and progress is saved in your own browser. See the <a href="/web/privacy">privacy page</a> for what is stored and what analytics collects.</p>
+
+<h2>Play responsibly</h2>
+<p>Play Poker Gym is strategy training only. There are no deposits, bets, cash prizes or real-money gambling on the site. Learning the best play lowers the house edge; it never beats it, and no strategy guarantees a profit. If gambling stops being fun, help is available in the US at 1-800-GAMBLER.</p>
+
+<p><a class="cta" href="/web/">Play your first hand →</a></p>
+</main>
+<footer class="pg-footer"><div class="wrap">
+<span>Play Poker Gym · free blackjack, video poker, baccarat and Hold’em practice. No real money. Learning the best play lowers the house edge; it never beats it.</span>
+<nav aria-label="Footer"><a href="/guides/">Guides</a><a href="/web/">Trainer</a><a href="/about/" aria-current="page">About</a><a href="/web/privacy">Privacy</a><a href="https://ko-fi.com/playpokergym">Tip on Ko-fi</a></nav>
+</div></footer>
+<script src="/web/posthog-loader.js"></script>
+</body></html>
