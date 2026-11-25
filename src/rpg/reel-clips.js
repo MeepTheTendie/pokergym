@@ -388,7 +388,7 @@ const SLUGS = {
   // puzzle noon) and a JoB FB 4 PM probe. EVs: docs/video/slate-20261201.md.
   'double-14-vs-five': {
     game: 'blackjack',
-    label: 'DOUBLE ON 14',
+    label: 'DOUBLE SOFT 14 AGAINST A 5',
     player: [C(14, 1), C(3, 3)],  // A♥ 3♣ = soft 14
     dealer: C(5, 0),              // 5♠
     hole: C(10, 2),               // 10♦
@@ -402,7 +402,7 @@ const SLUGS = {
   },
   'keep-the-ace': {
     game: 'videopoker',
-    label: 'KEEP THE ACE',
+    label: 'KEEP THE ACE WITH K-Q-J',
     hand: [C(14, 0), C(13, 1), C(12, 2), C(11, 3), C(4, 0)], // A♠ K♥ Q♦ J♣ 4♠
   },
 };
