@@ -22,6 +22,9 @@ export function localLinks(html, guides = GUIDES) {
     .replace(/href="\/web\/fonts\/([A-Za-z0-9-]+\.woff2)"/g, 'href="fonts/$1"')
     .replace(/href="\/web\/privacy(?:\.html)?"/g, 'href="privacy.html"')
     .replace(/href="\/web\/icon.svg"/g, 'href="icon.svg"')
+    // The About page is not bundled and the portable demo never links the live
+    // origin, so its footer link is dropped (with the weekly sample's separator).
+    .replace(/(?: · )?<a href="\/about\/"[^>]*>[^<]*<\/a>/g, '')
     .replace(/href="\/"/g, 'href="index.html"')
     .replace(/<script src="\/web\/posthog-loader\.js"><\/script>/g, '');
 }

@@ -11,7 +11,7 @@ const BASE = 'https://playpokergym.com';
 const UPDATED = '2026-11-04';
 
 const CORE = [
-  ['/', 1.0], ['/web/', 0.9], ['/guides/', 0.8], ['/web/privacy', 0.3],
+  ['/', 1.0], ['/web/', 0.9], ['/guides/', 0.8], ['/about/', 0.5], ['/web/privacy', 0.3],
 ];
 const LONG_GUIDES = [
   '/guides/blackjack/', '/guides/jacks-or-better/', '/guides/baccarat/',
@@ -26,6 +26,7 @@ const SOURCE = {
   '/': 'web/landing.html',
   '/web/': 'web/index.html',
   '/web/privacy': 'web/privacy.html',
+  '/about/': 'web/about.html',
 };
 const sourceFor = url => SOURCE[url] ?? `public${url}index.html`;
 const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago' }).format(new Date());

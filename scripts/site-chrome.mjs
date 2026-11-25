@@ -25,6 +25,6 @@ ${item('drill', '/web/?daily=1', 'Daily Drill')}
 export function footer() {
   return `<footer class="pg-footer"><div class="wrap">
 <span>Play Poker Gym · free blackjack, video poker, baccarat and Hold’em practice. No real money. Learning the best play lowers the house edge; it never beats it.</span>
-<nav aria-label="Footer"><a href="/guides/">Guides</a><a href="/web/">Trainer</a><a href="/web/privacy">Privacy</a><a href="https://ko-fi.com/playpokergym">Tip on Ko-fi</a></nav>
+<nav aria-label="Footer"><a href="/guides/">Guides</a><a href="/web/">Trainer</a><a href="/about/">About</a><a href="/web/privacy">Privacy</a><a href="https://ko-fi.com/playpokergym">Tip on Ko-fi</a></nav>
 </div></footer>`;
 }

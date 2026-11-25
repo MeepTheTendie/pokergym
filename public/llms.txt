@@ -20,6 +20,7 @@ Key facts for assistants:
 ## Main pages
 
 - [Home](https://playpokergym.com/): what Play Poker Gym is, the four games, how a session works, and the Daily Drill.
+- [About](https://playpokergym.com/about/): who builds Play Poker Gym, how the coach computes each answer, and the table rules the guides assume.
 - [Trainer](https://playpokergym.com/web/): the free playable app. Five-hand sessions, coach feedback, Daily Drill, mistake notebook, badges.
 - [Blackjack guide](https://playpokergym.com/guides/blackjack/): hit, stand or double on hard 16 and soft 18, with the simulator's assumptions.
 - [Jacks or Better guide](https://playpokergym.com/guides/jacks-or-better/): which cards to hold for a paying pair, a low pair and four cards to a royal flush.
@@ -36,7 +37,7 @@ quote the answer and the practice link together.
 
 - [Soft 17 (A-6) against a dealer 2: hit, double or stand?](https://playpokergym.com/guides/blackjack-soft-17-vs-2-hit/): Hit.
 - [Should you always split aces in blackjack?](https://playpokergym.com/guides/blackjack-aces-vs-10-split/): Yes.
-- [Should you split 4s against a dealer 5?](https://playpokergym.com/guides/blackjack-44-vs-5-split/): Split if you can double after splitting.
+- [Should you split 4s against a dealer 5?](https://playpokergym.com/guides/blackjack-44-vs-5-split/): Split if you can double…
 - [Hard 9 against a dealer 2: double or hit?](https://playpokergym.com/guides/blackjack-9-vs-2-hit/): Hit.
 - [8-8 against a dealer 10: split or hit?](https://playpokergym.com/guides/blackjack-88-vs-10-split/): Split.
 - [Soft 18 (A-7) against a 9: hit or stand?](https://playpokergym.com/guides/blackjack-soft-18-vs-9/): Hit.
@@ -74,11 +75,11 @@ quote the answer and the practice link together.
 - [Baccarat: Player has 6 — does Player draw?](https://playpokergym.com/guides/baccarat-player-six-stands/): No.
 - [Baccarat strategy trainer: learn the odds and the tableau free](https://playpokergym.com/guides/baccarat-strategy-trainer/): The only real baccarat…
 - [Baccarat: odds of losing 6 hands in a row](https://playpokergym.com/guides/baccarat-odds-of-losing-6-in-a-row/): About 1.4%, or roughly one time…
-- [How often does Banker win in baccarat?](https://playpokergym.com/guides/baccarat-how-often-banker-wins/): About 45.9% of hands, against 44.6% for Player.
+- [How often does Banker win in baccarat?](https://playpokergym.com/guides/baccarat-how-often-banker-wins/): About 45.9% of hands, against 44.6%…
 
 ### Hold'em
 
-- [Pocket pair: how often do you flop a set?](https://playpokergym.com/guides/holdem-pocket-pair-flop-a-set/): About 11.8% — roughly once in 8.5 flops.
+- [Pocket pair: how often do you flop a set?](https://playpokergym.com/guides/holdem-pocket-pair-flop-a-set/): About 11.8% — roughly once…
 - [Flush draw on the flop: odds you hit by the river?](https://playpokergym.com/guides/holdem-flush-draw-odds-by-the-river/): About 35% — roughly one time in three.
 - [Flush draw on the turn: odds you hit?](https://playpokergym.com/guides/holdem-flush-draw-turn-odds/): About 19.6% — roughly one time in five.
 - [Open-ended straight draw on the flop: odds?](https://playpokergym.com/guides/holdem-open-ended-straight-draw-odds/): About 31.5% by the river with two…

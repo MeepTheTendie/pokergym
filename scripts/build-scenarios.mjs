@@ -124,7 +124,8 @@ function page(s) {
     description: s.description,
     datePublished: UPDATED,
     dateModified: s.updated || UPDATED,
-    author: { '@type': 'Organization', name: 'Play Poker Gym' },
+    author: { '@type': 'Organization', name: 'Play Poker Gym', url: `${BASE}/about/` },
+    publisher: { '@type': 'Organization', '@id': `${BASE}/#organization`, name: 'Play Poker Gym', url: `${BASE}/` },
     mainEntityOfPage: url,
   };
   const crumbs = {

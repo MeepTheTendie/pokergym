@@ -10,6 +10,7 @@ test('portable links rewrite absolute paths into flat offline filenames', () => 
     '<a href="/web/privacy">privacy</a>',
     '<a href="/web/icon.svg">icon</a>',
     '<a href="/">home</a>',
+    '<a href="/about/">about</a>',
   ].join('');
   const out = localLinks(html);
   assert.match(out, /href="guide-blackjack\.html"/);
@@ -18,6 +19,8 @@ test('portable links rewrite absolute paths into flat offline filenames', () => 
   assert.match(out, /href="privacy\.html"/);
   assert.match(out, /href="icon\.svg"/);
   assert.match(out, /href="index\.html"/);
+  assert.doesNotMatch(out, /about/, 'the unbundled About page link is dropped');
+  assert.equal(localLinks('<a href="/guides/">All guides</a> · <a href="/about/">About Play Poker Gym</a> · x'), '<a href="index.html#portableGuides">All guides</a> · x');
 });
 
 test('portable bundle drops the first-party analytics loader', () => {
