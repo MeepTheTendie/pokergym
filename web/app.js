@@ -168,6 +168,12 @@ const entryParams = parseEntryParams(location.search);
 let requestedDrill = entryParams.drill ? findDrill(entryParams.drill) : null;
 // A reel deeplink (?c=<clip>) deals the exact hand from a social video as hand 1.
 let requestedReel = reelClipFor(entryParams.clip);
+// Kept until the reel session actually starts, so a cancelled auto-start or a
+// manual tap still deals the promised hand instead of falling back to a
+// different session.
+let pendingReel = requestedReel;
+let autoStart = false;
+let autoScheduled = false;
 let requestedGym = GYMS.find(gym => gym.game === (entryParams.practice ?? requestedDrill?.game ?? requestedReel?.game)) ?? null;
 // A shared Daily Drill link (?d=<n>) highlights today's drill when n is within
 // one day of today's number; otherwise it is ignored silently. ref is read only
@@ -448,9 +454,10 @@ function enterTraining() {
       ? requestedGym
       : GYM_BY_ID[profile.activeSession?.gymId] ?? requestedGym;
     const scenario = requestedDrill && requestedDrill.game === gym.game ? requestedDrill : null;
-    const reel = requestedReel && requestedReel.game === gym.game ? requestedReel : null;
+    const reel = (requestedReel || pendingReel) && (requestedReel || pendingReel).game === gym.game
+      ? (requestedReel || pendingReel) : null;
     requestedGym = null;
-    if (reel) requestedReel = null;
+    if (reel) { requestedReel = null; pendingReel = null; }
     if (scenario || reel) {
       // A targeted link always opens fresh on the promised hand, even when an
       // unfinished session exists, so the page and the deal cannot disagree.
@@ -1226,7 +1233,9 @@ function startDaily(entry = 'other') {
   dailyRun = { key, plan, number, index, results, scored: !completed, finished: false };
   dailyRun.token = analytics.startDaily({
     entry, number, resumed: index > 0, scored: !completed, shared: entry === 'daily_link' || entry === 'share_link',
+    ...(autoStart ? { auto: true, auto_rendered: true, auto_start: true, rendered: 'auto', start_type: 'auto' } : {}),
   });
+  autoStart = false;
   profile = setDailyProgress(profile, { key, plan, index, results });
   save();
   dailyMode = true;
@@ -1263,6 +1272,16 @@ function loadDailyHand() {
 function startGym(gym, sprint = false, mode = null) {
   dailyMode = false;
   dailyRun = null;
+  // A pending reel link wins over an unrelated unfinished session: reset to the
+  // promised hand instead of silently no-oping on the gym mismatch.
+  if (pendingReel && gym.game === pendingReel.game && (!profile.activeSession || profile.activeSession.gymId !== gym.id)) {
+    profile = { ...profile, activeSession: {
+      gymId: gym.id, played: 0, optimal: 0, dealt: 0, startedAt: new Date().toISOString(),
+      reelClip: pendingReel.clip,
+    } };
+    save();
+    pendingReel = null;
+  }
   if (sprint) {
     if (!canTrain(profile, gym.id) || profile.activeSession?.gymId !== gym.id) return;
   } else if (!canBattle(profile, gym.id) && !canPractice(profile, gym.id)) return;
@@ -1298,7 +1317,13 @@ function startGym(gym, sprint = false, mode = null) {
     mode: sprint ? (drillMode ?? 'session') : 'challenge',
     resumed: Boolean(sprint && profile.activeSession?.played > 0),
     entry: trainerEntry,
+    ...(autoStart ? {
+      auto: true, auto_rendered: true, auto_dealt: true, auto_start: true,
+      rendered: 'auto', start_type: 'auto', initiated_by: 'auto', automatic: true,
+    } : {}),
   });
+  if (profile.activeSession?.reelClip) pendingReel = null;
+  autoStart = false;
   firstDecisionStart = performance.now();
   firstDecisionEmitted = false;
   gameId = gym.game;
@@ -3172,14 +3197,16 @@ function startFromEntry() {
     document.removeEventListener('keydown', onInput, true);
     document.removeEventListener('visibilitychange', scheduleStart);
   };
-  const begin = () => {
+  const begin = (auto = autoScheduled) => {
     if (started || canceled) return;
     if (document.visibilityState !== 'visible') {
       // A hidden load is a preview, not a play. Wait for visibilitychange.
       clearTimer();
       return;
     }
+    autoScheduled = false;
     started = true;
+    autoStart = Boolean(auto);
     cleanup();
     if (!profile) {
       profile = createProfile(DEFAULT_CLASS);
@@ -3198,6 +3225,7 @@ function startFromEntry() {
     if (started || canceled) return;
     clearTimer();
     if (document.visibilityState === 'visible') {
+      autoScheduled = true;
       timer = setTimeout(begin, ENTRY_START_DELAY_MS);
     }
   };
@@ -3217,7 +3245,7 @@ function startFromEntry() {
       cleanup();
       return;
     }
-    begin();
+    begin(false);
   }
 
   // Show the promised entry as a preview while the visibility/input gate is
@@ -3226,6 +3254,8 @@ function startFromEntry() {
   else { initTitle(); }
 
   document.addEventListener('pointerdown', onInput, { capture: true, passive: true });
+  document.addEventListener('touchstart', onInput, { capture: true, passive: true });
+  document.addEventListener('click', onInput, { capture: true, passive: true });
   document.addEventListener('keydown', onInput, true);
   document.addEventListener('visibilitychange', scheduleStart);
   scheduleStart();
