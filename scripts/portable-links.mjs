@@ -8,6 +8,9 @@ export const GUIDES = ['jacks-or-better', 'blackjack', 'holdem-best-five', 'bacc
 
 export function localLinks(html, guides = GUIDES) {
   return html
+    // The game hubs' generated "Every ... guide" list points at one-question
+    // guides that the bundle does not ship, so the whole block is dropped.
+    .replace(/<!-- guide-index:start[\s\S]*?<!-- guide-index:end -->\n?/g, '')
     .replace(/href="\/sitemap.xml"/g, 'href="index.html"')
     .replace(/href="\/guides\/"/g, 'href="index.html#portableGuides"')
     .replace(/href="\/guides\/weekly-01\/"/g, 'href="weekly-sample.html"')
