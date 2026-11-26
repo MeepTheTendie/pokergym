@@ -284,3 +284,94 @@ test('the /about/ page explains who builds the site and how answers are computed
     assert.ok(footer.includes('href="/about/"'), `${file}: footer links /about/`);
   }
 });
+
+test('each game hub links every guide of its game with the question as the anchor', async () => {
+  const { scenarios } = await import('../../scripts/scenarios.mjs');
+  const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  // Game by slug, independent of scripts/guide-families.mjs, so a guide left out
+  // of a family list still has to reach its hub.
+  const hubs = {
+    'public/guides/blackjack/index.html': (slug) => slug.startsWith('blackjack-') || slug.startsWith('free-blackjack-'),
+    'public/guides/jacks-or-better/index.html': (slug) => slug.startsWith('video-poker-') || slug === 'free-video-poker-trainer',
+    'public/guides/baccarat/index.html': (slug) => slug.startsWith('baccarat-') || slug === 'free-baccarat-practice',
+    'public/guides/holdem-best-five/index.html': (slug) => slug.startsWith('holdem-') || slug === 'free-holdem-trainer',
+  };
+  for (const [file, inGame] of Object.entries(hubs)) {
+    const html = await read(file);
+    const start = html.indexOf('<!-- guide-index:start');
+    const end = html.indexOf('<!-- guide-index:end -->');
+    assert.ok(start > 0 && end > start, `${file}: generated guide index present`);
+    const block = html.slice(start, end);
+    const guides = scenarios.filter((s) => inGame(s.slug));
+    assert.ok(guides.length >= 6, `${file}: has guides`);
+    for (const s of guides) {
+      assert.ok(block.includes(`<a href="/guides/${s.slug}/">${esc(s.title)}</a>`), `${file}: links ${s.slug} with its question`);
+    }
+    for (const [, text] of block.matchAll(/<li><a href="\/guides\/[^"]+\/">([^<]+)<\/a><\/li>/g)) {
+      assert.doesNotMatch(text, /^(read more|more|click here|here|guide)$/i, `${file}: descriptive anchor`);
+    }
+  }
+});
+
+test('every sitemap guide has at least 3 inbound contextual links from other guides or hubs', async () => {
+  const sitemap = await read('public/sitemap.xml');
+  const base = 'https://playpokergym.com';
+  const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].slice(base.length));
+  const sources = urls.filter((u) => u.startsWith('/guides/'));
+  const inbound = new Map(urls.map((u) => [u, new Set()]));
+  for (const src of sources) {
+    // Shared nav and footer are the same on every page, so they don't count.
+    const html = (await read(`public${src}index.html`))
+      .replace(/<head>[\s\S]*?<\/head>/, '')
+      .replace(/<header class="pg-header">[\s\S]*?<\/header>/g, '')
+      .replace(/<footer class="pg-footer">[\s\S]*?<\/footer>/g, '');
+    for (const [, href] of html.matchAll(/<a\b[^>]*href="([^"#?]+)/g)) {
+      const target = href.startsWith(base) ? href.slice(base.length) : href;
+      if (target !== src && inbound.has(target)) inbound.get(target).add(src);
+    }
+  }
+  for (const url of sources.filter((u) => u !== '/guides/')) {
+    assert.ok(inbound.get(url).size >= 3, `${url}: ${inbound.get(url).size} inbound links from other guides (${[...inbound.get(url)].join(', ')})`);
+  }
+});
+
+test('related decisions stay in the same game and every decision guide links up to its hub', async () => {
+  const { scenarios } = await import('../../scripts/scenarios.mjs');
+  const game = (slug) => slug.startsWith('blackjack-') || slug.startsWith('free-blackjack-') ? 'blackjack'
+    : slug.startsWith('video-poker-') || slug === 'free-video-poker-trainer' ? 'videopoker'
+    : slug.startsWith('baccarat-') || slug === 'free-baccarat-practice' ? 'baccarat'
+    : slug.startsWith('holdem-') || slug === 'free-holdem-trainer' ? 'holdem' : null;
+  const hub = { blackjack: '/guides/blackjack/', videopoker: '/guides/jacks-or-better/', baccarat: '/guides/baccarat/', holdem: '/guides/holdem-best-five/' };
+  for (const s of scenarios) {
+    const html = await read(`public/guides/${s.slug}/index.html`);
+    const aside = html.slice(html.indexOf('<h2>Related decisions</h2>'), html.indexOf('</aside>'));
+    const related = [...aside.matchAll(/<li><a href="\/guides\/([^/]+)\/">/g)].map((m) => m[1]);
+    assert.ok(related.length >= 3 && related.length <= 5, `${s.slug}: 3-5 related decisions (${related.length})`);
+    const g = game(s.slug);
+    for (const other of related) {
+      assert.notEqual(other, s.slug, `${s.slug}: no self link`);
+      if (g) assert.ok(game(other) === g || game(other) === null, `${s.slug}: related ${other} is the same game`);
+    }
+    if (g) assert.ok(aside.includes(`<a href="${hub[g]}">`), `${s.slug}: links up to ${hub[g]}`);
+    if (g === 'blackjack' && s.slug !== 'blackjack-basic-strategy-trainer') {
+      assert.ok(aside.includes('<a href="/guides/blackjack-basic-strategy-trainer/">'), `${s.slug}: links the basic strategy trainer page`);
+    }
+  }
+  // Hand families link each other: every hard 12-17 stiff hand links at least
+  // three other stiff hands, and the same for splits and video poker holds.
+  const families = {
+    stiff: ['blackjack-12-vs-2-hit', 'blackjack-13-vs-2-stand', 'blackjack-15-vs-10-hit', 'blackjack-16-vs-10-hit', 'blackjack-17-vs-10-stand'],
+    doubles: ['blackjack-9-vs-2-hit', 'blackjack-10-vs-9-double', 'blackjack-11-vs-10-double', 'blackjack-11-vs-ace-hit'],
+    splits: ['blackjack-aces-vs-10-split', 'blackjack-22-vs-9-hit', 'blackjack-44-vs-5-split', 'blackjack-88-vs-10-split', 'blackjack-99-vs-7-stand'],
+    holds: ['video-poker-nothing-hand-hold', 'video-poker-low-pair-or-three-to-a-royal', 'video-poker-four-to-a-flush-vs-low-pair', 'video-poker-two-pair-hold-both'],
+    odds: ['holdem-flush-draw-odds-by-the-river', 'holdem-flush-draw-turn-odds', 'holdem-open-ended-straight-draw-odds', 'holdem-gutshot-odds'],
+  };
+  for (const [name, slugs] of Object.entries(families)) {
+    for (const slug of slugs) {
+      const html = await read(`public/guides/${slug}/index.html`);
+      const aside = html.slice(html.indexOf('<h2>Related decisions</h2>'), html.indexOf('</aside>'));
+      const hits = slugs.filter((o) => o !== slug && aside.includes(`href="/guides/${o}/"`)).length;
+      assert.ok(hits >= Math.min(3, slugs.length - 1), `${slug}: links ${hits} other ${name} guides`);
+    }
+  }
+});
