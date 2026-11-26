@@ -1,5 +1,7 @@
 # PokerGym operating rules
 
+> **SUNSET (2026-11-26).** Poker Gym is sunset: the site stays up as deployed and crew work has stopped (PG-CLAUDE-SUNSET-20261125-01, closed SUNSET 3–0). The rules below are historical. Nothing new is scheduled, rendered, deployed or tasked. Handoff, shutdown checklist and the list of unfinished items: [`SUNSET.md`](SUNSET.md).
+
 Canonical rules for PokerGym work. This file supersedes conflicting one-line guardrails in `docs/PokerGymControlDoc.md`, the retired `automation/retired/daily-prompt.md`, and ad-hoc agent notes. It applies to PokerGym only.
 
 **Where the rules live (cleaned up 2026-11-10):**
