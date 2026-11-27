@@ -224,6 +224,42 @@ test('position 6-9 blackjack guides answer in the title and carry the depth sect
   }
 });
 
+test('thin-page expansion: split aces and soft 17 vs 2 carry EV rows, full rules, what-changes and a trainer quiz', async () => {
+  const pages = {
+    'blackjack-aces-vs-10-split': { cell: '<td><strong>Split</strong></td>', rows: ['split', 'hit'], min: 900, drills: ['bj-aa-v10', 'bj-88-v10'] },
+    'blackjack-soft-17-vs-2-hit': { cell: '<td><strong>Hit</strong></td>', rows: ['hit', 'double', 'stand'], min: 800, drills: ['bj-soft18-v9'] },
+  };
+  const decode = (t) => t.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+  for (const [slug, { cell, rows, min, drills }] of Object.entries(pages)) {
+    const html = await read(`public/guides/${slug}/index.html`);
+    assert.ok(decode(/<title>([^<]*)<\/title>/.exec(html)[1]).length <= 65, `${slug}: title length`);
+    assert.ok(decode(meta(html, 'name', 'description')).length <= 160, `${slug}: description length`);
+    for (const heading of ['against every dealer upcard</h2>', '<h2>Rules this answer assumes</h2>', '<h2>What changes the answer</h2>', '<h2>Check yourself</h2>', '<h2>Practice it</h2>']) {
+      assert.ok(html.includes(heading), `${slug}: ${heading}`);
+    }
+    assert.ok(html.includes(cell), `${slug}: highlighted chart cell`);
+    for (const action of rows) {
+      const row = new RegExp(`<tr class="ev"><th scope="row">EV if you ${action}</th>(<td>(?:[+\u2212]\\d\\.\\d\\d|0\\.00)</td>){10}</tr>`);
+      assert.match(html, row, `${slug}: EV row for ${action}`);
+    }
+    const rules = /<h2>Rules this answer assumes<\/h2>\n<p>([^<]+)<\/p>/.exec(html)[1];
+    for (const rule of ['Six decks', '3:2', 'stands on soft 17', 'double after split', 'four hands', 'one card each', 'resplit', 'no surrender']) {
+      assert.ok(rules.includes(rule), `${slug}: rules line names ${rule}`);
+    }
+    const changes = html.slice(html.indexOf('<h2>What changes the answer</h2>'), html.indexOf('<h2>Check yourself</h2>'));
+    assert.ok((changes.match(/<li>/g) ?? []).length >= 4, `${slug}: at least 4 rule changes`);
+    for (const word of ['soft 17', '6:5', 'deck']) assert.ok(changes.includes(word), `${slug}: what-changes covers ${word}`);
+    const quiz = html.slice(html.indexOf('<ol class="quiz">'), html.indexOf('</ol>', html.indexOf('<ol class="quiz">')));
+    const questions = (quiz.match(/<details>/g) ?? []).length;
+    assert.ok(questions >= 2 && questions <= 3, `${slug}: 2-3 quiz questions`);
+    for (const drill of drills) assert.ok(quiz.includes(`href="/web/?drill=${drill}&amp;ref=guide"`), `${slug}: quiz drill ${drill}`);
+    const words = html.replace(/[\s\S]*<main[^>]*>|<\/main>[\s\S]*/g, '').replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+    assert.ok(words >= min, `${slug}: ${words} words`);
+    const article = jsonLd(html).find((node) => node['@type'] === 'Article');
+    assert.equal(article.dateModified, '2026-11-27', `${slug}: dateModified`);
+  }
+});
+
 test('the homepage body links popular strategy questions to live guides', async () => {
   const html = await read('web/landing.html');
   const sitemap = await read('public/sitemap.xml');

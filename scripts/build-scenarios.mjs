@@ -62,15 +62,31 @@ const GAME_FAQ = {
   'free-': ['Do I need an account or money to practice?', 'No. Play Poker Gym runs in the browser with no signup, no download and no real money; progress is saved on your device.'],
 };
 
-// Optional depth sections (scenarios.mjs: chart, changes). The rules line
+// Optional depth sections (scenarios.mjs: chart, changes, quiz). The rules line
 // matches the trainer (src/games/blackjack.js GAME) and GAME_FAQ above.
-export const BJ_RULES = 'Six decks, dealer stands on soft 17, double on any first two cards, double after split allowed, no surrender, and the dealer checks for blackjack before you act, so a dealer blackjack never takes a double or split bet. These are the rules the free trainer deals and grades with.';
+export const BJ_RULES = 'Six decks, blackjack pays 3:2, dealer stands on soft 17, double on any first two cards, double after split allowed, split up to four hands, split aces get one card each and can\u2019t be resplit, no surrender, and the dealer checks for blackjack before you act, so a dealer blackjack never takes a double or split bet. These are the rules the free trainer deals and grades with.';
 export const UPCARDS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'A'];
 export const PLAY = { S: 'Stand', H: 'Hit', D: 'Double', P: 'Split' };
+// Optional chart.ev: { split|hit|double|stand: [10 values] }, the coach
+// engine's expected value per 1-unit bet (test/scenarios.test.js checks them).
+const EV_ACTIONS = new Set(['split', 'hit', 'double', 'stand']);
+export function fmtEv(v) {
+  const r = Math.round(v * 100) / 100;
+  if (r === 0) return '0.00';
+  return `${r > 0 ? '+' : '\u2212'}${Math.abs(r).toFixed(2)}`;
+}
 
 // Escapes, then turns [label](/path/) into a link. Only site-relative paths.
 function inline(text) {
   return esc(text).replace(/\[([^\]]+)\]\((\/[^)\s]+)\)/g, (_, label, href) => `<a href="${href}">${label}</a>`);
+}
+
+function evRows(s) {
+  if (!s.chart.ev) return '';
+  return Object.entries(s.chart.ev).map(([action, values]) => {
+    if (!EV_ACTIONS.has(action) || values.length !== UPCARDS.length) throw new Error(`${s.slug}: bad chart.ev ${action}`);
+    return `\n<tr class="ev"><th scope="row">EV if you ${action}</th>${values.map(v => `<td>${fmtEv(v)}</td>`).join('')}</tr>`;
+  }).join('');
 }
 
 function depth(s) {
@@ -85,12 +101,13 @@ function depth(s) {
       return UPCARDS[i] === up ? `<td><strong>${play}</strong></td>` : `<td>${play}</td>`;
     }).join('');
     out.push(`<h2>${esc(label)} against every dealer upcard</h2>
-<div class="table-scroll"><table class="chart-row"><caption>Basic strategy for ${esc(label)}: six decks, dealer stands on soft 17</caption>
+<div class="table-scroll"><table class="chart-row"><caption>Basic strategy for ${esc(label)}: six decks, dealer stands on soft 17${s.chart.ev ? '. EV rows: expected return per 1-unit bet from a full shoe, from the trainer\u2019s coach engine' : ''}</caption>
 <thead><tr><th scope="col">Dealer shows</th>${UPCARDS.map(u => `<th scope="col">${u}</th>`).join('')}</tr></thead>
-<tbody><tr><th scope="row">${esc(label)}</th>${td}</tr></tbody></table></div>${note ? `\n<p class="note">${inline(note)}</p>` : ''}`);
+<tbody><tr><th scope="row">${esc(label)}</th>${td}</tr>${evRows(s)}</tbody></table></div>${note ? `\n<p class="note">${inline(note)}</p>` : ''}`);
   }
   out.push(`<h2>Rules this answer assumes</h2>\n<p>${esc(BJ_RULES)}</p>`);
   if (s.changes) out.push(`<h2>What changes the answer</h2>\n<ul>\n${s.changes.map(c => `<li>${inline(c)}</li>`).join('\n')}\n</ul>`);
+  if (s.quiz) out.push(`<h2>Check yourself</h2>\n<p>Answer each one in your head, then open it. Each links to a hand you can play in the free trainer.</p>\n<ol class="quiz">\n${s.quiz.map(qz => `<li><p><strong>${esc(qz.q)}</strong></p>\n<details><summary>Show the answer</summary><p>${inline(qz.a)} <a href="${esc(qz.href)}">${esc(qz.link)} \u2192</a></p></details></li>`).join('\n')}\n</ol>`);
   const drill = s.cta[1].includes('drill=') ? ` or <a href="${esc(s.cta[1])}">replay this exact hand</a>` : '';
   out.push(`<h2>Practice it</h2>\n<p>Reading the answer is the easy part. <a href="/web/?practice=blackjack&amp;ref=guide">Play five blackjack hands in the free trainer</a>${drill}: you make the call first, then the coach grades it and shows the value of every option. Missed hands come back for review. For the whole chart, see the <a href="/guides/blackjack-basic-strategy-trainer/">basic strategy trainer guide</a>.</p>`);
   return `\n${out.join('\n')}`;

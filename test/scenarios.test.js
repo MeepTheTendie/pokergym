@@ -61,3 +61,37 @@ test('every strategy chart row matches the coach engine', async () => {
     assert.equal(s.chart.cells, row, `${s.slug}: chart row`);
   }
 });
+
+// EV rows and quiz answers are engine output too: every printed EV must round
+// to the coach's value, and every quiz link must open a hand that exists.
+test('chart EV rows and quiz answers match the coach engine', async () => {
+  const { roundWith, UPCARDS, bestAction, clearCache } = await import('./blackjack-helpers.mjs');
+  const { findDrill } = await import('../src/rpg/drills.js');
+  const withEv = scenarios.filter(s => s.chart?.ev);
+  assert.ok(withEv.length >= 2);
+  for (const s of withEv) {
+    for (const [action, values] of Object.entries(s.chart.ev)) {
+      UPCARDS.forEach((up, i) => {
+        clearCache();
+        const ev = bestAction(roundWith(s.chart.hand, up)).alternatives.find(o => o.action === action).ev;
+        assert.equal(Math.round(ev * 100) / 100 || 0, values[i], `${s.slug}: ${action} vs ${up} (${ev.toFixed(4)})`);
+      });
+    }
+  }
+  const quizzed = scenarios.filter(s => s.quiz);
+  assert.ok(quizzed.length >= 2);
+  for (const s of quizzed) {
+    assert.ok(s.quiz.length >= 2 && s.quiz.length <= 3, `${s.slug}: 2-3 quiz questions`);
+    for (const q of s.quiz) {
+      const url = new URL(q.href, 'https://playpokergym.com');
+      assert.equal(url.pathname, '/web/', `${s.slug}: quiz links the trainer`);
+      const drill = url.searchParams.get('drill');
+      if (drill) assert.ok(findDrill(drill), `${s.slug}: drill ${drill} exists`);
+      else assert.equal(url.searchParams.get('practice'), 'blackjack', `${s.slug}: practice param`);
+      if (q.hand) {
+        clearCache();
+        assert.equal(bestAction(roundWith(q.hand, q.up)).action, q.action, `${s.slug}: ${q.q}`);
+      }
+    }
+  }
+});

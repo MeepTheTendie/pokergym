@@ -25,7 +25,7 @@
       "headline": "Blackjack soft 17 (A-6) vs 2: hit, double or stand? (2026)",
       "description": "Hit soft 17 against a 2. Standing gives up about 15 cents per dollar; hitting is roughly break-even and beats doubling by a hair. Practice the exact deal free.",
       "datePublished": "2026-11-04",
-      "dateModified": "2026-11-04",
+      "dateModified": "2026-11-27",
       "author": {
         "@type": "Organization",
         "name": "Play Poker Gym",
@@ -55,7 +55,7 @@
           "name": "Do you double soft 17 against a 2?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Under the standard stands-on-soft-17 rules, no: hitting is slightly better. Some hits-soft-17 charts double it against a 2; the difference is under one cent per dollar."
+            "text": "In a six- or eight-deck game, no: hitting is slightly better. Single-deck charts double it against a 2; either way the difference is under one cent per dollar."
           }
         },
         {
@@ -118,14 +118,44 @@
 <div class="play-row"><a class="cta" href="/web/?drill=bj-soft17-v2&ref=guide">Play this exact hand →</a><span class="note">The coach grades your call and explains it. Free, no signup.</span></div>
 <h2>Why</h2>
 <p>Seventeen only wins when the dealer busts, and a dealer 2 busts about 35% of the time. Standing on soft 17 here loses roughly 15 cents per dollar in the coach’s six-deck, stands-on-soft-17 game.</p>
-<p>The ace means you cannot bust on the next card, so hitting is free improvement: it brings the hand to about break-even. Doubling is almost as good (about half a cent worse), which is why some charts list double against a 2 under hits-soft-17 rules; against 3 through 6 the double becomes the clear play.</p>
+<p>The ace means you cannot bust on the next card, so hitting is free improvement: it brings the hand to about break-even. Doubling is almost as good (about half a cent worse), which is why single-deck charts list a double against a 2; against 3 through 6 the double becomes the clear play.</p>
+<h2>Soft 17 (A-6) against every dealer upcard</h2>
+<div class="table-scroll"><table class="chart-row"><caption>Basic strategy for Soft 17 (A-6): six decks, dealer stands on soft 17. EV rows: expected return per 1-unit bet from a full shoe, from the trainer’s coach engine</caption>
+<thead><tr><th scope="col">Dealer shows</th><th scope="col">2</th><th scope="col">3</th><th scope="col">4</th><th scope="col">5</th><th scope="col">6</th><th scope="col">7</th><th scope="col">8</th><th scope="col">9</th><th scope="col">10</th><th scope="col">A</th></tr></thead>
+<tbody><tr><th scope="row">Soft 17 (A-6)</th><td><strong>Hit</strong></td><td>Double</td><td>Double</td><td>Double</td><td>Double</td><td>Hit</td><td>Hit</td><td>Hit</td><td>Hit</td><td>Hit</td></tr>
+<tr class="ev"><th scope="row">EV if you hit</th><td>0.00</td><td>+0.03</td><td>+0.06</td><td>+0.10</td><td>+0.13</td><td>+0.06</td><td>−0.07</td><td>−0.15</td><td>−0.20</td><td>−0.18</td></tr>
+<tr class="ev"><th scope="row">EV if you double</th><td>0.00</td><td>+0.06</td><td>+0.13</td><td>+0.20</td><td>+0.26</td><td>−0.01</td><td>−0.25</td><td>−0.39</td><td>−0.45</td><td>−0.54</td></tr>
+<tr class="ev"><th scope="row">EV if you stand</th><td>−0.15</td><td>−0.11</td><td>−0.07</td><td>−0.04</td><td>+0.01</td><td>−0.10</td><td>−0.38</td><td>−0.42</td><td>−0.42</td><td>−0.48</td></tr></tbody></table></div>
+<p class="note">Against a 2, hit (about +0.001) and double (about −0.004) round to the same 0.00, but hitting is ahead. Standing is never the best play with soft 17.</p>
+<h2>Rules this answer assumes</h2>
+<p>Six decks, blackjack pays 3:2, dealer stands on soft 17, double on any first two cards, double after split allowed, split up to four hands, split aces get one card each and can’t be resplit, no surrender, and the dealer checks for blackjack before you act, so a dealer blackjack never takes a double or split bet. These are the rules the free trainer deals and grades with.</p>
+<h2>What changes the answer</h2>
+<ul>
+<li>Number of decks. In a single-deck game the same coach engine flips this hand to a double against a 2 (about +0.015 against +0.009 for hitting). With two, six or eight decks, hitting stays ahead.</li>
+<li>Dealer hits soft 17. Standard six- and eight-deck charts still hit soft 17 against a 2 and double it against 3 through 6. The hand that switches to a double against a 2 under that rule is soft 18 (A-7).</li>
+<li>Doubling not allowed. If you can’t double (a three-card soft 17 like A-2-4, or a table that limits doubles), hit soft 17 against every upcard. Never stand.</li>
+<li>After a split. With double after split (the trainer’s rule), a soft 17 you make after splitting (6s that draw an ace, say) plays the same way. Without it, hit. Split aces are the exception: they get one card and stand.</li>
+<li>Blackjack pays 6:5 instead of 3:2. No change. The payout only touches two-card naturals, and soft 17 isn’t one.</li>
+</ul>
+<h2>Check yourself</h2>
+<p>Answer each one in your head, then open it. Each links to a hand you can play in the free trainer.</p>
+<ol class="quiz">
+<li><p><strong>Soft 17 (A-6) against a dealer 5: hit, double or stand?</strong></p>
+<details><summary>Show the answer</summary><p>Double. Against a 5 the coach puts doubling at about +0.20 per unit bet and hitting at about +0.10. <a href="/web/?practice=blackjack&amp;ref=guide">Play five blackjack hands →</a></p></details></li>
+<li><p><strong>You have A-2-4 (soft 17, three cards) against a 4. What now?</strong></p>
+<details><summary>Show the answer</summary><p>Hit. A three-card hand can’t be doubled in the trainer, and standing on 17 is still worse than taking a card that can’t bust you. <a href="/web/?practice=blackjack&amp;ref=guide">Play five blackjack hands →</a></p></details></li>
+<li><p><strong>Soft 18 (A-7) against a 9: hit or stand?</strong></p>
+<details><summary>Show the answer</summary><p>Hit. Eighteen is weak against a 9; the coach puts hitting at about −0.10 and standing at about −0.18. See <a href="/guides/blackjack-soft-18-vs-9/">soft 18 against a 9</a>. <a href="/web/?drill=bj-soft18-v9&amp;ref=guide">Play soft 18 against a 9 →</a></p></details></li>
+</ol>
+<h2>Practice it</h2>
+<p>Reading the answer is the easy part. <a href="/web/?practice=blackjack&amp;ref=guide">Play five blackjack hands in the free trainer</a> or <a href="/web/?drill=bj-soft17-v2&amp;ref=guide">replay this exact hand</a>: you make the call first, then the coach grades it and shows the value of every option. Missed hands come back for review. For the whole chart, see the <a href="/guides/blackjack-basic-strategy-trainer/">basic strategy trainer guide</a>.</p>
 <p class="note">The trainer grades every decision against basic strategy, 9/6 Jacks or Better, or the standard baccarat tableau — the same answer you just read.</p>
 <section class="faq">
 <h2>Questions</h2>
 <h3>Should you ever stand on soft 17?</h3>
 <p>No. Soft 17 is never a stand in basic strategy. Hit it against 2, 7, 8, 9, 10 and ace, and double it against 3 through 6 when doubling is allowed.</p>
 <h3>Do you double soft 17 against a 2?</h3>
-<p>Under the standard stands-on-soft-17 rules, no: hitting is slightly better. Some hits-soft-17 charts double it against a 2; the difference is under one cent per dollar.</p>
+<p>In a six- or eight-deck game, no: hitting is slightly better. Single-deck charts double it against a 2; either way the difference is under one cent per dollar.</p>
 <h3>Why is soft 17 a weak hand?</h3>
 <p>Seventeen beats nothing on its own; it only wins if the dealer busts or pushes with 17. Because the ace counts as 1 or 11, you can take a card with no risk of busting.</p>
 </section>
