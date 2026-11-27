@@ -45,7 +45,7 @@ export function createProfile(classId) {
     handsOptimal: 0,
     lessonsDone: [],
     createdAt: null,
-    daily: { lastKey: null, streak: 0, best: 0, restKey: null, history: [], progress: null },
+    daily: defaultDaily(),
   };
 }
 

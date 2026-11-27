@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createProfile, beginSession, scoreSession, recordMistake, applyResult } from '../src/rpg/state.js';
+import { createProfile, defaultDaily, DAILY_HISTORY_CAP, beginSession, scoreSession, recordMistake, applyResult } from '../src/rpg/state.js';
 import { readBackup, writeBackup } from '../src/rpg/backup.js';
 
 test('backups round-trip legacy profiles, practice, active sessions and notebooks', () => {
@@ -39,4 +39,17 @@ test('a daily round that claims a finished score is rejected as a backup', () =>
   const p = createProfile('scholar');
   p.daily = { ...p.daily, progress: { key: '2026-01-01', index: 5, results: [true, true, true, true, true] } };
   assert.throws(() => writeBackup(p), /Invalid backup/);
+});
+
+test('fresh daily state and external backup cap follow the same definitions', () => {
+  const profile = createProfile('scholar');
+  assert.deepEqual(profile.daily, defaultDaily());
+  const row = { key: '2026-01-01', results: [true, false, true, false, true] };
+  profile.daily.history = Array.from({ length: DAILY_HISTORY_CAP }, () => ({
+    ...row,
+    results: [...row.results],
+  }));
+  assert.equal(readBackup(writeBackup(profile)).daily.history.length, DAILY_HISTORY_CAP);
+  profile.daily.history.push({ ...row });
+  assert.throws(() => writeBackup(profile), /Invalid backup/);
 });

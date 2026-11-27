@@ -28,6 +28,7 @@ State flows: browser input -> `src/games` decision -> `src/coach` explanation ->
 | --- | --- | --- |
 | High | Existing builds cleared only `web`, `src`, `guides`, and build-info, allowing obsolete `about`/`pro` files to survive rebuilds | **Fixed** with complete generated-subtree cleanup and regression test |
 | High | Core import direction and acyclic graph were not machine-enforced | **Guarded** with a dependency test in the unit suite |
+| High | Profile initialization duplicated the canonical daily shape; backup validation hardcoded the daily history cap | **Fixed**: `createProfile` calls `defaultDaily()`; external validator consumes `DAILY_HISTORY_CAP`, with a compatibility/boundary test |
 | Medium | `src/rpg/links.js` owns `REFERRER_REFS`/`cleanCampaign`; classic `web/posthog-loader.js` mirrors both | **Pending**: preserve synchronous attribution, prove behavior via fixtures, then unify at a single generated or bundled source and delete mirror |
 | Medium | `web/app.js` is ~3,270 lines; rendering and interaction orchestration are closely coupled | **Pending**: isolate one cohesive feature at a time, migrate all callers, test and delete its old implementation |
 | Medium | Static guide pages repeat blackjack-rule explanations | **Pending**: establish search/structured-data fixtures before introducing single-source generation |
@@ -47,9 +48,10 @@ State flows: browser input -> `src/games` decision -> `src/coach` explanation ->
 
 1. Round 1 — `scripts/build.mjs` and `test/release/build.test.js`: remove duplicate setup, clear all generated subtrees, and test stale-file deletion in an isolated temp output.
 2. Round 2 — `test/architecture.test.js`: inspect all `src/` JS imports, reject missing/external imports and cycles.
-3. Verification gate — GitHub `test` status must pass: unit/release, browser core/offline/storage, and Bend. Any failure keeps the branch unmerged.
-4. Next refactor — move duplicated referrer attribution semantics to one authoritative source **only after** synchronous browser attribution tests cover all existing callers; delete the old copy.
-5. Subsequent refactors — one tested slice of browser orchestration, then guide-generation/CSS ownership only where real duplication is demonstrated.
+3. Round 3 — `src/rpg/state.js` and `src/rpg/backup.js`: unify the default daily state and daily-history cap, migrate both callers, and test the existing serialized shape and limit.
+4. Verification gate — GitHub `test` status must pass: unit/release, browser core/offline/storage, and Bend. Any failure keeps the branch unmerged.
+5. Next refactor — move duplicated referrer attribution semantics to one authoritative source **only after** synchronous browser attribution tests cover all existing callers; delete the old copy.
+6. Subsequent refactors — one tested slice of browser orchestration, then guide-generation/CSS ownership only where real duplication is demonstrated.
 
 **Deferred pending explicit product decision:** schema-breaking save migrations, authentication/permissions, payments/Pro, public URL changes, DNS/credentials, SEO behavior changes and reactivation of automation.
 
