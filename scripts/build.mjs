@@ -1,4 +1,4 @@
-import { cp, mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -6,13 +6,11 @@ import { headersFileText } from '../worker/security.js';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 export async function build(output = path.join(root, 'dist')) {
-await mkdir(path.join(output, 'web'), { recursive: true });
-// Clean stale assets from previous builds so removed files don't linger.
-const { rm } = await import('node:fs/promises');
-await rm(path.join(output, 'web'), { recursive: true, force: true });
-await rm(path.join(output, 'src'), { recursive: true, force: true });
-await rm(path.join(output, 'guides'), { recursive: true, force: true });
-await rm(path.join(output, 'build-info.json'), { force: true });
+// Replace generated subtrees as a unit. Otherwise a previously generated
+// /about or /pro file can survive a rebuild even when it no longer ships.
+for (const entry of ['web', 'src', 'guides', 'pro', 'about', 'build-info.json']) {
+  await rm(path.join(output, entry), { recursive: true, force: true });
+}
 await mkdir(path.join(output, 'web'), { recursive: true });
 // Explicit allowlist: never publish harnesses, screenshots, credentials or node_modules.
 const files = ['index.html', 'app.js', 'audio.js', 'sound-controls.js', 'haptics.js', 'vp-coach-worker.js',
