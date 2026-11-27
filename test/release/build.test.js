@@ -1,8 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { access, readFile, readdir } from 'node:fs/promises';
+import { access, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { tmpdir } from 'node:os';
+import { build } from '../../scripts/build.mjs';
 
 test('public build contains its module graph without repository or diagnostic files', async () => {
   execFileSync(process.execPath, ['scripts/build.mjs']);
@@ -72,4 +74,25 @@ test('public build contains its module graph without repository or diagnostic fi
     assert.ok(assets.includes(asset), `${asset} is available before going offline`);
   }
   assert.ok(!assets.includes('/sw.js'), 'Worker does not cache itself');
+});
+
+test('rebuilding deletes obsolete files from all generated subtrees', async (t) => {
+  const output = await mkdtemp(path.join(tmpdir(), 'pokergym-build-'));
+  t.after(() => rm(output, { recursive: true, force: true }));
+  const generated = ['web', 'src', 'guides', 'pro', 'about'];
+  for (const dir of generated) {
+    await mkdir(path.join(output, dir), { recursive: true });
+    await writeFile(path.join(output, dir, 'stale-should-not-ship.js'), 'obsolete\\n');
+  }
+  await build(output);
+  for (const dir of generated) {
+    await assert.rejects(
+      access(path.join(output, dir, 'stale-should-not-ship.js')),
+      { code: 'ENOENT' },
+      `stale file survived rebuild in ${dir}`,
+    );
+  }
+  for (const file of ['web/index.html', 'src/rpg/links.js', 'guides/weekly-01/index.html', 'pro/index.html', 'about/index.html', 'sw.js']) {
+    await access(path.join(output, file));
+  }
 });
