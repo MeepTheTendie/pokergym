@@ -25,7 +25,7 @@
       "headline": "Should you always split aces? Yes, even vs a 10 (2026)",
       "description": "Yes. Split aces against every dealer card, 2 through ace. Vs a 10 the split is worth about +18 cents per dollar, hitting −7. EV for every upcard.",
       "datePublished": "2026-11-04",
-      "dateModified": "2026-11-04",
+      "dateModified": "2026-11-27",
       "author": {
         "@type": "Organization",
         "name": "Play Poker Gym",
@@ -126,7 +126,37 @@
 <div class="play-row"><a class="cta" href="/web/?drill=bj-aa-v10&ref=guide">Play this exact hand →</a><span class="note">The coach grades your call and explains it. Free, no signup.</span></div>
 <h2>Why</h2>
 <p>Two aces together are a soft 12, one of the worst starting hands. Split, each ace becomes the start of a hand where any ten-value card (about 31% of the shoe) makes 21. That is why aces, along with eights, are the pair basic strategy splits against everything.</p>
-<p>Split vs hit, per 1 unit bet (coach, six decks, dealer stands on soft 17, double after split, split aces get one card each, no resplitting aces): vs 2 +0.49 vs +0.08 · vs 3 +0.53 vs +0.10 · vs 4 +0.58 vs +0.13 · vs 5 +0.63 vs +0.16 · vs 6 +0.68 vs +0.19 · vs 7 +0.48 vs +0.16 · vs 8 +0.36 vs +0.09 · vs 9 +0.24 vs 0.00 · vs 10 +0.18 vs −0.07 · vs ace +0.12 vs −0.02. The split wins by at least 14 cents per dollar against every card, so there is no exception to learn.</p>
+<p>Per 1 unit bet in the coach’s game (rules below), splitting a pair of aces against a 10 is worth about +0.18 and hitting the soft 12 about −0.07. Against an ace, the closest case, it is +0.12 against −0.02. The split wins by at least 14 cents per dollar against every upcard, so there is no exception to learn. The table below has the numbers for every dealer card.</p>
+<h2>A-A against every dealer upcard</h2>
+<div class="table-scroll"><table class="chart-row"><caption>Basic strategy for A-A: six decks, dealer stands on soft 17. EV rows: expected return per 1-unit bet from a full shoe, from the trainer’s coach engine</caption>
+<thead><tr><th scope="col">Dealer shows</th><th scope="col">2</th><th scope="col">3</th><th scope="col">4</th><th scope="col">5</th><th scope="col">6</th><th scope="col">7</th><th scope="col">8</th><th scope="col">9</th><th scope="col">10</th><th scope="col">A</th></tr></thead>
+<tbody><tr><th scope="row">A-A</th><td>Split</td><td>Split</td><td>Split</td><td>Split</td><td>Split</td><td>Split</td><td>Split</td><td>Split</td><td><strong>Split</strong></td><td>Split</td></tr>
+<tr class="ev"><th scope="row">EV if you split</th><td>+0.49</td><td>+0.53</td><td>+0.58</td><td>+0.63</td><td>+0.68</td><td>+0.48</td><td>+0.36</td><td>+0.24</td><td>+0.18</td><td>+0.12</td></tr>
+<tr class="ev"><th scope="row">EV if you hit</th><td>+0.08</td><td>+0.10</td><td>+0.13</td><td>+0.16</td><td>+0.19</td><td>+0.16</td><td>+0.09</td><td>0.00</td><td>−0.07</td><td>−0.02</td></tr></tbody></table></div>
+<p class="note">The hit row is there for comparison. Standing on soft 12 loses 15 to 67 cents per dollar, and doubling it beats hitting only against a 6, by a fraction of a cent. Split 8s against every upcard too.</p>
+<h2>Rules this answer assumes</h2>
+<p>Six decks, blackjack pays 3:2, dealer stands on soft 17, double on any first two cards, double after split allowed, split up to four hands, split aces get one card each and can’t be resplit, no surrender, and the dealer checks for blackjack before you act, so a dealer blackjack never takes a double or split bet. These are the rules the free trainer deals and grades with.</p>
+<h2>What changes the answer</h2>
+<ul>
+<li>Dealer hits soft 17. Still split against every upcard. That rule changes a handful of plays, such as 11 against an ace and some soft doubles, but never a pair of aces.</li>
+<li>Blackjack pays 6:5 instead of 3:2. Still split. A split ace plus a ten is 21, not a blackjack, so it pays even money under either rule. 6:5 makes the whole game worse, not this decision.</li>
+<li>Resplitting aces allowed. Split, and if another ace lands on a split ace, split again. That only adds value. The trainer does not allow it, so a second ace there is a soft 12 that has to stand, and the numbers above already include that case.</li>
+<li>One card per split ace. This is the common rule and the one the trainer uses; the table assumes it. Where you may hit or double split aces (rare), the split is worth even more.</li>
+<li>Number of decks. Still split. Running the same coach engine on a one-, two- or eight-deck shoe gives the same row: split against every upcard.</li>
+<li>Splitting not allowed (a home game, say). Hit the soft 12. Against a 6 the coach puts doubling and hitting within a fraction of a cent of each other.</li>
+</ul>
+<h2>Check yourself</h2>
+<p>Answer each one in your head, then open it. Each links to a hand you can play in the free trainer.</p>
+<ol class="quiz">
+<li><p><strong>You hold A-A and the dealer shows an ace. Split or hit?</strong></p>
+<details><summary>Show the answer</summary><p>Split. It is the closest case on the chart, about +0.12 per unit bet for the split against −0.02 for hitting, and the split still wins. <a href="/web/?practice=blackjack&amp;ref=guide">Play five blackjack hands →</a></p></details></li>
+<li><p><strong>You split aces against a 10 and the first ace draws another ace. Can you split again?</strong></p>
+<details><summary>Show the answer</summary><p>Not in the trainer’s game: split aces get one card each and can’t be resplit, so that hand is a soft 12 and stands. Where resplitting aces is allowed, split again. <a href="/web/?drill=bj-aa-v10&amp;ref=guide">Play aces against a 10 →</a></p></details></li>
+<li><p><strong>Eights against a 10: split or hit?</strong></p>
+<details><summary>Show the answer</summary><p>Split. Aces and eights are the two pairs basic strategy splits against every upcard. Here is <a href="/guides/blackjack-88-vs-10-split/">why 8-8 vs 10 is a split</a>. <a href="/web/?drill=bj-88-v10&amp;ref=guide">Play eights against a 10 →</a></p></details></li>
+</ol>
+<h2>Practice it</h2>
+<p>Reading the answer is the easy part. <a href="/web/?practice=blackjack&amp;ref=guide">Play five blackjack hands in the free trainer</a> or <a href="/web/?drill=bj-aa-v10&amp;ref=guide">replay this exact hand</a>: you make the call first, then the coach grades it and shows the value of every option. Missed hands come back for review. For the whole chart, see the <a href="/guides/blackjack-basic-strategy-trainer/">basic strategy trainer guide</a>.</p>
 <p class="note">The trainer grades every decision against basic strategy, 9/6 Jacks or Better, or the standard baccarat tableau — the same answer you just read.</p>
 <section class="faq">
 <h2>Questions</h2>

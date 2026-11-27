@@ -5,7 +5,9 @@
 // Optional (blackjack): seoTitle, updated (dateModified), chart{label, hand
 // (ranks the engine test checks the row with), up,
 // cells: one letter per dealer upcard 2..9,10,A (S/H/D/P), note}, and
-// changes[] ("what changes the answer"; [text](/guides/slug/) makes a link).
+// changes[] ("what changes the answer"; [text](/guides/slug/) makes a link),
+// chart.ev { action: [10 EVs per 1-unit bet] } and quiz[{ q, a, href, link,
+// optional hand/up/action the engine test checks }] ("Check yourself").
 export const scenarios = [
   {
     slug: 'blackjack-soft-17-vs-2-hit',
@@ -14,13 +16,35 @@ export const scenarios = [
     answer: 'Hit. Never stand on soft 17, and against a 2 hitting edges out doubling.',
     why: [
       'Seventeen only wins when the dealer busts, and a dealer 2 busts about 35% of the time. Standing on soft 17 here loses roughly 15 cents per dollar in the coach\u2019s six-deck, stands-on-soft-17 game.',
-      'The ace means you cannot bust on the next card, so hitting is free improvement: it brings the hand to about break-even. Doubling is almost as good (about half a cent worse), which is why some charts list double against a 2 under hits-soft-17 rules; against 3 through 6 the double becomes the clear play.',
+      'The ace means you cannot bust on the next card, so hitting is free improvement: it brings the hand to about break-even. Doubling is almost as good (about half a cent worse), which is why single-deck charts list a double against a 2; against 3 through 6 the double becomes the clear play.',
+    ],
+    updated: '2026-11-27',
+    chart: {
+      label: 'Soft 17 (A-6)', hand: [14, 6], up: '2', cells: 'HDDDDHHHHH',
+      ev: {
+        hit: [0.00, 0.03, 0.06, 0.10, 0.13, 0.06, -0.07, -0.15, -0.20, -0.18],
+        double: [0.00, 0.06, 0.13, 0.20, 0.26, -0.01, -0.25, -0.39, -0.45, -0.54],
+        stand: [-0.15, -0.11, -0.07, -0.04, 0.01, -0.10, -0.38, -0.42, -0.42, -0.48],
+      },
+      note: 'Against a 2, hit (about +0.001) and double (about \u22120.004) round to the same 0.00, but hitting is ahead. Standing is never the best play with soft 17.',
+    },
+    changes: [
+      'Number of decks. In a single-deck game the same coach engine flips this hand to a double against a 2 (about +0.015 against +0.009 for hitting). With two, six or eight decks, hitting stays ahead.',
+      'Dealer hits soft 17. Standard six- and eight-deck charts still hit soft 17 against a 2 and double it against 3 through 6. The hand that switches to a double against a 2 under that rule is soft 18 (A-7).',
+      'Doubling not allowed. If you can\u2019t double (a three-card soft 17 like A-2-4, or a table that limits doubles), hit soft 17 against every upcard. Never stand.',
+      'After a split. With double after split (the trainer\u2019s rule), a soft 17 you make after splitting (6s that draw an ace, say) plays the same way. Without it, hit. Split aces are the exception: they get one card and stand.',
+      'Blackjack pays 6:5 instead of 3:2. No change. The payout only touches two-card naturals, and soft 17 isn\u2019t one.',
+    ],
+    quiz: [
+      { q: 'Soft 17 (A-6) against a dealer 5: hit, double or stand?', a: 'Double. Against a 5 the coach puts doubling at about +0.20 per unit bet and hitting at about +0.10.', href: '/web/?practice=blackjack&ref=guide', link: 'Play five blackjack hands', hand: [14, 6], up: 5, action: 'double' },
+      { q: 'You have A-2-4 (soft 17, three cards) against a 4. What now?', a: 'Hit. A three-card hand can\u2019t be doubled in the trainer, and standing on 17 is still worse than taking a card that can\u2019t bust you.', href: '/web/?practice=blackjack&ref=guide', link: 'Play five blackjack hands', hand: [14, 2, 4], up: 4, action: 'hit' },
+      { q: 'Soft 18 (A-7) against a 9: hit or stand?', a: 'Hit. Eighteen is weak against a 9; the coach puts hitting at about \u22120.10 and standing at about \u22120.18. See [soft 18 against a 9](/guides/blackjack-soft-18-vs-9/).', href: '/web/?drill=bj-soft18-v9&ref=guide', link: 'Play soft 18 against a 9', hand: [14, 7], up: 9, action: 'hit' },
     ],
     cta: ['Play this exact hand', '/web/?drill=bj-soft17-v2&ref=guide'],
     related: [['blackjack-soft-18-vs-3-double', 'Soft 18 against a 3: double or stand?'], ['blackjack-soft-18-vs-9', 'Soft 18 against a 9: hit or stand?'], ['blackjack-12-vs-2-hit', '12 against a 2: hit or stand?'], ['blackjack-soft-16-hands', 'Soft 16 (A-5): hit, double or stand?']],
     faq: [
       ['Should you ever stand on soft 17?', 'No. Soft 17 is never a stand in basic strategy. Hit it against 2, 7, 8, 9, 10 and ace, and double it against 3 through 6 when doubling is allowed.'],
-      ['Do you double soft 17 against a 2?', 'Under the standard stands-on-soft-17 rules, no: hitting is slightly better. Some hits-soft-17 charts double it against a 2; the difference is under one cent per dollar.'],
+      ['Do you double soft 17 against a 2?', 'In a six- or eight-deck game, no: hitting is slightly better. Single-deck charts double it against a 2; either way the difference is under one cent per dollar.'],
       ['Why is soft 17 a weak hand?', 'Seventeen beats nothing on its own; it only wins if the dealer busts or pushes with 17. Because the ace counts as 1 or 11, you can take a card with no risk of busting.'],
     ],
   },
@@ -32,7 +56,29 @@ export const scenarios = [
     answer: 'Yes. Always split aces, against every dealer upcard from 2 to ace, including a 10.',
     why: [
       'Two aces together are a soft 12, one of the worst starting hands. Split, each ace becomes the start of a hand where any ten-value card (about 31% of the shoe) makes 21. That is why aces, along with eights, are the pair basic strategy splits against everything.',
-      'Split vs hit, per 1 unit bet (coach, six decks, dealer stands on soft 17, double after split, split aces get one card each, no resplitting aces): vs 2 +0.49 vs +0.08 \u00b7 vs 3 +0.53 vs +0.10 \u00b7 vs 4 +0.58 vs +0.13 \u00b7 vs 5 +0.63 vs +0.16 \u00b7 vs 6 +0.68 vs +0.19 \u00b7 vs 7 +0.48 vs +0.16 \u00b7 vs 8 +0.36 vs +0.09 \u00b7 vs 9 +0.24 vs 0.00 \u00b7 vs 10 +0.18 vs \u22120.07 \u00b7 vs ace +0.12 vs \u22120.02. The split wins by at least 14 cents per dollar against every card, so there is no exception to learn.',
+      'Per 1 unit bet in the coach\u2019s game (rules below), splitting a pair of aces against a 10 is worth about +0.18 and hitting the soft 12 about \u22120.07. Against an ace, the closest case, it is +0.12 against \u22120.02. The split wins by at least 14 cents per dollar against every upcard, so there is no exception to learn. The table below has the numbers for every dealer card.',
+    ],
+    updated: '2026-11-27',
+    chart: {
+      label: 'A-A', hand: [14, 14], up: '10', cells: 'PPPPPPPPPP',
+      ev: {
+        split: [0.49, 0.53, 0.58, 0.63, 0.68, 0.48, 0.36, 0.24, 0.18, 0.12],
+        hit: [0.08, 0.10, 0.13, 0.16, 0.19, 0.16, 0.09, 0.00, -0.07, -0.02],
+      },
+      note: 'The hit row is there for comparison. Standing on soft 12 loses 15 to 67 cents per dollar, and doubling it beats hitting only against a 6, by a fraction of a cent. Split 8s against every upcard too.',
+    },
+    changes: [
+      'Dealer hits soft 17. Still split against every upcard. That rule changes a handful of plays, such as 11 against an ace and some soft doubles, but never a pair of aces.',
+      'Blackjack pays 6:5 instead of 3:2. Still split. A split ace plus a ten is 21, not a blackjack, so it pays even money under either rule. 6:5 makes the whole game worse, not this decision.',
+      'Resplitting aces allowed. Split, and if another ace lands on a split ace, split again. That only adds value. The trainer does not allow it, so a second ace there is a soft 12 that has to stand, and the numbers above already include that case.',
+      'One card per split ace. This is the common rule and the one the trainer uses; the table assumes it. Where you may hit or double split aces (rare), the split is worth even more.',
+      'Number of decks. Still split. Running the same coach engine on a one-, two- or eight-deck shoe gives the same row: split against every upcard.',
+      'Splitting not allowed (a home game, say). Hit the soft 12. Against a 6 the coach puts doubling and hitting within a fraction of a cent of each other.',
+    ],
+    quiz: [
+      { q: 'You hold A-A and the dealer shows an ace. Split or hit?', a: 'Split. It is the closest case on the chart, about +0.12 per unit bet for the split against \u22120.02 for hitting, and the split still wins.', href: '/web/?practice=blackjack&ref=guide', link: 'Play five blackjack hands', hand: [14, 14], up: 14, action: 'split' },
+      { q: 'You split aces against a 10 and the first ace draws another ace. Can you split again?', a: 'Not in the trainer\u2019s game: split aces get one card each and can\u2019t be resplit, so that hand is a soft 12 and stands. Where resplitting aces is allowed, split again.', href: '/web/?drill=bj-aa-v10&ref=guide', link: 'Play aces against a 10' },
+      { q: 'Eights against a 10: split or hit?', a: 'Split. Aces and eights are the two pairs basic strategy splits against every upcard. Here is [why 8-8 vs 10 is a split](/guides/blackjack-88-vs-10-split/).', href: '/web/?drill=bj-88-v10&ref=guide', link: 'Play eights against a 10', hand: [8, 8], up: 10, action: 'split' },
     ],
     cta: ['Play this exact hand', '/web/?drill=bj-aa-v10&ref=guide'],
     related: [['blackjack-88-vs-10-split', '8-8 against a 10: split or hit?'], ['blackjack-1010-vs-6-stand', '10-10 against a 6: split or stand?'], ['blackjack-99-vs-7-stand', '9-9 against a 7: split or stand?']],
